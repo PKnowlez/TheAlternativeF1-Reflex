@@ -532,30 +532,34 @@ def index() -> rx.Component:
             header(),
             # Main scrollable content area with medium gray background (bg="#2A2A2E")
             rx.box(
-                rx.cond(
-                    State.selected_article_id != -1,
-                    article_detail(),
+                rx.box(
                     rx.cond(
-                        State.active_nav == "home",
-                        articles_list(),
+                        State.selected_article_id != -1,
+                        article_detail(),
                         rx.cond(
-                            State.active_nav == "regulations",
-                            regulations_view(),
+                            State.active_nav == "home",
+                            articles_list(),
                             rx.cond(
-                                State.active_nav == "schedule",
-                                schedule_view(),
+                                State.active_nav == "regulations",
+                                regulations_view(),
                                 rx.cond(
-                                    State.active_nav == "standings",
-                                    standings_view(),
+                                    State.active_nav == "schedule",
+                                    schedule_view(),
                                     rx.cond(
-                                        State.active_nav == "teams",
-                                        teams_view(),
-                                        rx.text("Not found", color="white"),
+                                        State.active_nav == "standings",
+                                        standings_view(),
+                                        rx.cond(
+                                            State.active_nav == "teams",
+                                            teams_view(),
+                                            rx.text("Not found", color="white"),
+                                        )
                                     )
                                 )
                             )
                         )
-                    )
+                    ),
+                    width="100%",
+                    padding_bottom="100px",  # Push content above the fixed footer
                 ),
                 width="100%",
                 flex="1",
@@ -563,7 +567,6 @@ def index() -> rx.Component:
                 bg="#2A2A2E",
                 padding_x=["4", "6", "8"],
                 padding_top="8",
-                padding_bottom="12vh",
                 display="flex",
                 justify_content="center",
             ),

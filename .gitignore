@@ -1,3 +1,6 @@
+assets/external/
+.states
+.web
 # Virtual environment
 .venv/
 venv/
