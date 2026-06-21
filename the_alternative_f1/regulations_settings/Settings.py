@@ -99,7 +99,7 @@ def Settings() -> rx.Component:
         rx.grid(
             mini_table("Assist Restrictions", "Setting", assist_restrictions),
             mini_table("Simulation Settings", "Setting", simulation_settings),
-            columns="2",
+            columns=rx.breakpoints(initial="1", md="2"),
             spacing="5",
             width="100%",
         ),
@@ -111,7 +111,7 @@ def Settings() -> rx.Component:
             mini_table("Rules & Flags", "Setting", rules_flags),
             mini_table("Regular Weekend Structure", "Parameter", weekend_structure),
             mini_table("Sprint Weekend Structure", "Setting", sprint_weekend),
-            columns="3",
+            columns=rx.breakpoints(initial="1", md="3"),
             spacing="5",
             width="100%",
         ),
