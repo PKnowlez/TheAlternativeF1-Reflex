@@ -231,82 +231,33 @@ def article_detail() -> rx.Component:
     )
 
 
-def schedule_view() -> rx.Component:
-    """Mock schedule view."""
-    races = [
-        {"gp": "Bahrain Grand Prix", "date": "March 5-7", "track": "Sakhir", "status": "Completed"},
-        {"gp": "Saudi Arabian Grand Prix", "date": "March 19-21", "track": "Jeddah Corniche", "status": "Completed"},
-        {"gp": "Australian Grand Prix", "date": "April 2-4", "track": "Albert Park", "status": "Upcoming"},
-        {"gp": "Azerbaijan Grand Prix", "date": "April 28-30", "track": "Baku City Circuit", "status": "Upcoming"},
+def stats_view() -> rx.Component:
+    """All Time Stats view."""
+    stats_data = [
+        {"metric": "Most Championship Titles", "holder": "Max Verstappen", "value": "4"},
+        {"metric": "Most Race Wins", "holder": "Lando Norris", "value": "32"},
+        {"metric": "Most Pole Positions", "holder": "Charles Leclerc", "value": "41"},
+        {"metric": "Most Podiums", "holder": "Max Verstappen", "value": "98"},
+        {"metric": "Most Fastest Laps", "holder": "Oscar Piastri", "value": "18"},
     ]
     return rx.vstack(
-        rx.heading("Race Schedule 2026", size="6", color="white", font_weight="900", margin_bottom="4"),
-        rx.vstack(
-            *[
-                rx.hstack(
-                    rx.box(
-                        bg=rx.cond(race["status"] == "Completed", "#333333", "#00b4da"),
-                        width="12px",
-                        height="12px",
-                        border_radius="full",
-                    ),
-                    rx.vstack(
-                        rx.heading(race["gp"], size="3", color="white"),
-                        rx.text(f"{race['track']} • {race['date']}", color="#AAAAAA", font_size="sm"),
-                        align_items="start",
-                    ),
-                    rx.spacer(),
-                    rx.badge(
-                        race["status"],
-                        color_scheme=rx.cond(race["status"] == "Completed", "gray", "cyan"),
-                        variant="solid",
-                    ),
-                    width="100%",
-                    bg="#18181C",
-                    padding="4",
-                    border_radius="lg",
-                    border="1px solid #2C2C32",
-                    align="center",
-                )
-                for race in races
-            ],
-            spacing="3",
-            width="100%",
-        ),
-        width="100%",
-        max_width="700px",
-    )
-
-
-def standings_view() -> rx.Component:
-    """Mock standings view."""
-    drivers = [
-        {"pos": "1", "driver": "Max Verstappen", "team": "Red Bull Racing", "points": "258"},
-        {"pos": "2", "driver": "Lando Norris", "team": "McLaren", "points": "220"},
-        {"pos": "3", "driver": "Charles Leclerc", "team": "Ferrari", "points": "185"},
-        {"pos": "4", "driver": "Oscar Piastri", "team": "McLaren", "points": "162"},
-        {"pos": "5", "driver": "Carlos Sainz", "team": "Ferrari", "points": "145"},
-    ]
-    return rx.vstack(
-        rx.heading("Driver Standings", size="6", color="white", font_weight="900", margin_bottom="4"),
+        rx.heading("All Time League Stats", size="6", color="white", font_weight="900", margin_bottom="4"),
         rx.table.root(
             rx.table.header(
                 rx.table.row(
-                    rx.table.column_header_cell("Pos", color="#00b4da"),
-                    rx.table.column_header_cell("Driver", color="#00b4da"),
-                    rx.table.column_header_cell("Team", color="#00b4da"),
-                    rx.table.column_header_cell("Points", color="#00b4da", justify="end"),
+                    rx.table.column_header_cell("Metric", color="#00b4da"),
+                    rx.table.column_header_cell("Record Holder", color="#00b4da"),
+                    rx.table.column_header_cell("Value", color="#00b4da", justify="end"),
                 )
             ),
             rx.table.body(
                 *[
                     rx.table.row(
-                        rx.table.row_header_cell(d["pos"], color="white", font_weight="bold"),
-                        rx.table.cell(d["driver"], color="white"),
-                        rx.table.cell(d["team"], color="#AAAAAA"),
-                        rx.table.cell(d["points"], color="white", justify="end", font_weight="bold"),
+                        rx.table.cell(item["metric"], color="white", font_weight="bold"),
+                        rx.table.cell(item["holder"], color="#CCCCCC"),
+                        rx.table.cell(item["value"], color="#00b4da", justify="end", font_weight="bold"),
                     )
-                    for d in drivers
+                    for item in stats_data
                 ]
             ),
             width="100%",
@@ -321,40 +272,80 @@ def standings_view() -> rx.Component:
     )
 
 
-def teams_view() -> rx.Component:
-    """Mock teams view."""
-    teams_data = [
-        {"name": "Red Bull Racing", "color": "#0600EF", "drivers": "M. Verstappen / L. Lawson"},
-        {"name": "Ferrari", "color": "#EF1A2D", "drivers": "C. Leclerc / L. Hamilton"},
-        {"name": "McLaren", "color": "#FF8700", "drivers": "L. Norris / O. Piastri"},
-        {"name": "Mercedes", "color": "#00A19B", "drivers": "G. Russell / K. Antonelli"},
+def seasons_view() -> rx.Component:
+    """Historical Seasons view."""
+    seasons_data = [
+        {"season": "Season 2025", "champion": "Max Verstappen", "constructor": "Red Bull Racing", "status": "Completed"},
+        {"season": "Season 2024", "champion": "Lando Norris", "constructor": "McLaren", "status": "Completed"},
+        {"season": "Season 2023", "champion": "Max Verstappen", "constructor": "Red Bull Racing", "status": "Completed"},
+        {"season": "Season 2026", "champion": "TBD", "constructor": "TBD", "status": "Active"},
     ]
     return rx.vstack(
-        rx.heading("Constructor Teams", size="6", color="white", font_weight="900", margin_bottom="4"),
-        rx.grid(
-            *[
-                rx.vstack(
-                    rx.box(width="100%", height="6px", bg=team["color"], border_radius="full"),
-                    rx.heading(team["name"], size="4", color="white"),
-                    rx.text(team["drivers"], color="#AAAAAA", font_size="sm"),
-                    bg="#18181C",
-                    padding="5",
-                    border_radius="xl",
-                    border="1px solid #2C2C32",
-                    align_items="start",
-                    spacing="2",
-                    width="100%",
-                    _hover={"transform": "translateY(-4px)", "border_color": team["color"]},
-                    transition="all 0.2s ease-in-out",
+        rx.heading("League Seasons History", size="6", color="white", font_weight="900", margin_bottom="4"),
+        rx.table.root(
+            rx.table.header(
+                rx.table.row(
+                    rx.table.column_header_cell("Season", color="#00b4da"),
+                    rx.table.column_header_cell("Driver Champion", color="#00b4da"),
+                    rx.table.column_header_cell("Constructor Champion", color="#00b4da"),
+                    rx.table.column_header_cell("Status", color="#00b4da", justify="end"),
                 )
-                for team in teams_data
-            ],
-            columns="2",
-            spacing="4",
+            ),
+            rx.table.body(
+                *[
+                    rx.table.row(
+                        rx.table.cell(item["season"], color="white", font_weight="bold"),
+                        rx.table.cell(item["champion"], color="#CCCCCC"),
+                        rx.table.cell(item["constructor"], color="#CCCCCC"),
+                        rx.table.cell(
+                            rx.badge(item["status"], color_scheme=rx.cond(item["status"] == "Completed", "gray", "cyan"), variant="solid"),
+                            justify="end"
+                        ),
+                    )
+                    for item in seasons_data
+                ]
+            ),
             width="100%",
+            variant="ghost",
         ),
         width="100%",
-        max_width="750px",
+        max_width="700px",
+        bg="#18181C",
+        padding="6",
+        border_radius="xl",
+        border="1px solid #2C2C32",
+    )
+
+
+def login_view() -> rx.Component:
+    """A clean, premium Login form."""
+    return rx.vstack(
+        rx.heading("Driver Login", size="6", color="white", font_weight="900", margin_bottom="2"),
+        rx.text("Access the FIA control panel and your superlicense.", color="#AAAAAA", font_size="sm", margin_bottom="6"),
+        rx.vstack(
+            rx.text("Username or Email", color="white", font_size="xs", font_weight="bold", align_self="start"),
+            rx.input(placeholder="driver@alternativef1.com", type="email", width="100%", bg="#18181C", border_color="#2C2C32", color="white"),
+            rx.text("Password", color="white", font_size="xs", font_weight="bold", align_self="start", margin_top="3"),
+            rx.input(placeholder="••••••••", type="password", width="100%", bg="#18181C", border_color="#2C2C32", color="white"),
+            rx.button(
+                "Sign In",
+                bg="#00b4da",
+                color="white",
+                width="100%",
+                margin_top="6",
+                _hover={"bg": "#009bbd"},
+                cursor="pointer",
+            ),
+            width="100%",
+            spacing="2",
+        ),
+        width="100%",
+        max_width="400px",
+        bg="#18181C",
+        padding="6",
+        border_radius="xl",
+        border="1px solid #2C2C32",
+        align_items="center",
     )
 
 
@@ -428,8 +419,8 @@ def footer() -> rx.Component:
     """The permanent bottom navigation bar (8% height) with rect and circular buttons."""
     return rx.hstack(
         rx.hstack(
-            # Left rectangle buttons
-            rx.hstack(
+            # Left Grid (Regulations, All Time Stats) - flex="1"
+            rx.grid(
                 rx.button(
                     "Regulations",
                     bg=rx.cond(State.active_nav == "regulations", "#00b4da", "transparent"),
@@ -438,72 +429,79 @@ def footer() -> rx.Component:
                     font_size="xs",
                     font_weight="600",
                     border_radius="sm",
-                    padding_x="3",
-                    padding_y="1.5",
+                    width="100%",
+                    height="32px",
                     on_click=lambda: State.set_nav("regulations"),
-                    _hover={"bg": "#00b4da", "transform": "scale(1.05)"},
+                    _hover={"bg": "#00b4da", "transform": "scale(1.02)"},
                     cursor="pointer",
                 ),
                 rx.button(
-                    "Schedule",
-                    bg=rx.cond(State.active_nav == "schedule", "#00b4da", "transparent"),
+                    "All Time Stats",
+                    bg=rx.cond(State.active_nav == "stats", "#00b4da", "transparent"),
                     border="1px solid #00b4da",
                     color="white",
                     font_size="xs",
                     font_weight="600",
                     border_radius="sm",
-                    padding_x="3",
-                    padding_y="1.5",
-                    on_click=lambda: State.set_nav("schedule"),
-                    _hover={"bg": "#00b4da", "transform": "scale(1.05)"},
+                    width="100%",
+                    height="32px",
+                    on_click=lambda: State.set_nav("stats"),
+                    _hover={"bg": "#00b4da", "transform": "scale(1.02)"},
                     cursor="pointer",
                 ),
+                columns="2",
                 spacing="2",
+                flex="1",
             ),
-            # Center circular home button
-            rx.button(
-                rx.icon("home", size=18),
-                bg=rx.cond(State.active_nav == "home", "#00b4da", "#1A1A1A"),
-                border="2px solid #00b4da",
-                border_radius="full",
-                width="44px",
-                height="44px",
-                color="white",
-                on_click=State.go_home,
-                _hover={"bg": "#00b4da", "transform": "scale(1.1)", "box_shadow": "0 0 10px #00b4da"},
-                cursor="pointer",
-            ),
-            # Right rectangle buttons
-            rx.hstack(
+            # Center circular Home button
+            rx.box(
                 rx.button(
-                    "Standings",
-                    bg=rx.cond(State.active_nav == "standings", "#00b4da", "transparent"),
+                    rx.icon("home", size=18),
+                    bg=rx.cond(State.active_nav == "home", "#00b4da", "#1A1A1A"),
+                    border="2px solid #00b4da",
+                    border_radius="full",
+                    width="44px",
+                    height="44px",
+                    color="white",
+                    on_click=State.go_home,
+                    _hover={"bg": "#00b4da", "transform": "scale(1.1)", "box_shadow": "0 0 10px #00b4da"},
+                    cursor="pointer",
+                ),
+                padding_x="3",
+            ),
+            # Right Grid (Seasons, Login) - flex="1"
+            rx.grid(
+                rx.button(
+                    "Seasons",
+                    bg=rx.cond(State.active_nav == "seasons", "#00b4da", "transparent"),
                     border="1px solid #00b4da",
                     color="white",
                     font_size="xs",
                     font_weight="600",
                     border_radius="sm",
-                    padding_x="3",
-                    padding_y="1.5",
-                    on_click=lambda: State.set_nav("standings"),
-                    _hover={"bg": "#00b4da", "transform": "scale(1.05)"},
+                    width="100%",
+                    height="32px",
+                    on_click=lambda: State.set_nav("seasons"),
+                    _hover={"bg": "#00b4da", "transform": "scale(1.02)"},
                     cursor="pointer",
                 ),
                 rx.button(
-                    "Teams",
-                    bg=rx.cond(State.active_nav == "teams", "#00b4da", "transparent"),
+                    "Login",
+                    bg=rx.cond(State.active_nav == "login", "#00b4da", "transparent"),
                     border="1px solid #00b4da",
                     color="white",
                     font_size="xs",
                     font_weight="600",
                     border_radius="sm",
-                    padding_x="3",
-                    padding_y="1.5",
-                    on_click=lambda: State.set_nav("teams"),
-                    _hover={"bg": "#00b4da", "transform": "scale(1.05)"},
+                    width="100%",
+                    height="32px",
+                    on_click=lambda: State.set_nav("login"),
+                    _hover={"bg": "#00b4da", "transform": "scale(1.02)"},
                     cursor="pointer",
                 ),
+                columns="2",
                 spacing="2",
+                flex="1",
             ),
             width="100%",
             max_width="600px",
@@ -543,14 +541,14 @@ def index() -> rx.Component:
                                 State.active_nav == "regulations",
                                 regulations_view(),
                                 rx.cond(
-                                    State.active_nav == "schedule",
-                                    schedule_view(),
+                                    State.active_nav == "stats",
+                                    stats_view(),
                                     rx.cond(
-                                        State.active_nav == "standings",
-                                        standings_view(),
+                                        State.active_nav == "seasons",
+                                        seasons_view(),
                                         rx.cond(
-                                            State.active_nav == "teams",
-                                            teams_view(),
+                                            State.active_nav == "login",
+                                            login_view(),
                                             rx.text("Not found", color="white"),
                                         )
                                     )
