@@ -517,8 +517,10 @@ def footer() -> rx.Component:
         align="center",
         justify="center",
         border_top="1px solid #222222",
-        position="sticky",
+        position="fixed",
         bottom="0",
+        left="0",
+        right="0",
         z_index="100",
     )
 
@@ -560,7 +562,8 @@ def index() -> rx.Component:
                 overflow_y="auto",
                 bg="#2A2A2E",
                 padding_x=["4", "6", "8"],
-                padding_y="8",
+                padding_top="8",
+                padding_bottom="12vh",
                 display="flex",
                 justify_content="center",
             ),
