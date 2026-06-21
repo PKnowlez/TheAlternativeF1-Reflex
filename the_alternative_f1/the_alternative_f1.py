@@ -115,7 +115,7 @@ def article_card(article: dict) -> rx.Component:
         on_click=lambda: State.select_article(article["id"]),
         _hover={
             "transform": "translateY(-6px)",
-            "box_shadow": "0 10px 25px rgba(225, 6, 0, 0.2)",
+            "box_shadow": "0 10px 25px rgba(0, 180, 218, 0.3)",
             "border_color": "#00b4da",
         },
         transition="all 0.25s ease-in-out",
