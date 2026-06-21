@@ -1,0 +1,25 @@
+# Virtual environment
+.venv/
+venv/
+ENV/
+
+# Reflex auto-generated files
+.web/
+.states/
+reflex.lock/
+
+# Python compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Databases
+*.db
+*.sqlite
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# VS Code settings (optional, but keep settings.json if workspace-specific)
+# .vscode/
