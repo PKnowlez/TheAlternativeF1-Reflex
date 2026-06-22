@@ -356,7 +356,7 @@ def stats_view() -> rx.Component:
                 ),
             ),
             width="100%",
-            padding_left=["46px", "52px", "60px"],
+            padding_left=["60px", "80px", "100px"],
         ),
         width="100%",
         max_width="1200px",
@@ -455,7 +455,7 @@ def regulations_view() -> rx.Component:
                 settings_content(),
             ),
             width="100%",
-            padding_left=["46px", "52px", "60px"],
+            padding_left=["60px", "80px", "100px"],
         ),
         width="100%",
         max_width="1200px",
@@ -496,13 +496,6 @@ def _season_tab_button(label: str, tab_key: str) -> rx.Component:
         font_size="9px",
         font_weight="bold",
         width="34px",
-        height=rx.cond(
-            State.season_picker_open,
-            "calc((100vh - 12vh - 60px - 120px) / 7)",
-            "calc((100vh - 12vh - 60px - 40px) / 7)",
-        ),
-        min_height="40px",
-        max_height="100px",
         style={"writingMode": "vertical-rl"},
         border_radius="0px 8px 8px 0px",
         border="1px solid #2D2D32",
@@ -511,6 +504,8 @@ def _season_tab_button(label: str, tab_key: str) -> rx.Component:
         _hover={"bg": "#00b4da", "transform": "scaleX(1.05)"},
         cursor="pointer",
         padding="0",
+        flex="1",
+        min_height="30px",
     )
 
 
@@ -635,15 +630,15 @@ def seasons_view() -> rx.Component:
             season_picker_buttons,
             # Tab buttons
             *[_season_tab_button(label, key) for label, key in tabs],
-            spacing="2",
+            spacing="1",
             align_items="start",
             padding_top="4",
             position="fixed",
             left="0",
             top="12vh",
             z_index="99",
-            max_height="calc(100vh - 12vh - 60px)",
-            overflow_y="auto",
+            height="calc(100vh - 12vh - 60px - 10px)",
+            overflow="hidden",
         ),
         # Content area
         rx.box(
@@ -654,7 +649,7 @@ def seasons_view() -> rx.Component:
                 spacing="0",
             ),
             width="100%",
-            padding_left=["46px", "52px", "60px"],
+            padding_left=["60px", "80px", "100px"],
         ),
         width="100%",
         max_width="1200px",
@@ -805,7 +800,7 @@ def index() -> rx.Component:
     return rx.box(
         rx.vstack(
             header(),
-            # Main scrollable content area with medium gray background (bg="#2A2A2E")
+            # Main scrollable content area with medium gray background (bg="#47474c")
             rx.box(
                 # Inner centering wrapper
                 rx.box(
@@ -846,7 +841,7 @@ def index() -> rx.Component:
                 width="100%",
                 flex="1",
                 overflow_y="auto",
-                bg="#2A2A2E",
+                bg="#47474c",
                 padding_x=["4", "6", "8"],
                 padding_top="8",
             ),

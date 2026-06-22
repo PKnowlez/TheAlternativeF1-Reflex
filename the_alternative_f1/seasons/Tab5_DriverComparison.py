@@ -86,8 +86,8 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False) -> rx.Compon
 
     pos_change_chart = rx.recharts.bar_chart(
         rx.recharts.bar(data_key="change", name="Pos Change"),
-        rx.recharts.x_axis(data_key="driver", font_size=9, angle=-45, height=60),
-        rx.recharts.y_axis(font_size=10),
+        rx.recharts.x_axis(data_key="driver", font_size=9, angle=-45, height=60, stroke="white", text_anchor="end", interval=0),
+        rx.recharts.y_axis(font_size=10, stroke="white"),
         rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
         rx.recharts.reference_line(y=0, stroke="#555555"),
         data=pos_change_data,
@@ -111,8 +111,8 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False) -> rx.Compon
 
     pts_chart = rx.recharts.bar_chart(
         rx.recharts.bar(data_key="points", name="Points"),
-        rx.recharts.x_axis(data_key="driver", font_size=9, angle=-45, height=60),
-        rx.recharts.y_axis(font_size=10),
+        rx.recharts.x_axis(data_key="driver", font_size=9, angle=-45, height=60, stroke="white", text_anchor="end", interval=0),
+        rx.recharts.y_axis(font_size=10, stroke="white"),
         rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
         data=pts_data,
         width="100%",
@@ -131,8 +131,8 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False) -> rx.Compon
 
     qual_chart = rx.recharts.bar_chart(
         rx.recharts.bar(data_key="qualifying", fill="#00b4da", name="Avg Qualifying"),
-        rx.recharts.x_axis(data_key="driver", type_="category", font_size=9),
-        rx.recharts.y_axis(type_="number", font_size=10),
+        rx.recharts.x_axis(data_key="driver", type_="category", font_size=9, stroke="white", angle=-45, text_anchor="end", height=60, interval=0),
+        rx.recharts.y_axis(type_="number", font_size=10, stroke="white"),
         rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
         data=qual_data,
         width="100%",
@@ -152,8 +152,8 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False) -> rx.Compon
 
     place_chart = rx.recharts.bar_chart(
         rx.recharts.bar(data_key="place", fill="#00b4da", name="Avg Place"),
-        rx.recharts.x_axis(data_key="driver", type_="category", font_size=9),
-        rx.recharts.y_axis(type_="number", font_size=10),
+        rx.recharts.x_axis(data_key="driver", type_="category", font_size=9, stroke="white", angle=-45, text_anchor="end", height=60, interval=0),
+        rx.recharts.y_axis(type_="number", font_size=10, stroke="white"),
         rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
         data=place_data,
         width="100%",
@@ -187,15 +187,15 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False) -> rx.Compon
                     rx.recharts.line(
                         data_key=r,
                         stroke=driver_colors.get(r, "#555555"),
-                        dot=True,
+                        dot={"fill": driver_colors.get(r, "#555555"), "stroke": driver_colors.get(r, "#555555")},
                         name=r,
                         type_="monotone",
                     )
                     for r in rookie_names
                 ],
-                rx.recharts.x_axis(data_key="race", font_size=10, angle=-45, height=60),
-                rx.recharts.y_axis(font_size=10),
-                rx.recharts.legend(layout="vertical", align="right", vertical_align="middle", style={"color": "white"}),
+                rx.recharts.x_axis(data_key="race", font_size=10, angle=-45, height=60, stroke="white", text_anchor="end", interval=0),
+                rx.recharts.y_axis(font_size=10, stroke="white"),
+                rx.recharts.legend(layout="vertical", align="right", vertical_align="middle", style={"color": "white", "fontFamily": "Outfit", "fontSize": "13px", "fontWeight": "500"}),
                 rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
                 data=rookie_line_data,
                 width="100%",
@@ -205,7 +205,6 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False) -> rx.Compon
             bg="transparent",
             padding="4",
             border_radius="xl",
-            border="1px solid #2C2C32",
         )
 
     return rx.vstack(
@@ -240,7 +239,6 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False) -> rx.Compon
                 bg="transparent",
                 padding="4",
                 border_radius="xl",
-                border="1px solid #2C2C32",
             ),
             rx.vstack(
                 rx.text("Avg Positions Gained/Lost", color="white", font_weight="700", font_size="sm"),
@@ -250,7 +248,6 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False) -> rx.Compon
                 bg="transparent",
                 padding="4",
                 border_radius="xl",
-                border="1px solid #2C2C32",
             ),
             rx.vstack(
                 rx.text("Average Qualifying Position", color="white", font_weight="700", font_size="sm"),
@@ -260,7 +257,6 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False) -> rx.Compon
                 bg="transparent",
                 padding="4",
                 border_radius="xl",
-                border="1px solid #2C2C32",
             ),
             rx.vstack(
                 rx.text("Average Place", color="white", font_weight="700", font_size="sm"),
@@ -270,7 +266,6 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False) -> rx.Compon
                 bg="transparent",
                 padding="4",
                 border_radius="xl",
-                border="1px solid #2C2C32",
             ),
             columns=rx.breakpoints(initial="1", md="2"),
             spacing="5",

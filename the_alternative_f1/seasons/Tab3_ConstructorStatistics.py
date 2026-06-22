@@ -17,57 +17,81 @@ def Tab3(data: dict, season_data: dict) -> rx.Component:
     team_colors = data["team_colors"]
     season_num = season_data["season_number"]
 
-    # ── Stacked constructor points bar chart ─────────────────────────────
-    # Build data for a horizontal stacked bar chart showing each team's
-    # driver contributions
+    # ── Grouped constructor points bar chart ─────────────────────────────
     drivers_points_df_copy = drivers_points_df.copy()
     drivers_points_df_copy["Points"] = pd.to_numeric(
         drivers_points_df_copy["Points"], errors="coerce"
     ).fillna(0)
 
+    # Sort teams by total points descending to place the highest at the top
     team_total_points = (
         drivers_points_df_copy.groupby("Team")["Points"]
         .sum()
-        .sort_values(ascending=True)
+        .sort_values(ascending=False)
     )
     sorted_teams = team_total_points.index.tolist()
 
-    # Build stacked data: each item = {team, driver1_points, driver2_points, ...}
+    # Group drivers by team
+    team_to_drivers = {}
+    for _, row in drivers_points_df_copy.iterrows():
+        t = row["Team"]
+        d = row["Driver"]
+        p = float(row["Points"])
+        if t not in team_to_drivers:
+            team_to_drivers[t] = []
+        if d not in [x[0] for x in team_to_drivers[t]]:
+            team_to_drivers[t].append((d, p))
+
+    # Sort drivers within each team by points descending
+    for t in team_to_drivers:
+        team_to_drivers[t] = sorted(team_to_drivers[t], key=lambda x: x[1], reverse=True)
+
+    if team_to_drivers:
+        max_drivers = max(len(drivers) for drivers in team_to_drivers.values())
+    else:
+        max_drivers = 0
+
     driver_color_map = dict(zip(colors_driver_df["Driver"], colors_driver_df["Color"]))
-    all_drivers_in_chart = set()
 
     stacked_data = []
     for team in sorted_teams:
-        team_drivers = drivers_points_df_copy[
-            drivers_points_df_copy["Team"] == team
-        ].reset_index(drop=True)
+        drivers = team_to_drivers.get(team, [])
         item = {"team": team}
-        for _, row in team_drivers.iterrows():
-            d_name = row["Driver"]
-            item[d_name] = float(row["Points"])
-            all_drivers_in_chart.add(d_name)
+        for k in range(max_drivers):
+            if k < len(drivers):
+                d_name, d_pts = drivers[k]
+                item[f"driver_{k}_pts"] = d_pts
+                item[f"driver_{k}_color"] = driver_color_map.get(d_name, "#555555")
+            else:
+                item[f"driver_{k}_pts"] = 0
+                item[f"driver_{k}_color"] = "transparent"
         stacked_data.append(item)
 
-    all_drivers_list = list(all_drivers_in_chart)
+    # Create the Bar components with child Cells for custom coloring
+    bar_components = []
+    for k in range(max_drivers):
+        cells = [
+            rx.recharts.cell(fill=item[f"driver_{k}_color"])
+            for item in stacked_data
+        ]
+        bar_components.append(
+            rx.recharts.bar(
+                *cells,
+                data_key=f"driver_{k}_pts",
+            )
+        )
 
     stacked_chart = rx.recharts.bar_chart(
-        *[
-            rx.recharts.bar(
-                data_key=driver,
-                fill=driver_color_map.get(driver, "#555555"),
-                stack_id="a",
-                name=driver,
-            )
-            for driver in all_drivers_list
-        ],
-        rx.recharts.x_axis(data_key="team", type_="category", font_size=10),
-        rx.recharts.y_axis(type_="number", font_size=10),
-        rx.recharts.legend(layout="vertical", align="right", vertical_align="middle", style={"color": "white"}),
+        *bar_components,
+        rx.recharts.y_axis(data_key="team", type_="category", font_size=10, stroke="white", interval=0),
+        rx.recharts.x_axis(type_="number", font_size=10, stroke="white"),
         rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
         data=stacked_data,
         width="100%",
         height=max(300, len(sorted_teams) * 45),
         layout="vertical",
+        bar_gap=0,
+        margin={"left": 30, "right": 10, "top": 10, "bottom": 10},
     )
 
     # ── Individual constructor accordions ────────────────────────────────
@@ -86,7 +110,9 @@ def Tab3(data: dict, season_data: dict) -> rx.Component:
 
         # Bar chart data for this constructor
         bar_data = []
-        for j, race in enumerate(team_races_points_only):
+        num_completed = int(data["index_x"] + 0.5)
+        for j in range(num_completed):
+            race = team_races_points_only[j]
             pts = team_points[j] if j < len(team_points) else 0
             bar_data.append({
                 "race": race,
@@ -107,8 +133,8 @@ def Tab3(data: dict, season_data: dict) -> rx.Component:
 
         team_chart = rx.recharts.bar_chart(
             rx.recharts.bar(data_key="points", name="Points"),
-            rx.recharts.x_axis(data_key="race", font_size=9, angle=-45, height=60),
-            rx.recharts.y_axis(font_size=10),
+            rx.recharts.x_axis(data_key="race", font_size=9, angle=-45, height=60, stroke="white", text_anchor="end", interval=0),
+            rx.recharts.y_axis(font_size=10, stroke="white"),
             rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
             data=bar_data,
             width="100%",
@@ -185,7 +211,6 @@ def Tab3(data: dict, season_data: dict) -> rx.Component:
                 bg="transparent",
                 padding="4",
                 border_radius="xl",
-                border="1px solid #2C2C32",
             ),
             # Right: Individual constructors
             rx.vstack(
@@ -206,7 +231,6 @@ def Tab3(data: dict, season_data: dict) -> rx.Component:
                 bg="transparent",
                 padding="4",
                 border_radius="xl",
-                border="1px solid #2C2C32",
             ),
             columns=rx.breakpoints(initial="1", md="2"),
             spacing="5",

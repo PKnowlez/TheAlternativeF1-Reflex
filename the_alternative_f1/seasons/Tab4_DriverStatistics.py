@@ -151,7 +151,12 @@ def Tab4(data: dict, season_data: dict) -> rx.Component:
 
         # ── Points per race bar chart ────────────────────────────────────
         pts_bar_data = []
-        for j, race in enumerate(races_points_only):
+        num_completed = int(season_data.get("index_x", 0) + 0.5) if "index_x" in season_data else int(new_df.columns.size - 1)
+        # Wait, calculations data has "index_x", but let's check: Calculations returns "index_x" in the data dict!
+        # So since the function parameter is `data: dict`, we can do:
+        num_completed = int(data["index_x"] + 0.5)
+        for j in range(num_completed):
+            race = races_points_only[j]
             pts = driver_points[j] if j < len(driver_points) else 0
             pts_bar_data.append({
                 "race": race,
@@ -160,8 +165,8 @@ def Tab4(data: dict, season_data: dict) -> rx.Component:
 
         pts_chart = rx.recharts.bar_chart(
             rx.recharts.bar(data_key="points", fill="#00b4da", name="Points"),
-            rx.recharts.x_axis(data_key="race", font_size=8, angle=-45, height=55),
-            rx.recharts.y_axis(font_size=10),
+            rx.recharts.x_axis(data_key="race", font_size=8, angle=-45, height=55, stroke="white", text_anchor="end", interval=0),
+            rx.recharts.y_axis(font_size=10, stroke="white"),
             rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
             data=pts_bar_data,
             width="100%",
@@ -209,8 +214,8 @@ def Tab4(data: dict, season_data: dict) -> rx.Component:
 
         placement_chart = rx.recharts.bar_chart(
             rx.recharts.bar(data_key="count", fill="#00b4da", name="Count"),
-            rx.recharts.x_axis(data_key="place", font_size=9),
-            rx.recharts.y_axis(font_size=10),
+            rx.recharts.x_axis(data_key="place", font_size=9, stroke="white", angle=-45, text_anchor="end", height=60, interval=0),
+            rx.recharts.y_axis(font_size=10, stroke="white"),
             rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
             data=placement_data,
             width="100%",
@@ -256,8 +261,8 @@ def Tab4(data: dict, season_data: dict) -> rx.Component:
 
         pos_chart = rx.recharts.bar_chart(
             rx.recharts.bar(data_key="change", name="Change"),
-            rx.recharts.x_axis(data_key="race", font_size=8, angle=-45, height=55),
-            rx.recharts.y_axis(font_size=10),
+            rx.recharts.x_axis(data_key="race", font_size=8, angle=-45, height=55, stroke="white", text_anchor="end", interval=0),
+            rx.recharts.y_axis(font_size=10, stroke="white"),
             rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
             rx.recharts.reference_line(y=0, stroke="#555555"),
             data=pos_change_data,
@@ -391,5 +396,4 @@ def Tab4(data: dict, season_data: dict) -> rx.Component:
         bg="transparent",
         padding="4",
         border_radius="xl",
-        border="1px solid #2C2C32",
     )

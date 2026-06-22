@@ -135,9 +135,13 @@ def Calculations(season_data: dict) -> dict:
 
     races_with_start = ["Start"] + races
 
+    # Only include completed races in line charts
+    num_completed = int(index_x + 0.5)
+    races_with_start_completed = races_with_start[:1 + num_completed]
+
     # Build list-of-dicts for recharts team line chart
     team_line_data = []
-    for i, race_label in enumerate(races_with_start):
+    for i, race_label in enumerate(races_with_start_completed):
         point = {"race": race_label}
         for team in team_race_totals_t.columns:
             point[team] = float(team_race_totals_t.iloc[i][team])
@@ -148,7 +152,7 @@ def Calculations(season_data: dict) -> dict:
     driver_race_totals_t = driver_race_totals_t.T
 
     driver_line_data = []
-    for i, race_label in enumerate(races_with_start):
+    for i, race_label in enumerate(races_with_start_completed):
         point = {"race": race_label}
         for driver in driver_race_totals_t.columns:
             point[driver] = float(driver_race_totals_t.iloc[i][driver])
@@ -158,7 +162,7 @@ def Calculations(season_data: dict) -> dict:
     rookie_line_data = []
     if rookies:
         rookie_cols = [d for d in driver_race_totals_t.columns if d in rookies]
-        for i, race_label in enumerate(races_with_start):
+        for i, race_label in enumerate(races_with_start_completed):
             point = {"race": race_label}
             for rookie in rookie_cols:
                 point[rookie] = float(driver_race_totals_t.iloc[i][rookie])
