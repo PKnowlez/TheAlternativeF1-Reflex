@@ -1,19 +1,139 @@
-# This script will almagamte all of the previous season's results for a driver to determine:
-#   Total Wins, Second, and Third Place
-#   Total Podiums
-#   Total Points
-# It will provide a table for all of the drivers with all of this information
+# All Time Driver Statistics — Reflex Component
+# Replaces the Streamlit version of DriverAllTime.py
 
-import streamlit as st
-import pandas as pd
-import Functions
+import reflex as rx
+from the_alternative_f1.all_time_stats import Functions
 
-def DriverStats(season,tORd):
-    st.subheader("All Time Driver's Statistics")
-    st.markdown('''
-                Below summarizes The Alternative's F1 League Driver statistics over the course of Season 1 - Season 
-                ''' + str(season) + ".")
-    st.markdown('''
-                To ensure accuracy, this page is updated at the conclusion of each season, once all points, wins, and podiums are finalized.
-                ''')
-    Functions.CalculateAllTime(season,tORd)
+
+def driver_stats_view(num_seasons: int) -> rx.Component:
+    """Render the All Time Driver Statistics as a Reflex table."""
+
+    df = Functions.CalculateAllTime(num_seasons, "Driver")
+    rows = df.to_dict(orient="records")
+
+    def header_cell(label: str) -> rx.Component:
+        return rx.table.column_header_cell(
+            label,
+            color="#00b4da",
+            font_weight="bold",
+            font_size="11px",
+            text_transform="uppercase",
+            letter_spacing="0.05em",
+            white_space="nowrap",
+        )
+
+    def data_cell(value, accent: bool = False) -> rx.Component:
+        return rx.table.cell(
+            str(value),
+            color="#00b4da" if accent else "#E0E0E0",
+            font_weight="bold" if accent else "normal",
+            font_size="13px",
+            white_space="nowrap",
+        )
+
+    def champion_cell(value: int) -> rx.Component:
+        if value > 0:
+            return rx.table.cell(
+                rx.badge(
+                    f"🏆 x{value}",
+                    color_scheme="cyan",
+                    variant="solid",
+                    font_size="11px",
+                ),
+            )
+        return rx.table.cell(rx.text("—", color="#555555", font_size="13px"))
+
+    def streak_cell(value: int) -> rx.Component:
+        if value >= 3:
+            return rx.table.cell(
+                rx.badge(
+                    f"🔥 {value}",
+                    color_scheme="orange",
+                    variant="soft",
+                    font_size="11px",
+                ),
+            )
+        return rx.table.cell(
+            rx.text(str(value), color="#AAAAAA", font_size="13px")
+        )
+
+    return rx.vstack(
+        rx.vstack(
+            rx.heading(
+                "All Time Driver Statistics",
+                size="6",
+                color="white",
+                font_weight="900",
+            ),
+            rx.text(
+                f"Aggregated Driver's Championship statistics across Season 1 – Season {num_seasons}. "
+                "Updated at the conclusion of each season once all points, wins, and podiums are finalized.",
+                color="#AAAAAA",
+                font_size="sm",
+                max_width="700px",
+            ),
+            spacing="2",
+            align_items="start",
+            width="100%",
+            margin_bottom="6",
+        ),
+        rx.box(
+            rx.table.root(
+                rx.table.header(
+                    rx.table.row(
+                        header_cell("Pos"),
+                        header_cell("Driver"),
+                        header_cell("Points"),
+                        header_cell("1st"),
+                        header_cell("2nd"),
+                        header_cell("3rd"),
+                        header_cell("Podiums"),
+                        header_cell("Champ."),
+                        header_cell("Win Streak"),
+                        header_cell("SS Streak"),
+                        bg="#111111",
+                    )
+                ),
+                rx.table.body(
+                    *[
+                        rx.table.row(
+                            data_cell(row["Place"], accent=True),
+                            rx.table.cell(
+                                rx.text(row["Driver"], color="white", font_weight="600", font_size="13px")
+                            ),
+                            data_cell(f"{row['Points']:.0f}" if row["Points"] == int(row["Points"]) else f"{row['Points']:.1f}"),
+                            data_cell(row["1st Place"]),
+                            data_cell(row["2nd Place"]),
+                            data_cell(row["3rd Place"]),
+                            data_cell(row["Podiums"]),
+                            champion_cell(row["Driver's Champion"]),
+                            streak_cell(row["Win Streak"]),
+                            streak_cell(row["Single Season Win Streak"]),
+                            _hover={"bg": "rgba(0,180,218,0.05)"},
+                            transition="background 0.15s",
+                        )
+                        for row in rows
+                    ]
+                ),
+                width="100%",
+                variant="ghost",
+            ),
+            width="100%",
+            overflow_x="auto",
+            bg="#18181C",
+            border_radius="xl",
+            border="1px solid #2C2C32",
+            padding="4",
+        ),
+        rx.hstack(
+            rx.badge("🔥 3+ consecutive wins", color_scheme="orange", variant="soft", font_size="10px"),
+            rx.text("SS Streak = Single Season Win Streak", color="#666666", font_size="10px"),
+            spacing="4",
+            margin_top="3",
+            align="center",
+        ),
+        width="100%",
+        align_items="start",
+        margin_bottom="160px",
+        padding_right="4",
+    )

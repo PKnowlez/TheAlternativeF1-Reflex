@@ -7,6 +7,13 @@ from rxconfig import config
 from the_alternative_f1.articles import articles
 from the_alternative_f1.regulations_settings.Regulations import Regulations as regulations_content
 from the_alternative_f1.regulations_settings.Settings import Settings as settings_content
+from the_alternative_f1.all_time_stats.ConstructorAllTime import constructor_stats_view
+from the_alternative_f1.all_time_stats.DriverAllTime import driver_stats_view
+from the_alternative_f1.all_time_stats.RacesAllTime import races_all_time_view
+
+# ── Easily updatable season count ────────────────────────────────────────────
+NUM_SEASONS: int = 4
+# ─────────────────────────────────────────────────────────────────────────────
 
 
 class State(rx.State):
@@ -14,6 +21,7 @@ class State(rx.State):
     selected_article_id: int = -1
     active_nav: str = "home"
     selected_reg_tab: str = "regulations"
+    selected_stats_tab: str = "constructors"
 
     def select_article(self, article_id: int):
         self.selected_article_id = article_id
@@ -23,9 +31,14 @@ class State(rx.State):
         self.selected_article_id = -1
         if nav_name == "regulations":
             self.selected_reg_tab = "regulations"
+        if nav_name == "stats":
+            self.selected_stats_tab = "constructors"
 
     def set_reg_tab(self, tab_name: str):
         self.selected_reg_tab = tab_name
+
+    def set_stats_tab(self, tab_name: str):
+        self.selected_stats_tab = tab_name
 
     def go_home(self):
         self.active_nav = "home"
@@ -234,90 +247,90 @@ def article_detail() -> rx.Component:
 
 
 def stats_view() -> rx.Component:
-    """All Time Stats view."""
-    stats_data = [
-        {"metric": "Most Championship Titles", "holder": "Max Verstappen", "value": "4"},
-        {"metric": "Most Race Wins", "holder": "Lando Norris", "value": "32"},
-        {"metric": "Most Pole Positions", "holder": "Charles Leclerc", "value": "41"},
-        {"metric": "Most Podiums", "holder": "Max Verstappen", "value": "98"},
-        {"metric": "Most Fastest Laps", "holder": "Oscar Piastri", "value": "18"},
-    ]
-    return rx.vstack(
-        rx.heading("All Time League Stats", size="6", color="white", font_weight="900", margin_bottom="4"),
-        rx.table.root(
-            rx.table.header(
-                rx.table.row(
-                    rx.table.column_header_cell("Metric", color="#00b4da"),
-                    rx.table.column_header_cell("Record Holder", color="#00b4da"),
-                    rx.table.column_header_cell("Value", color="#00b4da", justify="end"),
-                )
+    """All Time Stats view with sidebar tabs for Constructors, Drivers, and Races."""
+    return rx.hstack(
+        # Sidebar with vertical buck-tooth tabs on the left
+        rx.vstack(
+            # Constructors Tab
+            rx.button(
+                "CONSTRUCTORS",
+                bg=rx.cond(State.selected_stats_tab == "constructors", "#00b4da", "#18181C"),
+                color="white",
+                font_size="10px",
+                font_weight="bold",
+                width="34px",
+                height="130px",
+                style={"writingMode": "vertical-rl"},
+                border_radius="0px 8px 8px 0px",
+                border="1px solid #2D2D32",
+                border_left="none",
+                on_click=lambda: State.set_stats_tab("constructors"),
+                _hover={"bg": "#00b4da", "transform": "scaleX(1.05)"},
+                cursor="pointer",
+                padding="0",
             ),
-            rx.table.body(
-                *[
-                    rx.table.row(
-                        rx.table.cell(item["metric"], color="white", font_weight="bold"),
-                        rx.table.cell(item["holder"], color="#CCCCCC"),
-                        rx.table.cell(item["value"], color="#00b4da", justify="end", font_weight="bold"),
-                    )
-                    for item in stats_data
-                ]
+            # Drivers Tab
+            rx.button(
+                "DRIVERS",
+                bg=rx.cond(State.selected_stats_tab == "drivers", "#00b4da", "#18181C"),
+                color="white",
+                font_size="10px",
+                font_weight="bold",
+                width="34px",
+                height="130px",
+                style={"writingMode": "vertical-rl"},
+                border_radius="0px 8px 8px 0px",
+                border="1px solid #2D2D32",
+                border_left="none",
+                on_click=lambda: State.set_stats_tab("drivers"),
+                _hover={"bg": "#00b4da", "transform": "scaleX(1.05)"},
+                cursor="pointer",
+                padding="0",
+            ),
+            # Races Tab
+            rx.button(
+                "RACES",
+                bg=rx.cond(State.selected_stats_tab == "races", "#00b4da", "#18181C"),
+                color="white",
+                font_size="10px",
+                font_weight="bold",
+                width="34px",
+                height="130px",
+                style={"writingMode": "vertical-rl"},
+                border_radius="0px 8px 8px 0px",
+                border="1px solid #2D2D32",
+                border_left="none",
+                on_click=lambda: State.set_stats_tab("races"),
+                _hover={"bg": "#00b4da", "transform": "scaleX(1.05)"},
+                cursor="pointer",
+                padding="0",
+            ),
+            spacing="3",
+            align_items="start",
+            padding_top="8",
+            position="fixed",
+            left="0",
+            top="12vh",
+            z_index="99",
+        ),
+        # Content Display Area
+        rx.box(
+            rx.cond(
+                State.selected_stats_tab == "constructors",
+                constructor_stats_view(NUM_SEASONS),
+                rx.cond(
+                    State.selected_stats_tab == "drivers",
+                    driver_stats_view(NUM_SEASONS),
+                    races_all_time_view(NUM_SEASONS),
+                ),
             ),
             width="100%",
-            variant="ghost",
+            padding_left=["46px", "52px", "60px"],
         ),
         width="100%",
-        max_width="700px",
-        bg="#18181C",
-        padding="6",
-        border_radius="xl",
-        border="1px solid #2C2C32",
-        margin_bottom="160px",
-    )
-
-
-def seasons_view() -> rx.Component:
-    """Historical Seasons view."""
-    seasons_data = [
-        {"season": "Season 2025", "champion": "Max Verstappen", "constructor": "Red Bull Racing", "status": "Completed"},
-        {"season": "Season 2024", "champion": "Lando Norris", "constructor": "McLaren", "status": "Completed"},
-        {"season": "Season 2023", "champion": "Max Verstappen", "constructor": "Red Bull Racing", "status": "Completed"},
-        {"season": "Season 2026", "champion": "TBD", "constructor": "TBD", "status": "Active"},
-    ]
-    return rx.vstack(
-        rx.heading("League Seasons History", size="6", color="white", font_weight="900", margin_bottom="4"),
-        rx.table.root(
-            rx.table.header(
-                rx.table.row(
-                    rx.table.column_header_cell("Season", color="#00b4da"),
-                    rx.table.column_header_cell("Driver Champion", color="#00b4da"),
-                    rx.table.column_header_cell("Constructor Champion", color="#00b4da"),
-                    rx.table.column_header_cell("Status", color="#00b4da", justify="end"),
-                )
-            ),
-            rx.table.body(
-                *[
-                    rx.table.row(
-                        rx.table.cell(item["season"], color="white", font_weight="bold"),
-                        rx.table.cell(item["champion"], color="#CCCCCC"),
-                        rx.table.cell(item["constructor"], color="#CCCCCC"),
-                        rx.table.cell(
-                            rx.badge(item["status"], color_scheme=rx.cond(item["status"] == "Completed", "gray", "cyan"), variant="solid"),
-                            justify="end"
-                        ),
-                    )
-                    for item in seasons_data
-                ]
-            ),
-            width="100%",
-            variant="ghost",
-        ),
-        width="100%",
-        max_width="700px",
-        bg="#18181C",
-        padding="6",
-        border_radius="xl",
-        border="1px solid #2C2C32",
-        margin_bottom="160px",
+        max_width="1200px",
+        align_items="start",
+        spacing="0",
     )
 
 
@@ -580,13 +593,9 @@ def index() -> rx.Component:
                                         State.active_nav == "stats",
                                         stats_view(),
                                         rx.cond(
-                                            State.active_nav == "seasons",
-                                            seasons_view(),
-                                            rx.cond(
-                                                State.active_nav == "login",
-                                                login_view(),
-                                                rx.text("Not found", color="white"),
-                                            )
+                                            State.active_nav == "login",
+                                            login_view(),
+                                            rx.text("Not found", color="white"),
                                         )
                                     )
                                 )
