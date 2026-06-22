@@ -148,6 +148,7 @@ def articles_list() -> rx.Component:
         ),
         width="100%",
         align="center",
+        margin_bottom="160px",
     )
 
 
@@ -209,6 +210,7 @@ def article_detail() -> rx.Component:
             width="100%",
             max_width="800px",
             align_items="start",
+            margin_bottom="160px",
         )
 
     return rx.box(
@@ -269,6 +271,7 @@ def stats_view() -> rx.Component:
         padding="6",
         border_radius="xl",
         border="1px solid #2C2C32",
+        margin_bottom="160px",
     )
 
 
@@ -314,6 +317,7 @@ def seasons_view() -> rx.Component:
         padding="6",
         border_radius="xl",
         border="1px solid #2C2C32",
+        margin_bottom="160px",
     )
 
 
@@ -346,6 +350,7 @@ def login_view() -> rx.Component:
         border_radius="xl",
         border="1px solid #2C2C32",
         align_items="center",
+        margin_bottom="160px",
     )
 
 
@@ -416,101 +421,129 @@ def regulations_view() -> rx.Component:
 
 
 def footer() -> rx.Component:
-    """The permanent bottom navigation bar (8% height) with rect and circular buttons."""
+    """The permanent bottom navigation bar with square icon buttons and a protruding circular Home button."""
+    footer_height = "60px"
+    home_button_height = "70px"  # 15% taller than 60px
     return rx.hstack(
         rx.hstack(
-            # Left Grid (Regulations, All Time Stats) - flex="1"
-            rx.grid(
+            # Left Group (Regulations, All Time Stats)
+            rx.hstack(
                 rx.button(
-                    "Regulations",
+                    rx.image(
+                        src="/Icons/IconRegulations.png",
+                        height="22px",
+                        object_fit="contain",
+                    ),
                     bg=rx.cond(State.active_nav == "regulations", "#00b4da", "transparent"),
                     border="1px solid #00b4da",
                     color="white",
-                    font_size="xs",
-                    font_weight="600",
                     border_radius="sm",
-                    width="100%",
-                    height="32px",
+                    width="36px",
+                    height="36px",
+                    min_width="36px",
+                    max_width="36px",
                     on_click=lambda: State.set_nav("regulations"),
-                    _hover={"bg": "#00b4da", "transform": "scale(1.02)"},
+                    _hover={"bg": "#00b4da", "transform": "scale(1.05)"},
                     cursor="pointer",
+                    padding="0",
                 ),
                 rx.button(
-                    "All Time Stats",
+                    rx.image(
+                        src="/Icons/IconAll.png",
+                        height="22px",
+                        object_fit="contain",
+                    ),
                     bg=rx.cond(State.active_nav == "stats", "#00b4da", "transparent"),
                     border="1px solid #00b4da",
                     color="white",
-                    font_size="xs",
-                    font_weight="600",
                     border_radius="sm",
-                    width="100%",
-                    height="32px",
+                    width="36px",
+                    height="36px",
+                    min_width="36px",
+                    max_width="36px",
                     on_click=lambda: State.set_nav("stats"),
-                    _hover={"bg": "#00b4da", "transform": "scale(1.02)"},
+                    _hover={"bg": "#00b4da", "transform": "scale(1.05)"},
                     cursor="pointer",
+                    padding="0",
                 ),
-                columns="2",
                 spacing="2",
-                flex="1",
             ),
-            # Center circular Home button
+            # Center circular Home button that pokes up
             rx.box(
-                rx.button(
-                    rx.icon("home", size=18),
-                    bg=rx.cond(State.active_nav == "home", "#00b4da", "#1A1A1A"),
-                    border="2px solid #00b4da",
-                    border_radius="full",
-                    width="44px",
-                    height="44px",
-                    color="white",
-                    on_click=State.go_home,
-                    _hover={"bg": "#00b4da", "transform": "scale(1.1)", "box_shadow": "0 0 10px #00b4da"},
-                    cursor="pointer",
+                rx.image(
+                    src="/Icons/IconLogo.png",
+                    height="36px",
+                    width="36px",
+                    object_fit="contain",
                 ),
-                padding_x="3",
+                bg=rx.cond(State.active_nav == "home", "#00b4da", "#1A1A1A"),
+                border="2px solid #00b4da",
+                border_radius="50%",
+                width=home_button_height,
+                height=home_button_height,
+                display="flex",
+                align_items="center",
+                justify_content="center",
+                on_click=State.go_home,
+                _hover={"bg": "#00b4da", "transform": "scale(1.05)", "box_shadow": "0 0 12px #00b4da"},
+                cursor="pointer",
+                position="relative",
+                top="-8px",  # Pokes up above the footer
+                z_index="101",
+                transition="all 0.2s ease-in-out",
             ),
-            # Right Grid (Seasons, Login) - flex="1"
-            rx.grid(
+            # Right Group (Seasons, Login)
+            rx.hstack(
                 rx.button(
-                    "Seasons",
+                    rx.image(
+                        src="/Icons/IconSeason.png",
+                        height="22px",
+                        object_fit="contain",
+                    ),
                     bg=rx.cond(State.active_nav == "seasons", "#00b4da", "transparent"),
                     border="1px solid #00b4da",
                     color="white",
-                    font_size="xs",
-                    font_weight="600",
                     border_radius="sm",
-                    width="100%",
-                    height="32px",
+                    width="36px",
+                    height="36px",
+                    min_width="36px",
+                    max_width="36px",
                     on_click=lambda: State.set_nav("seasons"),
-                    _hover={"bg": "#00b4da", "transform": "scale(1.02)"},
+                    _hover={"bg": "#00b4da", "transform": "scale(1.05)"},
                     cursor="pointer",
+                    padding="0",
                 ),
                 rx.button(
-                    "Login",
+                    rx.image(
+                        src="/Icons/IconLogin.png",
+                        height="22px",
+                        object_fit="contain",
+                    ),
                     bg=rx.cond(State.active_nav == "login", "#00b4da", "transparent"),
                     border="1px solid #00b4da",
                     color="white",
-                    font_size="xs",
-                    font_weight="600",
                     border_radius="sm",
-                    width="100%",
-                    height="32px",
+                    width="36px",
+                    height="36px",
+                    min_width="36px",
+                    max_width="36px",
                     on_click=lambda: State.set_nav("login"),
-                    _hover={"bg": "#00b4da", "transform": "scale(1.02)"},
+                    _hover={"bg": "#00b4da", "transform": "scale(1.05)"},
                     cursor="pointer",
+                    padding="0",
                 ),
-                columns="2",
                 spacing="2",
-                flex="1",
             ),
             width="100%",
-            max_width="600px",
-            justify="between",
+            max_width="360px",
+            justify="center",
+            spacing="5",
             align="center",
-            padding_x="4",
+            padding_x="2",
+            style={"overflow": "visible"},
         ),
         width="100%",
-        height="8vh",
+        height=footer_height,
         bg="black",
         align="center",
         justify="center",
@@ -520,6 +553,7 @@ def footer() -> rx.Component:
         left="0",
         right="0",
         z_index="100",
+        style={"overflow": "visible"},
     )
 
 
@@ -530,34 +564,41 @@ def index() -> rx.Component:
             header(),
             # Main scrollable content area with medium gray background (bg="#2A2A2E")
             rx.box(
+                # Inner centering wrapper
                 rx.box(
-                    rx.cond(
-                        State.selected_article_id != -1,
-                        article_detail(),
+                    rx.vstack(
                         rx.cond(
-                            State.active_nav == "home",
-                            articles_list(),
+                            State.selected_article_id != -1,
+                            article_detail(),
                             rx.cond(
-                                State.active_nav == "regulations",
-                                regulations_view(),
+                                State.active_nav == "home",
+                                articles_list(),
                                 rx.cond(
-                                    State.active_nav == "stats",
-                                    stats_view(),
+                                    State.active_nav == "regulations",
+                                    regulations_view(),
                                     rx.cond(
-                                        State.active_nav == "seasons",
-                                        seasons_view(),
+                                        State.active_nav == "stats",
+                                        stats_view(),
                                         rx.cond(
-                                            State.active_nav == "login",
-                                            login_view(),
-                                            rx.text("Not found", color="white"),
+                                            State.active_nav == "seasons",
+                                            seasons_view(),
+                                            rx.cond(
+                                                State.active_nav == "login",
+                                                login_view(),
+                                                rx.text("Not found", color="white"),
+                                            )
                                         )
                                     )
                                 )
                             )
-                        )
+                        ),
+                        rx.box(height="160px", min_height="160px", width="100%", flex_shrink="0"),  # Physical spacer to guarantee bottom scroll space
+                        width="100%",
+                        spacing="0",
                     ),
+                    display="flex",
+                    justify_content="center",
                     width="100%",
-                    padding_bottom="100px",  # Push content above the fixed footer
                 ),
                 width="100%",
                 flex="1",
@@ -565,8 +606,6 @@ def index() -> rx.Component:
                 bg="#2A2A2E",
                 padding_x=["4", "6", "8"],
                 padding_top="8",
-                display="flex",
-                justify_content="center",
             ),
             footer(),
             width="100%",
@@ -584,6 +623,10 @@ def index() -> rx.Component:
 app = rx.App(
     stylesheets=[
         "https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap",
+    ],
+    head_components=[
+        rx.el.link(rel="icon", href="/Icons/IconLogoApp.png"),
+        rx.el.link(rel="apple-touch-icon", href="/Icons/IconLogoApp.png"),
     ],
 )
 app.add_page(index)

@@ -69,4 +69,5 @@ def Regulations() -> rx.Component:
         border_radius="xl",
         border="1px solid #2C2C32",
         align_items="start",
+        margin_bottom="160px",
     )

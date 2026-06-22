@@ -128,4 +128,5 @@ def Settings() -> rx.Component:
         gap = "5%",
         width="100%",
         align_items="start",
+        margin_bottom="160px",
     )
