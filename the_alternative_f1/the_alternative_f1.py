@@ -10,9 +10,18 @@ from the_alternative_f1.regulations_settings.Settings import Settings as setting
 from the_alternative_f1.all_time_stats.ConstructorAllTime import constructor_stats_view
 from the_alternative_f1.all_time_stats.DriverAllTime import driver_stats_view
 from the_alternative_f1.all_time_stats.RacesAllTime import races_all_time_view
+from the_alternative_f1.seasons import seasons, LATEST_SEASON
+from the_alternative_f1.seasons.Calculations import Calculations
+from the_alternative_f1.seasons.Tab0_LeagueNews import Tab0
+from the_alternative_f1.seasons.Tab1_Standings import Tab1
+from the_alternative_f1.seasons.Tab2_RaceResults import Tab2
+from the_alternative_f1.seasons.Tab3_ConstructorStatistics import Tab3
+from the_alternative_f1.seasons.Tab4_DriverStatistics import Tab4
+from the_alternative_f1.seasons.Tab5_DriverComparison import Tab5
+from the_alternative_f1.seasons.Tab6_RaceSchedule import Tab6
 
-# ── Easily updatable season count ────────────────────────────────────────────
-NUM_SEASONS: int = 4
+# ── Dynamically derived from seasons __init__.py ─────────────────────────────
+NUM_SEASONS: int = LATEST_SEASON
 # ─────────────────────────────────────────────────────────────────────────────
 
 
@@ -22,6 +31,12 @@ class State(rx.State):
     active_nav: str = "home"
     selected_reg_tab: str = "regulations"
     selected_stats_tab: str = "constructors"
+
+    # ── Seasons state ────────────────────────────────────────────────────
+    selected_season: int = LATEST_SEASON
+    selected_season_tab: str = "standings"
+    season_picker_open: bool = False
+    rookies_only: bool = False
 
     def select_article(self, article_id: int):
         self.selected_article_id = article_id
@@ -33,12 +48,28 @@ class State(rx.State):
             self.selected_reg_tab = "regulations"
         if nav_name == "stats":
             self.selected_stats_tab = "constructors"
+        if nav_name == "seasons":
+            self.selected_season_tab = "standings"
+            self.rookies_only = False
 
     def set_reg_tab(self, tab_name: str):
         self.selected_reg_tab = tab_name
 
     def set_stats_tab(self, tab_name: str):
         self.selected_stats_tab = tab_name
+
+    def set_season(self, season_num: int):
+        self.selected_season = season_num
+        self.season_picker_open = False
+
+    def set_season_tab(self, tab_name: str):
+        self.selected_season_tab = tab_name
+
+    def toggle_season_picker(self):
+        self.season_picker_open = not self.season_picker_open
+
+    def toggle_rookies_only(self, value: bool):
+        self.rookies_only = value
 
     def go_home(self):
         self.active_nav = "home"
@@ -433,6 +464,205 @@ def regulations_view() -> rx.Component:
     )
 
 
+def _build_season_content(season_idx: int, tab: str, rookies_only: bool) -> rx.Component:
+    """Build the content for a specific season and tab."""
+    season_data = seasons[season_idx]
+    data = Calculations(season_data)
+
+    if tab == "news":
+        return Tab0(articles, season_data["season_number"])
+    elif tab == "standings":
+        return Tab1(data, season_data)
+    elif tab == "race_results":
+        return Tab2(data, season_data)
+    elif tab == "constructor_stats":
+        return Tab3(data, season_data)
+    elif tab == "driver_stats":
+        return Tab4(data, season_data)
+    elif tab == "driver_comparisons":
+        return Tab5(data, season_data, rookies_only=rookies_only)
+    elif tab == "schedule":
+        return Tab6(data, season_data)
+    else:
+        return Tab1(data, season_data)
+
+
+def _season_tab_button(label: str, tab_key: str) -> rx.Component:
+    """A single sidebar tab button for seasons."""
+    return rx.button(
+        label,
+        bg=rx.cond(State.selected_season_tab == tab_key, "#00b4da", "#18181C"),
+        color="white",
+        font_size="9px",
+        font_weight="bold",
+        width="34px",
+        height=rx.cond(
+            State.season_picker_open,
+            "calc((100vh - 12vh - 60px - 120px) / 7)",
+            "calc((100vh - 12vh - 60px - 40px) / 7)",
+        ),
+        min_height="40px",
+        max_height="100px",
+        style={"writingMode": "vertical-rl"},
+        border_radius="0px 8px 8px 0px",
+        border="1px solid #2D2D32",
+        border_left="none",
+        on_click=State.set_season_tab(tab_key),
+        _hover={"bg": "#00b4da", "transform": "scaleX(1.05)"},
+        cursor="pointer",
+        padding="0",
+    )
+
+
+def _season_picker_button(s: dict) -> rx.Component:
+    """A single season button in the picker."""
+    return rx.button(
+        f"S{s['season_number']}",
+        bg=rx.cond(
+            State.selected_season == s["season_number"],
+            "#00b4da",
+            "#111111",
+        ),
+        color="white",
+        font_size="9px",
+        font_weight="bold",
+        width="34px",
+        height="22px",
+        min_height="22px",
+        border_radius="0px 6px 6px 0px",
+        border="1px solid #2D2D32",
+        border_left="none",
+        on_click=lambda: State.set_season(s["season_number"]),
+        _hover={"bg": "#00b4da"},
+        cursor="pointer",
+        padding="0",
+    )
+
+
+def seasons_view() -> rx.Component:
+    """The Seasons view with sidebar navigation and content area."""
+
+    # Season picker buttons (shown when expanded)
+    season_picker_buttons = rx.cond(
+        State.season_picker_open,
+        rx.vstack(
+            *[_season_picker_button(s) for s in seasons],
+            spacing="1",
+        ),
+        rx.fragment(),
+    )
+
+
+    # Tab definitions: (label, key)
+    tabs = [
+        ("NEWS", "news"),
+        ("STANDINGS", "standings"),
+        ("RESULTS", "race_results"),
+        ("CONSTRUCTORS", "constructor_stats"),
+        ("DRIVERS", "driver_stats"),
+        ("COMPARISONS", "driver_comparisons"),
+        ("SCHEDULE", "schedule"),
+    ]
+
+    # Build content using nested rx.cond for each season
+    # We need to build a cond chain for selected_season (1..N)
+    # and within each, a cond chain for selected_season_tab
+    def build_tab_cond(season_idx: int) -> rx.Component:
+        """Build a conditional chain for tabs within a season."""
+        tab_keys = [t[1] for t in tabs]
+        # Start from the last tab and work backwards
+        result = _build_season_content(season_idx, tab_keys[-1], False)
+        for tk in reversed(tab_keys[:-1]):
+            rookies = tk == "driver_comparisons"
+            result = rx.cond(
+                State.selected_season_tab == tk,
+                _build_season_content(season_idx, tk, True if rookies else False),
+                result,
+            )
+        return result
+
+    # Build season conditional chain
+    content = build_tab_cond(len(seasons) - 1)  # default to last season
+    for idx in range(len(seasons) - 2, -1, -1):
+        content = rx.cond(
+            State.selected_season == seasons[idx]["season_number"],
+            build_tab_cond(idx),
+            content,
+        )
+
+    # Rookies toggle (shown only on comparisons tab)
+    rookies_toggle = rx.cond(
+        State.selected_season_tab == "driver_comparisons",
+        rx.hstack(
+            rx.text("Rookies Only", color="white", font_size="sm", font_weight="600"),
+            rx.switch(
+                checked=State.rookies_only,
+                on_change=State.toggle_rookies_only,
+                color_scheme="cyan",
+            ),
+            spacing="2",
+            align="center",
+            margin_bottom="4",
+        ),
+        rx.fragment(),
+    )
+
+    return rx.hstack(
+        # Sidebar
+        rx.vstack(
+            # Season picker toggle
+            rx.button(
+                rx.cond(
+                    State.season_picker_open,
+                    "▼",
+                    "▶",
+                ),
+                bg=rx.cond(State.season_picker_open, "#00b4da", "#18181C"),
+                color="white",
+                font_size="10px",
+                font_weight="bold",
+                width="34px",
+                height="34px",
+                min_height="34px",
+                border_radius="0px 8px 8px 0px",
+                border="1px solid #2D2D32",
+                border_left="none",
+                on_click=State.toggle_season_picker,
+                _hover={"bg": "#00b4da", "transform": "scaleX(1.05)"},
+                cursor="pointer",
+                padding="0",
+            ),
+            season_picker_buttons,
+            # Tab buttons
+            *[_season_tab_button(label, key) for label, key in tabs],
+            spacing="2",
+            align_items="start",
+            padding_top="4",
+            position="fixed",
+            left="0",
+            top="12vh",
+            z_index="99",
+            max_height="calc(100vh - 12vh - 60px)",
+            overflow_y="auto",
+        ),
+        # Content area
+        rx.box(
+            rx.vstack(
+                rookies_toggle,
+                content,
+                width="100%",
+                spacing="0",
+            ),
+            width="100%",
+            padding_left=["46px", "52px", "60px"],
+        ),
+        width="100%",
+        max_width="1200px",
+        align_items="start",
+        spacing="0",
+    )
+
+
 def footer() -> rx.Component:
     """The permanent bottom navigation bar with square icon buttons and a protruding circular Home button."""
     footer_height = "60px"
@@ -593,9 +823,13 @@ def index() -> rx.Component:
                                         State.active_nav == "stats",
                                         stats_view(),
                                         rx.cond(
-                                            State.active_nav == "login",
-                                            login_view(),
-                                            rx.text("Not found", color="white"),
+                                            State.active_nav == "seasons",
+                                            seasons_view(),
+                                            rx.cond(
+                                                State.active_nav == "login",
+                                                login_view(),
+                                                rx.text("Not found", color="white"),
+                                            )
                                         )
                                     )
                                 )

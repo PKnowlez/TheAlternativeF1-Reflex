@@ -9,5 +9,6 @@ article = {
     ],
     "image": "/article_f1_podium.png",
     "author": "Elena Rossi",
-    "date": "June 20, 2026"
+    "date": "June 20, 2026",
+    "season": 5,
 }

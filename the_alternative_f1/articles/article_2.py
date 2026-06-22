@@ -9,5 +9,6 @@ article = {
     ],
     "image": "/article_f1_tech.png",
     "author": "Devon Miller",
-    "date": "June 18, 2026"
+    "date": "June 18, 2026",
+    "season": 5,
 }

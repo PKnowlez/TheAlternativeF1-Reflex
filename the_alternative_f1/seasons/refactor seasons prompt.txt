@@ -1,0 +1,20 @@
+I need to have the files in /the_alternative_f1/seasons converted from streamlit to reflex. These files will form the basis of the seasons navigation button in the navigation bar.
+
+When a user selects the seasons button in the navigation bar they should be presented with the following:
+- The standings for the most recent season of the league (defaulting to the standings tab)
+- Left hand side bar buttons just like those found in the Regulations and Settings section, for each Tab in the order the files are enumerated in (News, Standings, Race Results, Constructor Stats, Driver Stats, Driver Comparisons, and Schedule) 
+- An additional side bar button at the top of the list of side bar buttons that expands when tapped to give the user the option to select which season they want to view. The rest of the side bar buttons will calculate off of this input. Additionally, it must default to the most recent or current season
+
+I will need an init file that I can select the seasons similar to selecting articles in the main area of the application.
+
+The season files need to include the following:
+- The season number
+- A list of rookie drivers (used in the calculations and driver comparisons so we can toggle between comparisons for the entire league and just the rookies)
+- A list of team colors (for the line and bar charts, as teams change colors sometimes) 
+- A list of driver colors (for the line and bar charts, as drivers change teams and colors sometimes) 
+
+The files provided need to be configured for reflex but also need to be refactored to handle the scale of the season from number of races to number of drivers. Both of those come from the excel sheets (Season1, Season2, Season3, etc.) in The_Alternative_F1.xlsx. Additionally in that excel file is the respective season schedules for Tab6.
+
+The full constructor and driver standings expanders should be buttons that provide a scrollable popup over the season tab with an X in the top right to close.
+
+The graphs, charts, etc. that are in columns should remain in those columns unless the screen is in a portrait format where it is too narrow for the columns, then the items should come one after the other vertically like the logic we deployed for the Settings page.
