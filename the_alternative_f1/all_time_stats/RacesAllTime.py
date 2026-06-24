@@ -111,11 +111,14 @@ def races_all_time_view(num_seasons: int) -> rx.Component:
                 size="6",
                 color="white",
                 font_weight="900",
+                padding_y="2.5%",
+                padding_x="2%",
             ),
             rx.text(
                 f"Podium finishers for every race across Season 1 – Season {num_seasons}.",
                 color="#AAAAAA",
                 font_size="sm",
+                padding_x="2%",
             ),
             rx.hstack(
                 rx.badge("🥇 1st", color_scheme="yellow", variant="soft", font_size="10px"),
@@ -123,6 +126,7 @@ def races_all_time_view(num_seasons: int) -> rx.Component:
                 rx.badge("🥉 3rd", color_scheme="orange", variant="soft", font_size="10px"),
                 spacing="3",
                 margin_top="2",
+                padding_x="2%",
             ),
             spacing="2",
             align_items="start",

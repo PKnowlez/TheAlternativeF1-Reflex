@@ -20,12 +20,12 @@ def Regulations() -> rx.Component:
     ]
 
     return rx.vstack(
-        rx.heading("Sporting & Technical Regulations", size="6", color="white", font_weight="900", margin_bottom="4", padding="2.5%"),
+        rx.heading("Sporting & Technical Regulations", size="6", color="white", font_weight="900", margin_bottom="4", padding_y="2.5%", padding_x="2%"),
         rx.table.root(
             rx.table.header(
                 rx.table.row(
-                    rx.table.column_header_cell("#", width="40px", color="#00b4da"),
-                    rx.table.column_header_cell("Regulation", width="220px", color="#00b4da"),
+                    rx.table.column_header_cell("#", width=["30px", "40px"], color="#00b4da"),
+                    rx.table.column_header_cell("Regulation", width=["100px", "150px", "220px"], color="#00b4da"),
                     rx.table.column_header_cell("Definition / Rule Description", color="#00b4da"),
                 )
             ),

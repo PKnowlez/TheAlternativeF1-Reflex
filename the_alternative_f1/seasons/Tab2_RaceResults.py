@@ -10,7 +10,7 @@ import pandas as pd
 import reflex as rx
 
 
-def _build_manual_race_item(race: dict, idx: int, prefix: str) -> rx.Component:
+def _build_manual_race_item(race: dict, idx: int, prefix: str, bg_color: str = "transparent") -> rx.Component:
     """Helper to build an accordion item for a custom manual pre-season or post-season race."""
     race_name = race.get("name", "Manual Race")
     results = race.get("results", [])
@@ -143,6 +143,10 @@ def _build_manual_race_item(race: dict, idx: int, prefix: str) -> rx.Component:
         ),
         rx.accordion.content(race_content),
         value=f"{prefix}_{idx}",
+        bg=bg_color,
+        border_radius="md",
+        padding_x="3",
+        margin_y="1",
     )
 
 
@@ -165,8 +169,11 @@ def Tab2(data: dict, season_data: dict) -> rx.Component:
 
     preseason_items = []
     preseason_races = season_data.get("preseason_races", [])
+    item_idx = 0
     for idx, pr in enumerate(preseason_races):
-        preseason_items.append(_build_manual_race_item(pr, idx, "preseason"))
+        bg_color = "#1E1E24" if item_idx % 2 == 0 else "#131316"
+        preseason_items.append(_build_manual_race_item(pr, idx, "preseason", bg_color))
+        item_idx += 1
 
     regular_items = []
 
@@ -194,11 +201,11 @@ def Tab2(data: dict, season_data: dict) -> rx.Component:
         is_sprint = "Sprint" in race_name or "(S)" in race_name
 
         if is_sprint:
-            qualifying_col = base_name + "SprintQualifying"
-            fastestlap_col = base_name + "SprintFastestLap"
-            dotd_col = base_name + "SprintDOTD"
-            mot_col = base_name + "SprintMOT"
-            cd_col = base_name + "SprintCD"
+            qualifying_col = base_name + " SprintQualifying"
+            fastestlap_col = base_name + " SprintFastestLap"
+            dotd_col = base_name + " SprintDOTD"
+            mot_col = base_name + " SprintMOT"
+            cd_col = base_name + " SprintCD"
         else:
             qualifying_col = race_name + "Qualifying"
             fastestlap_col = race_name + "FastestLap"
@@ -212,23 +219,39 @@ def Tab2(data: dict, season_data: dict) -> rx.Component:
             place_val = row[place_col]
             # Replace numeric codes with text
             place_display = str(int(place_val)) if not pd.isnull(place_val) else "-"
-            if place_display == "23":
-                place_display = "DNF"
-            elif place_display == "24":
-                place_display = "DNS"
-            elif place_display == "25":
-                place_display = "DSQ"
+            if season_num <= 4:
+                if place_display == "21":
+                    place_display = "DNF"
+                elif place_display == "22":
+                    place_display = "DNS"
+                elif place_display == "23":
+                    place_display = "DSQ"
+            else:
+                if place_display == "23":
+                    place_display = "DNF"
+                elif place_display == "24":
+                    place_display = "DNS"
+                elif place_display == "25":
+                    place_display = "DSQ"
 
             qualifying_val = "-"
             if qualifying_col in df.columns:
                 qv = row.get(qualifying_col, "-")
                 qualifying_val = str(int(qv)) if not pd.isnull(qv) and qv != "-" else "-"
-                if qualifying_val == "23":
-                    qualifying_val = "DNF"
-                elif qualifying_val == "24":
-                    qualifying_val = "DNS"
-                elif qualifying_val == "25":
-                    qualifying_val = "DSQ"
+                if season_num <= 4:
+                    if qualifying_val == "21":
+                        qualifying_val = "DNF"
+                    elif qualifying_val == "22":
+                        qualifying_val = "DNS"
+                    elif qualifying_val == "23":
+                        qualifying_val = "DSQ"
+                else:
+                    if qualifying_val == "23":
+                        qualifying_val = "DNF"
+                    elif qualifying_val == "24":
+                        qualifying_val = "DNS"
+                    elif qualifying_val == "25":
+                        qualifying_val = "DSQ"
 
             points_val = row[points_col] if not pd.isnull(row[points_col]) else 0
 
@@ -311,6 +334,7 @@ def Tab2(data: dict, season_data: dict) -> rx.Component:
             padding="3",
         )
 
+        bg_color = "#1E1E24" if item_idx % 2 == 0 else "#131316"
         regular_items.append(
             rx.accordion.item(
                 rx.accordion.trigger(
@@ -323,20 +347,27 @@ def Tab2(data: dict, season_data: dict) -> rx.Component:
                 ),
                 rx.accordion.content(race_content),
                 value=f"race_{i}",
+                bg=bg_color,
+                border_radius="md",
+                padding_x="3",
+                margin_y="1",
             )
         )
+        item_idx += 1
 
     postseason_items = []
     postseason_races = season_data.get("postseason_races", [])
     for idx, pr in enumerate(postseason_races):
-        postseason_items.append(_build_manual_race_item(pr, idx, "postseason"))
+        bg_color = "#1E1E24" if item_idx % 2 == 0 else "#131316"
+        postseason_items.append(_build_manual_race_item(pr, idx, "postseason", bg_color))
+        item_idx += 1
 
     accordion_items = preseason_items + regular_items + postseason_items
 
     if not accordion_items:
         return rx.vstack(
-            rx.heading(f"Season {season_num} Race Results", size="6", color="white", font_weight="900"),
-            rx.text("No race results available yet.", color="#888888"),
+            rx.heading(f"Season {season_num} Race Results", size="6", color="white", font_weight="900", padding_y="2.5%", padding_x="2%"),
+            rx.text("No race results available yet.", color="#888888", padding_x="2%"),
             width="100%",
             spacing="4",
         )
@@ -347,6 +378,8 @@ def Tab2(data: dict, season_data: dict) -> rx.Component:
             size="6",
             color="white",
             font_weight="900",
+            padding_y="2.5%",
+            padding_x="2%",
         ),
         rx.accordion.root(
             *accordion_items,

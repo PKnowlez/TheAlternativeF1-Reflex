@@ -1,5 +1,4 @@
 article = {
-    "id": 2,
     "title": "Inside the Cockpit: Decoding Modern F1 Wheels",
     "blurb": "An in-depth look at the complex steering wheels that serve as the neural interface between driver and F1 machinery.",
     "content": [

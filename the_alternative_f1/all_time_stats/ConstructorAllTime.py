@@ -50,13 +50,16 @@ def constructor_stats_view(num_seasons: int) -> rx.Component:
                 size="6",
                 color="white",
                 font_weight="900",
+                padding_y="2.5%",
+                padding_x="2%",
             ),
             rx.text(
                 f"Aggregated Constructor's Championship statistics across Season 1 – Season {num_seasons}. "
-                "Updated at the conclusion of each season once all points, wins, and podiums are finalized.",
+                "Championships are updated at the conclusion of each season once all points, wins, and podiums are finalized.",
                 color="#AAAAAA",
                 font_size="sm",
                 max_width="700px",
+                padding_x="2%",
             ),
             spacing="2",
             align_items="start",

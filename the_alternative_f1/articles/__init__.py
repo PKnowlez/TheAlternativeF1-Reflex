@@ -1,5 +1,4 @@
-from .article_0 import article as article_0
-from .article_1 import article as article_1
-from .article_2 import article as article_2
+from .Season5.Grid_Announcements.Haas import article as Haas_Article
+from .article_template import article as Template_Article
 
-articles = [article_0, article_1, article_2]
+articles = [Template_Article]

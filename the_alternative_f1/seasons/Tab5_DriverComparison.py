@@ -11,7 +11,7 @@ import pandas as pd
 import reflex as rx
 
 
-def Tab5(data: dict, season_data: dict, rookies_only: bool = False) -> rx.Component:
+def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only_var = None, toggle_rookies_only = None) -> rx.Component:
     """Render the Driver Comparisons tab.
 
     Parameters
@@ -85,12 +85,25 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False) -> rx.Compon
     ]
 
     pos_change_chart = rx.recharts.bar_chart(
-        rx.recharts.bar(data_key="change", name="Pos Change"),
-        rx.recharts.x_axis(data_key="driver", font_size=9, angle=-45, height=60, stroke="white", text_anchor="end", interval=0),
-        rx.recharts.y_axis(font_size=10, stroke="white"),
+        rx.recharts.bar(
+            *[
+                rx.recharts.cell(fill=item["fill"])
+                for item in pos_change_data
+            ],
+            data_key="change",
+            name="Pos Change",
+        ),
+        rx.recharts.x_axis(data_key="driver", font_size=9, angle=-90, height=90, stroke="white", text_anchor="end", interval=0, style={"fontFamily": "Outfit"}),
+        rx.recharts.y_axis(
+            stroke="white",
+            width=35,
+            tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
+        ),
         rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
         rx.recharts.reference_line(y=0, stroke="#555555"),
         data=pos_change_data,
+        margin={"top": 10, "right": 20, "left": 35, "bottom": 40},
+        margin_left="-10px",
         width="100%",
         height=300,
     )
@@ -110,55 +123,115 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False) -> rx.Compon
         })
 
     pts_chart = rx.recharts.bar_chart(
-        rx.recharts.bar(data_key="points", name="Points"),
-        rx.recharts.x_axis(data_key="driver", font_size=9, angle=-45, height=60, stroke="white", text_anchor="end", interval=0),
-        rx.recharts.y_axis(font_size=10, stroke="white"),
+        rx.recharts.bar(
+            *[
+                rx.recharts.cell(fill=item["fill"])
+                for item in pts_data
+            ],
+            data_key="points",
+            name="Points",
+        ),
+        rx.recharts.x_axis(data_key="driver", font_size=9, angle=-90, height=90, stroke="white", text_anchor="end", interval=0, style={"fontFamily": "Outfit"}),
+        rx.recharts.y_axis(
+            stroke="white",
+            width=35,
+            tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
+        ),
         rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
         data=pts_data,
+        margin={"top": 10, "right": 20, "left": 35, "bottom": 40},
+        margin_left="-10px",
         width="100%",
         height=300,
     )
 
     # ── Average Qualifying Position ──────────────────────────────────────
     avg_qual_df = filtered_df.sort_values(by="average_qualifying", ascending=True)
-    qual_data = [
-        {
+    qual_data = []
+    medal_colors = ["#FFD700", "#C0C0C0", "#CD7F32"]
+    for idx, (_, row) in enumerate(avg_qual_df.iterrows()):
+        fill = medal_colors[idx] if idx < 3 else "#0068c9"
+        qual_data.append({
             "driver": row["Driver"],
             "qualifying": round(row["average_qualifying"], 1),
-        }
-        for _, row in avg_qual_df.iterrows()
-    ]
+            "fill": fill,
+        })
 
     qual_chart = rx.recharts.bar_chart(
-        rx.recharts.bar(data_key="qualifying", fill="#00b4da", name="Avg Qualifying"),
-        rx.recharts.x_axis(data_key="driver", type_="category", font_size=9, stroke="white", angle=-45, text_anchor="end", height=60, interval=0),
-        rx.recharts.y_axis(type_="number", font_size=10, stroke="white"),
-        rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
+        rx.recharts.bar(
+            *[
+                rx.recharts.cell(fill=item["fill"])
+                for item in qual_data
+            ],
+            data_key="qualifying",
+            name="Avg Qualifying",
+        ),
+        rx.recharts.y_axis(
+            data_key="driver",
+            type_="category",
+            stroke="white",
+            interval=0,
+            axis_line=False,
+            tick_line=False,
+            width=75,
+            tick={"textAnchor": "start", "dx": -65, "fill": "white", "fontSize": 9, "fontFamily": "Outfit"},
+        ),
+        rx.recharts.x_axis(
+            type_="number",
+            font_size=10,
+            stroke="white",
+            style={"fontFamily": "Outfit"},
+        ),
         data=qual_data,
         width="100%",
         height=300,
         layout="vertical",
+        margin={"left": 75, "right": 25, "top": 10, "bottom": 10},
+        margin_left="-10px",
     )
 
     # ── Average Place ────────────────────────────────────────────────────
     avg_place_df = filtered_df.sort_values(by="average_place", ascending=True)
-    place_data = [
-        {
+    place_data = []
+    for idx, (_, row) in enumerate(avg_place_df.iterrows()):
+        fill = medal_colors[idx] if idx < 3 else "#0068c9"
+        place_data.append({
             "driver": row["Driver"],
             "place": round(row["average_place"], 1),
-        }
-        for _, row in avg_place_df.iterrows()
-    ]
+            "fill": fill,
+        })
 
     place_chart = rx.recharts.bar_chart(
-        rx.recharts.bar(data_key="place", fill="#00b4da", name="Avg Place"),
-        rx.recharts.x_axis(data_key="driver", type_="category", font_size=9, stroke="white", angle=-45, text_anchor="end", height=60, interval=0),
-        rx.recharts.y_axis(type_="number", font_size=10, stroke="white"),
-        rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
+        rx.recharts.bar(
+            *[
+                rx.recharts.cell(fill=item["fill"])
+                for item in place_data
+            ],
+            data_key="place",
+            name="Avg Place",
+        ),
+        rx.recharts.y_axis(
+            data_key="driver",
+            type_="category",
+            stroke="white",
+            interval=0,
+            axis_line=False,
+            tick_line=False,
+            width=75,
+            tick={"textAnchor": "start", "dx": -65, "fill": "white", "fontSize": 9, "fontFamily": "Outfit"},
+        ),
+        rx.recharts.x_axis(
+            type_="number",
+            font_size=10,
+            stroke="white",
+            style={"fontFamily": "Outfit"},
+        ),
         data=place_data,
         width="100%",
         height=300,
         layout="vertical",
+        margin={"left": 75, "right": 25, "top": 10, "bottom": 10},
+        margin_left="-10px",
     )
 
     # ── Leader badges ────────────────────────────────────────────────────
@@ -193,11 +266,32 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False) -> rx.Compon
                     )
                     for r in rookie_names
                 ],
-                rx.recharts.x_axis(data_key="race", font_size=10, angle=-45, height=60, stroke="white", text_anchor="end", interval=0),
-                rx.recharts.y_axis(font_size=10, stroke="white"),
-                rx.recharts.legend(layout="vertical", align="right", vertical_align="middle", style={"color": "white", "fontFamily": "Outfit", "fontSize": "13px", "fontWeight": "500"}),
+                rx.recharts.x_axis(data_key="race", font_size=10, angle=-90, height=80, stroke="white", text_anchor="end", interval=0),
+                rx.recharts.y_axis(
+                    stroke="white",
+                    width=35,
+                    tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
+                ),
+                rx.recharts.legend(
+                    layout="horizontal",
+                    align="left",
+                    vertical_align="bottom",
+                    icon_size=0,
+                    margin={"top": 15},
+                    style={"color": "white", "fontFamily": "Outfit", "fontSize": "13px", "fontWeight": "500", "textShadow": "0px 1px 2px rgba(0,0,0,0.8)"},
+                    wrapper_style={
+                        "backgroundColor": "#F0F0F2",
+                        "padding": "6px 12px",
+                        "borderRadius": "6px",
+                        "border": "1px solid #CCCCCC",
+                        "width": "fit-content",
+                        "boxShadow": "0 2px 8px rgba(0,0,0,0.15)",
+                    },
+                ),
                 rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
                 data=rookie_line_data,
+                margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
+                margin_left="-10px",
                 width="100%",
                 height=300,
             ),
@@ -213,17 +307,49 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False) -> rx.Compon
             size="6",
             color="white",
             font_weight="900",
+            padding_y="2.5%",
+            padding_x="2%",
+        ),
+        # Rookies toggle
+        rx.cond(
+            (rookies_only_var is not None) & (len(season_data.get("rookies", [])) > 0),
+            rx.hstack(
+                rx.text("Rookies Only", color="white", font_size="sm", font_weight="600"),
+                rx.switch(
+                    checked=rookies_only_var,
+                    on_change=toggle_rookies_only,
+                    color_scheme="cyan",
+                ),
+                spacing="2",
+                align="center",
+                margin_bottom="4",
+                padding_x="2%",
+            ),
+            rx.fragment()
         ),
 
         # Leader badges
         rx.flex(
             *[
-                rx.badge(b, color_scheme="cyan", variant="solid", font_size="11px")
+                rx.badge(
+                    b,
+                    color_scheme="cyan",
+                    variant="solid",
+                    font_size="11px",
+                    font_family="Outfit",
+                    font_weight="600",
+                    border_radius="md",
+                    padding_x="3",
+                    padding_y="1.5",
+                )
                 for b in leader_badges
             ],
             flex_wrap="wrap",
-            gap="2",
+            gap=["2", "3", "4", "5"],
+            justify="center",
+            align="center",
             width="100%",
+            margin_bottom="4",
         ),
 
         # Rookie chart (conditional)
@@ -252,6 +378,16 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False) -> rx.Compon
             rx.vstack(
                 rx.text("Average Qualifying Position", color="white", font_weight="700", font_size="sm"),
                 qual_chart,
+                rx.text(
+                    "Qualifying Position",
+                    color="white",
+                    font_size="11px",
+                    font_family="Outfit",
+                    font_weight="500",
+                    margin_top="-2",
+                    margin_left="40px",
+                    align_self="center",
+                ),
                 width="100%",
                 spacing="2",
                 bg="transparent",
@@ -261,6 +397,16 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False) -> rx.Compon
             rx.vstack(
                 rx.text("Average Place", color="white", font_weight="700", font_size="sm"),
                 place_chart,
+                rx.text(
+                    "Place",
+                    color="white",
+                    font_size="11px",
+                    font_family="Outfit",
+                    font_weight="500",
+                    margin_top="-2",
+                    margin_left="40px",
+                    align_self="center",
+                ),
                 width="100%",
                 spacing="2",
                 bg="transparent",

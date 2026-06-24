@@ -1,5 +1,4 @@
 article = {
-    "id": 0,
     "title": "The Dawn of Hydrogen-Powered F1 Engines",
     "blurb": "Formula 1 outlines a bold roadmap for zero-emission racing, paving the way for liquid hydrogen power units by 2030.",
     "content": [

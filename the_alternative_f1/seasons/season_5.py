@@ -1,4 +1,4 @@
-"""Season 5 data — 16 drivers, 8 teams, 14 races."""
+from the_alternative_f1.articles import Haas_Article
 
 season = {
     "season_number": 5,
@@ -7,6 +7,8 @@ season = {
 
     # Rookies: drivers not present in Season 4
     "rookies": {"Grayson", "TBD1", "Randy", "TBD2"},
+
+    "articles": [Haas_Article],
 
     "team_colors": {
         "Alpine": "hotpink",
@@ -43,22 +45,22 @@ season = {
     },
 
     "super_license_points": {
-        "Joshua": [0] * 14,
-        "Eddie": [0] * 14,
-        "Nick": [0] * 14,
-        "Grayson": [0] * 14,
-        "Patrick": [0] * 14,
-        "Josh": [0] * 14,
-        "Matthew": [0] * 14,
-        "Brently": [0] * 14,
-        "Del": [0] * 14,
-        "TBD1": [0] * 14,
-        "Boz": [0] * 14,
-        "TBD2": [0] * 14,
-        "Jaden": [0] * 14,
-        "Leo": [0] * 14,
-        "Jairo": [0] * 14,
-        "Randy": [0] * 14,
+        "Joshua":   [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Eddie":    [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Nick":     [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Grayson":  [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Patrick":  [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Josh":     [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Matthew":  [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Brently":  [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Del":      [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "TBD1":     [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Boz":      [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "TBD2":     [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Jaden":    [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Leo":      [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Jairo":    [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Randy":    [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
     },
 
     "preseason_races": [],

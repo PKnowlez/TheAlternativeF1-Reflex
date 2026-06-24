@@ -99,20 +99,61 @@ def PointTotals(season):
 
     return None, None, None, constructor_totals, None, driver_totals
 
+def is_season_completed(season):
+    sheet = "Season" + str(season)
+    try:
+        df = pd.read_excel(file, sheet_name=sheet)
+        sheet_sched = "S" + str(season) + "Schedule"
+        schedule = pd.read_excel(file, sheet_name=sheet_sched)
+    except Exception:
+        return False
+
+    races = []
+    race_points = []
+    for i in range(len(schedule)):
+        race_name = schedule['Race'].iloc[i]
+        if race_name.startswith(('Pre', 'Post')):
+            continue
+        races.append(race_name)
+        race_points.append(race_name + points_suffix)
+
+    if not race_points:
+        return False
+
+    last_col = race_points[-1]
+    if last_col not in df.columns:
+        return False
+
+    col_values = df[last_col].dropna()
+    if col_values.empty:
+        return False
+
+    try:
+        numeric_values = pd.to_numeric(col_values, errors='coerce').dropna()
+        if numeric_values.empty or (numeric_values == 0).all():
+            return False
+    except Exception:
+        return False
+
+    return True
+
 def CalculateAllTime(NumSeason, tORd):
     # Loop through the points scored for each tORd 
     dfs = []
     champs = []
     for i in range(NumSeason):
+        season_num = i + 1
         if tORd == 'Team':
-            _, _, _, df_i, _, _ = PointTotals(i+1)
-            champ = df_i['Team'].iloc[0]
-            champs.append(champ)
+            _, _, _, df_i, _, _ = PointTotals(season_num)
+            if is_season_completed(season_num):
+                champ = df_i['Team'].iloc[0]
+                champs.append(champ)
             dfs.append(df_i)
         elif tORd == 'Driver':
-            _, _, _, _, _, df_i = PointTotals(i+1)
-            champ = df_i['Driver'].iloc[0]
-            champs.append(champ)
+            _, _, _, _, _, df_i = PointTotals(season_num)
+            if is_season_completed(season_num):
+                champ = df_i['Driver'].iloc[0]
+                champs.append(champ)
             dfs.append(df_i)
 
     # Create the initial combined dataframe with place, tORd, and points

@@ -27,7 +27,7 @@ NUM_SEASONS: int = LATEST_SEASON
 
 class State(rx.State):
     """The app state."""
-    selected_article_id: int = -1
+    selected_article_title: str = ""
     active_nav: str = "home"
     selected_reg_tab: str = "regulations"
     selected_stats_tab: str = "constructors"
@@ -38,12 +38,12 @@ class State(rx.State):
     season_picker_open: bool = False
     rookies_only: bool = False
 
-    def select_article(self, article_id: int):
-        self.selected_article_id = article_id
+    def select_article(self, title: str):
+        self.selected_article_title = title
 
     def set_nav(self, nav_name: str):
         self.active_nav = nav_name
-        self.selected_article_id = -1
+        self.selected_article_title = ""
         if nav_name == "regulations":
             self.selected_reg_tab = "regulations"
         if nav_name == "stats":
@@ -73,7 +73,7 @@ class State(rx.State):
 
     def go_home(self):
         self.active_nav = "home"
-        self.selected_article_id = -1
+        self.selected_article_title = ""
 
 
 def header() -> rx.Component:
@@ -155,8 +155,9 @@ def article_card(article: dict) -> rx.Component:
         overflow="hidden",
         width="100%",
         max_width="360px",
+        margin_bottom="5%",
         cursor="pointer",
-        on_click=lambda: State.select_article(article["id"]),
+        on_click=lambda: State.select_article(article["title"]),
         _hover={
             "transform": "translateY(-6px)",
             "box_shadow": "0 10px 25px rgba(0, 180, 218, 0.3)",
@@ -170,11 +171,12 @@ def articles_list() -> rx.Component:
     """List of all article cards."""
     return rx.vstack(
         rx.vstack(
-            rx.heading("The Alternative F1 League News", size="7", color="white", font_weight="900"),
+            rx.heading("The Alternative F1 League News", size="7", color="white", font_weight="900", padding_y="2.5%", padding_x="2%"),
             rx.text(
                 "Stay up-to-date on the happenings of The Alternative F1 league.",
                 color="#AAAAAA",
                 font_size="sm",
+                padding_x="2%",
             ),
             align_items="start",
             spacing="1",
@@ -200,26 +202,17 @@ def article_detail() -> rx.Component:
     """The detailed article reading view."""
     def build_reader(article: dict) -> rx.Component:
         return rx.vstack(
-            rx.button(
-                rx.hstack(
-                    rx.icon("arrow-left", size=16),
-                    rx.text("Back to Articles"),
-                ),
-                variant="ghost",
-                color="white",
-                on_click=State.go_home,
-                margin_bottom="4",
-                _hover={"bg": "#00b4da", "color": "white"},
+            rx.image(
+                src=article["image"],
+                width="100%",
+                height=["200px", "350px", "400px"],
+                object_fit="cover",
+                border_radius="xl",
+                box_shadow="0 8px 30px rgba(0,0,0,0.5)",
+                margin_x="0px",
+                class_name="portrait-border-to-border",
             ),
             rx.vstack(
-                rx.image(
-                    src=article["image"],
-                    width="100%",
-                    height=["200px", "350px", "400px"],
-                    object_fit="cover",
-                    border_radius="xl",
-                    box_shadow="0 8px 30px rgba(0,0,0,0.5)",
-                ),
                 rx.hstack(
                     rx.badge(article["date"], color_scheme="cyan", variant="solid"),
                     rx.text(f"Written by {article['author']}", color="#888888", font_size="sm"),
@@ -236,7 +229,7 @@ def article_detail() -> rx.Component:
                 ),
                 rx.vstack(
                     *[
-                        rx.text(
+                        para if isinstance(para, rx.Component) else rx.text(
                             para,
                             color="#E0E0E0",
                             font_size="md",
@@ -250,30 +243,28 @@ def article_detail() -> rx.Component:
                 ),
                 align_items="start",
                 width="100%",
+                padding_x=["2%", "2%", "0px"],
             ),
             width="100%",
             max_width="800px",
             align_items="start",
+            margin_x="auto",
             margin_bottom="160px",
+            spacing="4",
+        )
+
+    # Build the conditional chain dynamically based on the articles in the imported list
+    cond_chain = rx.text("Article not found", color="white")
+    for article in reversed(articles):
+        cond_chain = rx.cond(
+            State.selected_article_title == article["title"],
+            build_reader(article),
+            cond_chain,
         )
 
     return rx.box(
-        rx.cond(
-            State.selected_article_id == 0,
-            build_reader(articles[0]),
-            rx.cond(
-                State.selected_article_id == 1,
-                build_reader(articles[1]),
-                rx.cond(
-                    State.selected_article_id == 2,
-                    build_reader(articles[2]),
-                    rx.text("Article not found", color="white"),
-                )
-            )
-        ),
+        cond_chain,
         width="100%",
-        display="flex",
-        justify_content="center",
     )
 
 
@@ -289,7 +280,7 @@ def stats_view() -> rx.Component:
                 color="white",
                 font_size="10px",
                 font_weight="bold",
-                width="34px",
+                width="26px",
                 height="130px",
                 style={"writingMode": "vertical-rl"},
                 border_radius="0px 8px 8px 0px",
@@ -307,7 +298,7 @@ def stats_view() -> rx.Component:
                 color="white",
                 font_size="10px",
                 font_weight="bold",
-                width="34px",
+                width="26px",
                 height="130px",
                 style={"writingMode": "vertical-rl"},
                 border_radius="0px 8px 8px 0px",
@@ -325,7 +316,7 @@ def stats_view() -> rx.Component:
                 color="white",
                 font_size="10px",
                 font_weight="bold",
-                width="34px",
+                width="26px",
                 height="130px",
                 style={"writingMode": "vertical-rl"},
                 border_radius="0px 8px 8px 0px",
@@ -356,7 +347,8 @@ def stats_view() -> rx.Component:
                 ),
             ),
             width="100%",
-            padding_left=["60px", "80px", "100px"],
+            padding_left=["50px", "70px", "90px"],
+            padding_right=["50px", "70px", "90px"],
         ),
         width="100%",
         max_width="1200px",
@@ -368,8 +360,8 @@ def stats_view() -> rx.Component:
 def login_view() -> rx.Component:
     """A clean, premium Login form."""
     return rx.vstack(
-        rx.heading("Driver Login", size="6", color="white", font_weight="900", margin_bottom="2"),
-        rx.text("Access the FIA control panel and your superlicense.", color="#AAAAAA", font_size="sm", margin_bottom="6"),
+        rx.heading("Driver Login", size="6", color="white", font_weight="900", margin_bottom="2", padding_y="2.5%", padding_x="2%"),
+        rx.text("Access the FIA control panel and your superlicense.", color="#AAAAAA", font_size="sm", margin_bottom="6", padding_x="2%"),
         rx.vstack(
             rx.text("Username or Email", color="white", font_size="xs", font_weight="bold", align_self="start"),
             rx.input(placeholder="driver@alternativef1.com", type="email", width="100%", bg="#18181C", border_color="#2C2C32", color="white"),
@@ -410,7 +402,7 @@ def regulations_view() -> rx.Component:
                 color="white",
                 font_size="10px",
                 font_weight="bold",
-                width="34px",
+                width="26px",
                 height="130px",
                 style={"writingMode": "vertical-rl"},
                 border_radius="0px 8px 8px 0px",
@@ -428,7 +420,7 @@ def regulations_view() -> rx.Component:
                 color="white",
                 font_size="10px",
                 font_weight="bold",
-                width="34px",
+                width="26px",
                 height="130px",
                 style={"writingMode": "vertical-rl"},
                 border_radius="0px 8px 8px 0px",
@@ -455,7 +447,8 @@ def regulations_view() -> rx.Component:
                 settings_content(),
             ),
             width="100%",
-            padding_left=["60px", "80px", "100px"],
+            padding_left=["50px", "70px", "90px"],
+            padding_right=["50px", "70px", "90px"],
         ),
         width="100%",
         max_width="1200px",
@@ -470,7 +463,7 @@ def _build_season_content(season_idx: int, tab: str, rookies_only: bool) -> rx.C
     data = Calculations(season_data)
 
     if tab == "news":
-        return Tab0(articles, season_data["season_number"])
+        return Tab0(season_data, select_article=State.select_article)
     elif tab == "standings":
         return Tab1(data, season_data)
     elif tab == "race_results":
@@ -480,7 +473,13 @@ def _build_season_content(season_idx: int, tab: str, rookies_only: bool) -> rx.C
     elif tab == "driver_stats":
         return Tab4(data, season_data)
     elif tab == "driver_comparisons":
-        return Tab5(data, season_data, rookies_only=rookies_only)
+        return Tab5(
+            data,
+            season_data,
+            rookies_only=rookies_only,
+            rookies_only_var=State.rookies_only,
+            toggle_rookies_only=State.toggle_rookies_only,
+        )
     elif tab == "schedule":
         return Tab6(data, season_data)
     else:
@@ -495,7 +494,7 @@ def _season_tab_button(label: str, tab_key: str) -> rx.Component:
         color="white",
         font_size="9px",
         font_weight="bold",
-        width="34px",
+        width="26px",
         style={"writingMode": "vertical-rl"},
         border_radius="0px 8px 8px 0px",
         border="1px solid #2D2D32",
@@ -521,7 +520,7 @@ def _season_picker_button(s: dict) -> rx.Component:
         color="white",
         font_size="9px",
         font_weight="bold",
-        width="34px",
+        width="26px",
         height="22px",
         min_height="22px",
         border_radius="0px 6px 6px 0px",
@@ -568,12 +567,22 @@ def seasons_view() -> rx.Component:
         # Start from the last tab and work backwards
         result = _build_season_content(season_idx, tab_keys[-1], False)
         for tk in reversed(tab_keys[:-1]):
-            rookies = tk == "driver_comparisons"
-            result = rx.cond(
-                State.selected_season_tab == tk,
-                _build_season_content(season_idx, tk, True if rookies else False),
-                result,
-            )
+            if tk == "driver_comparisons":
+                result = rx.cond(
+                    State.selected_season_tab == tk,
+                    rx.cond(
+                        State.rookies_only,
+                        _build_season_content(season_idx, tk, True),
+                        _build_season_content(season_idx, tk, False),
+                    ),
+                    result,
+                )
+            else:
+                result = rx.cond(
+                    State.selected_season_tab == tk,
+                    _build_season_content(season_idx, tk, False),
+                    result,
+                )
         return result
 
     # Build season conditional chain
@@ -584,23 +593,6 @@ def seasons_view() -> rx.Component:
             build_tab_cond(idx),
             content,
         )
-
-    # Rookies toggle (shown only on comparisons tab)
-    rookies_toggle = rx.cond(
-        State.selected_season_tab == "driver_comparisons",
-        rx.hstack(
-            rx.text("Rookies Only", color="white", font_size="sm", font_weight="600"),
-            rx.switch(
-                checked=State.rookies_only,
-                on_change=State.toggle_rookies_only,
-                color_scheme="cyan",
-            ),
-            spacing="2",
-            align="center",
-            margin_bottom="4",
-        ),
-        rx.fragment(),
-    )
 
     return rx.hstack(
         # Sidebar
@@ -616,7 +608,7 @@ def seasons_view() -> rx.Component:
                 color="white",
                 font_size="10px",
                 font_weight="bold",
-                width="34px",
+                width="26px",
                 height="34px",
                 min_height="34px",
                 border_radius="0px 8px 8px 0px",
@@ -643,13 +635,13 @@ def seasons_view() -> rx.Component:
         # Content area
         rx.box(
             rx.vstack(
-                rookies_toggle,
                 content,
                 width="100%",
                 spacing="0",
             ),
             width="100%",
-            padding_left=["60px", "80px", "100px"],
+            padding_left=["50px", "70px", "90px"],
+            padding_right=["50px", "70px", "90px"],
         ),
         width="100%",
         max_width="1200px",
@@ -806,7 +798,7 @@ def index() -> rx.Component:
                 rx.box(
                     rx.vstack(
                         rx.cond(
-                            State.selected_article_id != -1,
+                            State.selected_article_title != "",
                             article_detail(),
                             rx.cond(
                                 State.active_nav == "home",
@@ -861,6 +853,7 @@ def index() -> rx.Component:
 app = rx.App(
     stylesheets=[
         "https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap",
+        "style.css",
     ],
     head_components=[
         rx.el.link(rel="icon", href="/Icons/IconLogoApp.png"),

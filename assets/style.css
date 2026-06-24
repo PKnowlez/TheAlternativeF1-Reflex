@@ -1,0 +1,43 @@
+/* Stylesheet for article header image and other layout adjustments */
+
+@media (orientation: portrait) {
+    .portrait-border-to-border {
+        height: auto !important;
+        border-radius: 0px !important;
+        object-fit: contain !important;
+        box-shadow: none !important;
+        align-self: center !important;
+    }
+}
+
+@media (orientation: portrait) and (max-width: 767px) {
+    .portrait-border-to-border {
+        width: calc(100% + 32px) !important;
+    }
+}
+
+@media (orientation: portrait) and (min-width: 768px) and (max-width: 1023px) {
+    .portrait-border-to-border {
+        width: calc(100% + 48px) !important;
+    }
+}
+
+@media (orientation: portrait) and (min-width: 1024px) {
+    .portrait-border-to-border {
+        width: calc(100% + 64px) !important;
+    }
+}
+
+/* Recharts Legend Wrapper custom background box and styling */
+.recharts-legend-wrapper {
+    background-color: #C0C0C4 !important;
+    padding: 6px 12px !important;
+    border-radius: 6px !important;
+    border: 1px solid #CCCCCC !important;
+    width: fit-content !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+}
+
+.recharts-legend-item {
+    text-shadow: 0px 1px 1px rgba(0,0,0,0.95) !important;
+}

@@ -8,6 +8,8 @@ season = {
     # Rookies: drivers not present in Season 1
     "rookies": {"Del", "Joshua", "Eddie", "Yeti"},
 
+    "articles": [],
+
     "team_colors": {
         "McLaren": "#FF6A00",
         "Mercedes": "black",

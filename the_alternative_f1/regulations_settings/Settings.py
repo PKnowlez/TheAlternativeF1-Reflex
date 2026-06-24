@@ -93,7 +93,7 @@ def Settings() -> rx.Component:
         )
 
     return rx.vstack(
-        rx.heading("League Settings & Configuration", size="6", color="white", font_weight="900", margin_bottom="4", padding="2.5%"),
+        rx.heading("League Settings & Configuration", size="6", color="white", font_weight="900", margin_bottom="4", padding_y="2.5%", padding_x="2%"),
         
         # Row 1: Assist Restrictions & Simulation Settings
         rx.grid(

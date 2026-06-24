@@ -141,9 +141,12 @@ def Tab4(data: dict, season_data: dict) -> rx.Component:
             )
         ),
         value="super_license_item",
+        bg="#525259",
+        border_radius="md",
+        padding_x="3",
+        margin_y="1",
     )
     driver_items.append(sl_expander)
-
 
     for i in range(len(new_df)):
         driver_name = new_df["Driver"].iloc[i]
@@ -165,10 +168,16 @@ def Tab4(data: dict, season_data: dict) -> rx.Component:
 
         pts_chart = rx.recharts.bar_chart(
             rx.recharts.bar(data_key="points", fill="#00b4da", name="Points"),
-            rx.recharts.x_axis(data_key="race", font_size=8, angle=-45, height=55, stroke="white", text_anchor="end", interval=0),
-            rx.recharts.y_axis(font_size=10, stroke="white"),
+            rx.recharts.x_axis(data_key="race", font_size=8, angle=-90, height=80, stroke="white", text_anchor="end", interval=0),
+            rx.recharts.y_axis(
+                stroke="white",
+                width=35,
+                tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
+            ),
             rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
             data=pts_bar_data,
+            margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
+            margin_left="-10px",
             width="100%",
             height=220,
         )
@@ -214,10 +223,16 @@ def Tab4(data: dict, season_data: dict) -> rx.Component:
 
         placement_chart = rx.recharts.bar_chart(
             rx.recharts.bar(data_key="count", fill="#00b4da", name="Count"),
-            rx.recharts.x_axis(data_key="place", font_size=9, stroke="white", angle=-45, text_anchor="end", height=60, interval=0),
-            rx.recharts.y_axis(font_size=10, stroke="white"),
+            rx.recharts.x_axis(data_key="place", font_size=9, stroke="white", angle=-90, text_anchor="end", height=80, interval=0),
+            rx.recharts.y_axis(
+                stroke="white",
+                width=35,
+                tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
+            ),
             rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
             data=placement_data,
+            margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
+            margin_left="-10px",
             width="100%",
             height=220,
         )
@@ -261,11 +276,17 @@ def Tab4(data: dict, season_data: dict) -> rx.Component:
 
         pos_chart = rx.recharts.bar_chart(
             rx.recharts.bar(data_key="change", name="Change"),
-            rx.recharts.x_axis(data_key="race", font_size=8, angle=-45, height=55, stroke="white", text_anchor="end", interval=0),
-            rx.recharts.y_axis(font_size=10, stroke="white"),
+            rx.recharts.x_axis(data_key="race", font_size=8, angle=-90, height=80, stroke="white", text_anchor="end", interval=0),
+            rx.recharts.y_axis(
+                stroke="white",
+                width=35,
+                tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
+            ),
             rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
             rx.recharts.reference_line(y=0, stroke="#555555"),
             data=pos_change_data,
+            margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
+            margin_left="-10px",
             width="100%",
             height=220,
         )
@@ -326,11 +347,17 @@ def Tab4(data: dict, season_data: dict) -> rx.Component:
                 b,
                 color_scheme="cyan",
                 variant="outline",
-                font_size="10px",
+                font_size="11px",
+                font_family="Outfit",
+                font_weight="600",
+                border_radius="md",
+                padding_x="3",
+                padding_y="1.5",
             )
             for b in badges
         ]
 
+        bg_color = "#525259" if (i + 1) % 2 == 0 else "#3C3C41"
         driver_items.append(
             rx.accordion.item(
                 rx.accordion.trigger(
@@ -342,7 +369,9 @@ def Tab4(data: dict, season_data: dict) -> rx.Component:
                         rx.flex(
                             *badge_components,
                             flex_wrap="wrap",
-                            gap="2",
+                            gap=["2", "3", "4", "5"],
+                            justify="center",
+                            align="center",
                             width="100%",
                         ),
                         # Charts
@@ -374,6 +403,10 @@ def Tab4(data: dict, season_data: dict) -> rx.Component:
                     ),
                 ),
                 value=f"driver_{i}",
+                bg=bg_color,
+                border_radius="md",
+                padding_x="3",
+                margin_y="1",
             )
         )
 
@@ -383,6 +416,8 @@ def Tab4(data: dict, season_data: dict) -> rx.Component:
             size="6",
             color="white",
             font_weight="900",
+            padding_y="2.5%",
+            padding_x="2%",
         ),
         rx.accordion.root(
             *driver_items,

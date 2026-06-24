@@ -83,7 +83,14 @@ def Tab3(data: dict, season_data: dict) -> rx.Component:
 
     stacked_chart = rx.recharts.bar_chart(
         *bar_components,
-        rx.recharts.y_axis(data_key="team", type_="category", font_size=10, stroke="white", interval=0),
+        rx.recharts.y_axis(
+            data_key="team",
+            type_="category",
+            stroke="white",
+            interval=0,
+            width=95,
+            tick={"textAnchor": "start", "dx": -85, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
+        ),
         rx.recharts.x_axis(type_="number", font_size=10, stroke="white"),
         rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
         data=stacked_data,
@@ -91,7 +98,8 @@ def Tab3(data: dict, season_data: dict) -> rx.Component:
         height=max(300, len(sorted_teams) * 45),
         layout="vertical",
         bar_gap=0,
-        margin={"left": 30, "right": 10, "top": 10, "bottom": 10},
+        margin={"left": 95, "right": 10, "top": 10, "bottom": 10},
+        margin_left="-10px",
     )
 
     # ── Individual constructor accordions ────────────────────────────────
@@ -133,14 +141,21 @@ def Tab3(data: dict, season_data: dict) -> rx.Component:
 
         team_chart = rx.recharts.bar_chart(
             rx.recharts.bar(data_key="points", name="Points"),
-            rx.recharts.x_axis(data_key="race", font_size=9, angle=-45, height=60, stroke="white", text_anchor="end", interval=0),
-            rx.recharts.y_axis(font_size=10, stroke="white"),
+            rx.recharts.x_axis(data_key="race", font_size=9, angle=-90, height=80, stroke="white", text_anchor="end", interval=0),
+            rx.recharts.y_axis(
+                stroke="white",
+                width=35,
+                tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
+            ),
             rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
             data=bar_data,
+            margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
+            margin_left="-10px",
             width="100%",
             height=250,
         )
 
+        bg_color = "#525259" if idx % 2 == 0 else "#3C3C41"
         constructor_items.append(
             rx.accordion.item(
                 rx.accordion.trigger(
@@ -159,21 +174,33 @@ def Tab3(data: dict, season_data: dict) -> rx.Component:
                 ),
                 rx.accordion.content(
                     rx.vstack(
-                        rx.grid(
+                        rx.flex(
                             rx.badge(
                                 f"Total Points: {total_pts:.1f}",
                                 color_scheme="cyan",
                                 variant="solid",
                                 font_size="11px",
+                                font_family="Outfit",
+                                font_weight="600",
+                                border_radius="md",
+                                padding_x="3",
+                                padding_y="1.5",
                             ),
                             rx.badge(
                                 best_result,
                                 color_scheme="cyan",
                                 variant="outline",
                                 font_size="11px",
+                                font_family="Outfit",
+                                font_weight="600",
+                                border_radius="md",
+                                padding_x="3",
+                                padding_y="1.5",
                             ),
-                            columns=rx.breakpoints(initial="1", sm="2"),
-                            spacing="2",
+                            flex_wrap="wrap",
+                            gap=["2", "3", "4", "5"],
+                            justify="center",
+                            align="center",
                             width="100%",
                         ),
                         team_chart,
@@ -182,6 +209,10 @@ def Tab3(data: dict, season_data: dict) -> rx.Component:
                     ),
                 ),
                 value=f"constructor_{idx}",
+                bg=bg_color,
+                border_radius="md",
+                padding_x="3",
+                margin_y="1",
             )
         )
 
@@ -191,6 +222,8 @@ def Tab3(data: dict, season_data: dict) -> rx.Component:
             size="6",
             color="white",
             font_weight="900",
+            padding_y="2.5%",
+            padding_x="2%",
         ),
         rx.grid(
             # Left: Stacked chart

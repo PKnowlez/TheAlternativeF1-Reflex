@@ -61,6 +61,8 @@ def Tab6(data: dict, season_data: dict) -> rx.Component:
             size="6",
             color="white",
             font_weight="900",
+            padding_y="2.5%",
+            padding_x="2%",
         ),
         rx.box(
             rx.table.root(

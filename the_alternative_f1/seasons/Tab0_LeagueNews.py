@@ -6,18 +6,19 @@ Displays articles from the homepage that match the selected season.
 import reflex as rx
 
 
-def Tab0(articles: list, season_number: int) -> rx.Component:
+def Tab0(season_data: dict, select_article = None) -> rx.Component:
     """Render season-specific news articles.
 
     Parameters
     ----------
-    articles : list[dict]
-        The full articles list (each dict has an optional ``season`` key).
-    season_number : int
-        The currently selected season number.
+    season_data : dict
+        The season config dict from season_N.py.
     """
-    # Filter articles that belong to this season
-    season_articles = [a for a in articles if a.get("season") == season_number]
+    season_number = season_data["season_number"]
+    configured_articles = season_data.get("articles", [])
+
+    # Filter and keep only articles whose 'season' matches the season_number
+    season_articles = [a for a in configured_articles if a.get("season") == season_number]
 
     if not season_articles:
         return rx.vstack(
@@ -26,6 +27,8 @@ def Tab0(articles: list, season_number: int) -> rx.Component:
                 size="6",
                 color="white",
                 font_weight="900",
+                padding_y="2.5%",
+                padding_x="2%",
             ),
             rx.box(
                 rx.vstack(
@@ -56,9 +59,8 @@ def Tab0(articles: list, season_number: int) -> rx.Component:
                 rx.image(
                     src=article.get("image", ""),
                     width="100%",
-                    height="160px",
+                    height="180px",
                     object_fit="cover",
-                    border_radius="lg lg 0 0",
                 ),
                 rx.vstack(
                     rx.text(
@@ -80,10 +82,21 @@ def Tab0(articles: list, season_number: int) -> rx.Component:
                         font_size="sm",
                         color="#CCCCCC",
                     ),
-                    rx.text(
-                        f"By {article.get('author', '')}",
-                        font_size="xs",
-                        color="#888888",
+                    rx.hstack(
+                        rx.text(
+                            f"By {article.get('author', '')}",
+                            font_size="xs",
+                            color="#888888",
+                        ),
+                        rx.spacer(),
+                        rx.text(
+                            "Read Article →",
+                            font_size="xs",
+                            color="#00b4da",
+                            font_weight="bold",
+                        ),
+                        width="100%",
+                        align="center",
                     ),
                     spacing="2",
                     align_items="start",
@@ -98,14 +111,31 @@ def Tab0(articles: list, season_number: int) -> rx.Component:
             overflow="hidden",
             width="100%",
             max_width="360px",
+            margin_bottom="5%",
+            cursor="pointer",
+            on_click=lambda: select_article(article["title"]) if select_article is not None else None,
+            _hover={
+                "transform": "translateY(-6px)",
+                "box_shadow": "0 10px 25px rgba(0, 180, 218, 0.3)",
+                "border_color": "#00b4da",
+            },
+            transition="all 0.25s ease-in-out",
         )
 
     return rx.vstack(
-        rx.heading(
-            f"Season {season_number} News",
-            size="6",
-            color="white",
-            font_weight="900",
+        rx.vstack(
+            rx.heading(
+                f"Season {season_number} News",
+                size="6",
+                color="white",
+                font_weight="900",
+                padding_y="2.5%",
+                padding_x="2%",
+            ),
+            align_items="start",
+            width="100%",
+            max_width="1200px",
+            padding_bottom="4",
         ),
         rx.flex(
             *[news_card(a) for a in season_articles],
@@ -113,8 +143,9 @@ def Tab0(articles: list, season_number: int) -> rx.Component:
             justify="center",
             gap="5%",
             width="100%",
+            max_width="1200px",
         ),
         width="100%",
-        align_items="start",
+        align="center",
         spacing="4",
     )

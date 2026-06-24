@@ -1,5 +1,4 @@
 article = {
-    "id": 1,
     "title": "Podium Chaos: Underdog Secures Historic Win",
     "blurb": "A chaotic rain-soaked race in Monaco leads to a shocking victory for the midfield team, disrupting the championship standings.",
     "content": [

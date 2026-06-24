@@ -41,11 +41,32 @@ def Tab1(data: dict, season_data: dict) -> rx.Component:
             )
             for team in teams_in_data
         ],
-        rx.recharts.x_axis(data_key="race", font_size=10, angle=-45, height=60, stroke="white", text_anchor="end", interval=0),
-        rx.recharts.y_axis(font_size=10, stroke="white"),
-        rx.recharts.legend(layout="vertical", align="right", vertical_align="middle", style={"color": "white", "fontFamily": "Outfit", "fontSize": "13px", "fontWeight": "500"}),
+        rx.recharts.x_axis(data_key="race", font_size=10, angle=-90, height=80, stroke="white", text_anchor="end", interval=0),
+        rx.recharts.y_axis(
+            stroke="white",
+            width=35,
+            tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
+        ),
+        rx.recharts.legend(
+            layout="horizontal",
+            align="left",
+            vertical_align="bottom",
+            icon_size=0,
+            margin={"top": 15},
+            style={"color": "white", "fontFamily": "Outfit", "fontSize": "13px", "fontWeight": "500", "textShadow": "0px 1px 2px rgba(0,0,0,0.8)"},
+            wrapper_style={
+                "backgroundColor": "#F0F0F2",
+                "padding": "6px 12px",
+                "borderRadius": "6px",
+                "border": "1px solid #CCCCCC",
+                "width": "fit-content",
+                "boxShadow": "0 2px 8px rgba(0,0,0,0.15)",
+            },
+        ),
         rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
         data=team_line_data,
+        margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
+        margin_left="-10px",
         width="100%",
         height=350,
     )
@@ -64,11 +85,32 @@ def Tab1(data: dict, season_data: dict) -> rx.Component:
             )
             for driver in drivers_in_data
         ],
-        rx.recharts.x_axis(data_key="race", font_size=10, angle=-45, height=60, stroke="white", text_anchor="end", interval=0),
-        rx.recharts.y_axis(font_size=10, stroke="white"),
-        rx.recharts.legend(layout="vertical", align="right", vertical_align="middle", style={"color": "white", "fontFamily": "Outfit", "fontSize": "13px", "fontWeight": "500"}),
+        rx.recharts.x_axis(data_key="race", font_size=10, angle=-90, height=80, stroke="white", text_anchor="end", interval=0),
+        rx.recharts.y_axis(
+            stroke="white",
+            width=35,
+            tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
+        ),
+        rx.recharts.legend(
+            layout="horizontal",
+            align="left",
+            vertical_align="bottom",
+            icon_size=0,
+            margin={"top": 15},
+            style={"color": "white", "fontFamily": "Outfit", "fontSize": "13px", "fontWeight": "500", "textShadow": "0px 1px 2px rgba(0,0,0,0.8)"},
+            wrapper_style={
+                "backgroundColor": "#F0F0F2",
+                "padding": "6px 12px",
+                "borderRadius": "6px",
+                "border": "1px solid #CCCCCC",
+                "width": "fit-content",
+                "boxShadow": "0 2px 8px rgba(0,0,0,0.15)",
+            },
+        ),
         rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
         data=driver_line_data,
+        margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
+        margin_left="-10px",
         width="100%",
         height=350,
     )
@@ -84,10 +126,16 @@ def Tab1(data: dict, season_data: dict) -> rx.Component:
             data_key="points",
             name="Points",
         ),
-        rx.recharts.x_axis(data_key="team", font_size=10, angle=-45, height=60, stroke="white", text_anchor="end", interval=0),
-        rx.recharts.y_axis(font_size=10, stroke="white"),
+        rx.recharts.x_axis(data_key="team", font_size=10, angle=-90, height=90, stroke="white", text_anchor="end", interval=0),
+        rx.recharts.y_axis(
+            stroke="white",
+            width=35,
+            tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
+        ),
         rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
         data=constructor_bar_data,
+        margin={"top": 10, "right": 20, "left": 35, "bottom": 40},
+        margin_left="-10px",
         width="100%",
         height=300,
     )
@@ -103,10 +151,16 @@ def Tab1(data: dict, season_data: dict) -> rx.Component:
             data_key="points",
             name="Points",
         ),
-        rx.recharts.x_axis(data_key="driver", font_size=10, angle=-45, height=60, stroke="white", text_anchor="end", interval=0),
-        rx.recharts.y_axis(font_size=10, stroke="white"),
+        rx.recharts.x_axis(data_key="driver", font_size=10, angle=-90, height=90, stroke="white", text_anchor="end", interval=0),
+        rx.recharts.y_axis(
+            stroke="white",
+            width=35,
+            tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
+        ),
         rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
         data=driver_bar_data,
+        margin={"top": 10, "right": 20, "left": 35, "bottom": 40},
+        margin_left="-10px",
         width="100%",
         height=300,
     )
@@ -145,6 +199,8 @@ def Tab1(data: dict, season_data: dict) -> rx.Component:
             size="6",
             color="white",
             font_weight="900",
+            padding_y="2.5%",
+            padding_x="2%",
         ),
 
         # Standings popup buttons

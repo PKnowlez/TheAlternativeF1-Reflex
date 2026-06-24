@@ -8,6 +8,8 @@ season = {
     # Rookies: drivers not present in Season 2
     "rookies": {"Patrick", "Brently"},
 
+    "articles": [],
+
     "team_colors": {
         "McLaren": "#FF6A00",
         "VCARB": "blue",

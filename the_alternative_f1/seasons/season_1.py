@@ -8,6 +8,8 @@ season = {
     # No rookies in the inaugural season
     "rookies": set(),
 
+    "articles": [],
+
     "team_colors": {
         "McLaren": "#FF6A00",
         "Aston Martin": "teal",
