@@ -37,8 +37,8 @@ article = {
             margin_bottom="4",
         ),
     ],
-    "image": "/article_f1_future.png",
-    "author": "System Administrator",
+    "image": "/logo_with_black.png",
+    "author": "The Intern",
     "date": "June 24, 2026",
-    "season": 5,
+    "season": 0,
 }
