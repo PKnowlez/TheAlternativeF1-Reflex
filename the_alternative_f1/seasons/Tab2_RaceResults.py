@@ -381,17 +381,20 @@ def Tab2(data: dict, season_data: dict) -> rx.Component:
             padding_y="2.5%",
             padding_x="2%",
         ),
-        rx.accordion.root(
-            *accordion_items,
-            collapsible=True,
+        rx.box(
+            rx.accordion.root(
+                *accordion_items,
+                collapsible=True,
+                width="100%",
+                variant="ghost",
+            ),
             width="100%",
-            variant="ghost",
+            bg="#18181C",
+            padding="4",
+            border_radius="xl",
+            border="1px solid #2C2C32",
         ),
         width="100%",
         align_items="start",
         spacing="4",
-        bg="#18181C",
-        padding="4",
-        border_radius="xl",
-        border="1px solid #2C2C32",
     )

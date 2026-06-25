@@ -166,9 +166,13 @@ def Tab4(data: dict, season_data: dict) -> rx.Component:
                 "points": float(pts) if not pd.isnull(pts) else 0,
             })
 
+        # Calculate dynamic x-axis height for pts_chart
+        max_race_len = max([len(str(item.get("race", ""))) for item in pts_bar_data] or [0])
+        race_axis_height = max(40, max_race_len * 5 + 15)
+
         pts_chart = rx.recharts.bar_chart(
             rx.recharts.bar(data_key="points", fill="#00b4da", name="Points"),
-            rx.recharts.x_axis(data_key="race", font_size=8, angle=-90, height=80, stroke="white", text_anchor="end", interval=0),
+            rx.recharts.x_axis(data_key="race", font_size=6, angle=-90, height=race_axis_height, stroke="white", text_anchor="end", interval=0, tick={"dx": -5}),
             rx.recharts.y_axis(
                 stroke="white",
                 width=35,
@@ -221,9 +225,13 @@ def Tab4(data: dict, season_data: dict) -> rx.Component:
 
         placement_data = [{"place": places_list[k], "count": placements[k]} for k in range(10)]
 
+        # Calculate dynamic x-axis height for placement_chart
+        max_place_len = max([len(str(item.get("place", ""))) for item in placement_data] or [0])
+        place_axis_height = max(40, max_place_len * 5 + 15)
+
         placement_chart = rx.recharts.bar_chart(
             rx.recharts.bar(data_key="count", fill="#00b4da", name="Count"),
-            rx.recharts.x_axis(data_key="place", font_size=9, stroke="white", angle=-90, text_anchor="end", height=80, interval=0),
+            rx.recharts.x_axis(data_key="place", font_size=7, stroke="white", angle=-90, text_anchor="end", height=place_axis_height, interval=0, tick={"dx": -5}),
             rx.recharts.y_axis(
                 stroke="white",
                 width=35,
@@ -274,9 +282,13 @@ def Tab4(data: dict, season_data: dict) -> rx.Component:
                 "fill": "green" if val >= 0 else "red",
             })
 
+        # Calculate dynamic x-axis height for pos_chart
+        max_pos_race_len = max([len(str(item.get("race", ""))) for item in pos_change_data] or [0])
+        pos_race_axis_height = max(40, max_pos_race_len * 5 + 15)
+
         pos_chart = rx.recharts.bar_chart(
             rx.recharts.bar(data_key="change", name="Change"),
-            rx.recharts.x_axis(data_key="race", font_size=8, angle=-90, height=80, stroke="white", text_anchor="end", interval=0),
+            rx.recharts.x_axis(data_key="race", font_size=6, angle=-90, height=pos_race_axis_height, stroke="white", text_anchor="end", interval=0, tick={"dx": -5}),
             rx.recharts.y_axis(
                 stroke="white",
                 width=35,

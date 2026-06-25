@@ -4,6 +4,72 @@ import reflex as rx
 
 from rxconfig import config
 
+import json
+import os
+import uuid
+from the_alternative_f1.oauth_discord import oauth_discord
+
+from pydantic import BaseModel
+
+class CommentReply(BaseModel):
+    id: str
+    username: str
+    avatar: str
+    text: str
+    likes: int = 0
+    dislikes: int = 0
+    liked_by: list[str] = []
+    disliked_by: list[str] = []
+
+class Comment(BaseModel):
+    id: str
+    article_title: str
+    username: str
+    avatar: str
+    text: str
+    likes: int = 0
+    dislikes: int = 0
+    liked_by: list[str] = []
+    disliked_by: list[str] = []
+    replies: list[CommentReply] = []
+
+COMMENTS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "comments.json")
+
+def load_comments_from_file() -> list[Comment]:
+    if not os.path.exists(COMMENTS_FILE):
+        return []
+    try:
+        with open(COMMENTS_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            return [
+                Comment(
+                    id=item["id"],
+                    article_title=item["article_title"],
+                    username=item["username"],
+                    avatar=item["avatar"],
+                    text=item["text"],
+                    likes=item.get("likes", 0),
+                    dislikes=item.get("dislikes", 0),
+                    liked_by=item.get("liked_by", []),
+                    disliked_by=item.get("disliked_by", []),
+                    replies=[CommentReply(**r) for r in item.get("replies", [])]
+                )
+                for item in data
+            ]
+    except Exception as e:
+        print(f"Error loading comments: {e}")
+        return []
+
+def save_comments_to_file(comments: list[Comment]):
+    try:
+        with open(COMMENTS_FILE, "w", encoding="utf-8") as f:
+            serialized = [c.dict() for c in comments]
+            json.dump(serialized, f, indent=4, ensure_ascii=False)
+    except Exception as e:
+        print(f"Error saving comments: {e}")
+
+GLOBAL_COMMENTS = load_comments_from_file()
+
 from the_alternative_f1.articles import articles
 from the_alternative_f1.regulations_settings.Regulations import Regulations as regulations_content
 from the_alternative_f1.regulations_settings.Settings import Settings as settings_content
@@ -38,8 +104,172 @@ class State(rx.State):
     season_picker_open: bool = False
     rookies_only: bool = False
 
+    # ── Discord Login State ──────────────────────────────────────────────
+    discord_username: str = ""
+    discord_avatar: str = ""
+
+    # ── Comments State ───────────────────────────────────────────────────
+    comments_list: list[Comment] = []
+    new_comment_text: str = ""
+    active_reply_comment_id: str = ""
+    new_reply_text: str = ""
+    expanded_comment_ids: list[str] = []
+
+    def set_discord_username(self, username: str):
+        self.discord_username = username
+
+    def set_discord_avatar(self, avatar: str):
+        self.discord_avatar = avatar
+
+    def set_new_comment_text(self, text: str):
+        self.new_comment_text = text
+
+    def set_new_reply_text(self, text: str):
+        self.new_reply_text = text
+
+    def login_with_discord(self):
+        return rx.call_script("window.open('/oauth/discord', 'Discord Login', 'width=500,height=600')")
+
+    def complete_discord_login(self):
+        self.active_nav = "home"
+        self.load_comments()
+
+    def logout(self):
+        self.discord_username = ""
+        self.discord_avatar = ""
+        self.active_nav = "home"
+
+    def load_comments(self):
+        self.comments_list = [c for c in GLOBAL_COMMENTS if c.article_title == self.selected_article_title]
+
+    def add_comment(self):
+        if not self.discord_username:
+            return
+        text = self.new_comment_text.strip()
+        if not text:
+            return
+        new_comment = Comment(
+            id=str(uuid.uuid4()),
+            article_title=self.selected_article_title,
+            username=self.discord_username,
+            avatar=self.discord_avatar,
+            text=text,
+            likes=0,
+            dislikes=0,
+            liked_by=[],
+            disliked_by=[],
+            replies=[],
+        )
+        GLOBAL_COMMENTS.append(new_comment)
+        save_comments_to_file(GLOBAL_COMMENTS)
+        self.new_comment_text = ""
+        self.load_comments()
+
+    def add_reply(self, comment_id: str):
+        if not self.discord_username:
+            return
+        text = self.new_reply_text.strip()
+        if not text:
+            return
+        for c in GLOBAL_COMMENTS:
+            if c.id == comment_id:
+                new_reply = CommentReply(
+                    id=str(uuid.uuid4()),
+                    username=self.discord_username,
+                    avatar=self.discord_avatar,
+                    text=text,
+                    likes=0,
+                    dislikes=0,
+                    liked_by=[],
+                    disliked_by=[],
+                )
+                c.replies.append(new_reply)
+                if comment_id not in self.expanded_comment_ids:
+                    self.expanded_comment_ids.append(comment_id)
+                break
+        save_comments_to_file(GLOBAL_COMMENTS)
+        self.new_reply_text = ""
+        self.active_reply_comment_id = ""
+        self.load_comments()
+
+    def like_comment(self, comment_id: str, reply_id: str = None):
+        if not self.discord_username:
+            return
+        user = self.discord_username
+        for c in GLOBAL_COMMENTS:
+            if c.id == comment_id:
+                if reply_id is None:
+                    if user in c.liked_by:
+                        c.liked_by.remove(user)
+                    else:
+                        if user in c.disliked_by:
+                            c.disliked_by.remove(user)
+                        c.liked_by.append(user)
+                    c.likes = len(c.liked_by)
+                    c.dislikes = len(c.disliked_by)
+                else:
+                    for r in c.replies:
+                        if r.id == reply_id:
+                            if user in r.liked_by:
+                                r.liked_by.remove(user)
+                            else:
+                                if user in r.disliked_by:
+                                    r.disliked_by.remove(user)
+                                r.liked_by.append(user)
+                            r.likes = len(r.liked_by)
+                            r.dislikes = len(r.disliked_by)
+                            break
+                break
+        save_comments_to_file(GLOBAL_COMMENTS)
+        self.load_comments()
+
+    def dislike_comment(self, comment_id: str, reply_id: str = None):
+        if not self.discord_username:
+            return
+        user = self.discord_username
+        for c in GLOBAL_COMMENTS:
+            if c.id == comment_id:
+                if reply_id is None:
+                    if user in c.disliked_by:
+                        c.disliked_by.remove(user)
+                    else:
+                        if user in c.liked_by:
+                            c.liked_by.remove(user)
+                        c.disliked_by.append(user)
+                    c.likes = len(c.liked_by)
+                    c.dislikes = len(c.disliked_by)
+                else:
+                    for r in c.replies:
+                        if r.id == reply_id:
+                            if user in r.disliked_by:
+                                r.disliked_by.remove(user)
+                            else:
+                                if user in r.liked_by:
+                                    r.liked_by.remove(user)
+                                r.disliked_by.append(user)
+                            r.likes = len(r.liked_by)
+                            r.dislikes = len(r.disliked_by)
+                            break
+                break
+        save_comments_to_file(GLOBAL_COMMENTS)
+        self.load_comments()
+
+    def toggle_replies(self, comment_id: str):
+        if comment_id in self.expanded_comment_ids:
+            self.expanded_comment_ids.remove(comment_id)
+        else:
+            self.expanded_comment_ids.append(comment_id)
+
+    def set_active_reply_comment_id(self, comment_id: str):
+        if self.active_reply_comment_id == comment_id:
+            self.active_reply_comment_id = ""
+        else:
+            self.active_reply_comment_id = comment_id
+        self.new_reply_text = ""
+
     def select_article(self, title: str):
         self.selected_article_title = title
+        self.load_comments()
 
     def set_nav(self, nav_name: str):
         self.active_nav = nav_name
@@ -196,6 +426,325 @@ def articles_list() -> rx.Component:
         align="center",
         margin_bottom="160px",
     )
+def comment_card(comment: Comment) -> rx.Component:
+    """An individual comment card containing its text, actions, and replies."""
+    
+    def render_reply_item(reply: CommentReply) -> rx.Component:
+        return rx.hstack(
+            rx.avatar(
+                src=reply.avatar,
+                size="2",
+                fallback="U",
+                bg="#5865F2",
+            ),
+            rx.vstack(
+                rx.hstack(
+                    rx.text(reply.username, color="white", font_weight="bold", font_size="xs"),
+                    spacing="2",
+                    align="center",
+                ),
+                rx.text(reply.text, color="#CCCCCC", font_size="xs"),
+                rx.hstack(
+                    rx.button(
+                        rx.hstack(
+                            rx.icon("thumbs-up", size=12),
+                            rx.text(reply.likes, font_size="10px"),
+                            spacing="1",
+                        ),
+                        size="1",
+                        variant="ghost",
+                        color=rx.cond(reply.liked_by.contains(State.discord_username), "#00b4da", "#888888"),
+                        on_click=lambda: State.like_comment(comment.id, reply.id),
+                        cursor="pointer",
+                    ),
+                    rx.button(
+                        rx.hstack(
+                            rx.icon("thumbs-down", size=12),
+                            rx.text(reply.dislikes, font_size="10px"),
+                            spacing="1",
+                        ),
+                        size="1",
+                        variant="ghost",
+                        color=rx.cond(reply.disliked_by.contains(State.discord_username), "#FF4B4B", "#888888"),
+                        on_click=lambda: State.dislike_comment(comment.id, reply.id),
+                        cursor="pointer",
+                    ),
+                    spacing="2",
+                    align="center",
+                    margin_top="1",
+                ),
+                spacing="1",
+                align_items="start",
+                width="100%",
+            ),
+            spacing="3",
+            align_items="start",
+            padding_left="4",
+            border_left="2px solid #2C2C32",
+            width="100%",
+            margin_y="2",
+        )
+
+    return rx.vstack(
+        # Comment Header (User Info)
+        rx.hstack(
+            rx.avatar(
+                src=comment.avatar,
+                size="3",
+                fallback="U",
+                bg="#5865F2",
+            ),
+            rx.vstack(
+                rx.text(comment.username, color="white", font_weight="bold", font_size="sm"),
+                spacing="1",
+                align_items="start",
+            ),
+            spacing="3",
+            align="center",
+            width="100%",
+        ),
+
+        # Comment Text
+        rx.text(
+            comment.text,
+            color="#E0E0E0",
+            font_size="sm",
+            line_height="1.5",
+            margin_top="2",
+            width="100%",
+        ),
+
+        # Actions (Like, Dislike, Reply)
+        rx.hstack(
+            rx.button(
+                rx.hstack(
+                    rx.icon("thumbs-up", size=14),
+                    rx.text(comment.likes, font_size="12px"),
+                    spacing="1",
+                ),
+                size="1",
+                variant="ghost",
+                color=rx.cond(comment.liked_by.contains(State.discord_username), "#00b4da", "#888888"),
+                on_click=lambda: State.like_comment(comment.id),
+                cursor="pointer",
+            ),
+            rx.button(
+                rx.hstack(
+                    rx.icon("thumbs-down", size=14),
+                    rx.text(comment.dislikes, font_size="12px"),
+                    spacing="1",
+                ),
+                size="1",
+                variant="ghost",
+                color=rx.cond(comment.disliked_by.contains(State.discord_username), "#FF4B4B", "#888888"),
+                on_click=lambda: State.dislike_comment(comment.id),
+                cursor="pointer",
+            ),
+            rx.cond(
+                State.discord_username != "",
+                rx.button(
+                    rx.hstack(
+                        rx.icon("reply", size=14),
+                        rx.text("Reply", font_size="12px"),
+                        spacing="1",
+                    ),
+                    size="1",
+                    variant="ghost",
+                    color="#888888",
+                    on_click=lambda: State.set_active_reply_comment_id(comment.id),
+                    cursor="pointer",
+                ),
+                rx.fragment()
+            ),
+            spacing="4",
+            align="center",
+            margin_top="3",
+            margin_bottom="2",
+        ),
+
+        # Reply input field (rendered if active_reply_comment_id matches this comment)
+        rx.cond(
+            State.active_reply_comment_id == comment.id,
+            rx.vstack(
+                rx.text_area(
+                    placeholder=f"Reply to {comment.username}...",
+                    value=State.new_reply_text,
+                    on_change=State.set_new_reply_text,
+                    width="100%",
+                    bg="#202225",
+                    border="1px solid #2C2C32",
+                    color="white",
+                    height="80px",
+                ),
+                rx.hstack(
+                    rx.spacer(),
+                    rx.button(
+                        "Cancel",
+                        size="1",
+                        variant="ghost",
+                        color="white",
+                        on_click=lambda: State.set_active_reply_comment_id(""),
+                        cursor="pointer",
+                    ),
+                    rx.button(
+                        "Reply",
+                        size="1",
+                        bg="#00b4da",
+                        color="white",
+                        on_click=lambda: State.add_reply(comment.id),
+                        cursor="pointer",
+                    ),
+                    spacing="2",
+                    width="100%",
+                ),
+                width="100%",
+                spacing="2",
+                padding_top="2",
+                border_top="1px solid #2C2C32",
+            ),
+            rx.fragment()
+        ),
+
+        # Replies Container (with collapse/expand logic)
+        rx.cond(
+            comment.replies.length() > 1,
+            rx.cond(
+                State.expanded_comment_ids.contains(comment.id),
+                rx.vstack(
+                    rx.button(
+                        "Collapse Replies",
+                        size="1",
+                        variant="ghost",
+                        color="#00b4da",
+                        on_click=lambda: State.toggle_replies(comment.id),
+                        cursor="pointer",
+                        margin_bottom="2",
+                    ),
+                    rx.foreach(
+                        comment.replies,
+                        render_reply_item
+                    ),
+                    width="100%",
+                    align_items="start",
+                ),
+                rx.button(
+                    f"+{comment.replies.length()} Replies",
+                    size="1",
+                    bg="#202225",
+                    color="#00b4da",
+                    border="1px solid #2C2C32",
+                    on_click=lambda: State.toggle_replies(comment.id),
+                    _hover={"bg": "#00b4da", "color": "white"},
+                    cursor="pointer",
+                    margin_top="2",
+                ),
+            ),
+            rx.cond(
+                comment.replies.length() == 1,
+                rx.foreach(
+                    comment.replies,
+                    render_reply_item
+                ),
+                rx.fragment()
+            )
+        ),
+
+        width="100%",
+        bg="#18181C",
+        border="1px solid #2C2C32",
+        padding="5",
+        border_radius="xl",
+        align_items="start",
+        spacing="2",
+    )
+
+
+def comments_section() -> rx.Component:
+    """The comments section container below the article."""
+    return rx.vstack(
+        rx.divider(border_color="#2C2C32", margin_y="6"),
+        rx.heading("Discussion", size="5", color="white", font_weight="800", margin_bottom="4"),
+        
+        # New comment input
+        rx.cond(
+            State.discord_username == "",
+            # Prompt to login
+            rx.hstack(
+                rx.text("You must be logged in to comment.", color="#AAAAAA", font_size="sm"),
+                rx.button(
+                    "Login with Discord",
+                    bg="#5865F2",
+                    color="white",
+                    size="2",
+                    on_click=State.login_with_discord,
+                    cursor="pointer",
+                ),
+                bg="#18181C",
+                border="1px solid #2C2C32",
+                padding="4",
+                border_radius="lg",
+                width="100%",
+                align="center",
+                justify="between",
+                margin_bottom="4",
+            ),
+            # Input to submit comment
+            rx.vstack(
+                rx.hstack(
+                    rx.avatar(
+                        src=State.discord_avatar,
+                        size="2",
+                        fallback="U",
+                        bg="#5865F2",
+                    ),
+                    rx.text(f"Commenting as {State.discord_username}", color="white", font_size="sm", font_weight="bold"),
+                    spacing="2",
+                    align="center",
+                ),
+                rx.text_area(
+                    placeholder="Join the discussion...",
+                    value=State.new_comment_text,
+                    on_change=State.set_new_comment_text,
+                    width="100%",
+                    bg="#18181C",
+                    border="1px solid #2C2C32",
+                    color="white",
+                    height="100px",
+                ),
+                rx.button(
+                    "Submit Comment",
+                    bg="#00b4da",
+                    color="white",
+                    on_click=State.add_comment,
+                    align_self="end",
+                    _hover={"bg": "#009bbd"},
+                    cursor="pointer",
+                ),
+                spacing="3",
+                width="100%",
+                bg="#18181C",
+                border="1px solid #2C2C32",
+                padding="4",
+                border_radius="lg",
+                margin_bottom="6",
+            )
+        ),
+        
+        # List of comment cards
+        rx.cond(
+            State.comments_list.length() > 0,
+            rx.vstack(
+                rx.foreach(State.comments_list, comment_card),
+                width="100%",
+                spacing="4",
+            ),
+            rx.text("No comments yet. Start the conversation!", color="#888888", font_size="sm", text_align="center", width="100%", padding_y="8")
+        ),
+        
+        width="100%",
+        align_items="start",
+        padding_x=["2%", "2%", "0px"],
+    )
 
 
 def article_detail() -> rx.Component:
@@ -245,17 +794,25 @@ def article_detail() -> rx.Component:
                 width="100%",
                 padding_x=["2%", "2%", "0px"],
             ),
+            comments_section(),
             width="100%",
             max_width="800px",
             align_items="start",
             margin_x="auto",
             margin_bottom="160px",
-            spacing="4",
+            spacing="6",
         )
 
-    # Build the conditional chain dynamically based on the articles in the imported list
+    # Combine global articles and all season-specific articles to build the full search list
+    all_articles = list(articles)
+    for s in seasons:
+        for art in s.get("articles", []):
+            if art not in all_articles:
+                all_articles.append(art)
+
+    # Build the conditional chain dynamically based on the full list of articles
     cond_chain = rx.text("Article not found", color="white")
-    for article in reversed(articles):
+    for article in reversed(all_articles):
         cond_chain = rx.cond(
             State.selected_article_title == article["title"],
             build_reader(article),
@@ -347,8 +904,8 @@ def stats_view() -> rx.Component:
                 ),
             ),
             width="100%",
-            padding_left=["50px", "70px", "90px"],
-            padding_right=["50px", "70px", "90px"],
+            padding_left=["31px", "44px", "56px"],
+            padding_right=["31px", "44px", "56px"],
         ),
         width="100%",
         max_width="1200px",
@@ -358,35 +915,99 @@ def stats_view() -> rx.Component:
 
 
 def login_view() -> rx.Component:
-    """A clean, premium Login form."""
-    return rx.vstack(
-        rx.heading("Driver Login", size="6", color="white", font_weight="900", margin_bottom="2", padding_y="2.5%", padding_x="2%"),
-        rx.text("Access the FIA control panel and your superlicense.", color="#AAAAAA", font_size="sm", margin_bottom="6", padding_x="2%"),
-        rx.vstack(
-            rx.text("Username or Email", color="white", font_size="xs", font_weight="bold", align_self="start"),
-            rx.input(placeholder="driver@alternativef1.com", type="email", width="100%", bg="#18181C", border_color="#2C2C32", color="white"),
-            rx.text("Password", color="white", font_size="xs", font_weight="bold", align_self="start", margin_top="3"),
-            rx.input(placeholder="••••••••", type="password", width="100%", bg="#18181C", border_color="#2C2C32", color="white"),
-            rx.button(
-                "Sign In",
-                bg="#00b4da",
-                color="white",
+    """Centered, Discord-only Login Page."""
+    return rx.center(
+        rx.cond(
+            State.discord_username == "",
+            # Not Logged In
+            rx.vstack(
+                rx.image(
+                    src="https://assets-global.website-files.com/6257adef93867e50d84d30e2/636e0a6a49cf127bf92de1e2_icon_clyde_blurple_RGB.png",
+                    height="48px",
+                    object_fit="contain",
+                    margin_bottom="2",
+                ),
+                rx.heading("Driver Login", size="6", color="white", font_weight="900", text_align="center"),
+                rx.text("Authorize with Discord to submit comments and access the control panel.", color="#AAAAAA", font_size="sm", text_align="center", margin_bottom="6"),
+                rx.button(
+                    rx.hstack(
+                        rx.icon("log-in", size=18),
+                        rx.text("Login with Discord", font_weight="bold"),
+                        spacing="2",
+                        align="center",
+                    ),
+                    bg="#5865F2",
+                    color="white",
+                    width="100%",
+                    height="44px",
+                    on_click=State.login_with_discord,
+                    _hover={"bg": "#4752c4", "transform": "scale(1.02)"},
+                    transition="all 0.2s ease-in-out",
+                    cursor="pointer",
+                    border_radius="md",
+                ),
                 width="100%",
-                margin_top="6",
-                _hover={"bg": "#009bbd"},
-                cursor="pointer",
+                max_width="400px",
+                bg="#18181C",
+                padding="32px",
+                border_radius="xl",
+                border="1px solid #2C2C32",
+                box_shadow="0 8px 30px rgba(0,0,0,0.5)",
+                align_items="center",
             ),
-            width="100%",
-            spacing="2",
+            # Logged In
+            rx.vstack(
+                rx.heading("Driver Account", size="6", color="white", font_weight="900", text_align="center"),
+                rx.text("You are currently signed in.", color="#AAAAAA", font_size="sm", text_align="center", margin_bottom="4"),
+                rx.hstack(
+                    rx.avatar(
+                        src=State.discord_avatar,
+                        size="5",
+                        fallback="U",
+                        bg="#5865F2",
+                        border="2px solid #00b4da",
+                    ),
+                    rx.vstack(
+                        rx.text(State.discord_username, color="white", font_weight="bold", font_size="lg"),
+                        rx.badge("Verified League Driver", color_scheme="cyan", variant="solid"),
+                        spacing="1",
+                        align_items="start",
+                    ),
+                    spacing="4",
+                    align="center",
+                    bg="#252529",
+                    padding="4",
+                    border_radius="lg",
+                    width="100%",
+                    margin_bottom="6",
+                ),
+                rx.button(
+                    "Logout",
+                    bg="#FF4B4B",
+                    color="white",
+                    width="100%",
+                    height="40px",
+                    on_click=State.logout,
+                    _hover={"bg": "#E04040", "transform": "scale(1.02)"},
+                    transition="all 0.2s ease-in-out",
+                    cursor="pointer",
+                    border_radius="md",
+                ),
+                width="100%",
+                max_width="400px",
+                bg="#18181C",
+                padding="32px",
+                border_radius="xl",
+                border="1px solid #2C2C32",
+                box_shadow="0 8px 30px rgba(0,0,0,0.5)",
+                align_items="center",
+            ),
         ),
         width="100%",
-        max_width="400px",
-        bg="#18181C",
-        padding="6",
-        border_radius="xl",
-        border="1px solid #2C2C32",
+        min_height="50vh",
+        display="flex",
         align_items="center",
-        margin_bottom="160px",
+        justify="center",
     )
 
 
@@ -447,8 +1068,8 @@ def regulations_view() -> rx.Component:
                 settings_content(),
             ),
             width="100%",
-            padding_left=["50px", "70px", "90px"],
-            padding_right=["50px", "70px", "90px"],
+            padding_left=["31px", "44px", "56px"],
+            padding_right=["31px", "44px", "56px"],
         ),
         width="100%",
         max_width="1200px",
@@ -640,8 +1261,8 @@ def seasons_view() -> rx.Component:
                 spacing="0",
             ),
             width="100%",
-            padding_left=["50px", "70px", "90px"],
-            padding_right=["50px", "70px", "90px"],
+            padding_left=["31px", "44px", "56px"],
+            padding_right=["31px", "44px", "56px"],
         ),
         width="100%",
         max_width="1200px",
@@ -790,6 +1411,43 @@ def footer() -> rx.Component:
 def index() -> rx.Component:
     """The main view structure."""
     return rx.box(
+        rx.box(
+            rx.input(
+                id="discord-username-input",
+                type="hidden",
+                value=State.discord_username,
+                on_change=State.set_discord_username,
+            ),
+            rx.input(
+                id="discord-avatar-input",
+                type="hidden",
+                value=State.discord_avatar,
+                on_change=State.set_discord_avatar,
+            ),
+            rx.button(
+                id="discord-login-btn",
+                on_click=State.complete_discord_login,
+            ),
+            style={"display": "none"},
+        ),
+        rx.script(
+            """
+            window.addEventListener('message', (e) => {
+                if (e.data && e.data.type === 'discord_login') {
+                    const uInput = document.getElementById('discord-username-input');
+                    const aInput = document.getElementById('discord-avatar-input');
+                    const btn = document.getElementById('discord-login-btn');
+                    if (uInput && aInput && btn) {
+                        uInput.value = e.data.username;
+                        uInput.dispatchEvent(new Event('input', { bubbles: true }));
+                        aInput.value = e.data.avatar;
+                        aInput.dispatchEvent(new Event('input', { bubbles: true }));
+                        setTimeout(() => btn.click(), 50);
+                    }
+                }
+            });
+            """
+        ),
         rx.vstack(
             header(),
             # Main scrollable content area with medium gray background (bg="#47474c")

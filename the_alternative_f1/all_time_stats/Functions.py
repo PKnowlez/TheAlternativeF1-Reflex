@@ -326,15 +326,27 @@ def RacesAllTime(NumSeason, tORd):
 
         podium_list = []
         for col in [c + "Place" for c in place_cols]:
-            podium_entries = []
-            for place, prefix in [(1, '1st: '), (2, '2nd: '), (3, '3rd: ')]:
-                drivers = df[df[col] == place][x].tolist()
-                if drivers:
-                    podium_entries.append(prefix + ', '.join(drivers))
-                else:
-                    podium_entries.append(prefix + "None")
+            has_scores = False
+            if col in df.columns:
+                valid_scores = df[col].dropna()
+                try:
+                    numeric_scores = pd.to_numeric(valid_scores, errors='coerce').dropna()
+                    if not numeric_scores.empty and not (numeric_scores == 0).all():
+                        has_scores = True
+                except Exception:
+                    pass
 
-            podium_list.append('\n'.join(podium_entries))
+            if has_scores:
+                podium_entries = []
+                for place, prefix in [(1, '1st: '), (2, '2nd: '), (3, '3rd: ')]:
+                    drivers = df[df[col] == place][x].tolist()
+                    if drivers:
+                        podium_entries.append(prefix + ', '.join(drivers))
+                    else:
+                        podium_entries.append(prefix + "None")
+                podium_list.append('\n'.join(podium_entries))
+            else:
+                podium_list.append(None)
 
         summary_data['Season ' + str(i + 1)] = podium_list
         summary_df = pd.DataFrame(summary_data)
@@ -345,4 +357,10 @@ def RacesAllTime(NumSeason, tORd):
 
     # Group by 'Race' and aggregate 'Season X' columns
     grouped_df = final_df.groupby('Race').agg(lambda x: '\n\n'.join(x.dropna())).reset_index()
+
+    # Filter to only keep completed races (races that have scores in at least one season)
+    season_cols = [col for col in grouped_df.columns if col.startswith('Season ')]
+    is_completed = grouped_df[season_cols].apply(lambda row: any(str(val).strip() != "" for val in row), axis=1)
+    grouped_df = grouped_df[is_completed].reset_index(drop=True)
+
     return grouped_df

@@ -1,0 +1,12 @@
+Let's make a slightly bigger change. I want to update this application so that the login page uses Discord for the login. This will then allow the app to include comments on all articles but only for people who are logged in. People are some of the more detailed requirements for the login and comments system.
+- The login will be discord only, no other method for logging in
+- Login will open a new page for the user to login to discord and then send back information via the API or whatever is the most effective method for that type of call and response
+- Users shall be logged out by pressing the logout button on the login page OR by closing the tab the app operates within
+- The login UI must be centered on the login page
+- Comments must be appended to the bottom of all articles
+- Comments can only be submitted by users that are logged in
+- Comments must include the logged in discord user's profile picture and username
+- Comments must have a reply feature to generate a thread of comments
+- By default if there is more than one reply to a comment the thread collapses and there is a +N Replies button that expands the comment thread
+- Comments should be individual cards, except the replies should be all part of the same card instead of starting new ones
+- Comments should have a like and dislike button that increases as users hit either, each user can only select one or the other per comment

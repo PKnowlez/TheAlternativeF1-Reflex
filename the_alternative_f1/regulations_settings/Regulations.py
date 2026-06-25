@@ -16,58 +16,63 @@ def Regulations() -> rx.Component:
         ("Sprint Race Finishing Points", "Points are awarded based on finishing position in each race and follow the following pattern: 1st - 8, 2nd - 7, 3rd - 6, 4th - 5, 5th - 4, 6th - 3, 7th - 2, 8th - 1, 9th to 20th - 0.5."),
         ("Race Start Incident", "During the start of a race or Red Flag restart, any driver found to be the cause of an incident will be penalized in the next main race they participate in.** An incident in this scenario is any collision, squeeze, or brake check, involving one or more cars getting damage or losing more than 3 places due to the incident. The driver at fault will be penalized by being unable to compete in Q2 of the next race. In other words, the driver will qualify last, unless there are late drivers, in which those drivers that are late will start behind the offending driver from the previous race. A penalty point will also be added to the driver's super license for the remainder of the season."),
         ("Causing a Collision", "In some scenarios, drivers may cause a collision that is not severe enough to meet the requirements of Regulation 8 - Endangering or Ruining Another Driver's Race. In these scenarios, drivers who cause a collision will be penalized with a 5 second or 10 second penalty to their finishing position. The size of the penalty will be based on league review and severity of the incident. A penalty point will also be added to the driver's super license for remainder of the season."),
-        ("Race Restarts", "Races will not be restarted for racing incidents. If there is a bug or glitch during or before the race start, the race may be restarted depending on the scenario.")
+        ("Race Restarts", "Races will not be restarted for racing incidents. If there is a bug or glitch during or before the race start, the race may be restarted depending on the scenario."),
+        ("Damaging Another Vehicle", "When the league's race monitoring bot is enabled, drivers who damage another driver's vehicle via contact will be given a 1 place grid penalty. This predominantly replaces Regulation 14 - Causing a Collision as there is some subjective nature to that regulation. Whereas, this regulation will be based on bot data. Neither replaces a severe incident which is handled by Regulation 8 - Endangering or Ruining Another Driver's Race.")
     ]
 
     return rx.vstack(
         rx.heading("Sporting & Technical Regulations", size="6", color="white", font_weight="900", margin_bottom="4", padding_y="2.5%", padding_x="2%"),
-        rx.table.root(
-            rx.table.header(
-                rx.table.row(
-                    rx.table.column_header_cell("#", width=["30px", "40px"], color="#00b4da"),
-                    rx.table.column_header_cell("Regulation", width=["100px", "150px", "220px"], color="#00b4da"),
-                    rx.table.column_header_cell("Definition / Rule Description", color="#00b4da"),
-                )
-            ),
-            rx.table.body(
-                *[
+        rx.vstack(
+            rx.table.root(
+                rx.table.header(
                     rx.table.row(
-                        rx.table.cell(str(idx + 1), font_weight="bold", color="#888888"),
-                        rx.table.cell(title, color="white", font_weight="700"),
-                        rx.table.cell(definition, color="#CCCCCC"),
-                        _hover={"bg": "#1C1C20"},
+                        rx.table.column_header_cell("#", width=["30px", "40px"], color="#00b4da"),
+                        rx.table.column_header_cell("Regulation", width=["100px", "150px", "220px"], color="#00b4da"),
+                        rx.table.column_header_cell("Definition / Rule Description", color="#00b4da"),
                     )
-                    for idx, (title, definition) in enumerate(rules_data)
-                ]
+                ),
+                rx.table.body(
+                    *[
+                        rx.table.row(
+                            rx.table.cell(str(idx + 1), font_weight="bold", color="#888888"),
+                            rx.table.cell(title, color="white", font_weight="700"),
+                            rx.table.cell(definition, color="#CCCCCC"),
+                            _hover={"bg": "#1C1C20"},
+                        )
+                        for idx, (title, definition) in enumerate(rules_data)
+                    ]
+                ),
+                gap = "5%",
+                width="100%",
+                variant="ghost",
+            ),
+            # Footnotes
+            rx.vstack(
+                rx.text(
+                    "*This regulation only applies after the first 2 laps of the race or restart. If reckless driving occurs during a start or restart, the incident will be reviewed per request of the driver whose race was endangered or ruined.",
+                    font_size="xs",
+                    color="#888888",
+                ),
+                rx.text(
+                    "**This regulation will be modified for the final race of the season to penalize the driver on their finishing position in the final race, rather than carrying over to the next season.",
+                    font_size="xs",
+                    color="#888888",
+                ),
+                spacing="1",
+                margin_top="6",
+                align_items="start",
+                width="100%",
+                padding="2.5%",
             ),
             gap = "5%",
             width="100%",
-            variant="ghost",
-        ),
-        # Footnotes
-        rx.vstack(
-            rx.text(
-                "*This regulation only applies after the first 2 laps of the race or restart. If reckless driving occurs during a start or restart, the incident will be reviewed per request of the driver whose race was endangered or ruined.",
-                font_size="xs",
-                color="#888888",
-            ),
-            rx.text(
-                "**This regulation will be modified for the final race of the season to penalize the driver on their finishing position in the final race, rather than carrying over to the next season.",
-                font_size="xs",
-                color="#888888",
-            ),
-            spacing="1",
-            margin_top="6",
+            bg="#18181C",
+            padding="6",
+            border_radius="xl",
+            border="1px solid #2C2C32",
             align_items="start",
-            width="100%",
-            padding="2.5%",
         ),
-        gap = "5%",
         width="100%",
-        bg="#18181C",
-        padding="6",
-        border_radius="xl",
-        border="1px solid #2C2C32",
         align_items="start",
         margin_bottom="160px",
     )

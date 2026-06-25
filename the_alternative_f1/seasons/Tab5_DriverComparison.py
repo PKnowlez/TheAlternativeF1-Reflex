@@ -84,6 +84,9 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
         for _, row in avg_changed_df.iterrows()
     ]
 
+    max_pos_change_driver_len = max([len(str(item.get("driver", ""))) for item in pos_change_data] or [0])
+    pos_change_driver_axis_height = max(40, max_pos_change_driver_len * 5 + 15)
+
     pos_change_chart = rx.recharts.bar_chart(
         rx.recharts.bar(
             *[
@@ -93,7 +96,7 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
             data_key="change",
             name="Pos Change",
         ),
-        rx.recharts.x_axis(data_key="driver", font_size=9, angle=-90, height=90, stroke="white", text_anchor="end", interval=0, style={"fontFamily": "Outfit"}),
+        rx.recharts.x_axis(data_key="driver", font_size=7, angle=-90, height=pos_change_driver_axis_height, stroke="white", text_anchor="end", interval=0, style={"fontFamily": "Outfit"}, tick={"dx": -5}),
         rx.recharts.y_axis(
             stroke="white",
             width=35,
@@ -122,6 +125,9 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
             "fill": fill,
         })
 
+    max_pts_driver_len = max([len(str(item.get("driver", ""))) for item in pts_data] or [0])
+    pts_driver_axis_height = max(40, max_pts_driver_len * 5 + 15)
+
     pts_chart = rx.recharts.bar_chart(
         rx.recharts.bar(
             *[
@@ -131,7 +137,7 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
             data_key="points",
             name="Points",
         ),
-        rx.recharts.x_axis(data_key="driver", font_size=9, angle=-90, height=90, stroke="white", text_anchor="end", interval=0, style={"fontFamily": "Outfit"}),
+        rx.recharts.x_axis(data_key="driver", font_size=7, angle=-90, height=pts_driver_axis_height, stroke="white", text_anchor="end", interval=0, style={"fontFamily": "Outfit"}, tick={"dx": -5}),
         rx.recharts.y_axis(
             stroke="white",
             width=35,
@@ -173,12 +179,12 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
             interval=0,
             axis_line=False,
             tick_line=False,
-            width=75,
-            tick={"textAnchor": "start", "dx": -65, "fill": "white", "fontSize": 9, "fontFamily": "Outfit"},
+            width=60,
+            tick={"textAnchor": "start", "dx": -50, "fill": "white", "fontSize": 9, "fontFamily": "Outfit"},
         ),
         rx.recharts.x_axis(
             type_="number",
-            font_size=10,
+            font_size=8,
             stroke="white",
             style={"fontFamily": "Outfit"},
         ),
@@ -186,7 +192,7 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
         width="100%",
         height=300,
         layout="vertical",
-        margin={"left": 75, "right": 25, "top": 10, "bottom": 10},
+        margin={"left": 60, "right": 25, "top": 10, "bottom": 10},
         margin_left="-10px",
     )
 
@@ -217,12 +223,12 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
             interval=0,
             axis_line=False,
             tick_line=False,
-            width=75,
-            tick={"textAnchor": "start", "dx": -65, "fill": "white", "fontSize": 9, "fontFamily": "Outfit"},
+            width=60,
+            tick={"textAnchor": "start", "dx": -50, "fill": "white", "fontSize": 9, "fontFamily": "Outfit"},
         ),
         rx.recharts.x_axis(
             type_="number",
-            font_size=10,
+            font_size=8,
             stroke="white",
             style={"fontFamily": "Outfit"},
         ),
@@ -230,7 +236,7 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
         width="100%",
         height=300,
         layout="vertical",
-        margin={"left": 75, "right": 25, "top": 10, "bottom": 10},
+        margin={"left": 60, "right": 25, "top": 10, "bottom": 10},
         margin_left="-10px",
     )
 
@@ -253,6 +259,12 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
     rookie_chart_component = rx.fragment()
     if rookies_only and rookie_line_data and rookies:
         rookie_names = [d for d in rookies if d in driver_colors]
+        
+        # Calculate dynamic x-axis height
+        max_rookie_race_len = max([len(str(item.get("race", ""))) for item in rookie_line_data] or [0])
+        rookie_race_axis_height = max(40, max_rookie_race_len * 5 + 15)
+        rookie_legend_margin = max(15, rookie_race_axis_height - 30)
+
         rookie_chart_component = rx.vstack(
             rx.text("Rookie of the Year", color="white", font_weight="700", font_size="sm"),
             rx.recharts.line_chart(
@@ -266,27 +278,11 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
                     )
                     for r in rookie_names
                 ],
-                rx.recharts.x_axis(data_key="race", font_size=10, angle=-90, height=80, stroke="white", text_anchor="end", interval=0),
+                rx.recharts.x_axis(data_key="race", font_size=8, angle=-90, height=rookie_race_axis_height, stroke="white", text_anchor="end", interval=0, tick={"dx": -5}),
                 rx.recharts.y_axis(
                     stroke="white",
                     width=35,
                     tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
-                ),
-                rx.recharts.legend(
-                    layout="horizontal",
-                    align="left",
-                    vertical_align="bottom",
-                    icon_size=0,
-                    margin={"top": 15},
-                    style={"color": "white", "fontFamily": "Outfit", "fontSize": "13px", "fontWeight": "500", "textShadow": "0px 1px 2px rgba(0,0,0,0.8)"},
-                    wrapper_style={
-                        "backgroundColor": "#F0F0F2",
-                        "padding": "6px 12px",
-                        "borderRadius": "6px",
-                        "border": "1px solid #CCCCCC",
-                        "width": "fit-content",
-                        "boxShadow": "0 2px 8px rgba(0,0,0,0.15)",
-                    },
                 ),
                 rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
                 data=rookie_line_data,
@@ -294,6 +290,31 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
                 margin_left="-10px",
                 width="100%",
                 height=300,
+            ),
+            rx.accordion.root(
+                rx.accordion.item(
+                    rx.accordion.trigger(
+                        rx.text("Key", color="#555555", font_weight="600", font_size="13px", font_family="Outfit"),
+                    ),
+                    rx.accordion.content(
+                        rx.flex(
+                            *[
+                                rx.text(r, color=driver_colors.get(r, "#555555"), font_size="13px", font_family="Outfit", font_weight="600", text_shadow="0px 1px 4px rgba(0,0,0,0.2)")
+                                for r in rookie_names
+                            ],
+                            flex_wrap="wrap",
+                            gap="24px",
+                        ),
+                    ),
+                    value="rookie_key",
+                ),
+                collapsible=True,
+                width="100%",
+                variant="ghost",
+                bg="#F0F0F2",
+                border_radius="6px",
+                border="1px solid #CCCCCC",
+                box_shadow="0 2px 8px rgba(0,0,0,0.15)",
             ),
             width="100%",
             bg="transparent",

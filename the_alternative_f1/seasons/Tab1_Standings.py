@@ -25,6 +25,17 @@ def Tab1(data: dict, season_data: dict) -> rx.Component:
     driver_line_data = data["driver_line_data"]
     races_with_start = data["races_with_start"]
 
+    # Calculate dynamic x-axis heights based on longest label
+    max_team_race_len = max([len(str(item.get("race", ""))) for item in team_line_data] or [0])
+    team_race_axis_height = max(40, max_team_race_len * 5 + 15)
+
+    max_driver_race_len = max([len(str(item.get("race", ""))) for item in driver_line_data] or [0])
+    driver_race_axis_height = max(40, max_driver_race_len * 5 + 15)
+
+    # Dynamic legend top margin based on longest label (ensures legend clears labels)
+    team_race_legend_margin = max(15, team_race_axis_height - 30)
+    driver_race_legend_margin = max(15, driver_race_axis_height - 30)
+
     # ── Constructor line chart ───────────────────────────────────────────
     team_names = list(team_colors.keys())
     # Filter to only teams present in the data
@@ -41,27 +52,11 @@ def Tab1(data: dict, season_data: dict) -> rx.Component:
             )
             for team in teams_in_data
         ],
-        rx.recharts.x_axis(data_key="race", font_size=10, angle=-90, height=80, stroke="white", text_anchor="end", interval=0),
+        rx.recharts.x_axis(data_key="race", font_size=8, angle=-90, height=team_race_axis_height, stroke="white", text_anchor="end", interval=0, tick={"dx": -5}),
         rx.recharts.y_axis(
             stroke="white",
             width=35,
             tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
-        ),
-        rx.recharts.legend(
-            layout="horizontal",
-            align="left",
-            vertical_align="bottom",
-            icon_size=0,
-            margin={"top": 15},
-            style={"color": "white", "fontFamily": "Outfit", "fontSize": "13px", "fontWeight": "500", "textShadow": "0px 1px 2px rgba(0,0,0,0.8)"},
-            wrapper_style={
-                "backgroundColor": "#F0F0F2",
-                "padding": "6px 12px",
-                "borderRadius": "6px",
-                "border": "1px solid #CCCCCC",
-                "width": "fit-content",
-                "boxShadow": "0 2px 8px rgba(0,0,0,0.15)",
-            },
         ),
         rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
         data=team_line_data,
@@ -69,6 +64,33 @@ def Tab1(data: dict, season_data: dict) -> rx.Component:
         margin_left="-10px",
         width="100%",
         height=350,
+    )
+
+    # ── Constructor legend expander ──────────────────────────────────────
+    constructor_legend_expander = rx.accordion.root(
+        rx.accordion.item(
+            rx.accordion.trigger(
+                rx.text("Key", color="#555555", font_weight="600", font_size="13px", font_family="Outfit"),
+            ),
+            rx.accordion.content(
+                rx.flex(
+                    *[
+                        rx.text(team, color=team_colors.get(team, "#555555"), font_size="13px", font_family="Outfit", font_weight="600", text_shadow="0px 1px 4px rgba(0,0,0,0.2)")
+                        for team in teams_in_data
+                    ],
+                    flex_wrap="wrap",
+                    gap="24px",
+                ),
+            ),
+            value="constructor_key",
+        ),
+        collapsible=True,
+        width="100%",
+        variant="ghost",
+        bg="#F0F0F2",
+        border_radius="6px",
+        border="1px solid #CCCCCC",
+        box_shadow="0 2px 8px rgba(0,0,0,0.15)",
     )
 
     # ── Driver line chart ────────────────────────────────────────────────
@@ -85,27 +107,11 @@ def Tab1(data: dict, season_data: dict) -> rx.Component:
             )
             for driver in drivers_in_data
         ],
-        rx.recharts.x_axis(data_key="race", font_size=10, angle=-90, height=80, stroke="white", text_anchor="end", interval=0),
+        rx.recharts.x_axis(data_key="race", font_size=8, angle=-90, height=driver_race_axis_height, stroke="white", text_anchor="end", interval=0, tick={"dx": -5}),
         rx.recharts.y_axis(
             stroke="white",
             width=35,
             tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
-        ),
-        rx.recharts.legend(
-            layout="horizontal",
-            align="left",
-            vertical_align="bottom",
-            icon_size=0,
-            margin={"top": 15},
-            style={"color": "white", "fontFamily": "Outfit", "fontSize": "13px", "fontWeight": "500", "textShadow": "0px 1px 2px rgba(0,0,0,0.8)"},
-            wrapper_style={
-                "backgroundColor": "#F0F0F2",
-                "padding": "6px 12px",
-                "borderRadius": "6px",
-                "border": "1px solid #CCCCCC",
-                "width": "fit-content",
-                "boxShadow": "0 2px 8px rgba(0,0,0,0.15)",
-            },
         ),
         rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
         data=driver_line_data,
@@ -115,18 +121,48 @@ def Tab1(data: dict, season_data: dict) -> rx.Component:
         height=350,
     )
 
+    # ── Driver legend expander ───────────────────────────────────────────
+    driver_legend_expander = rx.accordion.root(
+        rx.accordion.item(
+            rx.accordion.trigger(
+                rx.text("Key", color="#555555", font_weight="600", font_size="13px", font_family="Outfit"),
+            ),
+            rx.accordion.content(
+                rx.flex(
+                    *[
+                        rx.text(driver, color=driver_colors.get(driver, "#555555"), font_size="13px", font_family="Outfit", font_weight="600", text_shadow="0px 1px 4px rgba(0,0,0,0.2)")
+                        for driver in drivers_in_data
+                    ],
+                    flex_wrap="wrap",
+                    gap="24px",
+                ),
+            ),
+            value="driver_key",
+        ),
+        collapsible=True,
+        width="100%",
+        variant="ghost",
+        bg="#F0F0F2",
+        border_radius="6px",
+        border="1px solid #CCCCCC",
+        box_shadow="0 2px 8px rgba(0,0,0,0.15)",
+    )
+
     # ── Constructor points bar chart data ────────────────────────────────
     constructor_bar_data = [
         {"team": row["Team"], "points": float(row["Points"]), "fill": team_colors.get(row["Team"], "#555555")}
         for _, row in constructor_totals.iterrows()
     ]
 
+    max_team_len = max([len(str(item.get("team", ""))) for item in constructor_bar_data] or [0])
+    team_axis_height = max(40, max_team_len * 5 + 15)
+
     constructor_bar_chart = rx.recharts.bar_chart(
         rx.recharts.bar(
             data_key="points",
             name="Points",
         ),
-        rx.recharts.x_axis(data_key="team", font_size=10, angle=-90, height=90, stroke="white", text_anchor="end", interval=0),
+        rx.recharts.x_axis(data_key="team", font_size=8, angle=-90, height=team_axis_height, stroke="white", text_anchor="end", interval=0, tick={"dx": -5}),
         rx.recharts.y_axis(
             stroke="white",
             width=35,
@@ -146,12 +182,15 @@ def Tab1(data: dict, season_data: dict) -> rx.Component:
         for _, row in driver_totals.iterrows()
     ]
 
+    max_driver_len = max([len(str(item.get("driver", ""))) for item in driver_bar_data] or [0])
+    driver_axis_height = max(40, max_driver_len * 5 + 15)
+
     driver_bar_chart = rx.recharts.bar_chart(
         rx.recharts.bar(
             data_key="points",
             name="Points",
         ),
-        rx.recharts.x_axis(data_key="driver", font_size=10, angle=-90, height=90, stroke="white", text_anchor="end", interval=0),
+        rx.recharts.x_axis(data_key="driver", font_size=8, angle=-90, height=driver_axis_height, stroke="white", text_anchor="end", interval=0, tick={"dx": -5}),
         rx.recharts.y_axis(
             stroke="white",
             width=35,
@@ -299,6 +338,7 @@ def Tab1(data: dict, season_data: dict) -> rx.Component:
             rx.vstack(
                 rx.text("Constructor's Championship", color="white", font_weight="700", font_size="sm"),
                 constructor_line_chart,
+                constructor_legend_expander,
                 rx.text("Constructor Points", color="white", font_weight="700", font_size="sm"),
                 constructor_bar_chart,
                 width="100%",
@@ -310,6 +350,7 @@ def Tab1(data: dict, season_data: dict) -> rx.Component:
             rx.vstack(
                 rx.text("Driver's Championship", color="white", font_weight="700", font_size="sm"),
                 driver_line_chart,
+                driver_legend_expander,
                 rx.text("Driver Points", color="white", font_weight="700", font_size="sm"),
                 driver_bar_chart,
                 width="100%",

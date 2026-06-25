@@ -38,7 +38,7 @@ def Settings() -> rx.Component:
         ("Safety Car", "Increased"),
         ("Safety Car Experience", "Immersive"),
         ("Formation Lap", "Off"),
-        ("Red Flags", "Standard"),
+        ("Red Flags", "Increased"),
         ("Affects Licence Level", "Off"),
     ]
 

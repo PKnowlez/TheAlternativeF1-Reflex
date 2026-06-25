@@ -30,7 +30,7 @@ def races_all_time_view(num_seasons: int) -> rx.Component:
     def podium_cell(text_val: str) -> rx.Component:
         """Format a podium result string (1st/2nd/3rd per season)."""
         if not text_val or str(text_val).strip() == "":
-            return rx.table.cell(rx.text("—", color="#444444", font_size="12px"))
+            return rx.table.cell("")
 
         lines = [l.strip() for l in str(text_val).replace("\\n\\n", "\n\n").replace("\\n", "\n").split("\n\n") if l.strip()]
 
