@@ -26,7 +26,9 @@ team_colors = {
     'AlphaTauri': 'LightSlateGray',
     'Alfa Romeo': 'Maroon',
     'Mercedes': 'black',
-    'Haas': 'gray',
+    "Haas": "white",
+    "Audi": "#A33E2C",
+    "Cadillac": "#FFEA00",
 }
 
 def PointTotals(season):
@@ -293,19 +295,68 @@ def CalculateAllTime(NumSeason, tORd):
         combined_totals['Win Streak'] = combined_totals['Win Streak'].astype(int)
         combined_totals['Single Season Win Streak'] = combined_totals['Single Season Win Streak'].astype(int)
         
+        # Map teams and drivers for each season
+        for i in range(NumSeason):
+            season_num = i + 1
+            sheet = "Season" + str(season_num)
+            try:
+                df_season = pd.read_excel(file, sheet_name=sheet)
+                df_season['Driver'] = df_season['Driver'].astype(str).str.strip()
+                df_season['Team'] = df_season['Team'].astype(str).str.strip()
+                
+                # Group teams by driver for this season
+                driver_teams = df_season.groupby('Driver')['Team'].apply(lambda x: ", ".join(x.unique())).to_dict()
+                combined_totals[f'Season {season_num}'] = combined_totals['Driver'].map(driver_teams).fillna('—')
+            except Exception:
+                combined_totals[f'Season {season_num}'] = '—'
+
         # Reorder columns for drivers
-        combined_totals = combined_totals[['Place', tORd, 'Points', '1st Place', '2nd Place', '3rd Place', 'Podiums', x, 'Win Streak', 'Single Season Win Streak']]
+        season_cols = [f'Season {i+1}' for i in range(NumSeason)]
+        combined_totals = combined_totals[['Place', tORd, 'Points', '1st Place', '2nd Place', '3rd Place', 'Podiums', x, 'Win Streak', 'Single Season Win Streak'] + season_cols]
         combined_totals['Place'] = combined_totals.index + 1
 
     elif tORd == 'Team':
         # Remove Podium columns as they are not needed for Team analysis as requested
-        combined_totals = combined_totals.drop(columns=['Podiums'])
+        if 'Podiums' in combined_totals.columns:
+            combined_totals = combined_totals.drop(columns=['Podiums'])
         
+        # Map teams and drivers for each season
+        for i in range(NumSeason):
+            season_num = i + 1
+            sheet = "Season" + str(season_num)
+            try:
+                df_season = pd.read_excel(file, sheet_name=sheet)
+                df_season['Driver'] = df_season['Driver'].astype(str).str.strip()
+                df_season['Team'] = df_season['Team'].astype(str).str.strip()
+                
+                # Group drivers by team for this season
+                team_drivers = df_season.groupby('Team')['Driver'].apply(lambda x: ", ".join(x.unique())).to_dict()
+                combined_totals[f'Season {season_num}'] = combined_totals['Team'].map(team_drivers).fillna('—')
+            except Exception:
+                combined_totals[f'Season {season_num}'] = '—'
+
         # Reorder columns for teams
-        combined_totals = combined_totals[['Place', tORd, 'Points', '1st Place', '2nd Place', '3rd Place', x]]
+        season_cols = [f'Season {i+1}' for i in range(NumSeason)]
+        combined_totals = combined_totals[['Place', tORd, 'Points', '1st Place', '2nd Place', '3rd Place', x] + season_cols]
         combined_totals['Place'] = combined_totals.index + 1
 
     return combined_totals
+
+def GetSeasonChampions(num_seasons: int):
+    """Retrieve constructor and driver champions for each season."""
+    constructor_champs = {}
+    driver_champs = {}
+    for s in range(1, num_seasons + 1):
+        if is_season_completed(s):
+            try:
+                _, _, _, df_team, _, df_driver = PointTotals(s)
+                if not df_team.empty:
+                    constructor_champs[s] = df_team['Team'].iloc[0]
+                if not df_driver.empty:
+                    driver_champs[s] = df_driver['Driver'].iloc[0]
+            except Exception:
+                pass
+    return constructor_champs, driver_champs
 
 def RacesAllTime(NumSeason, tORd):
     dfs3 = []
@@ -338,7 +389,7 @@ def RacesAllTime(NumSeason, tORd):
 
             if has_scores:
                 podium_entries = []
-                for place, prefix in [(1, '1st: '), (2, '2nd: '), (3, '3rd: ')]:
+                for place, prefix in [(1, '🥇 '), (2, '🥈 '), (3, '🥉 ')]:
                     drivers = df[df[col] == place][x].tolist()
                     if drivers:
                         podium_entries.append(prefix + ', '.join(drivers))

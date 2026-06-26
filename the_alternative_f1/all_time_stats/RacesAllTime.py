@@ -37,11 +37,11 @@ def races_all_time_view(num_seasons: int) -> rx.Component:
         def format_season_block(block: str) -> rx.Component:
             sub_lines = [sl.strip() for sl in block.split("\n") if sl.strip()]
             def line_color(line: str) -> str:
-                if line.startswith("1st"):
+                if line.startswith("🥇") or line.startswith("1st"):
                     return "#FFD700"
-                elif line.startswith("2nd"):
+                elif line.startswith("🥈") or line.startswith("2nd"):
                     return "#C0C0C0"
-                elif line.startswith("3rd"):
+                elif line.startswith("🥉") or line.startswith("3rd"):
                     return "#CD7F32"
                 return "#888888"
             return rx.vstack(
@@ -62,46 +62,41 @@ def races_all_time_view(num_seasons: int) -> rx.Component:
             padding_y="8px",
         )
 
-    def build_table(rows, title: str) -> rx.Component:
-        return rx.vstack(
-            rx.heading(title, size="4", color="white", font_weight="700", margin_bottom="3"),
-            rx.box(
-                rx.table.root(
-                    rx.table.header(
+    def build_table(rows) -> rx.Component:
+        return rx.box(
+            rx.table.root(
+                rx.table.header(
+                    rx.table.row(
+                        header_cell("Race"),
+                        *[header_cell(f"S{i+1}") for i in range(num_seasons)],
+                        bg="#111111",
+                    )
+                ),
+                rx.table.body(
+                    *[
                         rx.table.row(
-                            header_cell("Race"),
-                            *[header_cell(f"S{i+1}") for i in range(num_seasons)],
-                            bg="#111111",
+                            rx.table.cell(
+                                rx.text(row["Race"], color="white", font_weight="600", font_size="12px", white_space="nowrap"),
+                            ),
+                            *[
+                                podium_cell(row.get(col, ""))
+                                for col in season_cols
+                            ],
+                            _hover={"bg": "rgba(0,180,218,0.05)"},
+                            transition="background 0.15s",
                         )
-                    ),
-                    rx.table.body(
-                        *[
-                            rx.table.row(
-                                rx.table.cell(
-                                    rx.text(row["Race"], color="white", font_weight="600", font_size="12px", white_space="nowrap"),
-                                ),
-                                *[
-                                    podium_cell(row.get(col, ""))
-                                    for col in season_cols
-                                ],
-                                _hover={"bg": "rgba(0,180,218,0.05)"},
-                                transition="background 0.15s",
-                            )
-                            for row in rows
-                        ]
-                    ),
-                    width="100%",
-                    variant="ghost",
+                        for row in rows
+                    ]
                 ),
                 width="100%",
-                overflow_x="auto",
-                bg="#18181C",
-                border_radius="xl",
-                border="1px solid #2C2C32",
-                padding="4",
+                variant="ghost",
             ),
             width="100%",
-            align_items="start",
+            overflow_x="auto",
+            bg="#18181C",
+            border_radius="xl",
+            border="1px solid #2C2C32",
+            padding="4",
         )
 
     return rx.vstack(
@@ -133,11 +128,38 @@ def races_all_time_view(num_seasons: int) -> rx.Component:
             width="100%",
             margin_bottom="6",
         ),
-        rx.vstack(
-            build_table(team_rows, "Race Results by Constructor"),
-            build_table(driver_rows, "Race Results by Driver"),
+        rx.accordion.root(
+            rx.accordion.item(
+                rx.accordion.trigger(
+                    rx.text("Race Results by Constructor", color="white", font_weight="600"),
+                ),
+                rx.accordion.content(
+                    build_table(team_rows),
+                    padding_y="4px",
+                ),
+                value="constructor_results",
+                bg="#3C3C41",
+                border_radius="md",
+                padding_x="3",
+                margin_y="1",
+            ),
+            rx.accordion.item(
+                rx.accordion.trigger(
+                    rx.text("Race Results by Driver", color="white", font_weight="600"),
+                ),
+                rx.accordion.content(
+                    build_table(driver_rows),
+                    padding_y="4px",
+                ),
+                value="driver_results",
+                bg="#525259",
+                border_radius="md",
+                padding_x="3",
+                margin_y="1",
+            ),
+            collapsible=True,
             width="100%",
-            spacing="8",
+            variant="ghost",
         ),
         width="100%",
         align_items="start",

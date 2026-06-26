@@ -11,6 +11,8 @@ def constructor_stats_view(num_seasons: int) -> rx.Component:
     df = Functions.CalculateAllTime(num_seasons, "Team")
     rows = df.to_dict(orient="records")
 
+    constructor_champs, _ = Functions.GetSeasonChampions(num_seasons)
+
     def header_cell(label: str) -> rx.Component:
         return rx.table.column_header_cell(
             label,
@@ -42,6 +44,36 @@ def constructor_stats_view(num_seasons: int) -> rx.Component:
                 ),
             )
         return rx.table.cell(rx.text("—", color="#555555", font_size="13px"))
+
+    def season_cell(season_num: int, team_name: str, drivers_str: str) -> rx.Component:
+        if not drivers_str or drivers_str == "—" or drivers_str.strip() == "":
+            return rx.table.cell(rx.text("—", color="#555555", font_size="13px"))
+        
+        is_champ = constructor_champs.get(season_num) == team_name
+        drivers = [d.strip() for d in drivers_str.split(",") if d.strip()]
+        
+        return rx.table.cell(
+            rx.vstack(
+                rx.cond(
+                    is_champ,
+                    rx.badge(
+                        "🥇 Champion",
+                        color_scheme="yellow",
+                        variant="solid",
+                        font_size="10px",
+                        margin_bottom="1",
+                    ),
+                    rx.fragment(),
+                ),
+                *[
+                    rx.text(driver, color="#E0E0E0", font_size="13px", white_space="nowrap")
+                    for driver in drivers
+                ],
+                spacing="1",
+                align_items="start",
+            ),
+            padding_y="8px",
+        )
 
     return rx.vstack(
         rx.vstack(
@@ -77,6 +109,7 @@ def constructor_stats_view(num_seasons: int) -> rx.Component:
                         header_cell("2nd"),
                         header_cell("3rd"),
                         header_cell("Championships"),
+                        *[header_cell(f"S{i+1}") for i in range(num_seasons)],
                         bg="#111111",
                     )
                 ),
@@ -103,6 +136,10 @@ def constructor_stats_view(num_seasons: int) -> rx.Component:
                             data_cell(row["2nd Place"]),
                             data_cell(row["3rd Place"]),
                             champion_cell(row["Constructor's Champion"]),
+                            *[
+                                season_cell(s, row["Team"], row.get(f"Season {s}", "—"))
+                                for s in range(1, num_seasons + 1)
+                            ],
                             _hover={"bg": "rgba(0,180,218,0.05)"},
                             transition="background 0.15s",
                         )
