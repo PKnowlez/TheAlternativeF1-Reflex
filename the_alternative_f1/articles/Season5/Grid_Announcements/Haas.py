@@ -21,7 +21,21 @@ article = {
             margin_y="6",
             width="100%",
         ),
-        "Matthew and Brently will roll onto the track as the first pair of drivers to represent Haas and the American team on The Alternative F1's grid."
+        "Matthew was overheard with a bit of a disgruntled comment about how his rookie season went.",
+        rx.box(
+            rx.text(
+                "\"It would just be great to not find any race ending bugs or to be taken out by AI.\"",
+                color="#CCCCCC",
+                font_style="italic",
+                font_size="md",
+                line_height="1.6",
+            ),
+            padding_left="16px",
+            border_left="4px solid #00b4da",
+            margin_y="6",
+            width="100%",
+        ),
+        "Brently and Matthew will roll onto the track as the first pair of drivers to represent Haas and the American team on The Alternative F1's grid."
     ],
     "image": "/Season5/Grid_Announcements/Grid_Haas.png",
     "author": "Patrick Knowles",

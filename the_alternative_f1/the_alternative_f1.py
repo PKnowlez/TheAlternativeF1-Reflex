@@ -401,9 +401,9 @@ def articles_list() -> rx.Component:
     """List of all article cards."""
     return rx.vstack(
         rx.vstack(
-            rx.heading("The Alternative F1 League News", size="7", color="white", font_weight="900", padding_y="2.5%", padding_x="2%"),
+            rx.heading("League News", size="7", color="white", font_weight="900", padding_y="2.5%", padding_x="2%"),
             rx.text(
-                "Stay up-to-date on the happenings of The Alternative F1 league.",
+                "Click below to have our itnern obliterate your self-esteem senselessly",
                 color="#AAAAAA",
                 font_size="sm",
                 padding_x="2%",

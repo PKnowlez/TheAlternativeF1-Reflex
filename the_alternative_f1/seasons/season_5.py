@@ -8,7 +8,7 @@ season = {
     # Rookies: drivers not present in Season 4
     "rookies": {"Grayson", "TBD1", "Randy", "TBD2"},
 
-    "articles": [],
+    "articles": [Haas_Article],
 
     "team_colors": {
         "Alpine": "hotpink",
