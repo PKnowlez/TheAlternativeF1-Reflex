@@ -1113,7 +1113,7 @@ def _season_tab_button(label: str, tab_key: str) -> rx.Component:
         label,
         bg=rx.cond(State.selected_season_tab == tab_key, "#00b4da", "#18181C"),
         color="white",
-        font_size="9px",
+        font_size=["7px", "8px", "9px"],
         font_weight="bold",
         width="26px",
         style={"writingMode": "vertical-rl"},
@@ -1125,7 +1125,7 @@ def _season_tab_button(label: str, tab_key: str) -> rx.Component:
         cursor="pointer",
         padding="0",
         flex="1",
-        min_height="30px",
+        min_height=["22px", "26px", "30px"],
     )
 
 
@@ -1251,7 +1251,14 @@ def seasons_view() -> rx.Component:
             top="12vh",
             z_index="99",
             height="calc(100vh - 12vh - 60px - 10px)",
-            overflow="hidden",
+            style={
+                "overflow_y": "auto",
+                "scrollbar_width": "none",  # Firefox
+                "-ms-overflow-style": "none",  # IE/Edge
+                "&::-webkit-scrollbar": {  # Chrome/Safari/Opera
+                    "display": "none",
+                },
+            },
         ),
         # Content area
         rx.box(
