@@ -1,4 +1,5 @@
 import reflex as rx
+from the_alternative_f1.articles.components import zoomable_image
 
 article = {
     "title": "Article Template & Sample Rich Card",
@@ -23,7 +24,7 @@ article = {
         
         # An inline image within one of the paragraphs justified on the right
         rx.box(
-            rx.image(
+            zoomable_image(
                 src="/article_f1_tech.png", 
                 float="right", 
                 width="150px", 
@@ -73,7 +74,7 @@ article = {
         # A .gif
         rx.vstack(
             rx.text("Dynamic GIF Asset", color="#888888", font_size="xs", margin_bottom="1"),
-            rx.image(
+            zoomable_image(
                 src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3BxeDR6bXY0N3Rrb3V4dnZ0YnRqcDZ6N2x1eGFsZ3FhcDZtc3E3ZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKSjRrfIPjei1fG/giphy.gif",
                 width="100%",
                 max_width="400px",

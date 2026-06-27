@@ -1,4 +1,5 @@
 import reflex as rx
+from the_alternative_f1.articles.components import zoomable_image
 
 article = {
     "title": "New App, Who Dis?",
@@ -19,7 +20,7 @@ article = {
             margin_bottom="4",
         ),
 
-        rx.image(
+        zoomable_image(
             src="/NewApp/Navigation_Bar.png",
             width="100%",
             border_radius="md",
@@ -34,7 +35,7 @@ article = {
         ),
 
         rx.box(
-            rx.image(
+            zoomable_image(
                 src="/NewApp/Sidebar.png",
                 float="left", 
                 height="150px", 
@@ -42,7 +43,7 @@ article = {
                 margin_bottom="8px", 
                 border_radius="md",
                 box_shadow="0 4px 12px rgba(0,0,0,0.3)"
-            ),
+              ),
             rx.text(
                 "Alright, so you made it to the Regulations and Settings page. Proud of you. On the side you will see these two buttons that let you switch between regs and settings. You will also notice, that you can scroll...ya know...like all apps have done since, well, apps were invented. Keep up boomer. You're gonna see sidebar buttons like that all over the place, so get used to it. Pretty much every major section has them.",
                 color="#E0E0E0",
@@ -71,7 +72,7 @@ article = {
         ),
 
         rx.box(
-            rx.image(
+            zoomable_image(
                 src="/NewApp/SeasonSelect.png",
                 float="right", 
                 width="150px", 
