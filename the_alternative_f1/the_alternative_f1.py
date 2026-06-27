@@ -403,7 +403,7 @@ def articles_list() -> rx.Component:
         rx.vstack(
             rx.heading("League News", size="7", color="white", font_weight="900", padding_y="2.5%", padding_x="2%"),
             rx.text(
-                "Click below to have our itnern obliterate your self-esteem senselessly",
+                "Click below to have our intern obliterate your self-esteem senselessly.",
                 color="#AAAAAA",
                 font_size="sm",
                 padding_x="2%",
