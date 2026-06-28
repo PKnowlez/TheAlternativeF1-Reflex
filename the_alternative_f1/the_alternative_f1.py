@@ -792,7 +792,7 @@ def comment_card(comment: Comment) -> rx.Component:
         width="100%",
         bg="#18181C",
         border="1px solid #2C2C32",
-        padding="5",
+        padding="2%",
         border_radius="xl",
         align_items="start",
         spacing="2",
