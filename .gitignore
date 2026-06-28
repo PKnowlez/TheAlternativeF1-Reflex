@@ -26,3 +26,12 @@ Thumbs.db
 
 # VS Code settings (optional, but keep settings.json if workspace-specific)
 # .vscode/
+
+# Zips and build artifacts
+*.zip
+backend.zip
+frontend.zip
+
+# Design sources
+photoshop_sources/
+
