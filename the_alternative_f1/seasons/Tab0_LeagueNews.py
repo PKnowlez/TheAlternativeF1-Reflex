@@ -6,7 +6,7 @@ Displays articles from the homepage that match the selected season.
 import reflex as rx
 
 
-def Tab0(season_data: dict, select_article = None) -> rx.Component:
+def Tab0(season_data: dict, select_article = None, season_articles_expanded = None, expand_season_articles = None) -> rx.Component:
     """Render season-specific news articles.
 
     Parameters
@@ -111,7 +111,8 @@ def Tab0(season_data: dict, select_article = None) -> rx.Component:
             overflow="hidden",
             width="100%",
             max_width="360px",
-            margin_bottom="5%",
+            margin_top="2%",
+            margin_bottom="2%",
             cursor="pointer",
             on_click=lambda: select_article(article["title"]) if select_article is not None else None,
             _hover={
@@ -121,6 +122,9 @@ def Tab0(season_data: dict, select_article = None) -> rx.Component:
             },
             transition="all 0.25s ease-in-out",
         )
+
+    first_six = season_articles[:6]
+    remaining = season_articles[6:]
 
     return rx.vstack(
         rx.vstack(
@@ -138,10 +142,46 @@ def Tab0(season_data: dict, select_article = None) -> rx.Component:
             padding_bottom="4",
         ),
         rx.flex(
-            *[news_card(a) for a in season_articles],
+            *[news_card(a) for a in first_six],
+            rx.cond(
+                ~season_articles_expanded,
+                rx.center(
+                    rx.button(
+                        "Load More Articles",
+                        on_click=expand_season_articles,
+                        bg="#18181C",
+                        color="#00b4da",
+                        border="1px solid #00b4da",
+                        padding_x="6",
+                        padding_y="4",
+                        border_radius="xl",
+                        cursor="pointer",
+                        _hover={
+                            "bg": "#00b4da",
+                            "color": "white",
+                            "box_shadow": "0 0 15px rgba(0, 180, 218, 0.4)",
+                            "transform": "scale(1.02)",
+                        },
+                        transition="all 0.25s ease-in-out",
+                    ),
+                    width="100%",
+                    margin_top="4",
+                    margin_bottom="120px",
+                ),
+                rx.fragment()
+            ) if len(season_articles) > 6 else rx.fragment(),
+            *[
+                rx.cond(
+                    season_articles_expanded,
+                    news_card(a),
+                    rx.fragment()
+                )
+                for a in remaining
+            ],
             flex_wrap="wrap",
             justify="center",
-            gap="5%",
+            column_gap="4%",
+            row_gap="2%",
             width="100%",
             max_width="1200px",
         ),

@@ -115,6 +115,16 @@ class State(rx.State):
     new_reply_text: str = ""
     expanded_comment_ids: list[str] = []
 
+    # ── Articles Expand State ────────────────────────────────────────────
+    home_articles_expanded: bool = False
+    season_articles_expanded: bool = False
+
+    def expand_home_articles(self):
+        self.home_articles_expanded = True
+
+    def expand_season_articles(self):
+        self.season_articles_expanded = True
+
     def set_discord_username(self, username: str):
         self.discord_username = username
 
@@ -274,6 +284,8 @@ class State(rx.State):
     def set_nav(self, nav_name: str):
         self.active_nav = nav_name
         self.selected_article_title = ""
+        self.home_articles_expanded = False
+        self.season_articles_expanded = False
         if nav_name == "regulations":
             self.selected_reg_tab = "regulations"
         if nav_name == "stats":
@@ -291,6 +303,7 @@ class State(rx.State):
     def set_season(self, season_num: int):
         self.selected_season = season_num
         self.season_picker_open = False
+        self.season_articles_expanded = False
 
     def set_season_tab(self, tab_name: str):
         self.selected_season_tab = tab_name
@@ -304,6 +317,8 @@ class State(rx.State):
     def go_home(self):
         self.active_nav = "home"
         self.selected_article_title = ""
+        self.home_articles_expanded = False
+        self.season_articles_expanded = False
 
 
 def header() -> rx.Component:
@@ -385,7 +400,8 @@ def article_card(article: dict) -> rx.Component:
         overflow="hidden",
         width="100%",
         max_width="360px",
-        margin_bottom="5%",
+        margin_top="1%",
+        margin_bottom="1%",
         cursor="pointer",
         on_click=lambda: State.select_article(article["title"]),
         _hover={
@@ -399,26 +415,65 @@ def article_card(article: dict) -> rx.Component:
 
 def articles_list() -> rx.Component:
     """List of all article cards."""
+    first_six = articles[:6]
+    remaining = articles[6:]
     return rx.vstack(
         rx.vstack(
-            rx.heading("League News", size="7", color="white", font_weight="900", padding_y="2.5%", padding_x="2%"),
+            rx.heading("League News", size="7", color="white", font_weight="900", padding_top="2.5%", padding_bottom="0%", padding_x="2%"),
             rx.text(
                 "Click below to have our intern obliterate your self-esteem senselessly.",
                 color="#AAAAAA",
                 font_size="sm",
                 padding_x="2%",
+                padding_bottom="8"
             ),
             align_items="start",
             spacing="1",
             width="100%",
             max_width="1200px",
-            padding_bottom="4",
+            padding_bottom="2",
         ),
         rx.flex(
-            *[article_card(art) for art in articles],
+            *[article_card(art) for art in first_six],
+            rx.cond(
+                ~State.home_articles_expanded,
+                rx.center(
+                    rx.button(
+                        "Load More Articles",
+                        on_click=State.expand_home_articles,
+                        bg="#18181C",
+                        color="#00b4da",
+                        border="1px solid #00b4da",
+                        padding_x="6",
+                        padding_y="4",
+                        border_radius="xl",
+                        cursor="pointer",
+                        _hover={
+                            "bg": "#00b4da",
+                            "color": "white",
+                            "box_shadow": "0 0 15px rgba(0, 180, 218, 0.4)",
+                            "transform": "scale(1.02)",
+                        },
+                        transition="all 0.25s ease-in-out",
+                    ),
+                    width="100%",
+                    margin_top="4",
+                    margin_bottom="120px",
+                ),
+                rx.fragment()
+            ) if len(articles) > 6 else rx.fragment(),
+            *[
+                rx.cond(
+                    State.home_articles_expanded,
+                    article_card(art),
+                    rx.fragment()
+                )
+                for art in remaining
+            ],
             flex_wrap="wrap",
             justify="center",
-            gap="5%",
+            column_gap="4%",
+            row_gap="2%",
             width="100%",
             max_width="1200px",
         ),
@@ -1084,7 +1139,12 @@ def _build_season_content(season_idx: int, tab: str, rookies_only: bool) -> rx.C
     data = Calculations(season_data)
 
     if tab == "news":
-        return Tab0(season_data, select_article=State.select_article)
+        return Tab0(
+            season_data,
+            select_article=State.select_article,
+            season_articles_expanded=State.season_articles_expanded,
+            expand_season_articles=State.expand_season_articles,
+        )
     elif tab == "standings":
         return Tab1(data, season_data)
     elif tab == "race_results":
