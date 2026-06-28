@@ -51,6 +51,12 @@ COMMENTS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "
 DB_INITIALIZED = False
 
 def init_db_from_json():
+    # Automatically create tables if they do not exist
+    try:
+        rx.Model.metadata.create_all(rx.db.engine)
+    except Exception as e:
+        print(f"Error creating database tables: {e}")
+
     # If comments.json exists and the database is empty, migrate comments to SQL
     with rx.session() as session:
         try:
@@ -94,6 +100,7 @@ def init_db_from_json():
                 print("Successfully migrated comments.json to the database.")
             except Exception as e:
                 print(f"Error migrating comments.json to database: {e}")
+
 
 
 from the_alternative_f1.articles import articles
@@ -193,10 +200,15 @@ class State(rx.State):
             init_db_from_json()
             DB_INITIALIZED = True
         
-        with rx.session() as session:
-            self.comments_list = session.exec(
-                select(Comment).where(Comment.article_title == self.selected_article_title)
-            ).all()
+        try:
+            with rx.session() as session:
+                self.comments_list = session.exec(
+                    select(Comment).where(Comment.article_title == self.selected_article_title)
+                ).all()
+        except Exception as e:
+            print(f"Error loading comments: {e}")
+            self.comments_list = []
+
 
     def add_comment(self):
         if not self.discord_username:
