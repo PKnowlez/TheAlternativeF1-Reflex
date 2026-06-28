@@ -1,74 +1,100 @@
 """Welcome to Reflex! This file outlines the steps to create a basic app."""
 
 import reflex as rx
-
 from rxconfig import config
 
 import json
 import os
-import uuid
+import sqlalchemy
+import sqlmodel
+from sqlmodel import Field, Relationship, select
 from the_alternative_f1.oauth_discord import oauth_discord
 
-from pydantic import BaseModel
-
-class CommentReply(BaseModel):
-    id: str
+class CommentReply(rx.Model, table=True):
+    comment_id: int = Field(foreign_key="comment.id")
     username: str
     avatar: str
     text: str
     likes: int = 0
     dislikes: int = 0
-    liked_by: list[str] = []
-    disliked_by: list[str] = []
+    liked_by: list[str] = Field(
+        default=[],
+        sa_column=sqlalchemy.Column(sqlalchemy.JSON)
+    )
+    disliked_by: list[str] = Field(
+        default=[],
+        sa_column=sqlalchemy.Column(sqlalchemy.JSON)
+    )
+    comment: "Comment" = Relationship(back_populates="replies")
 
-class Comment(BaseModel):
-    id: str
+class Comment(rx.Model, table=True):
     article_title: str
     username: str
     avatar: str
     text: str
     likes: int = 0
     dislikes: int = 0
-    liked_by: list[str] = []
-    disliked_by: list[str] = []
-    replies: list[CommentReply] = []
+    liked_by: list[str] = Field(
+        default=[],
+        sa_column=sqlalchemy.Column(sqlalchemy.JSON)
+    )
+    disliked_by: list[str] = Field(
+        default=[],
+        sa_column=sqlalchemy.Column(sqlalchemy.JSON)
+    )
+    replies: list[CommentReply] = Relationship(
+        back_populates="comment",
+        sa_relationship_kwargs={"lazy": "selectin"}
+    )
 
 COMMENTS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "comments.json")
+DB_INITIALIZED = False
 
-def load_comments_from_file() -> list[Comment]:
-    if not os.path.exists(COMMENTS_FILE):
-        return []
-    try:
-        with open(COMMENTS_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            return [
-                Comment(
-                    id=item["id"],
-                    article_title=item["article_title"],
-                    username=item["username"],
-                    avatar=item["avatar"],
-                    text=item["text"],
-                    likes=item.get("likes", 0),
-                    dislikes=item.get("dislikes", 0),
-                    liked_by=item.get("liked_by", []),
-                    disliked_by=item.get("disliked_by", []),
-                    replies=[CommentReply(**r) for r in item.get("replies", [])]
-                )
-                for item in data
-            ]
-    except Exception as e:
-        print(f"Error loading comments: {e}")
-        return []
+def init_db_from_json():
+    # If comments.json exists and the database is empty, migrate comments to SQL
+    with rx.session() as session:
+        try:
+            count = len(session.exec(select(Comment)).all())
+        except Exception:
+            count = 0
+        if count == 0 and os.path.exists(COMMENTS_FILE):
+            try:
+                with open(COMMENTS_FILE, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                
+                # Import comments
+                for item in data:
+                    comment_obj = Comment(
+                        article_title=item["article_title"],
+                        username=item["username"],
+                        avatar=item["avatar"],
+                        text=item["text"],
+                        likes=item.get("likes", 0),
+                        dislikes=item.get("dislikes", 0),
+                        liked_by=item.get("liked_by", []),
+                        disliked_by=item.get("disliked_by", [])
+                    )
+                    session.add(comment_obj)
+                    session.commit()
+                    
+                    # Import replies for this comment
+                    for r in item.get("replies", []):
+                        reply_obj = CommentReply(
+                            comment_id=comment_obj.id,
+                            username=r["username"],
+                            avatar=r["avatar"],
+                            text=r["text"],
+                            likes=r.get("likes", 0),
+                            dislikes=r.get("dislikes", 0),
+                            liked_by=r.get("liked_by", []),
+                            disliked_by=r.get("disliked_by", [])
+                        )
+                        session.add(reply_obj)
+                    session.commit()
+                print("Successfully migrated comments.json to the database.")
+            except Exception as e:
+                print(f"Error migrating comments.json to database: {e}")
 
-def save_comments_to_file(comments: list[Comment]):
-    try:
-        with open(COMMENTS_FILE, "w", encoding="utf-8") as f:
-            serialized = [c.dict() for c in comments]
-            json.dump(serialized, f, indent=4, ensure_ascii=False)
-    except Exception as e:
-        print(f"Error saving comments: {e}")
-
-GLOBAL_COMMENTS = load_comments_from_file()
 
 from the_alternative_f1.articles import articles
 from the_alternative_f1.regulations_settings.Regulations import Regulations as regulations_content
@@ -105,15 +131,15 @@ class State(rx.State):
     rookies_only: bool = False
 
     # ── Discord Login State ──────────────────────────────────────────────
-    discord_username: str = ""
-    discord_avatar: str = ""
+    discord_username: str = rx.LocalStorage("", name="discord_username", sync=True)
+    discord_avatar: str = rx.LocalStorage("", name="discord_avatar", sync=True)
 
     # ── Comments State ───────────────────────────────────────────────────
     comments_list: list[Comment] = []
     new_comment_text: str = ""
-    active_reply_comment_id: str = ""
+    active_reply_comment_id: int = -1
     new_reply_text: str = ""
-    expanded_comment_ids: list[str] = []
+    expanded_comment_ids: list[int] = []
 
     # ── Articles Expand State ────────────────────────────────────────────
     home_articles_expanded: bool = False
@@ -138,7 +164,19 @@ class State(rx.State):
         self.new_reply_text = text
 
     def login_with_discord(self):
-        return rx.call_script("window.open('/oauth/discord', 'Discord Login', 'width=500,height=600')")
+        from the_alternative_f1.oauth_discord import load_env
+        load_env()
+        client_id = os.getenv("DISCORD_CLIENT_ID", "").strip()
+        redirect_uri = os.getenv("DISCORD_REDIRECT_URI", "").strip()
+
+        # Fallback to local mock page if credentials aren't set
+        if not client_id or not redirect_uri:
+            return rx.call_script("window.open('/oauth/discord', 'Discord Login', 'width=500,height=600')")
+
+        import urllib.parse
+        encoded_redirect = urllib.parse.quote(redirect_uri, safe="")
+        auth_url = f"https://discord.com/oauth2/authorize?client_id={client_id}&redirect_uri={encoded_redirect}&response_type=code&scope=identify"
+        return rx.call_script(f"window.open('{auth_url}', 'Discord Login', 'width=500,height=600')")
 
     def complete_discord_login(self):
         self.active_nav = "home"
@@ -150,7 +188,15 @@ class State(rx.State):
         self.active_nav = "home"
 
     def load_comments(self):
-        self.comments_list = [c for c in GLOBAL_COMMENTS if c.article_title == self.selected_article_title]
+        global DB_INITIALIZED
+        if not DB_INITIALIZED:
+            init_db_from_json()
+            DB_INITIALIZED = True
+        
+        with rx.session() as session:
+            self.comments_list = session.exec(
+                select(Comment).where(Comment.article_title == self.selected_article_title)
+            ).all()
 
     def add_comment(self):
         if not self.discord_username:
@@ -158,124 +204,151 @@ class State(rx.State):
         text = self.new_comment_text.strip()
         if not text:
             return
-        new_comment = Comment(
-            id=str(uuid.uuid4()),
-            article_title=self.selected_article_title,
-            username=self.discord_username,
-            avatar=self.discord_avatar,
-            text=text,
-            likes=0,
-            dislikes=0,
-            liked_by=[],
-            disliked_by=[],
-            replies=[],
-        )
-        GLOBAL_COMMENTS.append(new_comment)
-        save_comments_to_file(GLOBAL_COMMENTS)
+        
+        with rx.session() as session:
+            new_comment = Comment(
+                article_title=self.selected_article_title,
+                username=self.discord_username,
+                avatar=self.discord_avatar,
+                text=text,
+                likes=0,
+                dislikes=0,
+                liked_by=[],
+                disliked_by=[],
+            )
+            session.add(new_comment)
+            session.commit()
+            
         self.new_comment_text = ""
         self.load_comments()
 
-    def add_reply(self, comment_id: str):
+    def add_reply(self, comment_id: int):
         if not self.discord_username:
             return
         text = self.new_reply_text.strip()
         if not text:
             return
-        for c in GLOBAL_COMMENTS:
-            if c.id == comment_id:
-                new_reply = CommentReply(
-                    id=str(uuid.uuid4()),
-                    username=self.discord_username,
-                    avatar=self.discord_avatar,
-                    text=text,
-                    likes=0,
-                    dislikes=0,
-                    liked_by=[],
-                    disliked_by=[],
-                )
-                c.replies.append(new_reply)
-                if comment_id not in self.expanded_comment_ids:
-                    self.expanded_comment_ids.append(comment_id)
-                break
-        save_comments_to_file(GLOBAL_COMMENTS)
+        
+        with rx.session() as session:
+            new_reply = CommentReply(
+                comment_id=comment_id,
+                username=self.discord_username,
+                avatar=self.discord_avatar,
+                text=text,
+                likes=0,
+                dislikes=0,
+                liked_by=[],
+                disliked_by=[],
+            )
+            session.add(new_reply)
+            session.commit()
+            
+            if comment_id not in self.expanded_comment_ids:
+                self.expanded_comment_ids.append(comment_id)
+                
         self.new_reply_text = ""
-        self.active_reply_comment_id = ""
+        self.active_reply_comment_id = -1
         self.load_comments()
 
-    def like_comment(self, comment_id: str, reply_id: str = None):
+    def like_comment(self, comment_id: int, reply_id: int = None):
         if not self.discord_username:
             return
         user = self.discord_username
-        for c in GLOBAL_COMMENTS:
-            if c.id == comment_id:
-                if reply_id is None:
-                    if user in c.liked_by:
-                        c.liked_by.remove(user)
+        
+        with rx.session() as session:
+            if reply_id is None:
+                c = session.exec(select(Comment).where(Comment.id == comment_id)).first()
+                if c:
+                    liked = list(c.liked_by)
+                    disliked = list(c.disliked_by)
+                    if user in liked:
+                        liked.remove(user)
                     else:
-                        if user in c.disliked_by:
-                            c.disliked_by.remove(user)
-                        c.liked_by.append(user)
-                    c.likes = len(c.liked_by)
-                    c.dislikes = len(c.disliked_by)
-                else:
-                    for r in c.replies:
-                        if r.id == reply_id:
-                            if user in r.liked_by:
-                                r.liked_by.remove(user)
-                            else:
-                                if user in r.disliked_by:
-                                    r.disliked_by.remove(user)
-                                r.liked_by.append(user)
-                            r.likes = len(r.liked_by)
-                            r.dislikes = len(r.disliked_by)
-                            break
-                break
-        save_comments_to_file(GLOBAL_COMMENTS)
+                        if user in disliked:
+                            disliked.remove(user)
+                        liked.append(user)
+                    c.liked_by = liked
+                    c.disliked_by = disliked
+                    c.likes = len(liked)
+                    c.dislikes = len(disliked)
+                    session.add(c)
+                    session.commit()
+            else:
+                r = session.exec(select(CommentReply).where(CommentReply.id == reply_id)).first()
+                if r:
+                    liked = list(r.liked_by)
+                    disliked = list(r.disliked_by)
+                    if user in liked:
+                        liked.remove(user)
+                    else:
+                        if user in disliked:
+                            disliked.remove(user)
+                        liked.append(user)
+                    r.liked_by = liked
+                    r.disliked_by = disliked
+                    r.likes = len(liked)
+                    r.dislikes = len(disliked)
+                    session.add(r)
+                    session.commit()
+                    
         self.load_comments()
 
-    def dislike_comment(self, comment_id: str, reply_id: str = None):
+    def dislike_comment(self, comment_id: int, reply_id: int = None):
         if not self.discord_username:
             return
         user = self.discord_username
-        for c in GLOBAL_COMMENTS:
-            if c.id == comment_id:
-                if reply_id is None:
-                    if user in c.disliked_by:
-                        c.disliked_by.remove(user)
+        
+        with rx.session() as session:
+            if reply_id is None:
+                c = session.exec(select(Comment).where(Comment.id == comment_id)).first()
+                if c:
+                    liked = list(c.liked_by)
+                    disliked = list(c.disliked_by)
+                    if user in disliked:
+                        disliked.remove(user)
                     else:
-                        if user in c.liked_by:
-                            c.liked_by.remove(user)
-                        c.disliked_by.append(user)
-                    c.likes = len(c.liked_by)
-                    c.dislikes = len(c.disliked_by)
-                else:
-                    for r in c.replies:
-                        if r.id == reply_id:
-                            if user in r.disliked_by:
-                                r.disliked_by.remove(user)
-                            else:
-                                if user in r.liked_by:
-                                    r.liked_by.remove(user)
-                                r.disliked_by.append(user)
-                            r.likes = len(r.liked_by)
-                            r.dislikes = len(r.disliked_by)
-                            break
-                break
-        save_comments_to_file(GLOBAL_COMMENTS)
+                        if user in liked:
+                            liked.remove(user)
+                        disliked.append(user)
+                    c.liked_by = liked
+                    c.disliked_by = disliked
+                    c.likes = len(liked)
+                    c.dislikes = len(disliked)
+                    session.add(c)
+                    session.commit()
+            else:
+                r = session.exec(select(CommentReply).where(CommentReply.id == reply_id)).first()
+                if r:
+                    liked = list(r.liked_by)
+                    disliked = list(r.disliked_by)
+                    if user in disliked:
+                        disliked.remove(user)
+                    else:
+                        if user in liked:
+                            liked.remove(user)
+                        disliked.append(user)
+                    r.liked_by = liked
+                    r.disliked_by = disliked
+                    r.likes = len(liked)
+                    r.dislikes = len(disliked)
+                    session.add(r)
+                    session.commit()
+                    
         self.load_comments()
 
-    def toggle_replies(self, comment_id: str):
+    def toggle_replies(self, comment_id: int):
         if comment_id in self.expanded_comment_ids:
             self.expanded_comment_ids.remove(comment_id)
         else:
             self.expanded_comment_ids.append(comment_id)
 
-    def set_active_reply_comment_id(self, comment_id: str):
+    def set_active_reply_comment_id(self, comment_id: int):
         if self.active_reply_comment_id == comment_id:
-            self.active_reply_comment_id = ""
+            self.active_reply_comment_id = -1
         else:
             self.active_reply_comment_id = comment_id
         self.new_reply_text = ""
+
 
     def select_article(self, title: str):
         self.selected_article_title = title
@@ -1478,43 +1551,6 @@ def footer() -> rx.Component:
 def index() -> rx.Component:
     """The main view structure."""
     return rx.box(
-        rx.box(
-            rx.input(
-                id="discord-username-input",
-                type="hidden",
-                value=State.discord_username,
-                on_change=State.set_discord_username,
-            ),
-            rx.input(
-                id="discord-avatar-input",
-                type="hidden",
-                value=State.discord_avatar,
-                on_change=State.set_discord_avatar,
-            ),
-            rx.button(
-                id="discord-login-btn",
-                on_click=State.complete_discord_login,
-            ),
-            style={"display": "none"},
-        ),
-        rx.script(
-            """
-            window.addEventListener('message', (e) => {
-                if (e.data && e.data.type === 'discord_login') {
-                    const uInput = document.getElementById('discord-username-input');
-                    const aInput = document.getElementById('discord-avatar-input');
-                    const btn = document.getElementById('discord-login-btn');
-                    if (uInput && aInput && btn) {
-                        uInput.value = e.data.username;
-                        uInput.dispatchEvent(new Event('input', { bubbles: true }));
-                        aInput.value = e.data.avatar;
-                        aInput.dispatchEvent(new Event('input', { bubbles: true }));
-                        setTimeout(() => btn.click(), 50);
-                    }
-                }
-            });
-            """
-        ),
         rx.vstack(
             header(),
             # Main scrollable content area with medium gray background (bg="#47474c")

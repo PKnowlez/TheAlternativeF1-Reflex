@@ -1,0 +1,37 @@
+[
+    {
+        "id": "a44c3efe-d79c-4011-bfb4-65292bee83a1",
+        "article_title": "New App, Who Dis?",
+        "username": "PK",
+        "avatar": "https://cdn.discordapp.com/avatars/272144779758796813/4adb7d461713a9e6b602996c18a0b86b.png",
+        "text": "Test comment",
+        "likes": 0,
+        "dislikes": 0,
+        "liked_by": [],
+        "disliked_by": [],
+        "replies": [
+            {
+                "id": "fa4d6ce2-f3b5-41ff-96e0-436b36a51feb",
+                "username": "PK",
+                "avatar": "https://cdn.discordapp.com/avatars/272144779758796813/4adb7d461713a9e6b602996c18a0b86b.png",
+                "text": "Test reply",
+                "likes": 0,
+                "dislikes": 0,
+                "liked_by": [],
+                "disliked_by": []
+            }
+        ]
+    },
+    {
+        "id": "848a4f72-1407-450f-bed2-900275509b0a",
+        "article_title": "A New Look Team USA",
+        "username": "PK",
+        "avatar": "https://cdn.discordapp.com/avatars/272144779758796813/4adb7d461713a9e6b602996c18a0b86b.png",
+        "text": "USA!",
+        "likes": 0,
+        "dislikes": 0,
+        "liked_by": [],
+        "disliked_by": [],
+        "replies": []
+    }
+]
