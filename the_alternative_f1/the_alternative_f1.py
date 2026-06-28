@@ -217,19 +217,22 @@ class State(rx.State):
         if not text:
             return
         
-        with rx.session() as session:
-            new_comment = Comment(
-                article_title=self.selected_article_title,
-                username=self.discord_username,
-                avatar=self.discord_avatar,
-                text=text,
-                likes=0,
-                dislikes=0,
-                liked_by=[],
-                disliked_by=[],
-            )
-            session.add(new_comment)
-            session.commit()
+        try:
+            with rx.session() as session:
+                new_comment = Comment(
+                    article_title=self.selected_article_title,
+                    username=self.discord_username,
+                    avatar=self.discord_avatar,
+                    text=text,
+                    likes=0,
+                    dislikes=0,
+                    liked_by=[],
+                    disliked_by=[],
+                )
+                session.add(new_comment)
+                session.commit()
+        except Exception as e:
+            print(f"Error adding comment: {e}")
             
         self.new_comment_text = ""
         self.load_comments()
@@ -241,22 +244,25 @@ class State(rx.State):
         if not text:
             return
         
-        with rx.session() as session:
-            new_reply = CommentReply(
-                comment_id=comment_id,
-                username=self.discord_username,
-                avatar=self.discord_avatar,
-                text=text,
-                likes=0,
-                dislikes=0,
-                liked_by=[],
-                disliked_by=[],
-            )
-            session.add(new_reply)
-            session.commit()
-            
-            if comment_id not in self.expanded_comment_ids:
-                self.expanded_comment_ids.append(comment_id)
+        try:
+            with rx.session() as session:
+                new_reply = CommentReply(
+                    comment_id=comment_id,
+                    username=self.discord_username,
+                    avatar=self.discord_avatar,
+                    text=text,
+                    likes=0,
+                    dislikes=0,
+                    liked_by=[],
+                    disliked_by=[],
+                )
+                session.add(new_reply)
+                session.commit()
+                
+                if comment_id not in self.expanded_comment_ids:
+                    self.expanded_comment_ids.append(comment_id)
+        except Exception as e:
+            print(f"Error adding reply: {e}")
                 
         self.new_reply_text = ""
         self.active_reply_comment_id = -1
@@ -267,41 +273,44 @@ class State(rx.State):
             return
         user = self.discord_username
         
-        with rx.session() as session:
-            if reply_id is None:
-                c = session.exec(select(Comment).where(Comment.id == comment_id)).first()
-                if c:
-                    liked = list(c.liked_by)
-                    disliked = list(c.disliked_by)
-                    if user in liked:
-                        liked.remove(user)
-                    else:
-                        if user in disliked:
-                            disliked.remove(user)
-                        liked.append(user)
-                    c.liked_by = liked
-                    c.disliked_by = disliked
-                    c.likes = len(liked)
-                    c.dislikes = len(disliked)
-                    session.add(c)
-                    session.commit()
-            else:
-                r = session.exec(select(CommentReply).where(CommentReply.id == reply_id)).first()
-                if r:
-                    liked = list(r.liked_by)
-                    disliked = list(r.disliked_by)
-                    if user in liked:
-                        liked.remove(user)
-                    else:
-                        if user in disliked:
-                            disliked.remove(user)
-                        liked.append(user)
-                    r.liked_by = liked
-                    r.disliked_by = disliked
-                    r.likes = len(liked)
-                    r.dislikes = len(disliked)
-                    session.add(r)
-                    session.commit()
+        try:
+            with rx.session() as session:
+                if reply_id is None:
+                    c = session.exec(select(Comment).where(Comment.id == comment_id)).first()
+                    if c:
+                        liked = list(c.liked_by)
+                        disliked = list(c.disliked_by)
+                        if user in liked:
+                            liked.remove(user)
+                        else:
+                            if user in disliked:
+                                disliked.remove(user)
+                            liked.append(user)
+                        c.liked_by = liked
+                        c.disliked_by = disliked
+                        c.likes = len(liked)
+                        c.dislikes = len(disliked)
+                        session.add(c)
+                        session.commit()
+                else:
+                    r = session.exec(select(CommentReply).where(CommentReply.id == reply_id)).first()
+                    if r:
+                        liked = list(r.liked_by)
+                        disliked = list(r.disliked_by)
+                        if user in liked:
+                            liked.remove(user)
+                        else:
+                            if user in disliked:
+                                disliked.remove(user)
+                            liked.append(user)
+                        r.liked_by = liked
+                        r.disliked_by = disliked
+                        r.likes = len(liked)
+                        r.dislikes = len(disliked)
+                        session.add(r)
+                        session.commit()
+        except Exception as e:
+            print(f"Error liking comment/reply: {e}")
                     
         self.load_comments()
 
@@ -310,41 +319,44 @@ class State(rx.State):
             return
         user = self.discord_username
         
-        with rx.session() as session:
-            if reply_id is None:
-                c = session.exec(select(Comment).where(Comment.id == comment_id)).first()
-                if c:
-                    liked = list(c.liked_by)
-                    disliked = list(c.disliked_by)
-                    if user in disliked:
-                        disliked.remove(user)
-                    else:
-                        if user in liked:
-                            liked.remove(user)
-                        disliked.append(user)
-                    c.liked_by = liked
-                    c.disliked_by = disliked
-                    c.likes = len(liked)
-                    c.dislikes = len(disliked)
-                    session.add(c)
-                    session.commit()
-            else:
-                r = session.exec(select(CommentReply).where(CommentReply.id == reply_id)).first()
-                if r:
-                    liked = list(r.liked_by)
-                    disliked = list(r.disliked_by)
-                    if user in disliked:
-                        disliked.remove(user)
-                    else:
-                        if user in liked:
-                            liked.remove(user)
-                        disliked.append(user)
-                    r.liked_by = liked
-                    r.disliked_by = disliked
-                    r.likes = len(liked)
-                    r.dislikes = len(disliked)
-                    session.add(r)
-                    session.commit()
+        try:
+            with rx.session() as session:
+                if reply_id is None:
+                    c = session.exec(select(Comment).where(Comment.id == comment_id)).first()
+                    if c:
+                        liked = list(c.liked_by)
+                        disliked = list(c.disliked_by)
+                        if user in disliked:
+                            disliked.remove(user)
+                        else:
+                            if user in liked:
+                                liked.remove(user)
+                            disliked.append(user)
+                        c.liked_by = liked
+                        c.disliked_by = disliked
+                        c.likes = len(liked)
+                        c.dislikes = len(disliked)
+                        session.add(c)
+                        session.commit()
+                else:
+                    r = session.exec(select(CommentReply).where(CommentReply.id == reply_id)).first()
+                    if r:
+                        liked = list(r.liked_by)
+                        disliked = list(r.disliked_by)
+                        if user in disliked:
+                            disliked.remove(user)
+                        else:
+                            if user in liked:
+                                liked.remove(user)
+                            disliked.append(user)
+                        r.liked_by = liked
+                        r.disliked_by = disliked
+                        r.likes = len(liked)
+                        r.dislikes = len(disliked)
+                        session.add(r)
+                        session.commit()
+        except Exception as e:
+            print(f"Error disliking comment/reply: {e}")
                     
         self.load_comments()
 
