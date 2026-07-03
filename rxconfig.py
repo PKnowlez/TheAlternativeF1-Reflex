@@ -20,7 +20,7 @@ load_env()
 
 config = rx.Config(
     app_name="the_alternative_f1",
-    db_url=os.getenv("DATABASE_URL", "sqlite:///reflex.db"),
+    db_url=os.getenv("DATABASE_URL", "sqlite:////tmp/reflex.db" if os.name != "nt" else "sqlite:///reflex.db"),
     plugins=[
         rx.plugins.SitemapPlugin(),
         rx.plugins.TailwindV4Plugin(),

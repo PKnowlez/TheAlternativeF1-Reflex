@@ -2,3 +2,7 @@ cmd
 cd"c:\Users\pacma\OneDrive\Documents\Antigravity Coding\TheAlternativeF1-Reflex"
 .venv\Scripts\activate
 reflex deploy
+
+Or
+
+.venv\Scripts\reflex.exe deploy --envfile .env
