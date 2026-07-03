@@ -5,7 +5,7 @@ article = {
     "title": "Cadillac Racing Roars to Life",
     "blurb": "Can this pair avoid a sophomore slump and take home the crown?",
     "content": [
-        "With their second place finish behind them, Patrick and Josh inked a new deal with Cadillac, the newest constructor on the grid. Josh impressed the Indianapolis based team with his impressive rookie season. Along with Patrick’s ability to avoid a sophomore slump, led to the negotiations being short and simple. A Cadillac media correspondent told our beat reporter,",
+        "With their second place finish behind them, Patrick and Josh inked a new deal with Cadillac, the newest constructor on the grid. Josh impressed the Indianapolis based team with his impressive rookie season and with Patrick’s ability to avoid a sophomore slump, Cadillac says the negotiations were short and simple. A Cadillac media correspondent also told our beat reporter,",
         rx.box(
             rx.text(
                 "\"The team of Josh and Patrick showcase and embody what we call, an unrelenting drive for success. Our goal is simple: win as early and often as we can, and always be in the mix if there are scraps to clean up.\"",
