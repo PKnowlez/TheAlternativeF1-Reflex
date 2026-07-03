@@ -12,7 +12,7 @@ season = {
     # Rookies: drivers not present in Season 4
     "rookies": {"Grayson", "TBD1", "Randy", "TBD2"},
 
-    "articles": [RedBull_Article, Erick_Article, Haas_Article],
+    "articles": [Cadillac_Article, RedBull_Article, Erick_Article, Haas_Article],
 
     "team_colors": {
         "Alpine": "hotpink",
