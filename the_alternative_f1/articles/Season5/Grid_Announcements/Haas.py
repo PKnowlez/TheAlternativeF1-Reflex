@@ -38,7 +38,7 @@ article = {
         "Brently and Matthew will roll onto the track as the first pair of drivers to represent Haas and the American team on The Alternative F1's grid."
     ],
     "image": "/Season5/Grid_Announcements/Grid_Haas.png",
-    "author": "Patrick Knowles",
+    "author": "Patrick",
     "date": "June 25, 2026",
     "season": 5,
 }

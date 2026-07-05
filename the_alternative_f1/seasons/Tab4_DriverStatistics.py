@@ -25,6 +25,9 @@ def Tab4(data: dict, season_data: dict) -> rx.Component:
     index_x = data["index_x"]
     has_dotd_mot_cd = data["has_dotd_mot_cd"]
     season_num = season_data["season_number"]
+    team_colors = data.get("team_colors", {})
+    drivers_points_df = data["drivers_points_df"]
+    driver_to_team = dict(zip(drivers_points_df["Driver"], drivers_points_df["Team"]))
 
     # 15+ unique colors for per-race bars
     race_colors = [
@@ -66,7 +69,7 @@ def Tab4(data: dict, season_data: dict) -> rx.Component:
         )
     )
 
-    sl_table_rows = []
+    sl_drivers = []
     for i in range(len(new_df)):
         d_name = new_df["Driver"].iloc[i]
         pts_list = sl_points_data.get(d_name, [])
@@ -75,10 +78,38 @@ def Tab4(data: dict, season_data: dict) -> rx.Component:
         else:
             pts_list = pts_list[:len(races_points_only)]
         
+        total_sl = sum(pts_list)
+        
+        # Find the index of the first race where points were earned (> 0)
+        first_earned_idx = len(pts_list)
+        for idx, val in enumerate(pts_list):
+            if val > 0:
+                first_earned_idx = idx
+                break
+        
+        sl_drivers.append({
+            "driver": d_name,
+            "pts_list": pts_list,
+            "total": total_sl,
+            "first_earned": first_earned_idx,
+            "original_index": i
+        })
+    
+    # Sort by total points descending, then by earliest race index where points were earned ascending,
+    # and fallback to original standings index ascending.
+    sl_drivers.sort(key=lambda x: (-x["total"], x["first_earned"], x["original_index"]))
+
+    sl_table_rows = []
+    for item in sl_drivers:
+        d_name = item["driver"]
+        pts_list = item["pts_list"]
+        total_sl = item["total"]
+        if total_sl == 0:
+            continue
+        
         cells = [
             rx.table.cell(d_name, color="white", font_weight="600", font_size="sm")
         ]
-        total_sl = sum(pts_list)
         
         for val in pts_list:
             cells.append(
@@ -165,6 +196,7 @@ def Tab4(data: dict, season_data: dict) -> rx.Component:
             pts_bar_data.append({
                 "race": race,
                 "points": float(pts) if not pd.isnull(pts) else 0,
+                "fill": race_colors[j % len(race_colors)],
             })
 
         # Calculate dynamic x-axis height for pts_chart
@@ -173,14 +205,14 @@ def Tab4(data: dict, season_data: dict) -> rx.Component:
 
         pts_chart = zoomable_chart(
             lambda h: rx.recharts.bar_chart(
-                rx.recharts.bar(data_key="points", fill="#00b4da", name="Points"),
+                rx.recharts.bar(data_key="points", name="Points"),
                 rx.recharts.x_axis(data_key="race", font_size=6, angle=-90, height=race_axis_height, stroke="white", text_anchor="end", interval=0, tick={"dx": -5}),
                 rx.recharts.y_axis(
                     stroke="white",
                     width=35,
                     tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
                 ),
-                rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
+                rx.recharts.cartesian_grid(vertical=False, stroke="rgba(0, 0, 0, 0.25)"),
                 data=pts_bar_data,
                 margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
                 margin_left="-10px",
@@ -245,7 +277,7 @@ def Tab4(data: dict, season_data: dict) -> rx.Component:
                     width=35,
                     tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
                 ),
-                rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
+                rx.recharts.cartesian_grid(vertical=False, stroke="rgba(0, 0, 0, 0.25)"),
                 data=placement_data,
                 margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
                 margin_left="-10px",
@@ -308,7 +340,7 @@ def Tab4(data: dict, season_data: dict) -> rx.Component:
                     width=35,
                     tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
                 ),
-                rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
+                rx.recharts.cartesian_grid(vertical=False, stroke="rgba(0, 0, 0, 0.25)"),
                 rx.recharts.reference_line(y=0, stroke="#555555"),
                 data=pos_change_data,
                 margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
@@ -377,7 +409,7 @@ def Tab4(data: dict, season_data: dict) -> rx.Component:
             rx.badge(
                 b,
                 color_scheme="cyan",
-                variant="outline",
+                variant="solid",
                 font_size="11px",
                 font_family="Outfit",
                 font_weight="600",
@@ -388,11 +420,37 @@ def Tab4(data: dict, season_data: dict) -> rx.Component:
             for b in badges
         ]
 
+        total_points = sum(p for p in driver_points if not pd.isnull(p))
+        pts_str = f"{total_points:.1f}" if total_points % 1 != 0 else f"{int(total_points)}"
         bg_color = "#525259" if (i + 1) % 2 == 0 else "#3C3C41"
+        team_name = driver_to_team.get(driver_name, "—")
         driver_items.append(
             rx.accordion.item(
                 rx.accordion.trigger(
-                    rx.text(driver_name, color="white", font_weight="600"),
+                    rx.flex(
+                        rx.vstack(
+                            rx.text(driver_name, color="white", font_weight="600"),
+                            rx.text(f"Points: {pts_str}", color="#00b4da", font_size="10px", font_weight="bold"),
+                            align_items="start",
+                            spacing="0",
+                        ),
+                        rx.hstack(
+                            rx.box(
+                                width="4px",
+                                height="16px",
+                                bg=team_colors.get(team_name, "#555555"),
+                                border_radius="2px",
+                                flex_shrink="0",
+                            ),
+                            rx.text(team_name, color="#CCCCCC", font_size="xs", font_weight="500"),
+                            spacing="2",
+                            align="center",
+                            margin_right="4",
+                        ),
+                        justify="between",
+                        align="center",
+                        width="100%",
+                    )
                 ),
                 rx.accordion.content(
                     rx.vstack(

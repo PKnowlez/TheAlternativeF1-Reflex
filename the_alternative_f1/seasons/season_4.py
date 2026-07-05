@@ -1,3 +1,46 @@
+from the_alternative_f1.articles.Season4.LiveryRanking2026 import article as LiveryRanking2026_Article
+from the_alternative_f1.articles.Season4.PowerRankings import article as PowerRankings_Article
+from the_alternative_f1.articles.Season4.MonacoRecap import article as MonacoRecap_Article
+from the_alternative_f1.articles.Season4.Trophies import article as Trophies_Article
+from the_alternative_f1.articles.Season4.MonzaRecap import article as MonzaRecap_Article
+from the_alternative_f1.articles.Season4.Champions import article as Champions_Article
+from the_alternative_f1.articles.Season4.MonzaWeek import article as MonzaWeek_Article
+from the_alternative_f1.articles.Season4.AbuDhabiRecap import article as AbuDhabiRecap_Article
+from the_alternative_f1.articles.Season4.AbuDhabiWeek import article as AbuDhabiWeek_Article
+from the_alternative_f1.articles.Season4.JeddahVegasRecap import article as JeddahVegasRecap_Article
+from the_alternative_f1.articles.Season4.StandingsRumors import article as StandingsRumors_Article
+from the_alternative_f1.articles.Season4.ZandvoortRecap import article as ZandvoortRecap_Article
+from the_alternative_f1.articles.Season4.ZandvoortWeek import article as ZandvoortWeek_Article
+from the_alternative_f1.articles.Season4.AustriaRecap import article as AustriaRecap_Article
+from the_alternative_f1.articles.Season4.BrazilRecapAustriaWeek import article as BrazilRecapAustriaWeek_Article
+from the_alternative_f1.articles.Season4.BrazilFIA import article as BrazilFIA_Article
+from the_alternative_f1.articles.Season4.BrazilWeek import article as BrazilWeek_Article
+from the_alternative_f1.articles.Season4.SpaRecap import article as SpaRecap_Article
+from the_alternative_f1.articles.Season4.SpaFIA import article as SpaFIA_Article
+from the_alternative_f1.articles.Season4.SpaWeek import article as SpaWeek_Article
+from the_alternative_f1.articles.Season4.AustriaRRecap import article as AustriaRRecap_Article
+from the_alternative_f1.articles.Season4.AustriaRWeek import article as AustriaRWeek_Article
+from the_alternative_f1.articles.Season4.BakuRecap import article as BakuRecap_Article
+from the_alternative_f1.articles.Season4.BakuWeek import article as BakuWeek_Article
+from the_alternative_f1.articles.Season4.MexicoRecap import article as MexicoRecap_Article
+from the_alternative_f1.articles.Season4.Nick1000 import article as Nick1000_Article
+from the_alternative_f1.articles.Season4.MexicoWeek import article as MexicoWeek_Article
+from the_alternative_f1.articles.Season4.SpainFIA import article as SpainFIA_Article
+from the_alternative_f1.articles.Season4.SpainRecap import article as SpainRecap_Article
+from the_alternative_f1.articles.Season4.SpainWeek import article as SpainWeek_Article
+from the_alternative_f1.articles.Season4.MiamiRecap import article as MiamiRecap_Article
+from the_alternative_f1.articles.Season4.MiamiFIA import article as MiamiFIA_Article
+from the_alternative_f1.articles.Season4.MiamiWeek import article as MiamiWeek_Article
+from the_alternative_f1.articles.Season4.BahrainRecap import article as BahrainRecap_Article
+from the_alternative_f1.articles.Season4.BahrainWeek import article as BahrainWeek_Article
+from the_alternative_f1.articles.Season4.Preseason import article as Preseason_Article
+from the_alternative_f1.articles.Season4.ROTYAward import article as ROTYAward_Article
+from the_alternative_f1.articles.Season4.TrackRankings import article as TrackRankings_Article
+from the_alternative_f1.articles.Season4.TrackTierList import article as TrackTierList_Article
+from the_alternative_f1.articles.Season4.TrophyReveal import article as TrophyReveal_Article
+from the_alternative_f1.articles.Season4.ScheduleReveal import article as ScheduleReveal_Article
+from the_alternative_f1.articles.Season4.TrackOverview import article as TrackOverview_Article
+
 """Season 4 data — 14 drivers, 7 teams, 17 races."""
 
 season = {
@@ -8,7 +51,50 @@ season = {
     # Rookies: drivers not present in Season 3
     "rookies": {"Josh", "Matthew", "Leo", "Jaden", "Jairo"},
 
-    "articles": [],
+    "articles": [
+        LiveryRanking2026_Article,
+        PowerRankings_Article,
+        MonacoRecap_Article,
+        Trophies_Article,
+        MonzaRecap_Article,
+        Champions_Article,
+        MonzaWeek_Article,
+        AbuDhabiRecap_Article,
+        AbuDhabiWeek_Article,
+        JeddahVegasRecap_Article,
+        StandingsRumors_Article,
+        ZandvoortRecap_Article,
+        ZandvoortWeek_Article,
+        AustriaRecap_Article,
+        BrazilRecapAustriaWeek_Article,
+        BrazilFIA_Article,
+        BrazilWeek_Article,
+        SpaRecap_Article,
+        SpaFIA_Article,
+        SpaWeek_Article,
+        AustriaRRecap_Article,
+        AustriaRWeek_Article,
+        BakuRecap_Article,
+        BakuWeek_Article,
+        MexicoRecap_Article,
+        Nick1000_Article,
+        MexicoWeek_Article,
+        SpainFIA_Article,
+        SpainRecap_Article,
+        SpainWeek_Article,
+        MiamiRecap_Article,
+        MiamiFIA_Article,
+        MiamiWeek_Article,
+        BahrainRecap_Article,
+        BahrainWeek_Article,
+        Preseason_Article,
+        ROTYAward_Article,
+        TrackRankings_Article,
+        TrackTierList_Article,
+        TrophyReveal_Article,
+        ScheduleReveal_Article,
+        TrackOverview_Article,
+    ],
 
     "team_colors": {
         "Alpine": "hotpink",
@@ -38,10 +124,10 @@ season = {
     },
 
     "super_license_points": {
-        "Joshua": [0] * 17,
-        "Eddie": [0] * 17,
-        "Nick": [0] * 17,
-        "Travis": [0] * 17,
+        "Joshua": [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+        "Eddie": [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "Nick": [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "Travis": [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         "Patrick": [0] * 17,
         "Josh": [0] * 17,
         "Brently": [0] * 17,
@@ -49,8 +135,8 @@ season = {
         "Del": [0] * 17,
         "Boz": [0] * 17,
         "Erick": [0] * 17,
-        "Leo": [0] * 17,
-        "Jaden": [0] * 17,
+        "Leo": [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+        "Jaden": [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
         "Jairo": [0] * 17,
     },
 

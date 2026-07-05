@@ -10,7 +10,7 @@ import pandas as pd
 import reflex as rx
 
 
-def _build_manual_race_item(race: dict, idx: int, prefix: str, bg_color: str = "transparent") -> rx.Component:
+def _build_manual_race_item(race: dict, idx: int, prefix: str, bg_color: str = "transparent", team_colors: dict = None) -> rx.Component:
     """Helper to build an accordion item for a custom manual pre-season or post-season race."""
     race_name = race.get("name", "Manual Race")
     results = race.get("results", [])
@@ -53,7 +53,8 @@ def _build_manual_race_item(race: dict, idx: int, prefix: str, bg_color: str = "
         header_cells.append(rx.table.column_header_cell("Cleanest Driver", color="#00b4da"))
 
     table_rows = []
-    for r in sorted_results:
+    preview_rows = []
+    for idx_row, r in enumerate(sorted_results):
         place_val = r.get("place", "-")
         driver_val = r.get("driver", "-")
         team_val = r.get("team", "-")
@@ -71,7 +72,20 @@ def _build_manual_race_item(race: dict, idx: int, prefix: str, bg_color: str = "
         cells = [
             rx.table.cell(str(place_val), color="#E0E0E0", font_size="sm"),
             rx.table.cell(str(driver_val), color="white", font_weight="600", font_size="sm"),
-            rx.table.cell(str(team_val), color="#CCCCCC", font_size="sm"),
+            rx.table.cell(
+                rx.hstack(
+                    rx.box(
+                        width="4px",
+                        height="14px",
+                        bg=team_colors.get(str(team_val), "#555555") if team_colors else "#555555",
+                        border_radius="2px",
+                        flex_shrink="0",
+                    ),
+                    rx.text(str(team_val), color="#CCCCCC", font_size="sm"),
+                    spacing="2",
+                    align="center",
+                )
+            ),
             rx.table.cell(str(qualifying_val), color="#CCCCCC", font_size="sm"),
             rx.table.cell(str(points_val), color="#CCCCCC", font_size="sm"),
             rx.table.cell(fl_val, color="#CCCCCC", font_size="sm"),
@@ -108,6 +122,63 @@ def _build_manual_race_item(race: dict, idx: int, prefix: str, bg_color: str = "
             rx.table.row(*cells, _hover={"bg": "#1C1C20"})
         )
 
+        if idx_row < 3:
+            preview_place_display = str(place_val)
+            place_color = "#E0E0E0"
+            if str(place_val) == "1":
+                preview_place_display = "🥇"
+                place_color = "#FFD700"
+            elif str(place_val) == "2":
+                preview_place_display = "🥈"
+                place_color = "#C0C0C0"
+            elif str(place_val) == "3":
+                preview_place_display = "🥉"
+                place_color = "#CD7F32"
+
+            preview_cells = [
+                rx.table.cell(preview_place_display, color=place_color, font_size="xs"),
+                rx.table.cell(str(driver_val), color="white", font_weight="600", font_size="xs"),
+                rx.table.cell(
+                    rx.hstack(
+                        rx.box(
+                            width="4px",
+                            height="12px",
+                            bg=team_colors.get(str(team_val), "#555555") if team_colors else "#555555",
+                            border_radius="2px",
+                            flex_shrink="0",
+                        ),
+                        rx.text(str(team_val), color="#CCCCCC", font_size="xs"),
+                        spacing="2",
+                        align="center",
+                    )
+                ),
+                rx.table.cell(str(qualifying_val), color="#CCCCCC", font_size="xs"),
+            ]
+            preview_rows.append(
+                rx.table.row(*preview_cells, _hover={"bg": "#1C1C20"})
+            )
+
+    preview_header_cells = [
+        rx.table.column_header_cell("Place", color="#00b4da"),
+        rx.table.column_header_cell("Driver", color="#00b4da"),
+        rx.table.column_header_cell("Team", color="#00b4da"),
+        rx.table.column_header_cell("Qualifying", color="#00b4da"),
+    ]
+    preview_table = rx.box(
+        rx.table.root(
+            rx.table.header(
+                rx.table.row(*preview_header_cells),
+            ),
+            rx.table.body(*preview_rows),
+            width="100%",
+            variant="ghost",
+        ),
+        width="100%",
+        overflow_x="auto",
+        class_name="race-preview-table",
+        padding_top="2",
+    )
+
     race_content = rx.vstack(
         rx.text(
             f"Winner: {winner} — {constructor}",
@@ -137,9 +208,12 @@ def _build_manual_race_item(race: dict, idx: int, prefix: str, bg_color: str = "
             rx.vstack(
                 rx.text(race_name, color="white", font_weight="600"),
                 rx.text(f"Winner: {winner}", color="#00b4da", font_size="10px", font_weight="bold"),
+                preview_table,
                 align_items="start",
-                spacing="0",
-            )
+                spacing="2",
+                width="100%",
+            ),
+            width="100%",
         ),
         rx.accordion.content(race_content),
         value=f"{prefix}_{idx}",
@@ -166,13 +240,14 @@ def Tab2(data: dict, season_data: dict) -> rx.Component:
     race_points = data["race_points"]
     has_dotd_mot_cd = data["has_dotd_mot_cd"]
     season_num = season_data["season_number"]
+    team_colors = data.get("team_colors", {})
 
     preseason_items = []
     preseason_races = season_data.get("preseason_races", [])
     item_idx = 0
     for idx, pr in enumerate(preseason_races):
         bg_color = "#1E1E24" if item_idx % 2 == 0 else "#131316"
-        preseason_items.append(_build_manual_race_item(pr, idx, "preseason", bg_color))
+        preseason_items.append(_build_manual_race_item(pr, idx, "preseason", bg_color, team_colors))
         item_idx += 1
 
     regular_items = []
@@ -215,7 +290,8 @@ def Tab2(data: dict, season_data: dict) -> rx.Component:
 
         # Build the results rows
         table_rows = []
-        for _, row in df_sorted.iterrows():
+        preview_rows = []
+        for idx_row, (_, row) in enumerate(df_sorted.iterrows()):
             place_val = row[place_col]
             # Replace numeric codes with text
             place_display = str(int(place_val)) if not pd.isnull(place_val) else "-"
@@ -264,7 +340,20 @@ def Tab2(data: dict, season_data: dict) -> rx.Component:
             cells = [
                 rx.table.cell(place_display, color="#E0E0E0", font_size="sm"),
                 rx.table.cell(str(row["Driver"]), color="white", font_weight="600", font_size="sm"),
-                rx.table.cell(str(row["Team"]), color="#CCCCCC", font_size="sm"),
+                rx.table.cell(
+                    rx.hstack(
+                        rx.box(
+                            width="4px",
+                            height="14px",
+                            bg=team_colors.get(str(row["Team"]), "#555555") if team_colors else "#555555",
+                            border_radius="2px",
+                            flex_shrink="0",
+                        ),
+                        rx.text(str(row["Team"]), color="#CCCCCC", font_size="sm"),
+                        spacing="2",
+                        align="center",
+                    )
+                ),
                 rx.table.cell(qualifying_val, color="#CCCCCC", font_size="sm"),
                 rx.table.cell(str(points_val), color="#CCCCCC", font_size="sm"),
                 rx.table.cell(fl_val, color="#CCCCCC", font_size="sm"),
@@ -293,6 +382,63 @@ def Tab2(data: dict, season_data: dict) -> rx.Component:
             table_rows.append(
                 rx.table.row(*cells, _hover={"bg": "#1C1C20"})
             )
+
+            if idx_row < 3:
+                preview_place_display = place_display
+                place_color = "#E0E0E0"
+                if place_display == "1":
+                    preview_place_display = "🥇"
+                    place_color = "#FFD700"
+                elif place_display == "2":
+                    preview_place_display = "🥈"
+                    place_color = "#C0C0C0"
+                elif place_display == "3":
+                    preview_place_display = "🥉"
+                    place_color = "#CD7F32"
+
+                preview_cells = [
+                    rx.table.cell(preview_place_display, color=place_color, font_size="xs"),
+                    rx.table.cell(str(row["Driver"]), color="white", font_weight="600", font_size="xs"),
+                    rx.table.cell(
+                        rx.hstack(
+                            rx.box(
+                                width="4px",
+                                height="12px",
+                                bg=team_colors.get(str(row["Team"]), "#555555") if team_colors else "#555555",
+                                border_radius="2px",
+                                flex_shrink="0",
+                            ),
+                            rx.text(str(row["Team"]), color="#CCCCCC", font_size="xs"),
+                            spacing="2",
+                            align="center",
+                        )
+                    ),
+                    rx.table.cell(qualifying_val, color="#CCCCCC", font_size="xs"),
+                ]
+                preview_rows.append(
+                    rx.table.row(*preview_cells, _hover={"bg": "#1C1C20"})
+                )
+
+        preview_header_cells = [
+            rx.table.column_header_cell("Place", color="#00b4da"),
+            rx.table.column_header_cell("Driver", color="#00b4da"),
+            rx.table.column_header_cell("Team", color="#00b4da"),
+            rx.table.column_header_cell("Qualifying", color="#00b4da"),
+        ]
+        preview_table = rx.box(
+            rx.table.root(
+                rx.table.header(
+                    rx.table.row(*preview_header_cells),
+                ),
+                rx.table.body(*preview_rows),
+                width="100%",
+                variant="ghost",
+            ),
+            width="100%",
+            overflow_x="auto",
+            class_name="race-preview-table",
+            padding_top="2",
+        )
 
         # Build header cells
         header_cells = [
@@ -341,9 +487,12 @@ def Tab2(data: dict, season_data: dict) -> rx.Component:
                     rx.vstack(
                         rx.text(race_name, color="white", font_weight="600"),
                         rx.text(f"Winner: {winner}", color="#00b4da", font_size="10px", font_weight="bold"),
+                        preview_table,
                         align_items="start",
-                        spacing="0",
-                    )
+                        spacing="2",
+                        width="100%",
+                    ),
+                    width="100%",
                 ),
                 rx.accordion.content(race_content),
                 value=f"race_{i}",
@@ -359,7 +508,7 @@ def Tab2(data: dict, season_data: dict) -> rx.Component:
     postseason_races = season_data.get("postseason_races", [])
     for idx, pr in enumerate(postseason_races):
         bg_color = "#1E1E24" if item_idx % 2 == 0 else "#131316"
-        postseason_items.append(_build_manual_race_item(pr, idx, "postseason", bg_color))
+        postseason_items.append(_build_manual_race_item(pr, idx, "postseason", bg_color, team_colors))
         item_idx += 1
 
     accordion_items = preseason_items + regular_items + postseason_items

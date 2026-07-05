@@ -83,62 +83,273 @@ class DownloadState(rx.State):
                 return;
             }}
             
-            // Serialize SVG to XML string
-            const svgString = new XMLSerializer().serializeToString(svgElement);
-            const svgBlob = new Blob([svgString], {{ type: 'image/svg+xml;charset=utf-8' }});
-            const URL = window.URL || window.webkitURL || window;
-            const blobURL = URL.createObjectURL(svgBlob);
+            const bbox = svgElement.getBoundingClientRect();
+            const width = bbox.width || 800;
+            const height = bbox.height || 450;
+            const scaleFactor = 3.125; // 300 DPI / 96 DPI
+            const titleSpace = 50;
             
-            const image = new Image();
-            image.onload = () => {{
-                const canvas = document.createElement('canvas');
-                const bbox = svgElement.getBoundingClientRect();
-                const width = bbox.width || 800;
-                const height = bbox.height || 450;
-                const titleSpace = 50;
-                
-                canvas.width = width;
-                canvas.height = height + titleSpace;
-                const context = canvas.getContext('2d');
-                
-                // Get main bg color from CSS variable dynamically
-                const computedColor = getComputedStyle(document.documentElement).getPropertyValue('--main-bg-color').trim() || '#47474c';
-                
-                // Fill canvas background
-                context.fillStyle = computedColor;
-                context.fillRect(0, 0, canvas.width, canvas.height);
-                
-                // Draw Title Text at the top
-                context.fillStyle = '#FFFFFF';
-                context.font = 'bold 16px Outfit, sans-serif';
-                context.textBaseline = 'middle';
-                context.fillText("{title}", 20, titleSpace / 2);
-                
-                // Draw SVG image shifted below the title
-                context.drawImage(image, 0, titleSpace, width, height);
-                
-                // Trigger download
-                const pngURL = canvas.toDataURL('image/png');
-                const downloadLink = document.createElement('a');
-                const cleanTitle = "{title}".replace(/[^a-zA-Z0-9' \\(\\)\\-_]/g, '').trim();
-                
-                const localDate = new Date();
-                const year = localDate.getFullYear();
-                const month = String(localDate.getMonth() + 1).padStart(2, '0');
-                const day = String(localDate.getDate()).padStart(2, '0');
-                const dateStr = `${{year}}-${{month}}-${{day}}`;
-                
-                downloadLink.href = pngURL;
-                downloadLink.download = `${{cleanTitle}}_${{dateStr}}.png`;
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
-                URL.revokeObjectURL(blobURL);
+            // Try to fetch, convert and inline Outfit font from Google Fonts dynamically
+            let fontCss = "";
+            try {{
+                const cssResponse = await fetch("https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap");
+                let cssText = await cssResponse.text();
+                const urlRegex = /url\\(['"]?(https:\\/\\/fonts\\.gstatic\\.com\\/[^'")\\s]+)['"]?\\)/g;
+                let match;
+                const urlsToReplace = [];
+                while ((match = urlRegex.exec(cssText)) !== null) {{
+                    urlsToReplace.push(match[1]);
+                }}
+                for (const fontUrl of urlsToReplace) {{
+                    try {{
+                        const fontResponse = await fetch(fontUrl);
+                        const fontBlob = await fontResponse.blob();
+                        const reader = new FileReader();
+                        const base64Promise = new Promise((resolve) => {{
+                            reader.onloadend = () => resolve(reader.result);
+                        }});
+                        reader.readAsDataURL(fontBlob);
+                        const base64Url = await base64Promise;
+                        cssText = cssText.replaceAll(fontUrl, base64Url);
+                    }} catch (err) {{
+                        console.warn("Could not inline font file:", fontUrl, err);
+                    }}
+                }}
+                // Strip out any remaining remote gstatic urls to prevent tainting the canvas
+                cssText = cssText.replace(/url\\(['"]?https:\\/\\/fonts\\.gstatic\\.com\\/[^'")\\s]+['"]?\\)/g, "local('Outfit')");
+                fontCss = cssText;
+            }} catch (e) {{
+                console.warn("Could not fetch or inline Outfit font:", e);
+            }}
+            
+            // Clone the SVG element and set high-res dimensions
+            const clonedSvg = svgElement.cloneNode(true);
+            clonedSvg.setAttribute('width', width * scaleFactor);
+            clonedSvg.setAttribute('height', height * scaleFactor);
+            if (!clonedSvg.getAttribute('viewBox')) {{
+                clonedSvg.setAttribute('viewBox', `0 0 ${{width}} ${{height}}`);
+            }}
+            
+            // Inject styles with embedded font-face to the SVG cloned element
+            const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+            style.type = 'text/css';
+            style.textContent = fontCss + `
+                text {{
+                    font-family: 'Outfit', sans-serif !important;
+                }}
+            `;
+            clonedSvg.insertBefore(style, clonedSvg.firstChild);
+            
+            // Serialize SVG to XML string
+            const svgString = new XMLSerializer().serializeToString(clonedSvg);
+            const svgBlob = new Blob([svgString], {{ type: 'image/svg+xml;charset=utf-8' }});
+            
+            const reader = new FileReader();
+            reader.onloadend = () => {{
+                const dataURL = reader.result;
+                const image = new Image();
+                image.onload = () => {{
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width * scaleFactor;
+                    canvas.height = (height + titleSpace) * scaleFactor;
+                    const context = canvas.getContext('2d');
+                    
+                    // Get main bg color from CSS variable dynamically
+                    const computedColor = getComputedStyle(document.documentElement).getPropertyValue('--main-bg-color').trim() || '#47474c';
+                    
+                    // Fill canvas background
+                    context.fillStyle = computedColor;
+                    context.fillRect(0, 0, canvas.width, canvas.height);
+                    
+                    // Draw Title Text at the top
+                    context.fillStyle = '#FFFFFF';
+                    context.font = `bold ${{Math.round(16 * scaleFactor)}}px Outfit, sans-serif`;
+                    context.textBaseline = 'middle';
+                    context.fillText("{title}", 20 * scaleFactor, (titleSpace / 2) * scaleFactor);
+                    
+                    // Draw SVG image shifted below the title
+                    context.drawImage(image, 0, titleSpace * scaleFactor, width * scaleFactor, height * scaleFactor);
+                    
+                    // Trigger download
+                    const pngURL = canvas.toDataURL('image/png');
+                    const downloadLink = document.createElement('a');
+                    const cleanTitle = "{title}".replace(/[^a-zA-Z0-9' \\(\\)\\-_]/g, '').trim();
+                    
+                    const localDate = new Date();
+                    const year = localDate.getFullYear();
+                    const month = String(localDate.getMonth() + 1).padStart(2, '0');
+                    const day = String(localDate.getDate()).padStart(2, '0');
+                    const dateStr = `${{year}}-${{month}}-${{day}}`;
+                    
+                    downloadLink.href = pngURL;
+                    downloadLink.download = `${{cleanTitle}}_${{dateStr}}.png`;
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    document.body.removeChild(downloadLink);
+                }};
+                image.src = dataURL;
             }};
-            image.src = blobURL;
+            reader.readAsDataURL(svgBlob);
         }})();
         """
         return rx.call_script(js_code)
+
+    def download_table(self, table_id: str, title: str):
+        js_code = f"""
+        (async () => {{
+            const tableElement = document.getElementById('{table_id}');
+            if (!tableElement) {{
+                console.error('Table element {table_id} not found');
+                return;
+            }}
+            
+            const bbox = tableElement.getBoundingClientRect();
+            const width = bbox.width || 500;
+            const height = bbox.height || 600;
+            const scaleFactor = 3.125; // 300 DPI / 96 DPI
+            const titleSpace = 50;
+            
+            // Try to fetch, convert and inline Outfit font from Google Fonts dynamically
+            let fontCss = "";
+            try {{
+                const cssResponse = await fetch("https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap");
+                let cssText = await cssResponse.text();
+                const urlRegex = /url\\(['"]?(https:\\/\\/fonts\\.gstatic\\.com\\/[^'")\\s]+)['"]?\\)/g;
+                let match;
+                const urlsToReplace = [];
+                while ((match = urlRegex.exec(cssText)) !== null) {{
+                    urlsToReplace.push(match[1]);
+                }}
+                for (const fontUrl of urlsToReplace) {{
+                    try {{
+                        const fontResponse = await fetch(fontUrl);
+                        const fontBlob = await fontResponse.blob();
+                        const reader = new FileReader();
+                        const base64Promise = new Promise((resolve) => {{
+                            reader.onloadend = () => resolve(reader.result);
+                        }});
+                        reader.readAsDataURL(fontBlob);
+                        const base64Url = await base64Promise;
+                        cssText = cssText.replaceAll(fontUrl, base64Url);
+                    }} catch (err) {{
+                        console.warn("Could not inline font file:", fontUrl, err);
+                    }}
+                }}
+                // Strip out any remaining remote gstatic urls to prevent tainting the canvas
+                cssText = cssText.replace(/url\\(['"]?https:\\/\\/fonts\\.gstatic\\.com\\/[^'")\\s]+['"]?\\)/g, "local('Outfit')");
+                fontCss = cssText;
+            }} catch (e) {{
+                console.warn("Could not fetch or inline Outfit font:", e);
+            }}
+            
+            // Helper function to clone element and inline all computed styles recursively, stripping remote/external url() references
+            const cloneWithStyles = (element) => {{
+                const clone = element.cloneNode(true);
+                const descClone = clone.getElementsByTagName('*');
+                const descOrig = element.getElementsByTagName('*');
+                
+                const sanitizeStyle = (styleObj, targetStyle) => {{
+                    for (let i = 0; i < styleObj.length; i++) {{
+                        const prop = styleObj[i];
+                        let val = styleObj.getPropertyValue(prop);
+                        
+                        if (val && val.includes('url(')) {{
+                            if (!val.includes('url("data:') && !val.includes("url('data:") && !val.includes("url(data:")) {{
+                                val = 'none';
+                            }}
+                        }}
+                        targetStyle.setProperty(prop, val, styleObj.getPropertyPriority(prop));
+                    }}
+                }};
+                
+                sanitizeStyle(getComputedStyle(element), clone.style);
+                
+                for (let i = 0; i < descOrig.length; i++) {{
+                    sanitizeStyle(getComputedStyle(descOrig[i]), descClone[i].style);
+                }}
+                
+                // Sanitize any img tags in the clone
+                const images = clone.getElementsByTagName('img');
+                for (let img of images) {{
+                    if (img.src && !img.src.startsWith('data:')) {{
+                        img.src = '';
+                    }}
+                }}
+                return clone;
+            }};
+            
+            const clonedTable = cloneWithStyles(tableElement);
+            
+            // Inject font and global styles inside the foreignObject SVG
+            const svgString = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="${{width}}" height="${{height}}">
+                    <foreignObject width="100%" height="100%">
+                        <div xmlns="http://www.w3.org/1999/xhtml" style="width:100%; height:100%; padding:0; margin:0; font-family: 'Outfit', sans-serif !important;">
+                            <style type="text/css">
+                                ${{fontCss}}
+                                * {{
+                                    font-family: 'Outfit', sans-serif !important;
+                                    box-sizing: border-box !important;
+                                }}
+                            </style>
+                            ${{new XMLSerializer().serializeToString(clonedTable)}}
+                        </div>
+                    </foreignObject>
+                </svg>
+            `;
+            
+            const svgBlob = new Blob([svgString], {{ type: 'image/svg+xml;charset=utf-8' }});
+            
+            const reader = new FileReader();
+            reader.onloadend = () => {{
+                const dataURL = reader.result;
+                const image = new Image();
+                image.onload = () => {{
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width * scaleFactor;
+                    canvas.height = (height + titleSpace) * scaleFactor;
+                    const context = canvas.getContext('2d');
+                    
+                    // Get main bg color from CSS variable dynamically
+                    const computedColor = getComputedStyle(document.documentElement).getPropertyValue('--main-bg-color').trim() || '#47474c';
+                    
+                    // Fill canvas background
+                    context.fillStyle = computedColor;
+                    context.fillRect(0, 0, canvas.width, canvas.height);
+                    
+                    // Draw Title Text at the top
+                    context.fillStyle = '#FFFFFF';
+                    context.font = `bold ${{Math.round(16 * scaleFactor)}}px Outfit, sans-serif`;
+                    context.textBaseline = 'middle';
+                    context.fillText("{title}", 20 * scaleFactor, (titleSpace / 2) * scaleFactor);
+                    
+                    // Draw SVG image shifted below the title
+                    context.drawImage(image, 0, titleSpace * scaleFactor, width * scaleFactor, height * scaleFactor);
+                    
+                    // Trigger download
+                    const pngURL = canvas.toDataURL('image/png');
+                    const downloadLink = document.createElement('a');
+                    const cleanTitle = "{title}".replace(/[^a-zA-Z0-9' \\(\\)\\-_]/g, '').trim();
+                    
+                    const localDate = new Date();
+                    const year = localDate.getFullYear();
+                    const month = String(localDate.getMonth() + 1).padStart(2, '0');
+                    const day = String(localDate.getDate()).padStart(2, '0');
+                    const dateStr = `${{year}}-${{month}}-${{day}}`;
+                    
+                    downloadLink.href = pngURL;
+                    downloadLink.download = `${{cleanTitle}}_${{dateStr}}.png`;
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    document.body.removeChild(downloadLink);
+                }};
+                image.src = dataURL;
+            }};
+            reader.readAsDataURL(svgBlob);
+        }})();
+        """
+        return rx.call_script(js_code)
+
 
 
 def zoomable_chart(chart_factory, title: str, chart_id: str, height: int = 350, large_height: int = 450) -> rx.Component:

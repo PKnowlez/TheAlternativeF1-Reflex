@@ -5,7 +5,7 @@ scrollable modal popups for full standings tables.
 """
 
 import reflex as rx
-from the_alternative_f1.articles.components import zoomable_chart
+from the_alternative_f1.articles.components import zoomable_chart, DownloadState
 
 
 def Tab1(data: dict, season_data: dict) -> rx.Component:
@@ -25,6 +25,7 @@ def Tab1(data: dict, season_data: dict) -> rx.Component:
     team_line_data = data["team_line_data"]
     driver_line_data = data["driver_line_data"]
     races_with_start = data["races_with_start"]
+    drivers_points_df = data["drivers_points_df"]
 
     # Calculate dynamic x-axis heights based on longest label
     max_team_race_len = max([len(str(item.get("race", ""))) for item in team_line_data] or [0])
@@ -60,7 +61,7 @@ def Tab1(data: dict, season_data: dict) -> rx.Component:
                 width=35,
                 tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
             ),
-            rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
+            rx.recharts.cartesian_grid(vertical=False, stroke="rgba(0, 0, 0, 0.25)"),
             data=team_line_data,
             margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
             margin_left="-10px",
@@ -121,7 +122,7 @@ def Tab1(data: dict, season_data: dict) -> rx.Component:
                 width=35,
                 tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
             ),
-            rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
+            rx.recharts.cartesian_grid(vertical=False, stroke="rgba(0, 0, 0, 0.25)"),
             data=driver_line_data,
             margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
             margin_left="-10px",
@@ -182,7 +183,7 @@ def Tab1(data: dict, season_data: dict) -> rx.Component:
                 width=35,
                 tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
             ),
-            rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
+            rx.recharts.cartesian_grid(vertical=False, stroke="rgba(0, 0, 0, 0.25)"),
             data=constructor_bar_data,
             margin={"top": 10, "right": 20, "left": 35, "bottom": 40},
             margin_left="-10px",
@@ -216,7 +217,7 @@ def Tab1(data: dict, season_data: dict) -> rx.Component:
                 width=35,
                 tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
             ),
-            rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
+            rx.recharts.cartesian_grid(vertical=False, stroke="rgba(0, 0, 0, 0.25)"),
             data=driver_bar_data,
             margin={"top": 10, "right": 20, "left": 35, "bottom": 40},
             margin_left="-10px",
@@ -230,26 +231,86 @@ def Tab1(data: dict, season_data: dict) -> rx.Component:
     )
 
     # ── Full standings table helper ──────────────────────────────────────
-    def standings_table(title: str, df, col_name: str) -> rx.Component:
-        return rx.table.root(
-            rx.table.header(
-                rx.table.row(
-                    rx.table.column_header_cell("Pos", color="#00b4da", width="50px"),
-                    rx.table.column_header_cell(col_name, color="#00b4da"),
-                    rx.table.column_header_cell("Points", color="#00b4da", justify="end"),
-                )
-            ),
-            rx.table.body(
-                *[
+    def standings_table(title: str, df, col_name: str, table_id: str = None) -> rx.Component:
+        is_team_table = col_name == "Team"
+        driver_to_team = dict(zip(drivers_points_df["Driver"], drivers_points_df["Team"]))
+
+        if is_team_table:
+            header_row = rx.table.row(
+                rx.table.column_header_cell("Pos", color="#00b4da", width="50px"),
+                rx.table.column_header_cell("Team", color="#00b4da"),
+                rx.table.column_header_cell("Drivers", color="#00b4da"),
+                rx.table.column_header_cell("Points", color="#00b4da", justify="end"),
+            )
+        else:
+            header_row = rx.table.row(
+                rx.table.column_header_cell("Pos", color="#00b4da", width="50px"),
+                rx.table.column_header_cell("Driver", color="#00b4da"),
+                rx.table.column_header_cell("Team", color="#00b4da"),
+                rx.table.column_header_cell("Points", color="#00b4da", justify="end"),
+            )
+
+        rows = []
+        for idx, (_, row) in enumerate(df.iterrows()):
+            if is_team_table:
+                team_name = str(row["Team"])
+                team_drivers = drivers_points_df[drivers_points_df["Team"] == team_name].sort_values("Points", ascending=False)
+                driver_names = team_drivers["Driver"].tolist()
+                drivers_text = " & ".join(driver_names)
+                
+                rows.append(
                     rx.table.row(
                         rx.table.cell(str(idx + 1), color="#00b4da", font_weight="bold"),
-                        rx.table.cell(str(row[col_name]), color="white", font_weight="600"),
+                        rx.table.cell(
+                            rx.hstack(
+                                rx.box(
+                                    width="4px",
+                                    height="16px",
+                                    bg=team_colors.get(team_name, "#555555"),
+                                    border_radius="2px",
+                                    flex_shrink="0",
+                                ),
+                                rx.text(team_name, color="white", font_weight="600"),
+                                spacing="2",
+                                align="center",
+                            )
+                        ),
+                        rx.table.cell(drivers_text, color="#CCCCCC"),
                         rx.table.cell(str(row["Points"]), color="#CCCCCC", justify="end"),
                         _hover={"bg": "#1C1C20"},
                     )
-                    for idx, (_, row) in enumerate(df.iterrows())
-                ]
-            ),
+                )
+            else:
+                driver_name = str(row["Driver"])
+                team_name = driver_to_team.get(driver_name, "—")
+                
+                rows.append(
+                    rx.table.row(
+                        rx.table.cell(str(idx + 1), color="#00b4da", font_weight="bold"),
+                        rx.table.cell(driver_name, color="white", font_weight="600"),
+                        rx.table.cell(
+                            rx.hstack(
+                                rx.box(
+                                    width="4px",
+                                    height="16px",
+                                    bg=team_colors.get(team_name, "#555555"),
+                                    border_radius="2px",
+                                    flex_shrink="0",
+                                ),
+                                rx.text(team_name, color="#CCCCCC", font_weight="600"),
+                                spacing="2",
+                                align="center",
+                            )
+                        ),
+                        rx.table.cell(str(row["Points"]), color="#CCCCCC", justify="end"),
+                        _hover={"bg": "#1C1C20"},
+                    )
+                )
+
+        return rx.table.root(
+            rx.table.header(header_row),
+            rx.table.body(*rows),
+            id=table_id,
             width="100%",
             variant="ghost",
         )
@@ -283,16 +344,34 @@ def Tab1(data: dict, season_data: dict) -> rx.Component:
                     ),
                 ),
                 rx.dialog.content(
-                    rx.dialog.title(
-                        "Constructor's Championship Standings",
-                        color="white",
-                        font_weight="900",
-                    ),
-                    rx.box(
-                        standings_table("Constructor Standings", constructor_totals, "Team"),
-                        max_height="60vh",
-                        overflow_y="auto",
+                    rx.vstack(
+                        rx.dialog.title(
+                            "Constructor's Championship Standings",
+                            color="white",
+                            font_weight="900",
+                            align_self="start",
+                        ),
+                        rx.box(
+                            standings_table("Constructor Standings", constructor_totals, "Team", "constructor_standings_table"),
+                            max_height="60vh",
+                            overflow_y="auto",
+                            width="100%",
+                        ),
+                        rx.button(
+                            rx.hstack(
+                                rx.icon("download", size=16),
+                                rx.text("Download PNG"),
+                                spacing="2",
+                            ),
+                            on_click=lambda: DownloadState.download_table("constructor_standings_table", f"Season {season_num} Constructor's Championship Standings"),
+                            bg="#00b4da",
+                            color="white",
+                            _hover={"bg": "#009bbd"},
+                            cursor="pointer",
+                            margin_top="4",
+                        ),
                         width="100%",
+                        spacing="3",
                     ),
                     rx.dialog.close(
                         rx.button(
@@ -325,16 +404,34 @@ def Tab1(data: dict, season_data: dict) -> rx.Component:
                     ),
                 ),
                 rx.dialog.content(
-                    rx.dialog.title(
-                        "Driver's Championship Standings",
-                        color="white",
-                        font_weight="900",
-                    ),
-                    rx.box(
-                        standings_table("Driver Standings", driver_totals, "Driver"),
-                        max_height="60vh",
-                        overflow_y="auto",
+                    rx.vstack(
+                        rx.dialog.title(
+                            "Driver's Championship Standings",
+                            color="white",
+                            font_weight="900",
+                            align_self="start",
+                        ),
+                        rx.box(
+                            standings_table("Driver Standings", driver_totals, "Driver", "driver_standings_table"),
+                            max_height="60vh",
+                            overflow_y="auto",
+                            width="100%",
+                        ),
+                        rx.button(
+                            rx.hstack(
+                                rx.icon("download", size=16),
+                                rx.text("Download PNG"),
+                                spacing="2",
+                            ),
+                            on_click=lambda: DownloadState.download_table("driver_standings_table", f"Season {season_num} Driver's Championship Standings"),
+                            bg="#00b4da",
+                            color="white",
+                            _hover={"bg": "#009bbd"},
+                            cursor="pointer",
+                            margin_top="4",
+                        ),
                         width="100%",
+                        spacing="3",
                     ),
                     rx.dialog.close(
                         rx.button(

@@ -1,0 +1,206 @@
+import reflex as rx
+from the_alternative_f1.articles.components import zoomable_image
+
+article = {
+    "title": "Track Rankings, Driver's Edition",
+    "blurb": "A Word From Our Intern",
+    "content": [
+        rx.text(
+            rx.text("A Word From Our Intern", as_="span", font_weight="bold"), "> Just know, if your favorite track got bodied in these rankings, it's time to rethink your favorite track. > > -The Intern",
+            color="#E0E0E0",
+            font_size="md",
+            line_height="1.7",
+            margin_bottom="4",
+        ),
+        rx.text(
+            r"""With our intern's rankings released and driver voting complete, it is time to reveal how we all view this season's calendar. Below you will find a comparison of the intern's ranking, the average voting position per track, and rankings based on which tier each track was voted most for. Additionally, at the end of the article, there is a synopsis of when these tracks occur on the calendar and which stints might be the most enjoyable for the league.""",
+            color="#E0E0E0",
+            font_size="md",
+            line_height="1.7",
+            margin_bottom="4",
+        ),
+        rx.flex(
+            rx.vstack(
+                rx.text("The Intern's Rankings", font_weight="bold", color="#E0E0E0", font_size="sm", margin_bottom="2"),
+                zoomable_image(src="/Season4/Images/Intern Track Ranking.png", width="100%", max_width="250px", border_radius="md", box_shadow="0 4px 12px rgba(0,0,0,0.4)"),
+                align_items="center",
+            ),
+            rx.vstack(
+                rx.text("Average Ranking", font_weight="bold", color="#E0E0E0", font_size="sm", margin_bottom="2"),
+                zoomable_image(src="/Season4/Images/Average Votes.png", width="100%", max_width="250px", border_radius="md", box_shadow="0 4px 12px rgba(0,0,0,0.4)"),
+                align_items="center",
+            ),
+            rx.vstack(
+                rx.text("Most Votes Rankings", font_weight="bold", color="#E0E0E0", font_size="sm", margin_bottom="2"),
+                zoomable_image(src="/Season4/Images/Most Votes.png", width="100%", max_width="250px", border_radius="md", box_shadow="0 4px 12px rgba(0,0,0,0.4)"),
+                align_items="center",
+            ),
+            flex_wrap="wrap",
+            justify="center",
+            gap="4",
+            width="100%",
+            margin_y="4",
+        ),
+        rx.heading(
+            "The Intern's Rankings",
+            size="4",
+            color="#00b4da",
+            margin_top="6",
+            margin_bottom="3",
+            font_family="Outfit"
+        ),
+        rx.vstack(
+            rx.text("Intern Track Ranking", color="#888888", font_size="xs", margin_bottom="1"),
+            zoomable_image(
+                src="/Season4/Images/Intern Track Ranking.png",
+                width="100%",
+                max_width="400px",
+                border_radius="md",
+                box_shadow="0 4px 12px rgba(0,0,0,0.4)"
+            ),
+            align_items="center",
+            width="100%",
+            margin_y="4",
+        ),
+        rx.heading(
+            "Average Ranking",
+            size="4",
+            color="#00b4da",
+            margin_top="6",
+            margin_bottom="3",
+            font_family="Outfit"
+        ),
+        rx.vstack(
+            rx.text("Average Votes", color="#888888", font_size="xs", margin_bottom="1"),
+            zoomable_image(
+                src="/Season4/Images/Average Votes.png",
+                width="100%",
+                max_width="400px",
+                border_radius="md",
+                box_shadow="0 4px 12px rgba(0,0,0,0.4)"
+            ),
+            align_items="center",
+            width="100%",
+            margin_y="4",
+        ),
+        rx.heading(
+            "Most Votes Rankings",
+            size="4",
+            color="#00b4da",
+            margin_top="6",
+            margin_bottom="3",
+            font_family="Outfit"
+        ),
+        rx.vstack(
+            rx.text("Most Votes", color="#888888", font_size="xs", margin_bottom="1"),
+            zoomable_image(
+                src="/Season4/Images/Most Votes.png",
+                width="100%",
+                max_width="400px",
+                border_radius="md",
+                box_shadow="0 4px 12px rgba(0,0,0,0.4)"
+            ),
+            align_items="center",
+            width="100%",
+            margin_y="4",
+        ),
+        rx.text(
+            r"""Reviewing this data, it is clear to see that, indeed, Miami is a liked track. This comes contrary to some of the league's more prolific drivers, but will come as a delight to Erick "Miami ~~Fan~~ Lover" Tavera.""",
+            color="#E0E0E0",
+            font_size="md",
+            line_height="1.7",
+            margin_bottom="4",
+        ),
+        rx.text(
+            r"""Some additional insights are clear in this data as well. First and maybe foremost, the league generally prefers dedicated circuits as opposed to street circuits. So much so that the most eggregious of street circuits all received their most votes in the lowest tier.""",
+            color="#E0E0E0",
+            font_size="md",
+            line_height="1.7",
+            margin_bottom="4",
+        ),
+        rx.text(
+            r"""Second, Baku is clearly the most disliked track on the calendar. Even though last year it provided one of the most hotly competed races of the season. With tire degredation seemingly a larger impact than in previous seasons, there is a chance Baku provides another thriller.""",
+            color="#E0E0E0",
+            font_size="md",
+            line_height="1.7",
+            margin_bottom="4",
+        ),
+        rx.text(
+            r"""Finally, the league seems to love a Sprint. All three of the tracks that received S-Tier as their top vote getting tier are Sprints this season. Hopefully this leads the drivers to some excellent racing during the Sprints and the reverse grid regular races.""",
+            color="#E0E0E0",
+            font_size="md",
+            line_height="1.7",
+            margin_bottom="4",
+        ),
+        rx.heading(
+            "Rankings Across the Season",
+            size="4",
+            color="#00b4da",
+            margin_top="6",
+            margin_bottom="3",
+            font_family="Outfit"
+        ),
+        rx.text(
+            r"""Above we see the rankings of the tracks, based on their Most Votes ranking, plotted against the order in which they occur over the course of this season.""",
+            color="#E0E0E0",
+            font_size="md",
+            line_height="1.7",
+            margin_bottom="4",
+        ),
+        rx.text(
+            r"""What this tells us is that the middle stint of the season from Spa to Zandvoort is sure to be a memorable series of races regardless of results.""",
+            color="#E0E0E0",
+            font_size="md",
+            line_height="1.7",
+            margin_bottom="4",
+        ),
+        rx.text(
+            r"""Coming back from the Winter Break, drivers are faced with a gauntlet as they take on Jeddah and Las Vegas back to back. Both of these tracks fall into the D-Tier with respect to Most Votes.""",
+            color="#E0E0E0",
+            font_size="md",
+            line_height="1.7",
+            margin_bottom="4",
+        ),
+        rx.text(
+            r"""Finally, the season is both beginning and closing with tracks that find themselves lost in the quagmire of the middle tiers. Which should allow drivers to simply focus on the racing and not let the emotions of a track they love or hate take over during those moments.""",
+            color="#E0E0E0",
+            font_size="md",
+            line_height="1.7",
+            margin_bottom="4",
+        ),
+        rx.heading(
+            "Per Track Results",
+            size="4",
+            color="#00b4da",
+            margin_top="6",
+            margin_bottom="3",
+            font_family="Outfit"
+        ),
+        rx.flex(
+            zoomable_image(src="/Season4/Images/W1 - Bahrain.png", width="150px", margin="2", border_radius="md", box_shadow="0 4px 12px rgba(0,0,0,0.4)"),
+            zoomable_image(src="/Season4/Images/W2 - Miami.png", width="150px", margin="2", border_radius="md", box_shadow="0 4px 12px rgba(0,0,0,0.4)"),
+            zoomable_image(src="/Season4/Images/W3 - Spain.png", width="150px", margin="2", border_radius="md", box_shadow="0 4px 12px rgba(0,0,0,0.4)"),
+            zoomable_image(src="/Season4/Images/W4 - Mexico.png", width="150px", margin="2", border_radius="md", box_shadow="0 4px 12px rgba(0,0,0,0.4)"),
+            zoomable_image(src="/Season4/Images/W5 - Baku.png", width="150px", margin="2", border_radius="md", box_shadow="0 4px 12px rgba(0,0,0,0.4)"),
+            zoomable_image(src="/Season4/Images/W6 - Austria Reverse.png", width="150px", margin="2", border_radius="md", box_shadow="0 4px 12px rgba(0,0,0,0.4)"),
+            zoomable_image(src="/Season4/Images/W7 - Spa.png", width="150px", margin="2", border_radius="md", box_shadow="0 4px 12px rgba(0,0,0,0.4)"),
+            zoomable_image(src="/Season4/Images/W8 - Brazil.png", width="150px", margin="2", border_radius="md", box_shadow="0 4px 12px rgba(0,0,0,0.4)"),
+            zoomable_image(src="/Season4/Images/W9 - Austria.png", width="150px", margin="2", border_radius="md", box_shadow="0 4px 12px rgba(0,0,0,0.4)"),
+            zoomable_image(src="/Season4/Images/W10 - Zandvoort.png", width="150px", margin="2", border_radius="md", box_shadow="0 4px 12px rgba(0,0,0,0.4)"),
+            zoomable_image(src="/Season4/Images/W11 - Jeddah.png", width="150px", margin="2", border_radius="md", box_shadow="0 4px 12px rgba(0,0,0,0.4)"),
+            zoomable_image(src="/Season4/Images/W12 - Las Vegas.png", width="150px", margin="2", border_radius="md", box_shadow="0 4px 12px rgba(0,0,0,0.4)"),
+            zoomable_image(src="/Season4/Images/W13 - Abu Dhabi.png", width="150px", margin="2", border_radius="md", box_shadow="0 4px 12px rgba(0,0,0,0.4)"),
+            zoomable_image(src="/Season4/Images/W14 - Imola.png", width="150px", margin="2", border_radius="md", box_shadow="0 4px 12px rgba(0,0,0,0.4)"),
+            zoomable_image(src="/Season4/Images/image.png", width="150px", margin="2", border_radius="md", box_shadow="0 4px 12px rgba(0,0,0,0.4)"),
+            zoomable_image(src="/Season4/Images/image.png", width="150px", margin="2", border_radius="md", box_shadow="0 4px 12px rgba(0,0,0,0.4)"),
+            flex_wrap="wrap",
+            justify="center",
+            width="100%",
+            margin_y="4",
+        ),
+    ],
+    "image": "/Season4/Images/Intern Track Ranking.png",
+    "author": "Patrick",
+    "date": "September 7, 2025",
+    "season": 4,
+}

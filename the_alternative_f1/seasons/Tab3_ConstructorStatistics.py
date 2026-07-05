@@ -145,6 +145,10 @@ def Tab3(data: dict, season_data: dict) -> rx.Component:
             best_result = "Best Result: —"
 
         total_pts = sum(p for p in team_points if not pd.isnull(p))
+        total_pts_str = f"{total_pts:.1f}" if total_pts % 1 != 0 else f"{int(total_pts)}"
+        team_drivers = drivers_points_df[drivers_points_df["Team"] == team_name].sort_values("Points", ascending=False)
+        driver_names = team_drivers["Driver"].tolist()
+        drivers_text = " & ".join(driver_names)
 
         # Calculate dynamic x-axis height
         max_race_len = max([len(str(item.get("race", ""))) for item in bar_data] or [0])
@@ -159,7 +163,7 @@ def Tab3(data: dict, season_data: dict) -> rx.Component:
                     width=35,
                     tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
                 ),
-                rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
+                rx.recharts.cartesian_grid(vertical=False, stroke="rgba(0, 0, 0, 0.25)"),
                 data=bar_data,
                 margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
                 margin_left="-10px",
@@ -176,18 +180,29 @@ def Tab3(data: dict, season_data: dict) -> rx.Component:
         constructor_items.append(
             rx.accordion.item(
                 rx.accordion.trigger(
-                    rx.hstack(
-                        rx.box(
-                            width="8px",
-                            height="8px",
-                            bg=team_colors.get(team_name, "#555555"),
-                            border_radius="50%",
-                            flex_shrink="0",
+                    rx.flex(
+                        rx.hstack(
+                            rx.box(
+                                width="8px",
+                                height="8px",
+                                bg=team_colors.get(team_name, "#555555"),
+                                border_radius="50%",
+                                flex_shrink="0",
+                            ),
+                            rx.vstack(
+                                rx.text(team_name, color="white", font_weight="600"),
+                                rx.text(f"Points: {total_pts_str}", color="#00b4da", font_size="10px", font_weight="bold"),
+                                align_items="start",
+                                spacing="0",
+                            ),
+                            spacing="2",
+                            align="center",
                         ),
-                        rx.text(team_name, color="white", font_weight="600"),
-                        spacing="2",
+                        rx.text(drivers_text, color="#CCCCCC", font_size="xs", font_weight="500", margin_right="4"),
+                        justify="between",
                         align="center",
-                    ),
+                        width="100%",
+                    )
                 ),
                 rx.accordion.content(
                     rx.vstack(
@@ -206,7 +221,7 @@ def Tab3(data: dict, season_data: dict) -> rx.Component:
                             rx.badge(
                                 best_result,
                                 color_scheme="cyan",
-                                variant="outline",
+                                variant="solid",
                                 font_size="11px",
                                 font_family="Outfit",
                                 font_weight="600",
