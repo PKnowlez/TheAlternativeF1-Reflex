@@ -1,10 +1,61 @@
 import reflex as rx
+import os
+
+R2_CUSTOM_DOMAIN = os.getenv("R2_CUSTOM_DOMAIN", "https://pknowlez.com").rstrip("/")
+
+def rewrite_r2_url(url: str) -> str:
+    if isinstance(url, str) and url.startswith("/thealternativef1-cloudflare/"):
+        return url.replace("/thealternativef1-cloudflare/", f"{R2_CUSTOM_DOMAIN}/", 1)
+    return url
+
+def rewrite_paths_in_component(component):
+    if not isinstance(component, rx.Component):
+        return
+        
+    for attr in ["src", "url"]:
+        if hasattr(component, attr):
+            val = getattr(component, attr)
+            if hasattr(val, "_var_value"):
+                val = val._var_value
+            if isinstance(val, str) and val.startswith("/thealternativef1-cloudflare/"):
+                new_val = val.replace("/thealternativef1-cloudflare/", f"{R2_CUSTOM_DOMAIN}/", 1)
+                setattr(component, attr, new_val)
+                if "_cached_render_result" in component.__dict__:
+                    del component.__dict__["_cached_render_result"]
+                    
+    if hasattr(component, "children") and component.children:
+        for child in component.children:
+            rewrite_paths_in_component(child)
+
+def download_external_image(url: str):
+    filename = url.split("/")[-1] or "download"
+    js_code = f"""
+    (async () => {{
+        try {{
+            const response = await fetch('{url}');
+            const blob = await response.blob();
+            const blobUrl = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = '{filename}';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(blobUrl);
+        }} catch (e) {{
+            console.error('Failed to download image', e);
+            window.open('{url}', '_blank');
+        }}
+    }})();
+    """
+    return rx.call_script(js_code)
 
 def zoomable_image(src: str, **kwargs) -> rx.Component:
     """An image component that opens a fullscreen modal with a download button when clicked.
     
     Supports float and positioning styles by wrapping the dialog root in a layout box.
     """
+    src = rewrite_r2_url(src)
     # Extract layout properties to apply to the outer wrapper box
     # Set default values on styling keys if they aren't provided
     kwargs.setdefault("border_radius", "md")
@@ -49,7 +100,7 @@ def zoomable_image(src: str, **kwargs) -> rx.Component:
                         rx.text("Download Image"),
                         spacing="2",
                     ),
-                    on_click=rx.download(url=src),
+                    on_click=download_external_image(src),
                     bg="#00b4da",
                     color="white",
                     _hover={"bg": "#009bbd"},

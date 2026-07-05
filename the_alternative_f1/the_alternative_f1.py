@@ -962,6 +962,16 @@ def article_detail() -> rx.Component:
             if art not in all_articles:
                 all_articles.append(art)
 
+    # Rewrite all article R2 asset paths dynamically to use the custom domain
+    from the_alternative_f1.articles.components import rewrite_r2_url, rewrite_paths_in_component
+    for art in all_articles:
+        if "image" in art and isinstance(art["image"], str):
+            art["image"] = rewrite_r2_url(art["image"])
+        if "content" in art and isinstance(art["content"], list):
+            for item in art["content"]:
+                if isinstance(item, rx.Component):
+                    rewrite_paths_in_component(item)
+
     # Build the conditional chain dynamically based on the full list of articles
     cond_chain = rx.text("Article not found", color="white")
     for article in reversed(all_articles):

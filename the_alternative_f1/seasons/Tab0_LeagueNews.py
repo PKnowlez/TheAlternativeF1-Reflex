@@ -17,6 +17,12 @@ def Tab0(season_data: dict, select_article = None, season_articles_expanded = No
     season_number = season_data["season_number"]
     configured_articles = season_data.get("articles", [])
 
+    # Ensure thumbnail paths use the custom domain
+    from the_alternative_f1.articles.components import rewrite_r2_url
+    for art in configured_articles:
+        if "image" in art and isinstance(art["image"], str):
+            art["image"] = rewrite_r2_url(art["image"])
+
     # Filter and keep only articles whose 'season' matches the season_number
     season_articles = [a for a in configured_articles if a.get("season") == season_number]
 
