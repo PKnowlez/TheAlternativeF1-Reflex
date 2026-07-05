@@ -1618,7 +1618,7 @@ def index() -> rx.Component:
                 width="100%",
                 flex="1",
                 overflow_y="auto",
-                bg="#47474c",
+                bg="var(--main-bg-color)",
                 padding_x=["4", "6", "8"],
                 padding_top="8",
             ),

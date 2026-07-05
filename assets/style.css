@@ -1,3 +1,7 @@
+:root {
+    --main-bg-color: #47474c;
+}
+
 /* Stylesheet for article header image and other layout adjustments */
 
 @media (orientation: portrait) {

@@ -9,6 +9,7 @@ import math
 import numpy as np
 import pandas as pd
 import reflex as rx
+from the_alternative_f1.articles.components import zoomable_chart
 
 
 def Tab4(data: dict, season_data: dict) -> rx.Component:
@@ -170,20 +171,26 @@ def Tab4(data: dict, season_data: dict) -> rx.Component:
         max_race_len = max([len(str(item.get("race", ""))) for item in pts_bar_data] or [0])
         race_axis_height = max(40, max_race_len * 5 + 15)
 
-        pts_chart = rx.recharts.bar_chart(
-            rx.recharts.bar(data_key="points", fill="#00b4da", name="Points"),
-            rx.recharts.x_axis(data_key="race", font_size=6, angle=-90, height=race_axis_height, stroke="white", text_anchor="end", interval=0, tick={"dx": -5}),
-            rx.recharts.y_axis(
-                stroke="white",
-                width=35,
-                tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
+        pts_chart = zoomable_chart(
+            lambda h: rx.recharts.bar_chart(
+                rx.recharts.bar(data_key="points", fill="#00b4da", name="Points"),
+                rx.recharts.x_axis(data_key="race", font_size=6, angle=-90, height=race_axis_height, stroke="white", text_anchor="end", interval=0, tick={"dx": -5}),
+                rx.recharts.y_axis(
+                    stroke="white",
+                    width=35,
+                    tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
+                ),
+                rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
+                data=pts_bar_data,
+                margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
+                margin_left="-10px",
+                width="100%",
+                height=h,
             ),
-            rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
-            data=pts_bar_data,
-            margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
-            margin_left="-10px",
-            width="100%",
+            title=f"{driver_name} - Points Per Race",
+            chart_id=f"pts_chart_{i}",
             height=220,
+            large_height=350
         )
 
         # ── Best finish ──────────────────────────────────────────────────
@@ -229,20 +236,26 @@ def Tab4(data: dict, season_data: dict) -> rx.Component:
         max_place_len = max([len(str(item.get("place", ""))) for item in placement_data] or [0])
         place_axis_height = max(40, max_place_len * 5 + 15)
 
-        placement_chart = rx.recharts.bar_chart(
-            rx.recharts.bar(data_key="count", fill="#00b4da", name="Count"),
-            rx.recharts.x_axis(data_key="place", font_size=7, stroke="white", angle=-90, text_anchor="end", height=place_axis_height, interval=0, tick={"dx": -5}),
-            rx.recharts.y_axis(
-                stroke="white",
-                width=35,
-                tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
+        placement_chart = zoomable_chart(
+            lambda h: rx.recharts.bar_chart(
+                rx.recharts.bar(data_key="count", fill="#00b4da", name="Count"),
+                rx.recharts.x_axis(data_key="place", font_size=7, stroke="white", angle=-90, text_anchor="end", height=place_axis_height, interval=0, tick={"dx": -5}),
+                rx.recharts.y_axis(
+                    stroke="white",
+                    width=35,
+                    tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
+                ),
+                rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
+                data=placement_data,
+                margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
+                margin_left="-10px",
+                width="100%",
+                height=h,
             ),
-            rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
-            data=placement_data,
-            margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
-            margin_left="-10px",
-            width="100%",
+            title=f"{driver_name} - Placements Summary",
+            chart_id=f"placement_chart_{i}",
             height=220,
+            large_height=350
         )
 
         # ── Fastest laps ────────────────────────────────────────────────
@@ -286,21 +299,27 @@ def Tab4(data: dict, season_data: dict) -> rx.Component:
         max_pos_race_len = max([len(str(item.get("race", ""))) for item in pos_change_data] or [0])
         pos_race_axis_height = max(40, max_pos_race_len * 5 + 15)
 
-        pos_chart = rx.recharts.bar_chart(
-            rx.recharts.bar(data_key="change", name="Change"),
-            rx.recharts.x_axis(data_key="race", font_size=6, angle=-90, height=pos_race_axis_height, stroke="white", text_anchor="end", interval=0, tick={"dx": -5}),
-            rx.recharts.y_axis(
-                stroke="white",
-                width=35,
-                tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
+        pos_chart = zoomable_chart(
+            lambda h: rx.recharts.bar_chart(
+                rx.recharts.bar(data_key="change", name="Change"),
+                rx.recharts.x_axis(data_key="race", font_size=6, angle=-90, height=pos_race_axis_height, stroke="white", text_anchor="end", interval=0, tick={"dx": -5}),
+                rx.recharts.y_axis(
+                    stroke="white",
+                    width=35,
+                    tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
+                ),
+                rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
+                rx.recharts.reference_line(y=0, stroke="#555555"),
+                data=pos_change_data,
+                margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
+                margin_left="-10px",
+                width="100%",
+                height=h,
             ),
-            rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
-            rx.recharts.reference_line(y=0, stroke="#555555"),
-            data=pos_change_data,
-            margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
-            margin_left="-10px",
-            width="100%",
+            title=f"{driver_name} - Positions Gained/Lost",
+            chart_id=f"pos_chart_{i}",
             height=220,
+            large_height=350
         )
 
         # ── Averages ────────────────────────────────────────────────────

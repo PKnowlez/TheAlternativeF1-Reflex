@@ -9,6 +9,7 @@ import math
 import numpy as np
 import pandas as pd
 import reflex as rx
+from the_alternative_f1.articles.components import zoomable_chart
 
 
 def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only_var = None, toggle_rookies_only = None) -> rx.Component:
@@ -87,28 +88,34 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
     max_pos_change_driver_len = max([len(str(item.get("driver", ""))) for item in pos_change_data] or [0])
     pos_change_driver_axis_height = max(40, max_pos_change_driver_len * 5 + 15)
 
-    pos_change_chart = rx.recharts.bar_chart(
-        rx.recharts.bar(
-            *[
-                rx.recharts.cell(fill=item["fill"])
-                for item in pos_change_data
-            ],
-            data_key="change",
-            name="Pos Change",
+    pos_change_chart = zoomable_chart(
+        lambda h: rx.recharts.bar_chart(
+            rx.recharts.bar(
+                *[
+                    rx.recharts.cell(fill=item["fill"])
+                    for item in pos_change_data
+                ],
+                data_key="change",
+                name="Pos Change",
+            ),
+            rx.recharts.x_axis(data_key="driver", font_size=7, angle=-90, height=pos_change_driver_axis_height, stroke="white", text_anchor="end", interval=0, style={"fontFamily": "Outfit"}, tick={"dx": -5}),
+            rx.recharts.y_axis(
+                stroke="white",
+                width=35,
+                tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
+            ),
+            rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
+            rx.recharts.reference_line(y=0, stroke="#555555"),
+            data=pos_change_data,
+            margin={"top": 10, "right": 20, "left": 35, "bottom": 40},
+            margin_left="-10px",
+            width="100%",
+            height=h,
         ),
-        rx.recharts.x_axis(data_key="driver", font_size=7, angle=-90, height=pos_change_driver_axis_height, stroke="white", text_anchor="end", interval=0, style={"fontFamily": "Outfit"}, tick={"dx": -5}),
-        rx.recharts.y_axis(
-            stroke="white",
-            width=35,
-            tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
-        ),
-        rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
-        rx.recharts.reference_line(y=0, stroke="#555555"),
-        data=pos_change_data,
-        margin={"top": 10, "right": 20, "left": 35, "bottom": 40},
-        margin_left="-10px",
-        width="100%",
+        title="Average Positions Changed",
+        chart_id="pos_change_chart",
         height=300,
+        large_height=400
     )
 
     # ── Points Per Driver ────────────────────────────────────────────────
@@ -128,27 +135,33 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
     max_pts_driver_len = max([len(str(item.get("driver", ""))) for item in pts_data] or [0])
     pts_driver_axis_height = max(40, max_pts_driver_len * 5 + 15)
 
-    pts_chart = rx.recharts.bar_chart(
-        rx.recharts.bar(
-            *[
-                rx.recharts.cell(fill=item["fill"])
-                for item in pts_data
-            ],
-            data_key="points",
-            name="Points",
+    pts_chart = zoomable_chart(
+        lambda h: rx.recharts.bar_chart(
+            rx.recharts.bar(
+                *[
+                    rx.recharts.cell(fill=item["fill"])
+                    for item in pts_data
+                ],
+                data_key="points",
+                name="Points",
+            ),
+            rx.recharts.x_axis(data_key="driver", font_size=7, angle=-90, height=pts_driver_axis_height, stroke="white", text_anchor="end", interval=0, style={"fontFamily": "Outfit"}, tick={"dx": -5}),
+            rx.recharts.y_axis(
+                stroke="white",
+                width=35,
+                tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
+            ),
+            rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
+            data=pts_data,
+            margin={"top": 10, "right": 20, "left": 35, "bottom": 40},
+            margin_left="-10px",
+            width="100%",
+            height=h,
         ),
-        rx.recharts.x_axis(data_key="driver", font_size=7, angle=-90, height=pts_driver_axis_height, stroke="white", text_anchor="end", interval=0, style={"fontFamily": "Outfit"}, tick={"dx": -5}),
-        rx.recharts.y_axis(
-            stroke="white",
-            width=35,
-            tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
-        ),
-        rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
-        data=pts_data,
-        margin={"top": 10, "right": 20, "left": 35, "bottom": 40},
-        margin_left="-10px",
-        width="100%",
+        title="Points Per Driver",
+        chart_id="pts_chart",
         height=300,
+        large_height=400
     )
 
     # ── Average Qualifying Position ──────────────────────────────────────
@@ -163,37 +176,43 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
             "fill": fill,
         })
 
-    qual_chart = rx.recharts.bar_chart(
-        rx.recharts.bar(
-            *[
-                rx.recharts.cell(fill=item["fill"])
-                for item in qual_data
-            ],
-            data_key="qualifying",
-            name="Avg Qualifying",
+    qual_chart = zoomable_chart(
+        lambda h: rx.recharts.bar_chart(
+            rx.recharts.bar(
+                *[
+                    rx.recharts.cell(fill=item["fill"])
+                    for item in qual_data
+                ],
+                data_key="qualifying",
+                name="Avg Qualifying",
+            ),
+            rx.recharts.y_axis(
+                data_key="driver",
+                type_="category",
+                stroke="white",
+                interval=0,
+                axis_line=False,
+                tick_line=False,
+                width=60,
+                tick={"textAnchor": "start", "dx": -50, "fill": "white", "fontSize": 9, "fontFamily": "Outfit"},
+            ),
+            rx.recharts.x_axis(
+                type_="number",
+                font_size=8,
+                stroke="white",
+                style={"fontFamily": "Outfit"},
+            ),
+            data=qual_data,
+            width="100%",
+            height=h,
+            layout="vertical",
+            margin={"left": 60, "right": 25, "top": 10, "bottom": 10},
+            margin_left="-10px",
         ),
-        rx.recharts.y_axis(
-            data_key="driver",
-            type_="category",
-            stroke="white",
-            interval=0,
-            axis_line=False,
-            tick_line=False,
-            width=60,
-            tick={"textAnchor": "start", "dx": -50, "fill": "white", "fontSize": 9, "fontFamily": "Outfit"},
-        ),
-        rx.recharts.x_axis(
-            type_="number",
-            font_size=8,
-            stroke="white",
-            style={"fontFamily": "Outfit"},
-        ),
-        data=qual_data,
-        width="100%",
+        title="Average Qualifying Position",
+        chart_id="qual_chart",
         height=300,
-        layout="vertical",
-        margin={"left": 60, "right": 25, "top": 10, "bottom": 10},
-        margin_left="-10px",
+        large_height=400
     )
 
     # ── Average Place ────────────────────────────────────────────────────
@@ -207,37 +226,43 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
             "fill": fill,
         })
 
-    place_chart = rx.recharts.bar_chart(
-        rx.recharts.bar(
-            *[
-                rx.recharts.cell(fill=item["fill"])
-                for item in place_data
-            ],
-            data_key="place",
-            name="Avg Place",
+    place_chart = zoomable_chart(
+        lambda h: rx.recharts.bar_chart(
+            rx.recharts.bar(
+                *[
+                    rx.recharts.cell(fill=item["fill"])
+                    for item in place_data
+                ],
+                data_key="place",
+                name="Avg Place",
+            ),
+            rx.recharts.y_axis(
+                data_key="driver",
+                type_="category",
+                stroke="white",
+                interval=0,
+                axis_line=False,
+                tick_line=False,
+                width=60,
+                tick={"textAnchor": "start", "dx": -50, "fill": "white", "fontSize": 9, "fontFamily": "Outfit"},
+            ),
+            rx.recharts.x_axis(
+                type_="number",
+                font_size=8,
+                stroke="white",
+                style={"fontFamily": "Outfit"},
+            ),
+            data=place_data,
+            width="100%",
+            height=h,
+            layout="vertical",
+            margin={"left": 60, "right": 25, "top": 10, "bottom": 10},
+            margin_left="-10px",
         ),
-        rx.recharts.y_axis(
-            data_key="driver",
-            type_="category",
-            stroke="white",
-            interval=0,
-            axis_line=False,
-            tick_line=False,
-            width=60,
-            tick={"textAnchor": "start", "dx": -50, "fill": "white", "fontSize": 9, "fontFamily": "Outfit"},
-        ),
-        rx.recharts.x_axis(
-            type_="number",
-            font_size=8,
-            stroke="white",
-            style={"fontFamily": "Outfit"},
-        ),
-        data=place_data,
-        width="100%",
+        title="Average Place",
+        chart_id="place_chart",
         height=300,
-        layout="vertical",
-        margin={"left": 60, "right": 25, "top": 10, "bottom": 10},
-        margin_left="-10px",
+        large_height=400
     )
 
     # ── Leader badges ────────────────────────────────────────────────────
@@ -265,9 +290,8 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
         rookie_race_axis_height = max(40, max_rookie_race_len * 5 + 15)
         rookie_legend_margin = max(15, rookie_race_axis_height - 30)
 
-        rookie_chart_component = rx.vstack(
-            rx.text("Rookie of the Year", color="white", font_weight="700", font_size="sm"),
-            rx.recharts.line_chart(
+        rookie_chart = zoomable_chart(
+            lambda h: rx.recharts.line_chart(
                 *[
                     rx.recharts.line(
                         data_key=r,
@@ -289,8 +313,17 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
                 margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
                 margin_left="-10px",
                 width="100%",
-                height=300,
+                height=h,
             ),
+            title="Rookie of the Year",
+            chart_id="rookie_chart",
+            height=300,
+            large_height=400
+        )
+
+        rookie_chart_component = rx.vstack(
+            rx.text("Rookie of the Year", color="white", font_weight="700", font_size="sm"),
+            rookie_chart,
             rx.accordion.root(
                 rx.accordion.item(
                     rx.accordion.trigger(

@@ -6,6 +6,7 @@ with per-race bar charts and callout stats.
 
 import reflex as rx
 import pandas as pd
+from the_alternative_f1.articles.components import zoomable_chart
 
 
 def Tab3(data: dict, season_data: dict) -> rx.Component:
@@ -81,25 +82,31 @@ def Tab3(data: dict, season_data: dict) -> rx.Component:
             )
         )
 
-    stacked_chart = rx.recharts.bar_chart(
-        *bar_components,
-        rx.recharts.y_axis(
-            data_key="team",
-            type_="category",
-            stroke="white",
-            interval=0,
-            width=75,
-            tick={"textAnchor": "start", "dx": -65, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
+    stacked_chart = zoomable_chart(
+        lambda h: rx.recharts.bar_chart(
+            *bar_components,
+            rx.recharts.y_axis(
+                data_key="team",
+                type_="category",
+                stroke="white",
+                interval=0,
+                width=75,
+                tick={"textAnchor": "start", "dx": -65, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
+            ),
+            rx.recharts.x_axis(type_="number", font_size=8, stroke="white"),
+            rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
+            data=stacked_data,
+            width="100%",
+            height=h,
+            layout="vertical",
+            bar_gap=0,
+            margin={"left": 75, "right": 10, "top": 10, "bottom": 10},
+            margin_left="-10px",
         ),
-        rx.recharts.x_axis(type_="number", font_size=8, stroke="white"),
-        rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
-        data=stacked_data,
-        width="100%",
+        title="Stacked Constructor Points",
+        chart_id="stacked_chart",
         height=max(300, len(sorted_teams) * 45),
-        layout="vertical",
-        bar_gap=0,
-        margin={"left": 75, "right": 10, "top": 10, "bottom": 10},
-        margin_left="-10px",
+        large_height=max(450, len(sorted_teams) * 55)
     )
 
     # ── Individual constructor accordions ────────────────────────────────
@@ -143,20 +150,26 @@ def Tab3(data: dict, season_data: dict) -> rx.Component:
         max_race_len = max([len(str(item.get("race", ""))) for item in bar_data] or [0])
         race_axis_height = max(40, max_race_len * 5 + 15)
 
-        team_chart = rx.recharts.bar_chart(
-            rx.recharts.bar(data_key="points", name="Points"),
-            rx.recharts.x_axis(data_key="race", font_size=7, angle=-90, height=race_axis_height, stroke="white", text_anchor="end", interval=0, tick={"dx": -5}),
-            rx.recharts.y_axis(
-                stroke="white",
-                width=35,
-                tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
+        team_chart = zoomable_chart(
+            lambda h: rx.recharts.bar_chart(
+                rx.recharts.bar(data_key="points", name="Points"),
+                rx.recharts.x_axis(data_key="race", font_size=7, angle=-90, height=race_axis_height, stroke="white", text_anchor="end", interval=0, tick={"dx": -5}),
+                rx.recharts.y_axis(
+                    stroke="white",
+                    width=35,
+                    tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
+                ),
+                rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
+                data=bar_data,
+                margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
+                margin_left="-10px",
+                width="100%",
+                height=h,
             ),
-            rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
-            data=bar_data,
-            margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
-            margin_left="-10px",
-            width="100%",
+            title=f"{team_name} Race Results",
+            chart_id=f"team_chart_{idx}",
             height=250,
+            large_height=350
         )
 
         bg_color = "#525259" if idx % 2 == 0 else "#3C3C41"

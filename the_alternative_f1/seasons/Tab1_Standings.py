@@ -5,6 +5,7 @@ scrollable modal popups for full standings tables.
 """
 
 import reflex as rx
+from the_alternative_f1.articles.components import zoomable_chart
 
 
 def Tab1(data: dict, season_data: dict) -> rx.Component:
@@ -41,29 +42,35 @@ def Tab1(data: dict, season_data: dict) -> rx.Component:
     # Filter to only teams present in the data
     teams_in_data = [t for t in constructor_totals["Team"]]
 
-    constructor_line_chart = rx.recharts.line_chart(
-        *[
-            rx.recharts.line(
-                data_key=team,
-                stroke=team_colors.get(team, "#555555"),
-                dot={"fill": team_colors.get(team, "#555555"), "stroke": team_colors.get(team, "#555555")},
-                name=team,
-                type_="monotone",
-            )
-            for team in teams_in_data
-        ],
-        rx.recharts.x_axis(data_key="race", font_size=8, angle=-90, height=team_race_axis_height, stroke="white", text_anchor="end", interval=0, tick={"dx": -5}),
-        rx.recharts.y_axis(
-            stroke="white",
-            width=35,
-            tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
+    constructor_line_chart = zoomable_chart(
+        lambda h: rx.recharts.line_chart(
+            *[
+                rx.recharts.line(
+                    data_key=team,
+                    stroke=team_colors.get(team, "#555555"),
+                    dot={"fill": team_colors.get(team, "#555555"), "stroke": team_colors.get(team, "#555555")},
+                    name=team,
+                    type_="monotone",
+                )
+                for team in teams_in_data
+            ],
+            rx.recharts.x_axis(data_key="race", font_size=8, angle=-90, height=team_race_axis_height, stroke="white", text_anchor="end", interval=0, tick={"dx": -5}),
+            rx.recharts.y_axis(
+                stroke="white",
+                width=35,
+                tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
+            ),
+            rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
+            data=team_line_data,
+            margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
+            margin_left="-10px",
+            width="100%",
+            height=h,
         ),
-        rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
-        data=team_line_data,
-        margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
-        margin_left="-10px",
-        width="100%",
+        title="Constructor's Championship",
+        chart_id="constructor_line_chart",
         height=350,
+        large_height=450
     )
 
     # ── Constructor legend expander ──────────────────────────────────────
@@ -96,29 +103,35 @@ def Tab1(data: dict, season_data: dict) -> rx.Component:
     # ── Driver line chart ────────────────────────────────────────────────
     drivers_in_data = list(driver_totals["Driver"])
 
-    driver_line_chart = rx.recharts.line_chart(
-        *[
-            rx.recharts.line(
-                data_key=driver,
-                stroke=driver_colors.get(driver, "#555555"),
-                dot={"fill": driver_colors.get(driver, "#555555"), "stroke": driver_colors.get(driver, "#555555")},
-                name=driver,
-                type_="monotone",
-            )
-            for driver in drivers_in_data
-        ],
-        rx.recharts.x_axis(data_key="race", font_size=8, angle=-90, height=driver_race_axis_height, stroke="white", text_anchor="end", interval=0, tick={"dx": -5}),
-        rx.recharts.y_axis(
-            stroke="white",
-            width=35,
-            tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
+    driver_line_chart = zoomable_chart(
+        lambda h: rx.recharts.line_chart(
+            *[
+                rx.recharts.line(
+                    data_key=driver,
+                    stroke=driver_colors.get(driver, "#555555"),
+                    dot={"fill": driver_colors.get(driver, "#555555"), "stroke": driver_colors.get(driver, "#555555")},
+                    name=driver,
+                    type_="monotone",
+                )
+                for driver in drivers_in_data
+            ],
+            rx.recharts.x_axis(data_key="race", font_size=8, angle=-90, height=driver_race_axis_height, stroke="white", text_anchor="end", interval=0, tick={"dx": -5}),
+            rx.recharts.y_axis(
+                stroke="white",
+                width=35,
+                tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
+            ),
+            rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
+            data=driver_line_data,
+            margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
+            margin_left="-10px",
+            width="100%",
+            height=h,
         ),
-        rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
-        data=driver_line_data,
-        margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
-        margin_left="-10px",
-        width="100%",
+        title="Driver's Championship",
+        chart_id="driver_line_chart",
         height=350,
+        large_height=450
     )
 
     # ── Driver legend expander ───────────────────────────────────────────
@@ -157,23 +170,29 @@ def Tab1(data: dict, season_data: dict) -> rx.Component:
     max_team_len = max([len(str(item.get("team", ""))) for item in constructor_bar_data] or [0])
     team_axis_height = max(40, max_team_len * 5 + 15)
 
-    constructor_bar_chart = rx.recharts.bar_chart(
-        rx.recharts.bar(
-            data_key="points",
-            name="Points",
+    constructor_bar_chart = zoomable_chart(
+        lambda h: rx.recharts.bar_chart(
+            rx.recharts.bar(
+                data_key="points",
+                name="Points",
+            ),
+            rx.recharts.x_axis(data_key="team", font_size=8, angle=-90, height=team_axis_height, stroke="white", text_anchor="end", interval=0, tick={"dx": -5}),
+            rx.recharts.y_axis(
+                stroke="white",
+                width=35,
+                tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
+            ),
+            rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
+            data=constructor_bar_data,
+            margin={"top": 10, "right": 20, "left": 35, "bottom": 40},
+            margin_left="-10px",
+            width="100%",
+            height=h,
         ),
-        rx.recharts.x_axis(data_key="team", font_size=8, angle=-90, height=team_axis_height, stroke="white", text_anchor="end", interval=0, tick={"dx": -5}),
-        rx.recharts.y_axis(
-            stroke="white",
-            width=35,
-            tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
-        ),
-        rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
-        data=constructor_bar_data,
-        margin={"top": 10, "right": 20, "left": 35, "bottom": 40},
-        margin_left="-10px",
-        width="100%",
+        title="Constructor Points",
+        chart_id="constructor_bar_chart",
         height=300,
+        large_height=400
     )
 
     # ── Driver points bar chart data ─────────────────────────────────────
@@ -185,23 +204,29 @@ def Tab1(data: dict, season_data: dict) -> rx.Component:
     max_driver_len = max([len(str(item.get("driver", ""))) for item in driver_bar_data] or [0])
     driver_axis_height = max(40, max_driver_len * 5 + 15)
 
-    driver_bar_chart = rx.recharts.bar_chart(
-        rx.recharts.bar(
-            data_key="points",
-            name="Points",
+    driver_bar_chart = zoomable_chart(
+        lambda h: rx.recharts.bar_chart(
+            rx.recharts.bar(
+                data_key="points",
+                name="Points",
+            ),
+            rx.recharts.x_axis(data_key="driver", font_size=8, angle=-90, height=driver_axis_height, stroke="white", text_anchor="end", interval=0, tick={"dx": -5}),
+            rx.recharts.y_axis(
+                stroke="white",
+                width=35,
+                tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
+            ),
+            rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
+            data=driver_bar_data,
+            margin={"top": 10, "right": 20, "left": 35, "bottom": 40},
+            margin_left="-10px",
+            width="100%",
+            height=h,
         ),
-        rx.recharts.x_axis(data_key="driver", font_size=8, angle=-90, height=driver_axis_height, stroke="white", text_anchor="end", interval=0, tick={"dx": -5}),
-        rx.recharts.y_axis(
-            stroke="white",
-            width=35,
-            tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
-        ),
-        rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
-        data=driver_bar_data,
-        margin={"top": 10, "right": 20, "left": 35, "bottom": 40},
-        margin_left="-10px",
-        width="100%",
+        title="Driver Points",
+        chart_id="driver_bar_chart",
         height=300,
+        large_height=400
     )
 
     # ── Full standings table helper ──────────────────────────────────────

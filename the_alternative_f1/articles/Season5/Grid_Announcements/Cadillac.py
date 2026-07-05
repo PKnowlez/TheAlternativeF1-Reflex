@@ -38,6 +38,6 @@ article = {
     ],
     "image": "/Season5/Grid_Announcements/Grid_Cadillac.png",
     "author": "Patrick",
-    "date": "July 1, 2026",
+    "date": "July 3, 2026",
     "season": 5,
 }
