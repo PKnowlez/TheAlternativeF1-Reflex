@@ -39,3 +39,7 @@ photoshop_sources/
 .env
 .env*.local
 r2_credentials.env
+
+# Agents & API Credentials
+.agents/
+mcp_config.json
