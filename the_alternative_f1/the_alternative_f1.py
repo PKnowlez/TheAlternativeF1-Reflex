@@ -512,8 +512,8 @@ def article_card(article: dict) -> rx.Component:
 
 def articles_list() -> rx.Component:
     """List of all article cards."""
-    first_six = articles[:6]
-    remaining = articles[6:]
+    first_nine = articles[:9]
+    remaining = articles[9:]
     return rx.vstack(
         rx.vstack(
             rx.heading("League News", size="7", color="white", font_weight="900", padding_top="2.5%", padding_bottom="0%", padding_x="2%"),
@@ -531,7 +531,7 @@ def articles_list() -> rx.Component:
             padding_bottom="2",
         ),
         rx.flex(
-            *[article_card(art) for art in first_six],
+            *[article_card(art) for art in first_nine],
             rx.cond(
                 ~State.home_articles_expanded,
                 rx.center(
@@ -558,7 +558,7 @@ def articles_list() -> rx.Component:
                     margin_bottom="120px",
                 ),
                 rx.fragment()
-            ) if len(articles) > 6 else rx.fragment(),
+            ) if len(articles) > 9 else rx.fragment(),
             *[
                 rx.cond(
                     State.home_articles_expanded,

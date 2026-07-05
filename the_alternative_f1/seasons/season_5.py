@@ -2,7 +2,7 @@ from the_alternative_f1.articles.Season5.Grid_Announcements.Haas import article 
 from the_alternative_f1.articles.Season5.Grid_Announcements.Erick import article as Erick_Article
 from the_alternative_f1.articles.Season5.Grid_Announcements.RedBull import article as RedBull_Article
 from the_alternative_f1.articles.Season5.Grid_Announcements.Cadillac import article as Cadillac_Article
-from the_alternative_f1.articles.Season5.Grid_Announcements.McLaren import article as McLaren_Article
+from the_alternative_f1.articles.Season5.Grid_Announcements.Ferrari import article as Ferrari_Article
 
 season = {
     "season_number": 5,
@@ -12,7 +12,7 @@ season = {
     # Rookies: drivers not present in Season 4
     "rookies": {"Grayson", "TBD1", "Randy", "TBD2"},
 
-    "articles": [Cadillac_Article, RedBull_Article, Erick_Article, Haas_Article],
+    "articles": [Ferrari_Article, Cadillac_Article, RedBull_Article, Erick_Article, Haas_Article],
 
     "team_colors": {
         "Alpine": "hotpink",

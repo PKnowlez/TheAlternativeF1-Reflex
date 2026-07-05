@@ -129,8 +129,8 @@ def Tab0(season_data: dict, select_article = None, season_articles_expanded = No
             transition="all 0.25s ease-in-out",
         )
 
-    first_six = season_articles[:6]
-    remaining = season_articles[6:]
+    first_nine = season_articles[:9]
+    remaining = season_articles[9:]
 
     return rx.vstack(
         rx.vstack(
@@ -148,7 +148,7 @@ def Tab0(season_data: dict, select_article = None, season_articles_expanded = No
             padding_bottom="4",
         ),
         rx.flex(
-            *[news_card(a) for a in first_six],
+            *[news_card(a) for a in first_nine],
             rx.cond(
                 ~season_articles_expanded,
                 rx.center(
@@ -175,7 +175,7 @@ def Tab0(season_data: dict, select_article = None, season_articles_expanded = No
                     margin_bottom="120px",
                 ),
                 rx.fragment()
-            ) if len(season_articles) > 6 else rx.fragment(),
+            ) if len(season_articles) > 9 else rx.fragment(),
             *[
                 rx.cond(
                     season_articles_expanded,
