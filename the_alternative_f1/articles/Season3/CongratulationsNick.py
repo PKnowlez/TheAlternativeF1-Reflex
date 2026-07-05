@@ -8,7 +8,7 @@ article = {
 rx.vstack(
     rx.text("Congratulations Nick WDC Graphic", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Nick_Championship.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Nick_Championship.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -26,7 +26,7 @@ rx.text(
     margin_bottom="4",
 ),
     ],
-    "image": "/Season3/Images/Nick_Championship.png",
+    "image": "/thealternativef1-cloudflare/Season3/Images/Nick_Championship.png",
     "author": "McLaren Racing",
     "date": "February 10, 2025",
     "season": 3,

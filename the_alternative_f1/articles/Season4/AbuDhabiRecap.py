@@ -71,7 +71,7 @@ article = {
         rx.vstack(
             rx.text("Ad1", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Abu Dhabi/ad1.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Abu Dhabi/ad1.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -84,7 +84,7 @@ article = {
         rx.vstack(
             rx.text("Ad2", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Abu Dhabi/ad2.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Abu Dhabi/ad2.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -97,7 +97,7 @@ article = {
         rx.vstack(
             rx.text("Ad3", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Abu Dhabi/ad3.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Abu Dhabi/ad3.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -110,7 +110,7 @@ article = {
         rx.vstack(
             rx.text("Ad4", color="#888888", font_size="xs", margin_bottom="1"),
             rx.video(
-                src="/Season4/Images/Abu Dhabi/ad4.mp4",
+                src="/thealternativef1-cloudflare/Season4/Images/Abu Dhabi/ad4.mp4",
                 width="100%",
                 height="auto",
                 controls=True,
@@ -124,7 +124,7 @@ article = {
         rx.vstack(
             rx.text("Ad5", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Abu Dhabi/ad5.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Abu Dhabi/ad5.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -137,7 +137,7 @@ article = {
         rx.vstack(
             rx.text("Ad6", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Abu Dhabi/ad6.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Abu Dhabi/ad6.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -150,7 +150,7 @@ article = {
         rx.vstack(
             rx.text("Ad7", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Abu Dhabi/ad7.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Abu Dhabi/ad7.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -163,7 +163,7 @@ article = {
         rx.vstack(
             rx.text("Ad8", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Abu Dhabi/ad8.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Abu Dhabi/ad8.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -176,7 +176,7 @@ article = {
         rx.vstack(
             rx.text("Ad9", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Abu Dhabi/ad9.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Abu Dhabi/ad9.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -189,7 +189,7 @@ article = {
         rx.vstack(
             rx.text("Ad10", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Abu Dhabi/ad10.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Abu Dhabi/ad10.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -202,7 +202,7 @@ article = {
         rx.vstack(
             rx.text("Ad11", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Abu Dhabi/ad11.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Abu Dhabi/ad11.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -215,7 +215,7 @@ article = {
         rx.vstack(
             rx.text("Ad12", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Abu Dhabi/ad12.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Abu Dhabi/ad12.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -228,7 +228,7 @@ article = {
         rx.vstack(
             rx.text("Ad13", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Abu Dhabi/ad13.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Abu Dhabi/ad13.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -249,7 +249,7 @@ article = {
         rx.vstack(
             rx.text("Ad14", color="#888888", font_size="xs", margin_bottom="1"),
             rx.video(
-                src="/Season4/Images/Abu Dhabi/ad14.mp4",
+                src="/thealternativef1-cloudflare/Season4/Images/Abu Dhabi/ad14.mp4",
                 width="100%",
                 height="auto",
                 controls=True,
@@ -307,7 +307,7 @@ article = {
         rx.vstack(
             rx.text("Mclarens5", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Silly Season/McLarenS5.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Silly Season/McLarenS5.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -327,7 +327,7 @@ article = {
         rx.vstack(
             rx.text("Cadillacs5", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Silly Season/CadillacS5.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Silly Season/CadillacS5.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -347,7 +347,7 @@ article = {
         rx.vstack(
             rx.text("Surfer", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/surfer.gif",
+                src="/thealternativef1-cloudflare/Season4/Images/surfer.gif",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -360,7 +360,7 @@ article = {
         rx.vstack(
             rx.text("Videofile", color="#888888", font_size="xs", margin_bottom="1"),
             rx.video(
-                src="/Season4/Images/VideoFile.mp4",
+                src="/thealternativef1-cloudflare/Season4/Images/VideoFile.mp4",
                 width="100%",
                 height="auto",
                 controls=True,
@@ -372,7 +372,7 @@ article = {
             margin_y="4",
         ),
     ],
-    "image": "/Season4/Images/Abu Dhabi/ad1.png",
+    "image": "/thealternativef1-cloudflare/Season4/Images/Abu Dhabi/ad1.png",
     "author": "The Intern",
     "date": "January 16, 2026",
     "season": 4,

@@ -36,7 +36,7 @@ article = {
             width="100%",
         ),
     ],
-    "image": "/Season5/Grid_Announcements/Grid_McLaren.png",
+    "image": "/thealternativef1-cloudflare/Season5/Grid_Announcements/Grid_McLaren.png",
     "author": "Patrick",
     "date": "July 5, 2026",
     "season": 5,

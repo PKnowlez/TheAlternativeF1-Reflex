@@ -15,7 +15,7 @@ rx.text(
 rx.vstack(
     rx.text("Canada Start", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Canada_Start.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Canada_Start.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -42,7 +42,7 @@ rx.text(
 rx.vstack(
     rx.text("Canada Nick Collage", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Canada_Nick_Collage.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Canada_Nick_Collage.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -62,7 +62,7 @@ rx.text(
 rx.vstack(
     rx.text("Canada Eddie and Erick Sibling Rivalry", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Canada_Eddie_Erick_Collage.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Canada_Eddie_Erick_Collage.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -82,7 +82,7 @@ rx.text(
 rx.vstack(
     rx.text("Joshua Turn 7 Spin", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Canada_Joshua_Crash.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Canada_Joshua_Crash.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -102,7 +102,7 @@ rx.text(
 rx.vstack(
     rx.text("Del Victory in Canada", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Canada_Del.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Canada_Del.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -120,7 +120,7 @@ rx.text(
     margin_bottom="4",
 ),
     ],
-    "image": "/Season3/Images/Canada_Start.png",
+    "image": "/thealternativef1-cloudflare/Season3/Images/Canada_Start.png",
     "author": "Patrick Knowles with credit Erick & Nick",
     "date": "January 23, 2025",
     "season": 3,

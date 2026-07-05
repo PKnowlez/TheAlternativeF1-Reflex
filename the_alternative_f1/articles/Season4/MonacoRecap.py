@@ -15,7 +15,7 @@ article = {
         rx.vstack(
             rx.text("Cinema", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Monaco/cinema.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Monaco/cinema.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -35,7 +35,7 @@ article = {
         rx.vstack(
             rx.text("Erick Bodies", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Monaco/erick_bodies.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Monaco/erick_bodies.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -48,7 +48,7 @@ article = {
         rx.vstack(
             rx.text("Erick Clip", color="#888888", font_size="xs", margin_bottom="1"),
             rx.video(
-                src="/Season4/Images/Monaco/erick_clip.mp4",
+                src="/thealternativef1-cloudflare/Season4/Images/Monaco/erick_clip.mp4",
                 width="100%",
                 height="auto",
                 controls=True,
@@ -62,7 +62,7 @@ article = {
         rx.vstack(
             rx.text("Erick Pk", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Monaco/erick_pk.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Monaco/erick_pk.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -75,7 +75,7 @@ article = {
         rx.vstack(
             rx.text("Erick Dive", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Monaco/erick_dive.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Monaco/erick_dive.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -88,7 +88,7 @@ article = {
         rx.vstack(
             rx.text("Erick Crash", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Monaco/erick_crash.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Monaco/erick_crash.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -115,7 +115,7 @@ article = {
         rx.vstack(
             rx.text("Jairo Joshua", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Monaco/jairo_joshua.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Monaco/jairo_joshua.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -128,7 +128,7 @@ article = {
         rx.vstack(
             rx.text("Jaden Leo", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Monaco/jaden_leo.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Monaco/jaden_leo.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -148,7 +148,7 @@ article = {
         rx.vstack(
             rx.text("Everyone Liked", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Monaco/everyone_liked.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Monaco/everyone_liked.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -168,7 +168,7 @@ article = {
         rx.vstack(
             rx.text("Pk Jairo", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Monaco/pk_jairo.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Monaco/pk_jairo.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -188,7 +188,7 @@ article = {
         rx.vstack(
             rx.text("Settings", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Monaco/settings.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Monaco/settings.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -208,7 +208,7 @@ article = {
         rx.vstack(
             rx.text("Pk Crash", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Monaco/pk_crash.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Monaco/pk_crash.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -221,7 +221,7 @@ article = {
         rx.vstack(
             rx.text("Brentuar", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Monaco/brentuar.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Monaco/brentuar.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -234,7 +234,7 @@ article = {
         rx.vstack(
             rx.text("Team Usa", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Monaco/team_usa.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Monaco/team_usa.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -268,7 +268,7 @@ article = {
         rx.vstack(
             rx.text("Josh Newman", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Monaco/josh_newman.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Monaco/josh_newman.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -288,7 +288,7 @@ article = {
         rx.vstack(
             rx.text("Eddie Texting", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Monaco/eddie_texting.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Monaco/eddie_texting.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -337,7 +337,7 @@ article = {
         rx.vstack(
             rx.text("Surfer", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Images/surfer.gif",
+                src="/thealternativef1-cloudflare/Images/surfer.gif",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -350,7 +350,7 @@ article = {
         rx.vstack(
             rx.text("Videofile", color="#888888", font_size="xs", margin_bottom="1"),
             rx.video(
-                src="/Images/VideoFile.mp4",
+                src="/thealternativef1-cloudflare/Images/VideoFile.mp4",
                 width="100%",
                 height="auto",
                 controls=True,
@@ -362,7 +362,7 @@ article = {
             margin_y="4",
         ),
     ],
-    "image": "/Season4/Images/Monaco/cinema.png",
+    "image": "/thealternativef1-cloudflare/Season4/Images/Monaco/cinema.png",
     "author": "The Intern",
     "date": "January 30, 2026",
     "season": 4,

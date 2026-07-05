@@ -15,7 +15,7 @@ rx.text(
 rx.vstack(
     rx.text("Spain Cover Photo", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Spain_Cover.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Spain_Cover.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -49,7 +49,7 @@ rx.text(
 rx.vstack(
     rx.text("Yeti in Spain", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Spain_Yeti.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Spain_Yeti.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -83,7 +83,7 @@ rx.text(
 rx.vstack(
     rx.text("Nick and Joshua Battle at Spa", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Spa_Nick_Joshua.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Spa_Nick_Joshua.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -103,7 +103,7 @@ rx.text(
 rx.vstack(
     rx.text("Spa Log Jam Incident", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Spa_Log_Jam.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Spa_Log_Jam.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -151,7 +151,7 @@ rx.text(
 rx.vstack(
     rx.text("Alpine Team Radio at Spa", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Spa_Alpines.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Spa_Alpines.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -169,7 +169,7 @@ rx.text(
     margin_bottom="4",
 ),
     ],
-    "image": "/Season3/Images/Spain_Cover.png",
+    "image": "/thealternativef1-cloudflare/Season3/Images/Spain_Cover.png",
     "author": "Patrick Knowles",
     "date": "January 2, 2025",
     "season": 3,

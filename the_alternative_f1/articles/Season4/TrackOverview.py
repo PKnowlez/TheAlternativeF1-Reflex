@@ -22,7 +22,7 @@ article = {
         rx.vstack(
             rx.text("Tracks 1", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Tracks_1.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Tracks_1.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -111,7 +111,7 @@ article = {
         rx.vstack(
             rx.text("Track Reveal Miami", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/track_reveal_miami.png",
+                src="/thealternativef1-cloudflare/Season4/Images/track_reveal_miami.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -145,7 +145,7 @@ article = {
         rx.vstack(
             rx.text("Tracks 2", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Tracks_2.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Tracks_2.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -247,7 +247,7 @@ article = {
         rx.vstack(
             rx.text("Tracks 3", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Tracks_3.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Tracks_3.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -274,7 +274,7 @@ article = {
         rx.vstack(
             rx.text("Surfer", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/surfer.gif",
+                src="/thealternativef1-cloudflare/Season4/Images/surfer.gif",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -329,7 +329,7 @@ article = {
         rx.vstack(
             rx.text("Tracks 4", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Tracks_4.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Tracks_4.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -398,7 +398,7 @@ article = {
         rx.vstack(
             rx.text("Tracks 5", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Tracks_5.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Tracks_5.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -446,7 +446,7 @@ article = {
         rx.vstack(
             rx.text("No Mikey", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/no_mikey.png",
+                src="/thealternativef1-cloudflare/Season4/Images/no_mikey.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -487,7 +487,7 @@ article = {
         rx.vstack(
             rx.text("Tracks 6", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Tracks_6.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Tracks_6.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -512,7 +512,7 @@ article = {
             margin_bottom="4",
         ),
     ],
-    "image": "/Season4/Images/Tracks_1.png",
+    "image": "/thealternativef1-cloudflare/Season4/Images/Tracks_1.png",
     "author": "A Joint Patrick & The Intern Production",
     "date": "August 15, 2025",
     "season": 4,

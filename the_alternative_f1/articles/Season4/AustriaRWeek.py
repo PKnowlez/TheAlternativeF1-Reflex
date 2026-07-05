@@ -8,7 +8,7 @@ article = {
         rx.vstack(
             rx.text("Austria Reverse", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/austria_reverse.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/austria_reverse.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -42,7 +42,7 @@ article = {
         rx.vstack(
             rx.text("Austria Circuit", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Austria_Circuit.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Austria_Circuit.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -81,7 +81,7 @@ article = {
             margin_bottom="4",
         ),
     ],
-    "image": "/Season4/Images/austria_reverse.jpg",
+    "image": "/thealternativef1-cloudflare/Season4/Images/austria_reverse.jpg",
     "author": "Patrick",
     "date": "November 10, 2025",
     "season": 4,

@@ -22,7 +22,7 @@ article = {
         rx.vstack(
             rx.text("Deal With It", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/deal_with_it.gif",
+                src="/thealternativef1-cloudflare/Season4/Images/deal_with_it.gif",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -49,7 +49,7 @@ article = {
         rx.vstack(
             rx.text("Track Tier List", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Track_Tier_List.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Track_Tier_List.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -60,7 +60,7 @@ article = {
             margin_y="4",
         ),
     ],
-    "image": "/Season4/Images/deal_with_it.gif",
+    "image": "/thealternativef1-cloudflare/Season4/Images/deal_with_it.gif",
     "author": "The Intern",
     "date": "August 25, 2025",
     "season": 4,

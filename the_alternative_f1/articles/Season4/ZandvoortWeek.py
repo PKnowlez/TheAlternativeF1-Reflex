@@ -8,7 +8,7 @@ article = {
         rx.vstack(
             rx.text("Zandvoort", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Zandvoort.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Zandvoort.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -49,7 +49,7 @@ article = {
         rx.vstack(
             rx.text("Netherlands Circuit", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Netherlands_Circuit.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Netherlands_Circuit.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -126,7 +126,7 @@ article = {
         rx.vstack(
             rx.text("Surfer", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/surfer.gif",
+                src="/thealternativef1-cloudflare/Season4/Images/surfer.gif",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -137,7 +137,7 @@ article = {
             margin_y="4",
         ),
     ],
-    "image": "/Season4/Images/Zandvoort.jpg",
+    "image": "/thealternativef1-cloudflare/Season4/Images/Zandvoort.jpg",
     "author": "Patrick",
     "date": "December 16, 2025",
     "season": 4,

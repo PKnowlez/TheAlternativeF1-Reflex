@@ -15,7 +15,7 @@ rx.text(
 rx.vstack(
     rx.text("China Sprint Battle - Erick and Patrick", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/ChinaSprint_Erick_Patrick.png",
+        src="/thealternativef1-cloudflare/Season3/Images/ChinaSprint_Erick_Patrick.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -42,7 +42,7 @@ rx.text(
 rx.vstack(
     rx.text("China Main Race Incident", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/ChinaRace_Incident.png",
+        src="/thealternativef1-cloudflare/Season3/Images/ChinaRace_Incident.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -62,7 +62,7 @@ rx.text(
 rx.vstack(
     rx.text("China Hairpin Collision", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/ChinaRace_Eddie_Boz_Incident.png",
+        src="/thealternativef1-cloudflare/Season3/Images/ChinaRace_Eddie_Boz_Incident.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -82,7 +82,7 @@ rx.text(
 rx.vstack(
     rx.text("Erick Hairpin Runoff", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/ChinaRace_Erick_Mistake.png",
+        src="/thealternativef1-cloudflare/Season3/Images/ChinaRace_Erick_Mistake.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -107,7 +107,7 @@ rx.text(
     margin_bottom="4",
 ),
     ],
-    "image": "/Season3/Images/ChinaSprint_Erick_Patrick.png",
+    "image": "/thealternativef1-cloudflare/Season3/Images/ChinaSprint_Erick_Patrick.png",
     "author": "Patrick Knowles with credit Erick",
     "date": "January 9, 2025",
     "season": 3,

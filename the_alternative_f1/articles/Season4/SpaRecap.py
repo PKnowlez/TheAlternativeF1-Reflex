@@ -130,7 +130,7 @@ article = {
         rx.vstack(
             rx.text("Pk Roast1", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Spa/PK_roast1.gif",
+                src="/thealternativef1-cloudflare/Season4/Images/Spa/PK_roast1.gif",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -143,7 +143,7 @@ article = {
         rx.vstack(
             rx.text("Pk Roast2", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Spa/PK_roast2.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Spa/PK_roast2.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -156,7 +156,7 @@ article = {
         rx.vstack(
             rx.text("Pk Roast3", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Spa/PK_roast3.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Spa/PK_roast3.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -169,7 +169,7 @@ article = {
         rx.vstack(
             rx.text("Pk Roast4", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Spa/PK_roast4.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Spa/PK_roast4.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -182,7 +182,7 @@ article = {
         rx.vstack(
             rx.text("Pk Roast5", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Spa/PK_roast5.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Spa/PK_roast5.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -195,7 +195,7 @@ article = {
         rx.vstack(
             rx.text("Pk Roast6", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Spa/PK_roast6.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Spa/PK_roast6.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -208,7 +208,7 @@ article = {
         rx.vstack(
             rx.text("Pk Roast7", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Spa/PK_roast7.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Spa/PK_roast7.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -236,7 +236,7 @@ article = {
         rx.vstack(
             rx.text("Joshua Roast1", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Spa/joshua_roast1.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Spa/joshua_roast1.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -249,7 +249,7 @@ article = {
         rx.vstack(
             rx.text("Joshua Roast2", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Spa/joshua_roast2.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Spa/joshua_roast2.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -262,7 +262,7 @@ article = {
         rx.vstack(
             rx.text("Josh Roast1", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Spa/Josh_roast1.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Spa/Josh_roast1.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -275,7 +275,7 @@ article = {
         rx.vstack(
             rx.text("Josh Roast2", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Spa/Josh_roast2.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Spa/Josh_roast2.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -296,7 +296,7 @@ article = {
         rx.vstack(
             rx.text("Leo Roast1", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Spa/leo_roast1.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Spa/leo_roast1.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -309,7 +309,7 @@ article = {
         rx.vstack(
             rx.text("Leo Roast2", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Spa/leo_roast2.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Spa/leo_roast2.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -322,7 +322,7 @@ article = {
         rx.vstack(
             rx.text("Leo Roast3", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Spa/leo_roast3.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Spa/leo_roast3.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -335,7 +335,7 @@ article = {
         rx.vstack(
             rx.text("Leo Roast4", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Spa/leo_roast4.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Spa/leo_roast4.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -356,7 +356,7 @@ article = {
         rx.vstack(
             rx.text("League Roast1", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Spa/league_roast1.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Spa/league_roast1.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -369,7 +369,7 @@ article = {
         rx.vstack(
             rx.text("League Roast2", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Spa/league_roast2.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Spa/league_roast2.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -382,7 +382,7 @@ article = {
         rx.vstack(
             rx.text("League Roast3", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Spa/league_roast3.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Spa/league_roast3.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -395,7 +395,7 @@ article = {
         rx.vstack(
             rx.text("League Roast4", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Spa/league_roast4.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Spa/league_roast4.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -408,7 +408,7 @@ article = {
         rx.vstack(
             rx.text("Rb Roast", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Spa/RB_roast.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Spa/RB_roast.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -421,7 +421,7 @@ article = {
         rx.vstack(
             rx.text("Ea Roast", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Spa/EA_roast.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Spa/EA_roast.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -432,7 +432,7 @@ article = {
             margin_y="4",
         ),
     ],
-    "image": "/Season4/Images/Trophy.png",
+    "image": "/thealternativef1-cloudflare/Season4/Images/Trophy.png",
     "author": "The Intern",
     "date": "December 1, 2025",
     "season": 4,

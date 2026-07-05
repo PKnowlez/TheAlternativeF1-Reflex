@@ -8,7 +8,7 @@ article = {
 rx.vstack(
     rx.text("Austria Race Cover", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Austria_Alpine_Braking.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Austria_Alpine_Braking.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -42,7 +42,7 @@ rx.text(
 rx.vstack(
     rx.text("Joshua Pit Exit Incident", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Austria_Talent.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Austria_Talent.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -169,7 +169,7 @@ rx.text(
 rx.vstack(
     rx.text("Erick Airborne in Austria", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Austria_Erick_Airborne.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Austria_Erick_Airborne.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -196,7 +196,7 @@ rx.text(
 rx.vstack(
     rx.text("Albon Kamikaze on Patrick", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Austria_Kamikaze.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Austria_Kamikaze.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -216,7 +216,7 @@ rx.text(
 rx.vstack(
     rx.text("Erick Ferrari Strategy Meme", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Austria_Erick.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Austria_Erick.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -236,7 +236,7 @@ rx.text(
 rx.vstack(
     rx.text("Brently Lightning McQueen Performance", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Austria_Brently.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Austria_Brently.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -261,7 +261,7 @@ rx.text(
     margin_bottom="4",
 ),
     ],
-    "image": "/Season3/Images/Austria_Alpine_Braking.png",
+    "image": "/thealternativef1-cloudflare/Season3/Images/Austria_Alpine_Braking.png",
     "author": "A Joint Patrick & The Intern Production",
     "date": "February 10, 2025",
     "season": 3,

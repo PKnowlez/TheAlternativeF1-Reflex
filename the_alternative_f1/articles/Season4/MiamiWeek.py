@@ -8,7 +8,7 @@ article = {
         rx.vstack(
             rx.text("Miami Header", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Miami_Header.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Miami_Header.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -56,7 +56,7 @@ article = {
         rx.vstack(
             rx.text("Miami Circuit", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Miami_Circuit.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Miami_Circuit.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -97,7 +97,7 @@ article = {
         rx.vstack(
             rx.text("Surfer", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/surfer.gif",
+                src="/thealternativef1-cloudflare/Season4/Images/surfer.gif",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -108,7 +108,7 @@ article = {
             margin_y="4",
         ),
     ],
-    "image": "/Season4/Images/Miami_Header.jpg",
+    "image": "/thealternativef1-cloudflare/Season4/Images/Miami_Header.jpg",
     "author": "Patrick",
     "date": "October 4, 2025",
     "season": 4,

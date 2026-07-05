@@ -8,7 +8,7 @@ article = {
 rx.vstack(
     rx.text("Breaking News - Driver Swap", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/BN_Del_Zane.png",
+        src="/thealternativef1-cloudflare/Season3/Images/BN_Del_Zane.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -26,7 +26,7 @@ rx.text(
     margin_bottom="4",
 ),
     ],
-    "image": "/Season3/Images/BN_Del_Zane.png",
+    "image": "/thealternativef1-cloudflare/Season3/Images/BN_Del_Zane.png",
     "author": "System Administrator",
     "date": "February 20, 2025",
     "season": 3,

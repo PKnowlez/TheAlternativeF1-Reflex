@@ -55,7 +55,7 @@ rx.text(
     margin_bottom="4",
 ),
     ],
-    "image": "/Season3/Images/Trophy.png",
+    "image": "/thealternativef1-cloudflare/Season3/Images/Trophy.png",
     "author": "The Alternative F124 League",
     "date": "January 16, 2025",
     "season": 3,

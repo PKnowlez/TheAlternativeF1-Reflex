@@ -27,7 +27,7 @@ rx.text(
     margin_bottom="4",
 ),
     ],
-    "image": "/Season3/Images/Trophy.png",
+    "image": "/thealternativef1-cloudflare/Season3/Images/Trophy.png",
     "author": "System Administrator",
     "date": "February 20, 2025",
     "season": 3,

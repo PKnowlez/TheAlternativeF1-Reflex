@@ -22,7 +22,7 @@ article = {
         rx.vstack(
             rx.text("Monza2026", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Monza2026.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Monza2026.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -106,7 +106,7 @@ article = {
         rx.vstack(
             rx.text("Ferraris5", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Silly Season/FerrariS5.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Silly Season/FerrariS5.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -119,7 +119,7 @@ article = {
         rx.vstack(
             rx.text("Surfer", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Images/surfer.gif",
+                src="/thealternativef1-cloudflare/Images/surfer.gif",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -132,7 +132,7 @@ article = {
         rx.vstack(
             rx.text("Videofile", color="#888888", font_size="xs", margin_bottom="1"),
             rx.video(
-                src="/Images/VideoFile.mp4",
+                src="/thealternativef1-cloudflare/Images/VideoFile.mp4",
                 width="100%",
                 height="auto",
                 controls=True,
@@ -144,7 +144,7 @@ article = {
             margin_y="4",
         ),
     ],
-    "image": "/Season4/Images/Monza2026.png",
+    "image": "/thealternativef1-cloudflare/Season4/Images/Monza2026.png",
     "author": "A Joint Patrick & The Intern Production",
     "date": "January 25, 2026",
     "season": 4,

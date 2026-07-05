@@ -8,7 +8,7 @@ article = {
         rx.vstack(
             rx.text("Spain Alpine Statement", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Spain Alpine Statement.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Spain Alpine Statement.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -56,7 +56,7 @@ article = {
         rx.vstack(
             rx.text("Spain Qualifying", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Spain Qualifying.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Spain Qualifying.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -83,7 +83,7 @@ article = {
         rx.vstack(
             rx.text("Spain Race", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Spain Race.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Spain Race.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -145,7 +145,7 @@ article = {
         rx.vstack(
             rx.text("Surfer", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/surfer.gif",
+                src="/thealternativef1-cloudflare/Season4/Images/surfer.gif",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -156,7 +156,7 @@ article = {
             margin_y="4",
         ),
     ],
-    "image": "/Season4/Images/Spain Alpine Statement.png",
+    "image": "/thealternativef1-cloudflare/Season4/Images/Spain Alpine Statement.png",
     "author": "The Intern",
     "date": "October 23, 2025",
     "season": 4,

@@ -8,7 +8,7 @@ article = {
 rx.vstack(
     rx.text("Race Postponed Notice", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Postponed.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Postponed.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -26,7 +26,7 @@ rx.text(
     margin_bottom="4",
 ),
     ],
-    "image": "/Season3/Images/Postponed.png",
+    "image": "/thealternativef1-cloudflare/Season3/Images/Postponed.png",
     "author": "Patrick Knowles",
     "date": "December 22, 2024",
     "season": 3,

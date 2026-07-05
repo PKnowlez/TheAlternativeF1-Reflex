@@ -453,7 +453,7 @@ article = {
             margin_bottom="4",
         ),
     ],
-    "image": "/Season4/Images/Trophy.png",
+    "image": "/thealternativef1-cloudflare/Season4/Images/Trophy.png",
     "author": "Patrick",
     "date": "January 24, 2026",
     "season": 4,

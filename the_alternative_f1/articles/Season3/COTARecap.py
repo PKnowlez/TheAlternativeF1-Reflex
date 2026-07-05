@@ -29,7 +29,7 @@ rx.text(
 rx.vstack(
     rx.text("Turn 1 Chaos at COTA", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/COTA_MM.png",
+        src="/thealternativef1-cloudflare/Season3/Images/COTA_MM.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -56,7 +56,7 @@ rx.text(
 rx.vstack(
     rx.text("Midfield Battle at COTA", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/COTA_BLB.png",
+        src="/thealternativef1-cloudflare/Season3/Images/COTA_BLB.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -76,7 +76,7 @@ rx.text(
 rx.vstack(
     rx.text("Eddie Off-Track Spin at COTA", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/COTA_Eddie.png",
+        src="/thealternativef1-cloudflare/Season3/Images/COTA_Eddie.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -103,7 +103,7 @@ rx.text(
 rx.vstack(
     rx.text("Erick Defending at COTA", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/COTA_Erick.png",
+        src="/thealternativef1-cloudflare/Season3/Images/COTA_Erick.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -130,7 +130,7 @@ rx.text(
 rx.vstack(
     rx.text("Eddie Last-Turn Wall Crash at COTA", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/COTA_Eddie2.png",
+        src="/thealternativef1-cloudflare/Season3/Images/COTA_Eddie2.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -148,7 +148,7 @@ rx.text(
     margin_bottom="4",
 ),
     ],
-    "image": "/Season3/Images/COTA_MM.png",
+    "image": "/thealternativef1-cloudflare/Season3/Images/COTA_MM.png",
     "author": "Patrick",
     "date": "February 13, 2025",
     "season": 3,

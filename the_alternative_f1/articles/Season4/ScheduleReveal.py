@@ -43,7 +43,7 @@ article = {
         rx.vstack(
             rx.text("Schedule Reveal", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Schedule_Reveal.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Schedule_Reveal.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -54,7 +54,7 @@ article = {
             margin_y="4",
         ),
     ],
-    "image": "/Season4/Images/Schedule_Reveal.png",
+    "image": "/thealternativef1-cloudflare/Season4/Images/Schedule_Reveal.png",
     "author": "Patrick",
     "date": "August 21, 2025",
     "season": 4,

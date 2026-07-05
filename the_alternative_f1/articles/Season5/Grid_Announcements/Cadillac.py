@@ -36,7 +36,7 @@ article = {
             width="100%",
         ),
     ],
-    "image": "/Season5/Grid_Announcements/Grid_Cadillac.png",
+    "image": "/thealternativef1-cloudflare/Season5/Grid_Announcements/Grid_Cadillac.png",
     "author": "Patrick",
     "date": "July 3, 2026",
     "season": 5,

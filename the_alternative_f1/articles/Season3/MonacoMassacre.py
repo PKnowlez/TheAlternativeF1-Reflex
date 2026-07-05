@@ -29,7 +29,7 @@ rx.text(
 rx.vstack(
     rx.text("Monaco Polar Express Meme", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Monaco_Polar_Express.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Monaco_Polar_Express.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -49,7 +49,7 @@ rx.text(
 rx.vstack(
     rx.text("Nick Monaco DNF", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Monaco_Nick.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Monaco_Nick.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -69,7 +69,7 @@ rx.text(
 rx.vstack(
     rx.text("Brently Monaco Victory", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Monaco_Brently.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Monaco_Brently.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -87,7 +87,7 @@ rx.text(
     margin_bottom="4",
 ),
     ],
-    "image": "/Season3/Images/Monaco_Polar_Express.png",
+    "image": "/thealternativef1-cloudflare/Season3/Images/Monaco_Polar_Express.png",
     "author": "A Joint Patrick & The Intern Production",
     "date": "February 20, 2025",
     "season": 3,

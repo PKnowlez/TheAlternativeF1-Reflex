@@ -38,5 +38,4 @@ photoshop_sources/
 # Environment variables
 .env
 .env*.local
-
-
+r2_credentials.env

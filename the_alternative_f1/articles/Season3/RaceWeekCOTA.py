@@ -8,7 +8,7 @@ article = {
 rx.vstack(
     rx.text("Texas Charles Leclerc", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/COTA_Charles.png",
+        src="/thealternativef1-cloudflare/Season3/Images/COTA_Charles.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -53,7 +53,7 @@ rx.text(
 rx.vstack(
     rx.text("Circuit of the Americas Map", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/COTA_Circuit.png",
+        src="/thealternativef1-cloudflare/Season3/Images/COTA_Circuit.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -71,7 +71,7 @@ rx.text(
     margin_bottom="4",
 ),
     ],
-    "image": "/Season3/Images/COTA_Charles.png",
+    "image": "/thealternativef1-cloudflare/Season3/Images/COTA_Charles.png",
     "author": "Patrick",
     "date": "February 11, 2025",
     "season": 3,

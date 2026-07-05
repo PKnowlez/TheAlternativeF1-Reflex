@@ -8,7 +8,7 @@ article = {
 rx.vstack(
     rx.text("Season Trophy", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Trophy.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Trophy.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -19,7 +19,7 @@ rx.vstack(
     margin_y="4",
 ),
     ],
-    "image": "/Season3/Images/Trophy.png",
+    "image": "/thealternativef1-cloudflare/Season3/Images/Trophy.png",
     "author": "Patrick Knowles",
     "date": "December 1, 2024",
     "season": 3,

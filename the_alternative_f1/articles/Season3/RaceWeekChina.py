@@ -15,7 +15,7 @@ rx.text(
 rx.vstack(
     rx.text("Shanghai Circuit Map", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/China_Circuit.png",
+        src="/thealternativef1-cloudflare/Season3/Images/China_Circuit.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -40,7 +40,7 @@ rx.text(
     margin_bottom="4",
 ),
     ],
-    "image": "/Season3/Images/China_Circuit.png",
+    "image": "/thealternativef1-cloudflare/Season3/Images/China_Circuit.png",
     "author": "Patrick Knowles",
     "date": "January 5, 2025",
     "season": 3,

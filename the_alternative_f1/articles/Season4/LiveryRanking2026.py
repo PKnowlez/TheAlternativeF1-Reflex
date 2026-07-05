@@ -8,7 +8,7 @@ article = {
         rx.vstack(
             rx.text("Babe Wakeup", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Livery/Babe Wakeup.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Livery/Babe Wakeup.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -42,7 +42,7 @@ article = {
         rx.vstack(
             rx.text("Intern Ranking", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Livery/Intern Ranking.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Livery/Intern Ranking.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -55,7 +55,7 @@ article = {
         rx.vstack(
             rx.text("Surfer", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Images/surfer.gif",
+                src="/thealternativef1-cloudflare/Images/surfer.gif",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -68,7 +68,7 @@ article = {
         rx.vstack(
             rx.text("Videofile", color="#888888", font_size="xs", margin_bottom="1"),
             rx.video(
-                src="/Images/VideoFile.mp4",
+                src="/thealternativef1-cloudflare/Images/VideoFile.mp4",
                 width="100%",
                 height="auto",
                 controls=True,
@@ -80,7 +80,7 @@ article = {
             margin_y="4",
         ),
     ],
-    "image": "/Season4/Images/Livery/Babe Wakeup.png",
+    "image": "/thealternativef1-cloudflare/Season4/Images/Livery/Babe Wakeup.png",
     "author": "The Intern",
     "date": "February 9, 2026",
     "season": 4,

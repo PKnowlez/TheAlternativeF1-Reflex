@@ -8,7 +8,7 @@ article = {
 rx.vstack(
     rx.text("Silverstone Start", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Silverstone_Start.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Silverstone_Start.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -28,7 +28,7 @@ rx.text(
 rx.vstack(
     rx.text("Silverstone Final Turn", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Silverstone_Final_Turn.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Silverstone_Final_Turn.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -48,7 +48,7 @@ rx.text(
 rx.vstack(
     rx.text("Silverstone PK and Zane", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Silverstone_PK_Zane.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Silverstone_PK_Zane.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -59,7 +59,7 @@ rx.vstack(
     margin_y="4",
 ),
     ],
-    "image": "/Season3/Images/Silverstone_Start.png",
+    "image": "/thealternativef1-cloudflare/Season3/Images/Silverstone_Start.png",
     "author": "Patrick Knowles with credit Eddie & Nick",
     "date": "December 4, 2024",
     "season": 3,

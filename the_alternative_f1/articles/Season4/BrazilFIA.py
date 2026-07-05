@@ -7,7 +7,7 @@ article = {
     "content": [
 
     ],
-    "image": "/Season4/Images/Trophy.png",
+    "image": "/thealternativef1-cloudflare/Season4/Images/Trophy.png",
     "author": "System Administrator",
     "date": "December 7, 2025",
     "season": 4,

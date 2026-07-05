@@ -8,7 +8,7 @@ article = {
         rx.vstack(
             rx.text("Vegascover", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Jeddah Vegas/VegasCover.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Jeddah Vegas/VegasCover.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -64,7 +64,7 @@ article = {
         rx.vstack(
             rx.text("Jeddah1", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Jeddah Vegas/Jeddah1.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Jeddah Vegas/Jeddah1.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -77,7 +77,7 @@ article = {
         rx.vstack(
             rx.text("Jeddah2", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Jeddah Vegas/Jeddah2.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Jeddah Vegas/Jeddah2.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -90,7 +90,7 @@ article = {
         rx.vstack(
             rx.text("Jeddah3", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Jeddah Vegas/Jeddah3.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Jeddah Vegas/Jeddah3.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -103,7 +103,7 @@ article = {
         rx.vstack(
             rx.text("Jeddah4", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Jeddah Vegas/Jeddah4.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Jeddah Vegas/Jeddah4.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -116,7 +116,7 @@ article = {
         rx.vstack(
             rx.text("Jeddah5", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Jeddah Vegas/Jeddah5.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Jeddah Vegas/Jeddah5.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -129,7 +129,7 @@ article = {
         rx.vstack(
             rx.text("Jeddah6", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Jeddah Vegas/Jeddah6.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Jeddah Vegas/Jeddah6.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -178,7 +178,7 @@ article = {
         rx.vstack(
             rx.text("Vegas", color="#888888", font_size="xs", margin_bottom="1"),
             rx.video(
-                src="/Season4/Images/Jeddah Vegas/Vegas.mp4",
+                src="/thealternativef1-cloudflare/Season4/Images/Jeddah Vegas/Vegas.mp4",
                 width="100%",
                 height="auto",
                 controls=True,
@@ -192,7 +192,7 @@ article = {
         rx.vstack(
             rx.text("Vegas1", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Jeddah Vegas/Vegas1.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Jeddah Vegas/Vegas1.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -205,7 +205,7 @@ article = {
         rx.vstack(
             rx.text("Vegas2", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Jeddah Vegas/Vegas2.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Jeddah Vegas/Vegas2.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -218,7 +218,7 @@ article = {
         rx.vstack(
             rx.text("Vegas3", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Jeddah Vegas/Vegas3.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Jeddah Vegas/Vegas3.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -231,7 +231,7 @@ article = {
         rx.vstack(
             rx.text("Vegas4", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Jeddah Vegas/Vegas4.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Jeddah Vegas/Vegas4.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -244,7 +244,7 @@ article = {
         rx.vstack(
             rx.text("Vegas5", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Jeddah Vegas/Vegas5.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Jeddah Vegas/Vegas5.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -257,7 +257,7 @@ article = {
         rx.vstack(
             rx.text("Vegas6", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Jeddah Vegas/Vegas6.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Jeddah Vegas/Vegas6.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -277,7 +277,7 @@ article = {
         rx.vstack(
             rx.text("Jeddahvegas1", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Jeddah Vegas/JeddahVegas1.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Jeddah Vegas/JeddahVegas1.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -290,7 +290,7 @@ article = {
         rx.vstack(
             rx.text("Jeddahvegas2", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Jeddah Vegas/JeddahVegas2.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Jeddah Vegas/JeddahVegas2.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -303,7 +303,7 @@ article = {
         rx.vstack(
             rx.text("Jeddahvegas3", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Jeddah Vegas/JeddahVegas3.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Jeddah Vegas/JeddahVegas3.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -316,7 +316,7 @@ article = {
         rx.vstack(
             rx.text("Jeddahvegas4", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Jeddah Vegas/JeddahVegas4.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Jeddah Vegas/JeddahVegas4.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -373,7 +373,7 @@ article = {
         rx.vstack(
             rx.text("Surfer", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/surfer.gif",
+                src="/thealternativef1-cloudflare/Season4/Images/surfer.gif",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -384,7 +384,7 @@ article = {
             margin_y="4",
         ),
     ],
-    "image": "/Season4/Images/Jeddah Vegas/VegasCover.png",
+    "image": "/thealternativef1-cloudflare/Season4/Images/Jeddah Vegas/VegasCover.png",
     "author": "The Intern",
     "date": "January 8, 2026",
     "season": 4,

@@ -36,7 +36,7 @@ article = {
         rx.vstack(
             rx.text("Zandvoort1", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Zandvoort/Zandvoort1.jpeg",
+                src="/thealternativef1-cloudflare/Season4/Images/Zandvoort/Zandvoort1.jpeg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -49,7 +49,7 @@ article = {
         rx.vstack(
             rx.text("Zandvoort2", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Zandvoort/Zandvoort2.jpeg",
+                src="/thealternativef1-cloudflare/Season4/Images/Zandvoort/Zandvoort2.jpeg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -62,7 +62,7 @@ article = {
         rx.vstack(
             rx.text("Zandvoort3", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Zandvoort/Zandvoort3.jpeg",
+                src="/thealternativef1-cloudflare/Season4/Images/Zandvoort/Zandvoort3.jpeg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -75,7 +75,7 @@ article = {
         rx.vstack(
             rx.text("Zandvoort4", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Zandvoort/Zandvoort4.jpeg",
+                src="/thealternativef1-cloudflare/Season4/Images/Zandvoort/Zandvoort4.jpeg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -88,7 +88,7 @@ article = {
         rx.vstack(
             rx.text("Zandvoort5", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Zandvoort/Zandvoort5.jpeg",
+                src="/thealternativef1-cloudflare/Season4/Images/Zandvoort/Zandvoort5.jpeg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -101,7 +101,7 @@ article = {
         rx.vstack(
             rx.text("Zandvoort6", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Zandvoort/Zandvoort6.jpeg",
+                src="/thealternativef1-cloudflare/Season4/Images/Zandvoort/Zandvoort6.jpeg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -114,7 +114,7 @@ article = {
         rx.vstack(
             rx.text("Zandvoort7", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Zandvoort/Zandvoort7.jpeg",
+                src="/thealternativef1-cloudflare/Season4/Images/Zandvoort/Zandvoort7.jpeg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -127,7 +127,7 @@ article = {
         rx.vstack(
             rx.text("Zandvoort8", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Zandvoort/Zandvoort8.jpeg",
+                src="/thealternativef1-cloudflare/Season4/Images/Zandvoort/Zandvoort8.jpeg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -140,7 +140,7 @@ article = {
         rx.vstack(
             rx.text("Zandvoort9", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Zandvoort/Zandvoort9.jpeg",
+                src="/thealternativef1-cloudflare/Season4/Images/Zandvoort/Zandvoort9.jpeg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -153,7 +153,7 @@ article = {
         rx.vstack(
             rx.text("Zandvoort10", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Zandvoort/Zandvoort10.jpeg",
+                src="/thealternativef1-cloudflare/Season4/Images/Zandvoort/Zandvoort10.jpeg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -166,7 +166,7 @@ article = {
         rx.vstack(
             rx.text("Zandvoort11", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Zandvoort/Zandvoort11.jpeg",
+                src="/thealternativef1-cloudflare/Season4/Images/Zandvoort/Zandvoort11.jpeg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -179,7 +179,7 @@ article = {
         rx.vstack(
             rx.text("Zandvoort12", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Zandvoort/Zandvoort12.jpeg",
+                src="/thealternativef1-cloudflare/Season4/Images/Zandvoort/Zandvoort12.jpeg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -192,7 +192,7 @@ article = {
         rx.vstack(
             rx.text("Zandvoort13", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Zandvoort/Zandvoort13.jpeg",
+                src="/thealternativef1-cloudflare/Season4/Images/Zandvoort/Zandvoort13.jpeg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -205,7 +205,7 @@ article = {
         rx.vstack(
             rx.text("Surfer", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/surfer.gif",
+                src="/thealternativef1-cloudflare/Season4/Images/surfer.gif",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -216,7 +216,7 @@ article = {
             margin_y="4",
         ),
     ],
-    "image": "/Season4/Images/surfer.gif",
+    "image": "/thealternativef1-cloudflare/Season4/Images/surfer.gif",
     "author": "The Intern",
     "date": "December 20, 2025",
     "season": 4,

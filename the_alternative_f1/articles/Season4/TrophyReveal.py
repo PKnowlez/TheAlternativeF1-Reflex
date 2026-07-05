@@ -8,7 +8,7 @@ article = {
         rx.vstack(
             rx.text("Trophy", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Trophy.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Trophy.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -49,7 +49,7 @@ article = {
         rx.vstack(
             rx.text("Trophy Side", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Trophy_Side.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Trophy_Side.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -60,7 +60,7 @@ article = {
             margin_y="4",
         ),
     ],
-    "image": "/Season4/Images/Trophy.png",
+    "image": "/thealternativef1-cloudflare/Season4/Images/Trophy.png",
     "author": "Patrick",
     "date": "August 24, 2025",
     "season": 4,

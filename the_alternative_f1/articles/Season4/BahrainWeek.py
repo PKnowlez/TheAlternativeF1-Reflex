@@ -8,7 +8,7 @@ article = {
         rx.vstack(
             rx.text("Raweceek1", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/RaweCeek1.png",
+                src="/thealternativef1-cloudflare/Season4/Images/RaweCeek1.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -49,7 +49,7 @@ article = {
         rx.vstack(
             rx.text("Bahrain Circuit", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Bahrain_Circuit.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Bahrain_Circuit.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -90,7 +90,7 @@ article = {
         rx.vstack(
             rx.text("Surfer", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/surfer.gif",
+                src="/thealternativef1-cloudflare/Season4/Images/surfer.gif",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -101,7 +101,7 @@ article = {
             margin_y="4",
         ),
     ],
-    "image": "/Season4/Images/RaweCeek1.png",
+    "image": "/thealternativef1-cloudflare/Season4/Images/RaweCeek1.png",
     "author": "Patrick",
     "date": "September 25, 2025",
     "season": 4,

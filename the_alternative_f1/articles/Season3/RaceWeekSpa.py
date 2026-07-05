@@ -15,7 +15,7 @@ rx.text(
 rx.vstack(
     rx.text("Spa-Francorchamps Circuit Map", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Spa_Circuit.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Spa_Circuit.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -35,7 +35,7 @@ rx.text(
 rx.vstack(
     rx.text("Spa Race Week Collage", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Spa_Race_Week_Collage2.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Spa_Race_Week_Collage2.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -53,7 +53,7 @@ rx.text(
     margin_bottom="4",
 ),
     ],
-    "image": "/Season3/Images/Spa_Circuit.png",
+    "image": "/thealternativef1-cloudflare/Season3/Images/Spa_Circuit.png",
     "author": "Patrick Knowles",
     "date": "December 14, 2024",
     "season": 3,

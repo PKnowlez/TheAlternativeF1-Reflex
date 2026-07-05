@@ -8,7 +8,7 @@ article = {
         rx.vstack(
             rx.text("Austriarcover", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/AustriaRCover.png",
+                src="/thealternativef1-cloudflare/Season4/Images/AustriaRCover.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -41,7 +41,7 @@ article = {
         rx.vstack(
             rx.text("Austriarmemes", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/AustriaRMemes.png",
+                src="/thealternativef1-cloudflare/Season4/Images/AustriaRMemes.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -75,7 +75,7 @@ article = {
         rx.vstack(
             rx.text("Austriarend", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/AustriaREnd.png",
+                src="/thealternativef1-cloudflare/Season4/Images/AustriaREnd.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -86,7 +86,7 @@ article = {
             margin_y="4",
         ),
     ],
-    "image": "/Season4/Images/AustriaRCover.png",
+    "image": "/thealternativef1-cloudflare/Season4/Images/AustriaRCover.png",
     "author": "The Intern",
     "date": "November 13, 2025",
     "season": 4,

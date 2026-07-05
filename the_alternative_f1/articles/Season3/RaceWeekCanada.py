@@ -31,7 +31,7 @@ rx.text(
 rx.vstack(
     rx.text("Circuit Gilles-Villeneuve Map", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Canada_Circuit.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Canada_Circuit.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -56,7 +56,7 @@ rx.text(
     margin_bottom="4",
 ),
     ],
-    "image": "/Season3/Images/Canada_Circuit.png",
+    "image": "/thealternativef1-cloudflare/Season3/Images/Canada_Circuit.png",
     "author": "Patrick Knowles",
     "date": "January 18, 2025",
     "season": 3,

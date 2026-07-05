@@ -36,7 +36,7 @@ rx.text(
 rx.vstack(
     rx.text("Drivers and Teams Championship Odds", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Standings_Memes.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Standings_Memes.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -84,7 +84,7 @@ rx.text(
 rx.vstack(
     rx.text("So You're Telling Me There's A Chance", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Chance.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Chance.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -111,7 +111,7 @@ rx.text(
 rx.vstack(
     rx.text("Championship Meteor Scenario", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Meteor.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Meteor.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -164,7 +164,7 @@ rx.text(
     margin_bottom="4",
 ),
     ],
-    "image": "/Season3/Images/Standings_Memes.png",
+    "image": "/thealternativef1-cloudflare/Season3/Images/Standings_Memes.png",
     "author": "The Intern",
     "date": "February 4, 2025",
     "season": 3,

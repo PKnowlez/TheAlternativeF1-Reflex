@@ -15,7 +15,7 @@ rx.text(
 rx.vstack(
     rx.text("Baku Midfield - Travis and Eddie", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Baku_Travis_Eddie.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Baku_Travis_Eddie.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -63,7 +63,7 @@ rx.text(
 rx.vstack(
     rx.text("Eddie Baku Incident", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Baku_Eddie.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Baku_Eddie.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -83,7 +83,7 @@ rx.text(
 rx.vstack(
     rx.text("Baku Overtake - Nick and Patrick", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Baku_Nick_Patrick_Pass.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Baku_Nick_Patrick_Pass.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -103,7 +103,7 @@ rx.text(
 rx.vstack(
     rx.text("Baku Race Collage", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Baku_Collage.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Baku_Collage.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -114,7 +114,7 @@ rx.vstack(
     margin_y="4",
 ),
     ],
-    "image": "/Season3/Images/Baku_Travis_Eddie.png",
+    "image": "/thealternativef1-cloudflare/Season3/Images/Baku_Travis_Eddie.png",
     "author": "Patrick Knowles with credit Nick",
     "date": "January 17, 2025",
     "season": 3,

@@ -8,7 +8,7 @@ article = {
 rx.vstack(
     rx.text("Australia Start", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Australia_Start.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Australia_Start.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -21,7 +21,7 @@ rx.vstack(
 rx.vstack(
     rx.text("Australia Race Collage", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Australia_Collage.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Australia_Collage.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -34,7 +34,7 @@ rx.vstack(
 rx.vstack(
     rx.text("Australia Side Shot", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Australia_Side_Shot.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Australia_Side_Shot.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -45,7 +45,7 @@ rx.vstack(
     margin_y="4",
 ),
     ],
-    "image": "/Season3/Images/Australia_Start.png",
+    "image": "/thealternativef1-cloudflare/Season3/Images/Australia_Start.png",
     "author": "Patrick Knowles with credit Erick & Nick",
     "date": "December 11, 2024",
     "season": 3,

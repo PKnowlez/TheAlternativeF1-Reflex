@@ -8,7 +8,7 @@ article = {
         rx.vstack(
             rx.text("1000 Points Nick", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/1000 Points Nick.png",
+                src="/thealternativef1-cloudflare/Season4/Images/1000 Points Nick.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -82,7 +82,7 @@ article = {
         rx.vstack(
             rx.text("Travis 1000 Points", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Travis 1000 Points.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Travis 1000 Points.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -95,7 +95,7 @@ article = {
         rx.vstack(
             rx.text("Surfer", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/surfer.gif",
+                src="/thealternativef1-cloudflare/Season4/Images/surfer.gif",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -106,7 +106,7 @@ article = {
             margin_y="4",
         ),
     ],
-    "image": "/Season4/Images/1000 Points Nick.png",
+    "image": "/thealternativef1-cloudflare/Season4/Images/1000 Points Nick.png",
     "author": "Patrick",
     "date": "October 30, 2025",
     "season": 4,

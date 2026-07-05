@@ -8,7 +8,7 @@ article = {
         rx.vstack(
             rx.text("Mexico Cover", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Mexico Cover.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Mexico Cover.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -70,7 +70,7 @@ article = {
         rx.vstack(
             rx.text("Mexico Circuit", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Mexico_Circuit.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Mexico_Circuit.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -125,7 +125,7 @@ article = {
         rx.vstack(
             rx.text("Mexico Sombrero", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Mexico Sombrero.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Mexico Sombrero.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -164,7 +164,7 @@ article = {
             margin_bottom="4",
         ),
     ],
-    "image": "/Season4/Images/Mexico Cover.jpg",
+    "image": "/thealternativef1-cloudflare/Season4/Images/Mexico Cover.jpg",
     "author": "Patrick",
     "date": "October 24, 2025",
     "season": 4,

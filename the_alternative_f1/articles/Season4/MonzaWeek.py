@@ -50,7 +50,7 @@ article = {
         rx.vstack(
             rx.text("Monza Circuit", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Monza_Circuit.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Monza_Circuit.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -113,7 +113,7 @@ article = {
         rx.vstack(
             rx.text("Surfer", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/surfer.gif",
+                src="/thealternativef1-cloudflare/Season4/Images/surfer.gif",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -126,7 +126,7 @@ article = {
         rx.vstack(
             rx.text("Videofile", color="#888888", font_size="xs", margin_bottom="1"),
             rx.video(
-                src="/Season4/Images/VideoFile.mp4",
+                src="/thealternativef1-cloudflare/Season4/Images/VideoFile.mp4",
                 width="100%",
                 height="auto",
                 controls=True,
@@ -138,7 +138,7 @@ article = {
             margin_y="4",
         ),
     ],
-    "image": "/Season4/Images/Monza_Circuit.png",
+    "image": "/thealternativef1-cloudflare/Season4/Images/Monza_Circuit.png",
     "author": "Patrick",
     "date": "January 20, 2026",
     "season": 4,

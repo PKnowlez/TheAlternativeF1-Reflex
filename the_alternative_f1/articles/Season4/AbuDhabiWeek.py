@@ -86,7 +86,7 @@ article = {
         rx.vstack(
             rx.text("Abu Dhabi Circuit", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Abu_Dhabi_Circuit.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Abu_Dhabi_Circuit.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -136,7 +136,7 @@ article = {
         rx.vstack(
             rx.text("Haass5", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Silly Season/HaasS5.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Silly Season/HaasS5.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -157,7 +157,7 @@ article = {
         rx.vstack(
             rx.text("Redbulls5Contract", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Silly Season/RedBullS5Contract.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Silly Season/RedBullS5Contract.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -170,7 +170,7 @@ article = {
         rx.vstack(
             rx.text("Surfer", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/surfer.gif",
+                src="/thealternativef1-cloudflare/Season4/Images/surfer.gif",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -181,7 +181,7 @@ article = {
             margin_y="4",
         ),
     ],
-    "image": "/Season4/Images/Abu_Dhabi_Circuit.png",
+    "image": "/thealternativef1-cloudflare/Season4/Images/Abu_Dhabi_Circuit.png",
     "author": "Patrick",
     "date": "January 11, 2026",
     "season": 4,

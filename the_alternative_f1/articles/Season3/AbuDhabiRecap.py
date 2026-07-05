@@ -15,7 +15,7 @@ rx.text(
 rx.vstack(
     rx.text("Joshua Abu Dhabi Qualifying Line", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Abu_Dhabi_Joshua_Quali.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Abu_Dhabi_Joshua_Quali.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -42,7 +42,7 @@ rx.text(
 rx.vstack(
     rx.text("Abu Dhabi Race Memes", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Abu_Dhabi_Memes.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Abu_Dhabi_Memes.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -67,7 +67,7 @@ rx.text(
     margin_bottom="4",
 ),
     ],
-    "image": "/Season3/Images/Abu_Dhabi_Joshua_Quali.png",
+    "image": "/thealternativef1-cloudflare/Season3/Images/Abu_Dhabi_Joshua_Quali.png",
     "author": "The Intern",
     "date": "February 6, 2025",
     "season": 3,

@@ -8,7 +8,7 @@ article = {
         rx.vstack(
             rx.text("Baku2", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/baku2.png",
+                src="/thealternativef1-cloudflare/Season4/Images/baku2.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -91,7 +91,7 @@ article = {
         rx.vstack(
             rx.text("Baku1", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/baku1.png",
+                src="/thealternativef1-cloudflare/Season4/Images/baku1.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -112,7 +112,7 @@ article = {
         rx.vstack(
             rx.text("Patrick1", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Baku/patrick1.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Baku/patrick1.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -125,7 +125,7 @@ article = {
         rx.vstack(
             rx.text("Patrick2", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Baku/patrick2.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Baku/patrick2.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -153,7 +153,7 @@ article = {
         rx.vstack(
             rx.text("Eddie", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Baku/eddie.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Baku/eddie.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -181,7 +181,7 @@ article = {
         rx.vstack(
             rx.text("Travis", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Baku/travis.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Baku/travis.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -209,7 +209,7 @@ article = {
         rx.vstack(
             rx.text("Boz", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Baku/boz.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Baku/boz.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -237,7 +237,7 @@ article = {
         rx.vstack(
             rx.text("Leo1", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Baku/leo1.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Baku/leo1.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -250,7 +250,7 @@ article = {
         rx.vstack(
             rx.text("Leo2", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Baku/leo2.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Baku/leo2.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -278,7 +278,7 @@ article = {
         rx.vstack(
             rx.text("Brently", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Baku/brently.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Baku/brently.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -306,7 +306,7 @@ article = {
         rx.vstack(
             rx.text("Matthew1", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Baku/matthew1.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Baku/matthew1.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -319,7 +319,7 @@ article = {
         rx.vstack(
             rx.text("Matthew2", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Baku/matthew2.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Baku/matthew2.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -347,7 +347,7 @@ article = {
         rx.vstack(
             rx.text("Del", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Baku/del.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Baku/del.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -375,7 +375,7 @@ article = {
         rx.vstack(
             rx.text("Erick1", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Baku/erick1.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Baku/erick1.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -388,7 +388,7 @@ article = {
         rx.vstack(
             rx.text("Erick2", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Baku/erick2.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Baku/erick2.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -416,7 +416,7 @@ article = {
         rx.vstack(
             rx.text("Josh1", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Baku/josh1.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Baku/josh1.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -429,7 +429,7 @@ article = {
         rx.vstack(
             rx.text("Josh2", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Baku/josh2.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Baku/josh2.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -457,7 +457,7 @@ article = {
         rx.vstack(
             rx.text("Mercedes", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Baku/mercedes.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Baku/mercedes.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -470,7 +470,7 @@ article = {
         rx.vstack(
             rx.text("Jaden2", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Baku/jaden2.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Baku/jaden2.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -498,7 +498,7 @@ article = {
         rx.vstack(
             rx.text("Nick1", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Baku/nick1.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Baku/nick1.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -511,7 +511,7 @@ article = {
         rx.vstack(
             rx.text("Nick2", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Baku/nick2.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Baku/nick2.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -539,7 +539,7 @@ article = {
         rx.vstack(
             rx.text("Joshua1", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Baku/joshua1.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Baku/joshua1.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -552,7 +552,7 @@ article = {
         rx.vstack(
             rx.text("Joshua2", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Baku/joshua2.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Baku/joshua2.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -580,7 +580,7 @@ article = {
         rx.vstack(
             rx.text("Mercedes", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Baku/mercedes.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Baku/mercedes.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -593,7 +593,7 @@ article = {
         rx.vstack(
             rx.text("Jairo2", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Baku/jairo2.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Baku/jairo2.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -611,7 +611,7 @@ article = {
             margin_bottom="4",
         ),
     ],
-    "image": "/Season4/Images/baku2.png",
+    "image": "/thealternativef1-cloudflare/Season4/Images/baku2.png",
     "author": "The Intern",
     "date": "November 6, 2025",
     "season": 4,

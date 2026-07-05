@@ -37,7 +37,7 @@ article = {
         rx.vstack(
             rx.text("Trophys4 Text", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/TrophyS4 Text.png",
+                src="/thealternativef1-cloudflare/Season4/Images/TrophyS4 Text.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -50,7 +50,7 @@ article = {
         rx.vstack(
             rx.text("Trophys4 Photo", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/TrophyS4 Photo.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/TrophyS4 Photo.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -71,7 +71,7 @@ article = {
         rx.vstack(
             rx.text("Monaco Trophy Wide", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Monaco Trophy Wide.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Monaco Trophy Wide.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -84,7 +84,7 @@ article = {
         rx.vstack(
             rx.text("Surfer", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Images/surfer.gif",
+                src="/thealternativef1-cloudflare/Images/surfer.gif",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -97,7 +97,7 @@ article = {
         rx.vstack(
             rx.text("Videofile", color="#888888", font_size="xs", margin_bottom="1"),
             rx.video(
-                src="/Images/VideoFile.mp4",
+                src="/thealternativef1-cloudflare/Images/VideoFile.mp4",
                 width="100%",
                 height="auto",
                 controls=True,
@@ -109,7 +109,7 @@ article = {
             margin_y="4",
         ),
     ],
-    "image": "/Season4/Images/TrophyS4 Text.png",
+    "image": "/thealternativef1-cloudflare/Season4/Images/TrophyS4 Text.png",
     "author": "Patrick",
     "date": "January 26, 2026",
     "season": 4,

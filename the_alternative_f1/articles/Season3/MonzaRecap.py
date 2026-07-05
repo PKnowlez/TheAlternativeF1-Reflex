@@ -8,7 +8,7 @@ article = {
 rx.vstack(
     rx.text("Monza Intern Recap", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Monza_Intern.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Monza_Intern.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -35,7 +35,7 @@ rx.text(
 rx.vstack(
     rx.text("Erick Monza Incident Map", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Monza_Erick_Map.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Monza_Erick_Map.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -69,7 +69,7 @@ rx.text(
 rx.vstack(
     rx.text("Monza Finish - Nick and Del", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Monza_Nick_Del.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Monza_Nick_Del.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -103,7 +103,7 @@ rx.text(
 rx.vstack(
     rx.text("Eddie Team Radio at Monza", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Monza_Eddie.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Monza_Eddie.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -114,7 +114,7 @@ rx.vstack(
     margin_y="4",
 ),
     ],
-    "image": "/Season3/Images/Monza_Intern.png",
+    "image": "/thealternativef1-cloudflare/Season3/Images/Monza_Intern.png",
     "author": "The Intern",
     "date": "January 31, 2025",
     "season": 3,

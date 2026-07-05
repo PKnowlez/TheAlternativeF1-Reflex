@@ -22,7 +22,7 @@ rx.text(
 rx.vstack(
     rx.text("Monza Race Week Update", color="#888888", font_size="xs", margin_bottom="1"),
     zoomable_image(
-        src="/Season3/Images/Monza_Update.png",
+        src="/thealternativef1-cloudflare/Season3/Images/Monza_Update.png",
         width="100%",
         max_width="400px",
         border_radius="md",
@@ -33,7 +33,7 @@ rx.vstack(
     margin_y="4",
 ),
     ],
-    "image": "/Season3/Images/Monza_Update.png",
+    "image": "/thealternativef1-cloudflare/Season3/Images/Monza_Update.png",
     "author": "The Intern",
     "date": "January 29, 2025",
     "season": 3,

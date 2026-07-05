@@ -71,7 +71,7 @@ article = {
         rx.vstack(
             rx.text("Austria Memes", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Austria_Memes.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Austria_Memes.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -84,7 +84,7 @@ article = {
         rx.vstack(
             rx.text("Austria1", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Austria/austria1.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Austria/austria1.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -97,7 +97,7 @@ article = {
         rx.vstack(
             rx.text("Austria2", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Austria/austria2.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Austria/austria2.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -110,7 +110,7 @@ article = {
         rx.vstack(
             rx.text("Austria3", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Austria/austria3.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Austria/austria3.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -123,7 +123,7 @@ article = {
         rx.vstack(
             rx.text("Austria4", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Austria/austria4.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Austria/austria4.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -136,7 +136,7 @@ article = {
         rx.vstack(
             rx.text("Austria5", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Austria/austria5.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Austria/austria5.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -149,7 +149,7 @@ article = {
         rx.vstack(
             rx.text("Austria6", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Austria/austria6.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Austria/austria6.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -162,7 +162,7 @@ article = {
         rx.vstack(
             rx.text("Austria7", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Austria/austria7.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Austria/austria7.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -175,7 +175,7 @@ article = {
         rx.vstack(
             rx.text("Austria8", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Austria/austria8.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Austria/austria8.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -188,7 +188,7 @@ article = {
         rx.vstack(
             rx.text("Austria9", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Austria/austria9.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Austria/austria9.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -201,7 +201,7 @@ article = {
         rx.vstack(
             rx.text("Austria10", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Austria/austria10.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Austria/austria10.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -241,7 +241,7 @@ article = {
             margin_bottom="4",
         ),
     ],
-    "image": "/Season4/Images/Austria_Memes.png",
+    "image": "/thealternativef1-cloudflare/Season4/Images/Austria_Memes.png",
     "author": "The Intern",
     "date": "December 11, 2025",
     "season": 4,

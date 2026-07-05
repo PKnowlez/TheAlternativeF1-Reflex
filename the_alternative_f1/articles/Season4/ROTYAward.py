@@ -8,7 +8,7 @@ article = {
         rx.vstack(
             rx.text("New Foe", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/New Foe.png",
+                src="/thealternativef1-cloudflare/Season4/Images/New Foe.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -49,7 +49,7 @@ article = {
         rx.vstack(
             rx.text("Rookie Button", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Rookie Button.png",
+                src="/thealternativef1-cloudflare/Season4/Images/Rookie Button.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -74,7 +74,7 @@ article = {
             margin_bottom="4",
         ),
     ],
-    "image": "/Season4/Images/New Foe.png",
+    "image": "/thealternativef1-cloudflare/Season4/Images/New Foe.png",
     "author": "Patrick",
     "date": "September 8, 2025",
     "season": 4,

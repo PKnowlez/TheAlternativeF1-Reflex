@@ -27,7 +27,7 @@ article = {
             margin_bottom="4",
         ),
     ],
-    "image": "/Season4/Images/Trophy.png",
+    "image": "/thealternativef1-cloudflare/Season4/Images/Trophy.png",
     "author": "Patrick",
     "date": "October 23, 2025",
     "season": 4,

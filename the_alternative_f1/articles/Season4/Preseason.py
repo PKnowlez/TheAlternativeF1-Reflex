@@ -8,7 +8,7 @@ article = {
         rx.vstack(
             rx.text("Mumscar", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/MumsCar.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/MumsCar.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -56,7 +56,7 @@ article = {
         rx.vstack(
             rx.text("Preseasonmemes", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/PreseasonMemes.png",
+                src="/thealternativef1-cloudflare/Season4/Images/PreseasonMemes.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -69,7 +69,7 @@ article = {
         rx.vstack(
             rx.text("Surfer", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/surfer.gif",
+                src="/thealternativef1-cloudflare/Season4/Images/surfer.gif",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -80,7 +80,7 @@ article = {
             margin_y="4",
         ),
     ],
-    "image": "/Season4/Images/MumsCar.jpg",
+    "image": "/thealternativef1-cloudflare/Season4/Images/MumsCar.jpg",
     "author": "The Intern",
     "date": "September 25, 2025",
     "season": 4,

@@ -9,7 +9,7 @@ article = {
         "This all began in a mundane way, a week away from his phone. That’s what Erick claimed was going to happen. Nothing more, just some time to detach and play princesses with his kid. After the week ended, friends on the grid reported that Erick seemed different and slower to respond. Nothing really out of the ordinary for something like this. But as time went on, ones close to Erick claim to receive fewer and fewer responses to texts, and some report he altogether disappeared for a week. Our intrepid beat reporter, The Intern, has taken time to investigate matters more thoroughly, the remainder of this article is an unedited report from them.",
         rx.box(
             zoomable_image(
-                src="/Season5/Erick/Erick_Writing.png",
+                src="/thealternativef1-cloudflare/Season5/Erick/Erick_Writing.png",
                 float="left", 
                 height="300px", 
                 margin_right="16px",
@@ -29,7 +29,7 @@ article = {
         "So yeah, dude went on a trip, high as a kite, hoping to figure something out. But that doesn’t usually get you out of a pro-sporting career. Nah, it's what happened next that set in motion what McLaren are publicly calling, ‘leaving Erick’s seat spiritually open.’ Dude gets back to the US right at the heat of speedrunning Scientology. Now, to take a step back here before I explain what happens. Those who know the Tavera boys know that they aren’t Jack Skellington, I promise that is a key bit of information to retain. So dude, barely coming down from his little trip, decides he is gonna spearhead a speedrun through the Houston Scientology ‘Church.’",
         rx.box(
             zoomable_image(
-                src="/Season5/Erick/Erick_Church.png",
+                src="/thealternativef1-cloudflare/Season5/Erick/Erick_Church.png",
                 float="right", 
                 height="200px", 
                 margin_left="16px",
@@ -75,7 +75,7 @@ article = {
         ),
         "The Intern noted to me that this is Nick’s third teammate to vacate the second seat at McLaren in nearly five seasons. As things progress with that seat, we will be sure to keep you informed."
     ],
-    "image": "/Season5/Erick/Erick_Cover.png",
+    "image": "/thealternativef1-cloudflare/Season5/Erick/Erick_Cover.png",
     "author": "Patrick and The Intern",
     "date": "June 27, 2026",
     "season": 5,

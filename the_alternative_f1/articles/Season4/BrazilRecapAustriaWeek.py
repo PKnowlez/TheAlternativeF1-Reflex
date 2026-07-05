@@ -101,7 +101,7 @@ article = {
         rx.vstack(
             rx.text("Erick0", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Brazil/erick0.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Brazil/erick0.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -114,7 +114,7 @@ article = {
         rx.vstack(
             rx.text("Erick1", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Brazil/erick1.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Brazil/erick1.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -127,7 +127,7 @@ article = {
         rx.vstack(
             rx.text("Erick2", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Brazil/erick2.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Brazil/erick2.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -140,7 +140,7 @@ article = {
         rx.vstack(
             rx.text("Erick3", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Brazil/erick3.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Brazil/erick3.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -160,7 +160,7 @@ article = {
         rx.vstack(
             rx.text("Erick4", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Brazil/erick4.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Brazil/erick4.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -173,7 +173,7 @@ article = {
         rx.vstack(
             rx.text("Erick5", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Brazil/erick5.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Brazil/erick5.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -186,7 +186,7 @@ article = {
         rx.vstack(
             rx.text("Erick6", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Brazil/erick6.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Brazil/erick6.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -199,7 +199,7 @@ article = {
         rx.vstack(
             rx.text("Erick7", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Brazil/erick7.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Brazil/erick7.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -212,7 +212,7 @@ article = {
         rx.vstack(
             rx.text("Erick8", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Brazil/erick8.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Brazil/erick8.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -232,7 +232,7 @@ article = {
         rx.vstack(
             rx.text("Joshua1", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Brazil/joshua1.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Brazil/joshua1.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -245,7 +245,7 @@ article = {
         rx.vstack(
             rx.text("Joshua2", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/Brazil/joshua2.jpg",
+                src="/thealternativef1-cloudflare/Season4/Images/Brazil/joshua2.jpg",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -258,7 +258,7 @@ article = {
         rx.vstack(
             rx.text("Surfer", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/surfer.gif",
+                src="/thealternativef1-cloudflare/Season4/Images/surfer.gif",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -269,7 +269,7 @@ article = {
             margin_y="4",
         ),
     ],
-    "image": "/Season4/Images/surfer.gif",
+    "image": "/thealternativef1-cloudflare/Season4/Images/surfer.gif",
     "author": "A Patrick and The Intern Production",
     "date": "December 7, 2025",
     "season": 4,

@@ -21,7 +21,7 @@ article = {
         ),
 
         zoomable_image(
-            src="/NewApp/Navigation_Bar.png",
+            src="/thealternativef1-cloudflare/NewApp/Navigation_Bar.png",
             width="100%",
             border_radius="md",
             box_shadow="0 4px 12px rgba(0,0,0,0.4)"
@@ -36,7 +36,7 @@ article = {
 
         rx.box(
             zoomable_image(
-                src="/NewApp/Sidebar.png",
+                src="/thealternativef1-cloudflare/NewApp/Sidebar.png",
                 float="left", 
                 height="150px", 
                 margin_right="16px", 
@@ -73,7 +73,7 @@ article = {
 
         rx.box(
             zoomable_image(
-                src="/NewApp/SeasonSelect.png",
+                src="/thealternativef1-cloudflare/NewApp/SeasonSelect.png",
                 float="right", 
                 width="150px", 
                 margin_left="16px", 
@@ -99,7 +99,7 @@ article = {
             margin_bottom="4",
         ),
     ],
-    "image": "/NewApp/Header.png",
+    "image": "/thealternativef1-cloudflare/NewApp/Header.png",
     "author": "The Intern",
     "date": "June 25, 2026",
     "season": 0,

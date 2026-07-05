@@ -112,7 +112,7 @@ rx.text(
     margin_bottom="4",
 ),
     ],
-    "image": "/Season3/Images/Trophy.png",
+    "image": "/thealternativef1-cloudflare/Season3/Images/Trophy.png",
     "author": "Insiders: Joshua, Eddie, & Patrick",
     "date": "February 11, 2025",
     "season": 3,

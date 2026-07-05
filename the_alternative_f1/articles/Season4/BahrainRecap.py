@@ -8,7 +8,7 @@ article = {
         rx.vstack(
             rx.text("Bahrain Start", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/bahrain_start.png",
+                src="/thealternativef1-cloudflare/Season4/Images/bahrain_start.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -71,7 +71,7 @@ article = {
         rx.vstack(
             rx.text("Intern Smashing", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/intern_smashing.png",
+                src="/thealternativef1-cloudflare/Season4/Images/intern_smashing.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -112,7 +112,7 @@ article = {
         rx.vstack(
             rx.text("Bahrain Mclaren Livery", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/bahrain_mclaren_livery.png",
+                src="/thealternativef1-cloudflare/Season4/Images/bahrain_mclaren_livery.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -159,7 +159,7 @@ article = {
         rx.vstack(
             rx.text("Bahrain Qualifying", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/bahrain_qualifying.png",
+                src="/thealternativef1-cloudflare/Season4/Images/bahrain_qualifying.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -207,7 +207,7 @@ article = {
         rx.vstack(
             rx.text("Bahrain Race", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/bahrain_race.png",
+                src="/thealternativef1-cloudflare/Season4/Images/bahrain_race.png",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -255,7 +255,7 @@ article = {
         rx.vstack(
             rx.text("Surfer", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/surfer.gif",
+                src="/thealternativef1-cloudflare/Season4/Images/surfer.gif",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -268,7 +268,7 @@ article = {
         rx.vstack(
             rx.text("Surfer", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
-                src="/Season4/Images/surfer.gif",
+                src="/thealternativef1-cloudflare/Season4/Images/surfer.gif",
                 width="100%",
                 max_width="400px",
                 border_radius="md",
@@ -279,7 +279,7 @@ article = {
             margin_y="4",
         ),
     ],
-    "image": "/Season4/Images/bahrain_start.png",
+    "image": "/thealternativef1-cloudflare/Season4/Images/bahrain_start.png",
     "author": "A Joint Patrick & The Intern Production",
     "date": "October 2, 2025",
     "season": 4,

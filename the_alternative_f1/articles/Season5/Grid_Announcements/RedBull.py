@@ -36,7 +36,7 @@ article = {
             width="100%",
         ),
     ],
-    "image": "/Season5/Grid_Announcements/Grid_RedBull.png",
+    "image": "/thealternativef1-cloudflare/Season5/Grid_Announcements/Grid_RedBull.png",
     "author": "Patrick",
     "date": "June 28, 2026",
     "season": 5,
