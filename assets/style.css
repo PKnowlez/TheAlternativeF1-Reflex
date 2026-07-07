@@ -56,4 +56,52 @@
     margin: 4px !important;
 }
 
+/* Major Header slide/fade animation */
+@keyframes majorHeaderFade {
+  0% {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  5% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  95% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+}
+
+.major-header-fade {
+  animation: majorHeaderFade ease-in-out forwards;
+}
+
+/* Ticker Data slide/fade animation */
+@keyframes tickerDataFade {
+  0% {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  12% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  88% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+}
+
+.ticker-data-fade {
+  animation: tickerDataFade 3s ease-in-out forwards;
+}
+
 

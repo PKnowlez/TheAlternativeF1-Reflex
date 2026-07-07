@@ -29,6 +29,7 @@ team_colors = {
     "Haas": "white",
     "Audi": "#A33E2C",
     "Cadillac": "#FFEA00",
+    'Williams': "DodgerBlue",
 }
 
 def PointTotals(season):

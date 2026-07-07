@@ -3,6 +3,7 @@
 import reflex as rx
 from rxconfig import config
 
+import asyncio
 import json
 import os
 import sqlalchemy
@@ -122,6 +123,117 @@ from the_alternative_f1.seasons.Tab6_RaceSchedule import Tab6
 # ── Dynamically derived from seasons __init__.py ─────────────────────────────
 NUM_SEASONS: int = LATEST_SEASON
 # ─────────────────────────────────────────────────────────────────────────────
+
+def precompute_ticker_items() -> list[list]:
+    import pandas as pd
+    from the_alternative_f1.seasons import seasons
+    from the_alternative_f1.seasons.Calculations import Calculations
+
+    target_season = None
+    target_res = None
+
+    # Find the most recent season with at least one race result posted
+    for s in reversed(seasons):
+        try:
+            res = Calculations(s)
+            completed = 0
+            df = res["df"]
+            race_place = res["race_place"]
+            for col in race_place:
+                if not pd.isnull(df.iloc[0][col]):
+                    completed += 1
+            if completed > 0:
+                target_season = s
+                target_res = res
+                break
+        except Exception:
+            pass
+
+    items = []
+    if target_res and target_season:
+        # A. Constructor Standings (top 3)
+        constructor_totals = target_res["constructor_totals"]
+        medals = ["🥇", "🥈", "🥉"]
+        for idx, (_, row) in enumerate(constructor_totals.head(3).iterrows()):
+            items.append([
+                "Constructor Standings",
+                f"{medals[idx]} {row['Team']} ({row['Points']} pts)",
+                0,
+                9
+            ])
+
+        # B. Driver Standings (top 3)
+        driver_totals = target_res["driver_totals"]
+        for idx, (_, row) in enumerate(driver_totals.head(3).iterrows()):
+            items.append([
+                "Driver Standings",
+                f"{medals[idx]} {row['Driver']} ({row['Points']} pts)",
+                1,
+                9
+            ])
+
+        # C. Most Recent Race Winner
+        df = target_res["df"]
+        races = target_res["races"]
+        race_place = target_res["race_place"]
+        last_completed_race_name = None
+        last_completed_winner = None
+        last_completed_team = None
+        for i in reversed(range(len(races))):
+            place_col = race_place[i]
+            if not pd.isnull(df.iloc[0][place_col]):
+                last_completed_race_name = races[i]
+                df_sorted = df.sort_values(place_col, ascending=True)
+                last_completed_winner = df_sorted["Driver"].iloc[0]
+                last_completed_team = df_sorted["Team"].iloc[0]
+                break
+        if last_completed_race_name:
+            items.append([
+                f"{last_completed_race_name} Winner",
+                f"🏆 {last_completed_winner} ({last_completed_team})",
+                2,
+                3
+            ])
+
+        # D. Upcoming Race
+        upcoming_race_name = None
+        upcoming_race_date = None
+        current_season = seasons[-1]
+        try:
+            curr_res = Calculations(current_season)
+            sched = curr_res["schedule_df"]
+            if "Status" in sched.columns:
+                pending = sched[sched["Status"].astype(str).str.lower() != "final"]
+                pending = pending[~pending["Race"].str.contains("Post-Season", case=False, na=False)]
+                if not pending.empty:
+                    upcoming_race_name = pending["Race"].iloc[0]
+                    upcoming_race_date = pending["Date"].iloc[0] if "Date" in pending.columns else ""
+        except Exception:
+            pass
+
+        if not upcoming_race_name:
+            try:
+                sched = target_res["schedule_df"]
+                if "Status" in sched.columns:
+                    pending = sched[sched["Status"].astype(str).str.lower() != "final"]
+                    pending = pending[~pending["Race"].str.contains("Post-Season", case=False, na=False)]
+                    if not pending.empty:
+                        upcoming_race_name = pending["Race"].iloc[0]
+                        upcoming_race_date = pending["Date"].iloc[0] if "Date" in pending.columns else ""
+            except Exception:
+                pass
+
+        if upcoming_race_name:
+            date_str = f" - {upcoming_race_date}" if upcoming_race_date else ""
+            items.append([
+                "Upcoming Race",
+                f"📅 {upcoming_race_name}{date_str}",
+                3,
+                3
+            ])
+    return items
+
+STATIC_TICKER_ITEMS = precompute_ticker_items()
 
 
 class State(rx.State):
@@ -417,20 +529,250 @@ class State(rx.State):
         self.home_articles_expanded = False
         self.season_articles_expanded = False
 
+    # ── Ticker State ─────────────────────────────────────────────────────
+    ticker_index: int = 0
+    ticker_items: list[list] = STATIC_TICKER_ITEMS
+    ticker_initialized: bool = False
+    ticker_loop_running: bool = False
+
+    @rx.var
+    def ticker_header(self) -> str:
+        if self.ticker_items and self.ticker_index < len(self.ticker_items):
+            return self.ticker_items[self.ticker_index][0]
+        return ""
+
+    @rx.var
+    def ticker_data(self) -> str:
+        if self.ticker_items and self.ticker_index < len(self.ticker_items):
+            return self.ticker_items[self.ticker_index][1]
+        return ""
+
+    @rx.var
+    def major_index(self) -> int:
+        if self.ticker_items and self.ticker_index < len(self.ticker_items):
+            return self.ticker_items[self.ticker_index][2]
+        return 0
+
+    @rx.var
+    def header_animation_duration(self) -> str:
+        if self.ticker_items and self.ticker_index < len(self.ticker_items):
+            return f"{self.ticker_items[self.ticker_index][3]}s"
+        return "3s"
+
+    def initialize_ticker(self):
+        if self.ticker_initialized:
+            return
+        
+        import pandas as pd
+        from the_alternative_f1.seasons import seasons
+        from the_alternative_f1.seasons.Calculations import Calculations
+
+        target_season = None
+        target_res = None
+
+        # Find the most recent season with at least one race result posted
+        for s in reversed(seasons):
+            try:
+                res = Calculations(s)
+                completed = 0
+                df = res["df"]
+                race_place = res["race_place"]
+                for col in race_place:
+                    if not pd.isnull(df.iloc[0][col]):
+                        completed += 1
+                if completed > 0:
+                    target_season = s
+                    target_res = res
+                    break
+            except Exception as e:
+                # Silently ignore or log error
+                print(f"Error checking season: {e}")
+
+        items = []
+
+        if target_res and target_season:
+            # A. Constructor Standings (top 3)
+            constructor_totals = target_res["constructor_totals"]
+            medals = ["🥇", "🥈", "🥉"]
+            for idx, (_, row) in enumerate(constructor_totals.head(3).iterrows()):
+                team_name = row["Team"]
+                pts = row["Points"]
+                medal = medals[idx] if idx < len(medals) else ""
+                items.append([
+                    "Constructor Standings",
+                    f"{medal} {team_name} ({pts} pts)",
+                    0,
+                    9
+                ])
+
+            # B. Driver Standings (top 3)
+            driver_totals = target_res["driver_totals"]
+            for idx, (_, row) in enumerate(driver_totals.head(3).iterrows()):
+                driver_name = row["Driver"]
+                pts = row["Points"]
+                medal = medals[idx] if idx < len(medals) else ""
+                items.append([
+                    "Driver Standings",
+                    f"{medal} {driver_name} ({pts} pts)",
+                    1,
+                    9
+                ])
+
+            # C. Most Recent Race Winner
+            df = target_res["df"]
+            races = target_res["races"]
+            race_place = target_res["race_place"]
+            
+            last_completed_race_name = None
+            last_completed_winner = None
+            last_completed_team = None
+            
+            for i in reversed(range(len(races))):
+                place_col = race_place[i]
+                if not pd.isnull(df.iloc[0][place_col]):
+                    last_completed_race_name = races[i]
+                    df_sorted = df.sort_values(place_col, ascending=True)
+                    last_completed_winner = df_sorted["Driver"].iloc[0]
+                    last_completed_team = df_sorted["Team"].iloc[0]
+                    break
+            
+            if last_completed_race_name:
+                items.append([
+                    f"{last_completed_race_name} Winner",
+                    f"🏆 {last_completed_winner} ({last_completed_team})",
+                    2,
+                    3
+                ])
+
+            # D. Upcoming Race from current season or target season
+            upcoming_race_name = None
+            upcoming_race_date = None
+
+            current_season = seasons[-1]
+            try:
+                curr_res = Calculations(current_season)
+                sched = curr_res["schedule_df"]
+                if "Status" in sched.columns:
+                    pending = sched[sched["Status"].astype(str).str.lower() != "final"]
+                    pending = pending[~pending["Race"].str.contains("Post-Season", case=False, na=False)]
+                    if not pending.empty:
+                        upcoming_race_name = pending["Race"].iloc[0]
+                        upcoming_race_date = pending["Date"].iloc[0] if "Date" in pending.columns else ""
+            except Exception as e:
+                print(f"Error checking current season schedule: {e}")
+
+            if not upcoming_race_name:
+                try:
+                    sched = target_res["schedule_df"]
+                    if "Status" in sched.columns:
+                        pending = sched[sched["Status"].astype(str).str.lower() != "final"]
+                        pending = pending[~pending["Race"].str.contains("Post-Season", case=False, na=False)]
+                        if not pending.empty:
+                            upcoming_race_name = pending["Race"].iloc[0]
+                            upcoming_race_date = pending["Date"].iloc[0] if "Date" in pending.columns else ""
+                except Exception:
+                    pass
+
+            if upcoming_race_name:
+                date_str = f" - {upcoming_race_date}" if upcoming_race_date else ""
+                items.append([
+                    "Upcoming Race",
+                    f"📅 {upcoming_race_name}{date_str}",
+                    3,
+                    3
+                ])
+        
+        self.ticker_items = items
+        self.ticker_initialized = True
+
+    @rx.event(background=True)
+    async def start_ticker_loop(self):
+        async with self:
+            if self.ticker_loop_running:
+                return
+            self.ticker_loop_running = True
+            if not self.ticker_items:
+                self.initialize_ticker()
+        
+        try:
+            while True:
+                await asyncio.sleep(3)
+                async with self:
+                    if self.ticker_items:
+                        self.ticker_index = (self.ticker_index + 1) % len(self.ticker_items)
+        finally:
+            async with self:
+                self.ticker_loop_running = False
+
+
+def header_ticker() -> rx.Component:
+    """The sliding header ticker component."""
+    return rx.vstack(
+        rx.text(
+            State.ticker_header,
+            font_size=["8px", "9px", "9px"],
+            color="#00b4da",
+            font_weight="bold",
+            text_transform="uppercase",
+            letter_spacing="1px",
+            margin="0",
+            key=State.major_index,
+            class_name="major-header-fade",
+            style={"animationDuration": State.header_animation_duration},
+        ),
+        rx.text(
+            State.ticker_data,
+            font_size=["11px", "12px", "13px"],
+            color="white",
+            font_weight="600",
+            margin="0",
+            white_space="nowrap",
+            key=State.ticker_index,
+            class_name="ticker-data-fade",
+        ),
+        spacing="0",
+        align_items="end",
+        on_mount=State.start_ticker_loop,
+    )
+
 
 def header() -> rx.Component:
     """The permanent header (8% height) with the logo."""
-    return rx.hstack(
-        rx.image(
-            src="/The Alternative F1 NEW Logo.png",
-            height="70%",
-            object_fit="contain",
+    return rx.box(
+        # Center wrapper for Logo
+        rx.center(
+            rx.image(
+                src="/The Alternative F1 NEW Logo.png",
+                height="5.6vh",
+                object_fit="contain",
+                cursor="pointer",
+                on_click=State.go_home,
+            ),
+            width="100%",
+            height="100%",
+            position="absolute",
+            left="0",
+            top="0",
+            z_index="1",
+        ),
+        # Right aligned wrapper for Ticker
+        rx.hstack(
+            rx.spacer(),
+            rx.cond(
+                State.ticker_items,
+                header_ticker(),
+                rx.fragment(),
+            ),
+            width="100%",
+            height="100%",
+            align_items="center",
+            padding_right="2.5%",
+            position="relative",
+            z_index="2",
         ),
         width="100%",
         height="8vh",
         bg="black",
-        align="center",
-        justify="center",
         border_bottom="1px solid #222222",
         position="sticky",
         top="0",

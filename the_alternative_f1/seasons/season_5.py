@@ -3,6 +3,8 @@ from the_alternative_f1.articles.Season5.Grid_Announcements.Erick import article
 from the_alternative_f1.articles.Season5.Grid_Announcements.RedBull import article as RedBull_Article
 from the_alternative_f1.articles.Season5.Grid_Announcements.Cadillac import article as Cadillac_Article
 from the_alternative_f1.articles.Season5.Grid_Announcements.Ferrari import article as Ferrari_Article
+from the_alternative_f1.articles.Season5.Grid_Announcements.McLaren import article as McLaren_Article
+from the_alternative_f1.articles.Season5.Grid_Announcements.Williams import article as Williams_Article
 
 season = {
     "season_number": 5,
@@ -10,9 +12,9 @@ season = {
     "schedule_sheet": "S5Schedule",
 
     # Rookies: drivers not present in Season 4
-    "rookies": {"Grayson", "TBD1", "Randy", "TBD2"},
+    "rookies": {"Grayson", "Josh C.", "Randy", "Austin"},
 
-    "articles": [Ferrari_Article, Cadillac_Article, RedBull_Article, Erick_Article, Haas_Article],
+    "articles": [McLaren_Article, Ferrari_Article, Cadillac_Article, RedBull_Article, Erick_Article, Haas_Article],
 
     "team_colors": {
         "Alpine": "hotpink",
@@ -27,21 +29,22 @@ season = {
         "Haas": "white",
         "Audi": "#A33E2C",
         "Cadillac": "#FFEA00",
+        "Williams": "DodgerBlue",
     },
 
     "driver_colors": {
         "Joshua": "darkblue",
         "Eddie": "#8888c9",
         "Nick": "#FF6A00",
-        "Grayson": "#FFAE00",
+        "Del": "#FFAE00",
         "Patrick": "#FFEA00",
         "Josh": "#A8A153",
         "Matthew": "white",
         "Brently": "#C5C5C5",
-        "Del": "teal",
-        "TBD1": "#01C79E",
+        "Grayson": "DodgerBlue",
+        "Josh C.": "#99ccff",
         "Boz": "#A33E2C",
-        "TBD2": "#9E6156",
+        "Austin": "#9E6156",
         "Jaden": "red",
         "Leo": "#ff6060",
         "Jairo": "black",
@@ -52,15 +55,15 @@ season = {
         "Joshua":   [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
         "Eddie":    [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
         "Nick":     [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        "Grayson":  [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Del":      [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
         "Patrick":  [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
         "Josh":     [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
         "Matthew":  [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
         "Brently":  [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        "Del":      [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        "TBD1":     [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Grayson":  [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Josh C.":  [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
         "Boz":      [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        "TBD2":     [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Austin":   [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
         "Jaden":    [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
         "Leo":      [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
         "Jairo":    [0,0,0,0,0,0,0,0,0,0,0,0,0,0],

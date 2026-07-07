@@ -28,7 +28,10 @@ team_colors = {
         'AlphaTauri': 'LightSlateGray',
         'Alfa Romeo': 'Maroon',
         'Mercedes': 'black',
-        'Haas': 'gray',
+        'Haas': 'white',
+        'Audi': '#A33E2C',
+        'Cadillac': '#FFEA00',
+        'Williams': 'DodgerBlue',
     }  
 
 def PointTotals(season):
