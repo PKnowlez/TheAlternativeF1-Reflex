@@ -5,6 +5,8 @@ from the_alternative_f1.articles.Season5.Grid_Announcements.Cadillac import arti
 from the_alternative_f1.articles.Season5.Grid_Announcements.Ferrari import article as Ferrari_Article
 from the_alternative_f1.articles.Season5.Grid_Announcements.McLaren import article as McLaren_Article
 from the_alternative_f1.articles.Season5.Grid_Announcements.Williams import article as Williams_Article
+from the_alternative_f1.articles.Season5.Grid_Announcements.Audi import article as Audi_Article
+from the_alternative_f1.articles.Season5.Grid_Announcements.Mercedes import article as Mercedes_Article
 
 season = {
     "season_number": 5,

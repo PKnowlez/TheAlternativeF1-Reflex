@@ -24,6 +24,6 @@ article = {
     ],
     "image": "/thealternativef1-cloudflare/Season5/Grid_Announcements/Grid_Williams.png",
     "author": "Patrick",
-    "date": "July 8, 2026",
+    "date": "July 10, 2026",
     "season": 5,
 }

@@ -157,7 +157,7 @@ def precompute_ticker_items() -> list[list]:
         for idx, (_, row) in enumerate(constructor_totals.head(3).iterrows()):
             items.append([
                 "Constructor Standings",
-                f"{medals[idx]} {row['Team']} ({row['Points']} pts)",
+                f"{medals[idx]} {row['Team']}\n({row['Points']} pts)",
                 0,
                 9
             ])
@@ -167,7 +167,7 @@ def precompute_ticker_items() -> list[list]:
         for idx, (_, row) in enumerate(driver_totals.head(3).iterrows()):
             items.append([
                 "Driver Standings",
-                f"{medals[idx]} {row['Driver']} ({row['Points']} pts)",
+                f"{medals[idx]} {row['Driver']}\n({row['Points']} pts)",
                 1,
                 9
             ])
@@ -190,7 +190,7 @@ def precompute_ticker_items() -> list[list]:
         if last_completed_race_name:
             items.append([
                 f"{last_completed_race_name} Winner",
-                f"🏆 {last_completed_winner} ({last_completed_team})",
+                f"🏆 {last_completed_winner}\n({last_completed_team})",
                 2,
                 3
             ])
@@ -224,7 +224,7 @@ def precompute_ticker_items() -> list[list]:
                 pass
 
         if upcoming_race_name:
-            date_str = f" - {upcoming_race_date}" if upcoming_race_date else ""
+            date_str = f"\n({upcoming_race_date})" if upcoming_race_date else ""
             items.append([
                 "Upcoming Race",
                 f"📅 {upcoming_race_name}{date_str}",
@@ -600,7 +600,7 @@ class State(rx.State):
                 medal = medals[idx] if idx < len(medals) else ""
                 items.append([
                     "Constructor Standings",
-                    f"{medal} {team_name} ({pts} pts)",
+                    f"{medal} {team_name}\n({pts} pts)",
                     0,
                     9
                 ])
@@ -613,7 +613,7 @@ class State(rx.State):
                 medal = medals[idx] if idx < len(medals) else ""
                 items.append([
                     "Driver Standings",
-                    f"{medal} {driver_name} ({pts} pts)",
+                    f"{medal} {driver_name}\n({pts} pts)",
                     1,
                     9
                 ])
@@ -639,7 +639,7 @@ class State(rx.State):
             if last_completed_race_name:
                 items.append([
                     f"{last_completed_race_name} Winner",
-                    f"🏆 {last_completed_winner} ({last_completed_team})",
+                    f"🏆 {last_completed_winner}\n({last_completed_team})",
                     2,
                     3
                 ])
@@ -674,7 +674,7 @@ class State(rx.State):
                     pass
 
             if upcoming_race_name:
-                date_str = f" - {upcoming_race_date}" if upcoming_race_date else ""
+                date_str = f"\n({upcoming_race_date})" if upcoming_race_date else ""
                 items.append([
                     "Upcoming Race",
                     f"📅 {upcoming_race_name}{date_str}",
@@ -710,7 +710,7 @@ def header_ticker() -> rx.Component:
     return rx.vstack(
         rx.text(
             State.ticker_header,
-            font_size=["8px", "9px", "9px"],
+            font_size=["7px", "8px", "9px"],
             color="#00b4da",
             font_weight="bold",
             text_transform="uppercase",
@@ -722,11 +722,11 @@ def header_ticker() -> rx.Component:
         ),
         rx.text(
             State.ticker_data,
-            font_size=["11px", "12px", "13px"],
+            font_size=["10px", "11px", "13px"],
             color="white",
             font_weight="600",
             margin="0",
-            white_space="nowrap",
+            white_space=["pre-line", "nowrap", "nowrap"],
             key=State.ticker_index,
             class_name="ticker-data-fade",
         ),
@@ -743,7 +743,7 @@ def header() -> rx.Component:
         rx.center(
             rx.image(
                 src="/The Alternative F1 NEW Logo.png",
-                height="5.6vh",
+                height=["4vh", "5vh", "5.6vh"],
                 object_fit="contain",
                 cursor="pointer",
                 on_click=State.go_home,
@@ -854,8 +854,8 @@ def article_card(article: dict) -> rx.Component:
 
 def articles_list() -> rx.Component:
     """List of all article cards."""
-    first_nine = articles[:9]
-    remaining = articles[9:]
+    first_six = articles[:6]
+    remaining = articles[6:]
     return rx.vstack(
         rx.vstack(
             rx.heading("League News", size="7", color="white", font_weight="900", padding_top="2.5%", padding_bottom="0%", padding_x="2%"),
@@ -873,7 +873,7 @@ def articles_list() -> rx.Component:
             padding_bottom="2",
         ),
         rx.flex(
-            *[article_card(art) for art in first_nine],
+            *[article_card(art) for art in first_six],
             rx.cond(
                 ~State.home_articles_expanded,
                 rx.center(
@@ -897,10 +897,9 @@ def articles_list() -> rx.Component:
                     ),
                     width="100%",
                     margin_top="4",
-                    margin_bottom="120px",
                 ),
                 rx.fragment()
-            ) if len(articles) > 9 else rx.fragment(),
+            ) if len(articles) > 6 else rx.fragment(),
             *[
                 rx.cond(
                     State.home_articles_expanded,
@@ -918,7 +917,7 @@ def articles_list() -> rx.Component:
         ),
         width="100%",
         align="center",
-        margin_bottom="160px",
+        padding_bottom="160px",
     )
 def comment_card(comment: Comment) -> rx.Component:
     """An individual comment card containing its text, actions, and replies."""
