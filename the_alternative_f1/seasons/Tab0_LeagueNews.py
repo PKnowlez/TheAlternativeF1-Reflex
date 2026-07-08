@@ -172,6 +172,7 @@ def Tab0(season_data: dict, select_article = None, season_articles_expanded = No
                     ),
                     width="100%",
                     margin_top="4",
+                    margin_bottom="120px",
                 ),
                 rx.fragment()
             ) if len(season_articles) > 6 else rx.fragment(),

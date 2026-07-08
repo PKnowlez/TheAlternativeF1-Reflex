@@ -897,6 +897,7 @@ def articles_list() -> rx.Component:
                     ),
                     width="100%",
                     margin_top="4",
+                    margin_bottom="120px",
                 ),
                 rx.fragment()
             ) if len(articles) > 6 else rx.fragment(),
