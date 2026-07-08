@@ -12,7 +12,7 @@ import reflex as rx
 from the_alternative_f1.articles.components import zoomable_chart
 
 
-def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only_var = None, toggle_rookies_only = None) -> rx.Component:
+def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only_var = None, toggle_rookies_only = None, sprint_only_var = None, toggle_sprint_only = None) -> rx.Component:
     """Render the Driver Comparisons tab.
 
     Parameters
@@ -355,12 +355,33 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
             border_radius="xl",
         )
 
+    has_sprint = data.get("has_sprint", False)
+
     return rx.vstack(
-        rx.heading(
-            f"Season {season_num} Driver Comparisons",
-            size="6",
-            color="white",
-            font_weight="900",
+        rx.hstack(
+            rx.heading(
+                f"Season {season_num} Driver Comparisons",
+                size="6",
+                color="white",
+                font_weight="900",
+            ),
+            rx.spacer(),
+            rx.cond(
+                has_sprint & (sprint_only_var is not None),
+                rx.hstack(
+                    rx.text("Sprint Championship", color="white", font_size="sm", font_weight="600"),
+                    rx.switch(
+                        checked=sprint_only_var,
+                        on_change=toggle_sprint_only,
+                        color_scheme="cyan",
+                    ),
+                    spacing="2",
+                    align="center",
+                ),
+                rx.fragment()
+            ),
+            width="100%",
+            align="center",
             padding_y="2.5%",
             padding_x="2%",
         ),

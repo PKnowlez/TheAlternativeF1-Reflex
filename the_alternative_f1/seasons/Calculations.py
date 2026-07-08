@@ -14,7 +14,7 @@ import pandas as pd
 _EXCEL_PATH = str((Path(__file__).parent.parent / "The_Alternative_F1.xlsx").resolve())
 
 
-def Calculations(season_data: dict) -> dict:
+def Calculations(season_data: dict, sprint_only: bool = False) -> dict:
     """Run all calculations for the given season and return a results dict.
 
     Parameters
@@ -59,10 +59,22 @@ def Calculations(season_data: dict) -> dict:
     # ── Identify column groups ───────────────────────────────────────────
     race_points = [col for col in df.columns if col.endswith("Points")]
     race_place = [col for col in df.columns if col.endswith("Place")]
-    races = [col.replace("Points", "").replace("Sprint", " Sprint") if "Sprint" in col
-             else col[:-6] for col in race_points]
-    # Simpler: just strip "Points" suffix
-    races = [col[:-6] for col in race_points]
+
+    # Detect if any completed Sprint columns exist
+    sprint_points_cols = [col for col in df.columns if col.endswith("Points") and "Sprint" in col]
+    sprint_points_completed = [col for col in sprint_points_cols if df[col].fillna(0).sum() > 0]
+    has_sprint = len(sprint_points_completed) > 0
+
+    if sprint_only and has_sprint:
+        race_points = [col for col in race_points if "Sprint" in col]
+        race_place = [col for col in race_place if "Sprint" in col]
+
+    races = []
+    for col in race_points:
+        name = col[:-6]  # strip "Points"
+        if "Sprint" in name and not name.endswith(" Sprint"):
+            name = name.replace("Sprint", " Sprint")
+        races.append(name)
 
     # Detect optional column groups
     fastest_lap_columns = [col for col in df.columns if col.endswith("FastestLap")]
@@ -71,6 +83,14 @@ def Calculations(season_data: dict) -> dict:
     CD_columns = [col for col in df.columns if col.endswith("CD")]
     qualifying_columns = [col for col in df.columns if col.endswith("Qualifying")]
     place_columns = [col for col in df.columns if col.endswith("Place")]
+
+    if sprint_only and has_sprint:
+        fastest_lap_columns = [col for col in fastest_lap_columns if "Sprint" in col]
+        DOTD_columns = [col for col in DOTD_columns if "Sprint" in col]
+        MOT_columns = [col for col in MOT_columns if "Sprint" in col]
+        CD_columns = [col for col in CD_columns if "Sprint" in col]
+        qualifying_columns = [col for col in qualifying_columns if "Sprint" in col]
+        place_columns = [col for col in place_columns if "Sprint" in col]
 
     has_dotd_mot_cd = len(DOTD_columns) > 0
 
@@ -173,6 +193,8 @@ def Calculations(season_data: dict) -> dict:
 
     # ── Filtered DataFrames for driver stats ─────────────────────────────
     points_columns = [col for col in df.columns if col.endswith(("Points", "SprintPoints"))]
+    if sprint_only and has_sprint:
+        points_columns = [col for col in points_columns if "Sprint" in col]
 
     new_df = df.set_index("Driver")[points_columns].reset_index()
     new_df_FL = df.set_index("Driver")[fastest_lap_columns].reset_index() if fastest_lap_columns else pd.DataFrame({"Driver": df["Driver"]})
@@ -190,6 +212,8 @@ def Calculations(season_data: dict) -> dict:
 
     # ── Team-level aggregations for Tab1/Tab3 ────────────────────────────
     team_points_columns = [col for col in df.columns if col.endswith(("Points", "SprintPoints"))]
+    if sprint_only and has_sprint:
+        team_points_columns = [col for col in team_points_columns if "Sprint" in col]
     team_races_points_only = races.copy()
 
     team_df = df.groupby("Team")[team_points_columns].sum().reset_index()
@@ -255,4 +279,5 @@ def Calculations(season_data: dict) -> dict:
         "CD_columns": CD_columns,
         "qualifying_columns": qualifying_columns,
         "place_columns": place_columns,
+        "has_sprint": has_sprint,
     }

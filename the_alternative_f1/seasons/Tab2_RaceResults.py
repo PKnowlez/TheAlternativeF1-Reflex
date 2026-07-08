@@ -224,7 +224,7 @@ def _build_manual_race_item(race: dict, idx: int, prefix: str, bg_color: str = "
     )
 
 
-def Tab2(data: dict, season_data: dict) -> rx.Component:
+def Tab2(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only=None) -> rx.Component:
     """Render the Race Results tab.
 
     Parameters
@@ -241,6 +241,7 @@ def Tab2(data: dict, season_data: dict) -> rx.Component:
     has_dotd_mot_cd = data["has_dotd_mot_cd"]
     season_num = season_data["season_number"]
     team_colors = data.get("team_colors", {})
+    has_sprint = data.get("has_sprint", False)
 
     preseason_items = []
     preseason_races = season_data.get("preseason_races", [])
@@ -272,15 +273,22 @@ def Tab2(data: dict, season_data: dict) -> rx.Component:
 
         # Build column names for this race
         # Strip (S) for sprint column lookups
-        base_name = race_name.replace(" (S)", "").replace(" Sprint", "")
+        base_name = race_name.replace(" (S)", "").replace(" Sprint", "").replace("Sprint", "").strip()
         is_sprint = "Sprint" in race_name or "(S)" in race_name
 
         if is_sprint:
-            qualifying_col = base_name + " SprintQualifying"
-            fastestlap_col = base_name + " SprintFastestLap"
-            dotd_col = base_name + " SprintDOTD"
-            mot_col = base_name + " SprintMOT"
-            cd_col = base_name + " SprintCD"
+            if base_name + "SprintQualifying" in df.columns or base_name + "SprintPoints" in df.columns:
+                qualifying_col = base_name + "SprintQualifying"
+                fastestlap_col = base_name + "SprintFastestLap"
+                dotd_col = base_name + "SprintDOTD"
+                mot_col = base_name + "SprintMOT"
+                cd_col = base_name + "SprintCD"
+            else:
+                qualifying_col = base_name + " SprintQualifying"
+                fastestlap_col = base_name + " SprintFastestLap"
+                dotd_col = base_name + " SprintDOTD"
+                mot_col = base_name + " SprintMOT"
+                cd_col = base_name + " SprintCD"
         else:
             qualifying_col = race_name + "Qualifying"
             fastestlap_col = race_name + "FastestLap"
@@ -515,18 +523,63 @@ def Tab2(data: dict, season_data: dict) -> rx.Component:
 
     if not accordion_items:
         return rx.vstack(
-            rx.heading(f"Season {season_num} Race Results", size="6", color="white", font_weight="900", padding_y="2.5%", padding_x="2%"),
+            rx.hstack(
+                rx.heading(
+                    f"Season {season_num} Race Results",
+                    size="6",
+                    color="white",
+                    font_weight="900",
+                ),
+                rx.spacer(),
+                rx.cond(
+                    has_sprint & (sprint_only_var is not None),
+                    rx.hstack(
+                        rx.text("Sprint Championship", color="white", font_size="sm", font_weight="600"),
+                        rx.switch(
+                            checked=sprint_only_var,
+                            on_change=toggle_sprint_only,
+                            color_scheme="cyan",
+                        ),
+                        spacing="2",
+                        align="center",
+                    ),
+                    rx.fragment()
+                ),
+                width="100%",
+                align="center",
+                padding_y="2.5%",
+                padding_x="2%",
+            ),
             rx.text("No race results available yet.", color="#888888", padding_x="2%"),
             width="100%",
             spacing="4",
         )
 
     return rx.vstack(
-        rx.heading(
-            f"Season {season_num} Race Results",
-            size="6",
-            color="white",
-            font_weight="900",
+        rx.hstack(
+            rx.heading(
+                f"Season {season_num} Race Results",
+                size="6",
+                color="white",
+                font_weight="900",
+            ),
+            rx.spacer(),
+            rx.cond(
+                has_sprint & (sprint_only_var is not None),
+                rx.hstack(
+                    rx.text("Sprint Championship", color="white", font_size="sm", font_weight="600"),
+                    rx.switch(
+                        checked=sprint_only_var,
+                        on_change=toggle_sprint_only,
+                        color_scheme="cyan",
+                    ),
+                    spacing="2",
+                    align="center",
+                ),
+                rx.fragment()
+            ),
+            width="100%",
+            align="center",
             padding_y="2.5%",
             padding_x="2%",
         ),

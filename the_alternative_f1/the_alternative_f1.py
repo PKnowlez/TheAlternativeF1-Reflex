@@ -248,6 +248,7 @@ class State(rx.State):
     selected_season_tab: str = "standings"
     season_picker_open: bool = False
     rookies_only: bool = False
+    sprint_only: bool = False
 
     # ── Discord Login State ──────────────────────────────────────────────
     discord_username: str = rx.LocalStorage("", name="discord_username", sync=True)
@@ -502,6 +503,7 @@ class State(rx.State):
         if nav_name == "seasons":
             self.selected_season_tab = "standings"
             self.rookies_only = False
+            self.sprint_only = False
 
     def set_reg_tab(self, tab_name: str):
         self.selected_reg_tab = tab_name
@@ -513,6 +515,8 @@ class State(rx.State):
         self.selected_season = season_num
         self.season_picker_open = False
         self.season_articles_expanded = False
+        if season_num in [1, 2]:
+            self.sprint_only = False
 
     def set_season_tab(self, tab_name: str):
         self.selected_season_tab = tab_name
@@ -522,6 +526,9 @@ class State(rx.State):
 
     def toggle_rookies_only(self, value: bool):
         self.rookies_only = value
+
+    def toggle_sprint_only(self, value: bool):
+        self.sprint_only = value
 
     def go_home(self):
         self.active_nav = "home"
@@ -1582,10 +1589,10 @@ def regulations_view() -> rx.Component:
     )
 
 
-def _build_season_content(season_idx: int, tab: str, rookies_only: bool) -> rx.Component:
+def _build_season_content(season_idx: int, tab: str, rookies_only: bool, sprint_only: bool) -> rx.Component:
     """Build the content for a specific season and tab."""
     season_data = seasons[season_idx]
-    data = Calculations(season_data)
+    data = Calculations(season_data, sprint_only=sprint_only)
 
     if tab == "news":
         return Tab0(
@@ -1595,13 +1602,33 @@ def _build_season_content(season_idx: int, tab: str, rookies_only: bool) -> rx.C
             expand_season_articles=State.expand_season_articles,
         )
     elif tab == "standings":
-        return Tab1(data, season_data)
+        return Tab1(
+            data,
+            season_data,
+            sprint_only_var=State.sprint_only,
+            toggle_sprint_only=State.toggle_sprint_only,
+        )
     elif tab == "race_results":
-        return Tab2(data, season_data)
+        return Tab2(
+            data,
+            season_data,
+            sprint_only_var=State.sprint_only,
+            toggle_sprint_only=State.toggle_sprint_only,
+        )
     elif tab == "constructor_stats":
-        return Tab3(data, season_data)
+        return Tab3(
+            data,
+            season_data,
+            sprint_only_var=State.sprint_only,
+            toggle_sprint_only=State.toggle_sprint_only,
+        )
     elif tab == "driver_stats":
-        return Tab4(data, season_data)
+        return Tab4(
+            data,
+            season_data,
+            sprint_only_var=State.sprint_only,
+            toggle_sprint_only=State.toggle_sprint_only,
+        )
     elif tab == "driver_comparisons":
         return Tab5(
             data,
@@ -1609,6 +1636,8 @@ def _build_season_content(season_idx: int, tab: str, rookies_only: bool) -> rx.C
             rookies_only=rookies_only,
             rookies_only_var=State.rookies_only,
             toggle_rookies_only=State.toggle_rookies_only,
+            sprint_only_var=State.sprint_only,
+            toggle_sprint_only=State.toggle_sprint_only,
         )
     elif tab == "schedule":
         return Tab6(data, season_data)
@@ -1695,22 +1724,40 @@ def seasons_view() -> rx.Component:
         """Build a conditional chain for tabs within a season."""
         tab_keys = [t[1] for t in tabs]
         # Start from the last tab and work backwards
-        result = _build_season_content(season_idx, tab_keys[-1], False)
+        result = _build_season_content(season_idx, tab_keys[-1], False, False)
         for tk in reversed(tab_keys[:-1]):
             if tk == "driver_comparisons":
                 result = rx.cond(
                     State.selected_season_tab == tk,
                     rx.cond(
-                        State.rookies_only,
-                        _build_season_content(season_idx, tk, True),
-                        _build_season_content(season_idx, tk, False),
+                        State.sprint_only,
+                        rx.cond(
+                            State.rookies_only,
+                            _build_season_content(season_idx, tk, rookies_only=True, sprint_only=True),
+                            _build_season_content(season_idx, tk, rookies_only=False, sprint_only=True),
+                        ),
+                        rx.cond(
+                            State.rookies_only,
+                            _build_season_content(season_idx, tk, rookies_only=True, sprint_only=False),
+                            _build_season_content(season_idx, tk, rookies_only=False, sprint_only=False),
+                        ),
+                    ),
+                    result,
+                )
+            elif tk in ["standings", "race_results", "constructor_stats", "driver_stats"]:
+                result = rx.cond(
+                    State.selected_season_tab == tk,
+                    rx.cond(
+                        State.sprint_only,
+                        _build_season_content(season_idx, tk, rookies_only=False, sprint_only=True),
+                        _build_season_content(season_idx, tk, rookies_only=False, sprint_only=False),
                     ),
                     result,
                 )
             else:
                 result = rx.cond(
                     State.selected_season_tab == tk,
-                    _build_season_content(season_idx, tk, False),
+                    _build_season_content(season_idx, tk, False, False),
                     result,
                 )
         return result

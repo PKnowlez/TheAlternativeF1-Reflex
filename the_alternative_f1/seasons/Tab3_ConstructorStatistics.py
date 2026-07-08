@@ -9,7 +9,7 @@ import pandas as pd
 from the_alternative_f1.articles.components import zoomable_chart
 
 
-def Tab3(data: dict, season_data: dict) -> rx.Component:
+def Tab3(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only=None) -> rx.Component:
     """Render the Constructor Statistics tab."""
     team_df = data["team_df"]
     team_races_points_only = data["team_races_points_only"]
@@ -248,12 +248,33 @@ def Tab3(data: dict, season_data: dict) -> rx.Component:
             )
         )
 
+    has_sprint = data.get("has_sprint", False)
+
     return rx.vstack(
-        rx.heading(
-            f"Season {season_num} Constructor Statistics",
-            size="6",
-            color="white",
-            font_weight="900",
+        rx.hstack(
+            rx.heading(
+                f"Season {season_num} Constructor Statistics",
+                size="6",
+                color="white",
+                font_weight="900",
+            ),
+            rx.spacer(),
+            rx.cond(
+                has_sprint & (sprint_only_var is not None),
+                rx.hstack(
+                    rx.text("Sprint Championship", color="white", font_size="sm", font_weight="600"),
+                    rx.switch(
+                        checked=sprint_only_var,
+                        on_change=toggle_sprint_only,
+                        color_scheme="cyan",
+                    ),
+                    spacing="2",
+                    align="center",
+                ),
+                rx.fragment()
+            ),
+            width="100%",
+            align="center",
             padding_y="2.5%",
             padding_x="2%",
         ),
