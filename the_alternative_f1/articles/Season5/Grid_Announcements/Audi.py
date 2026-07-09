@@ -23,7 +23,7 @@ article = {
         ),
         "This season there are four new constructors to the grid. A big question that looms is who will end up supreme among them? And while there isn't much data out there yet, many bets seem to be on Audi."
     ],
-    "image": "/thealternativef1-cloudflare/Season5/Grid_Announcements/Grid_Audi.png",
+    "image": "/thealternativef1-cloudflare/Season5/Grid_Announcements/Grid_Audi_2.png",
     "author": "Patrick",
     "date": "July 13, 2026",
     "season": 5,
