@@ -7,35 +7,9 @@ article = {
     "content": [
         "With all tracks selected by drivers, it is time to rank them all from the greatest of all time to not worth licking the asphalt. Honestly, some of you picked some trash tracks, you better hope other people don't agree with me...talking about you Singapore.",
         "Here are a few things you need to know:",
-        rx.box(
-            rx.text(
-                "\"1) Only 14 of the se tracks will make it to the regular season.\"",
-                color="#CCCCCC",
-                font_style="italic",
-                font_size="md",
-                line_height="1.6",
-                margin_bottom="4",
-            ),
-            rx.text(
-                "\"2) 3 of these tracks are already guaranteed to be on the season calendar, but I won't be telling you which are safe.\"",
-                color="#CCCCCC",
-                font_style="italic",
-                font_size="md",
-                line_height="1.6",
-                margin_bottom="4",
-            ),
-            rx.text(
-                "\"3) The two lowest ranked tracks that aren't one of the 3 mentioned in rule 2, will be used for preseason, so no worries we are racing them all!\"",
-                color="#CCCCCC",
-                font_style="italic",
-                font_size="md",
-                line_height="1.6",
-            ),
-            padding_left="16px",
-            border_left="4px solid #00b4da",
-            margin_y="6",
-            width="100%",
-        ),
+        "1) Only 14 of the se tracks will make it to the regular season.",
+        "2) 3 of these tracks are already guaranteed to be on the season calendar, but I won't be telling you which are safe.",
+        "3) The two lowest ranked tracks that aren't one of the 3 mentioned in rule 2, will be used for preseason, so no worries we are racing them all!",
         rx.center(
             rx.link(
                 rx.button(
