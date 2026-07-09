@@ -95,7 +95,7 @@ def main():
         dirs[:] = [d for d in dirs if d not in exclude_dirs]
         
         for file in files:
-            if file in exclude_files:
+            if file in exclude_files or file.lower().endswith(".psd"):
                 continue
             
             full_path = os.path.join(root, file)
