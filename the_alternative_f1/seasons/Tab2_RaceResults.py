@@ -122,16 +122,17 @@ def _build_manual_race_item(race: dict, idx: int, prefix: str, bg_color: str = "
             rx.table.row(*cells, _hover={"bg": "#1C1C20"})
         )
 
-        if idx_row < 3:
-            preview_place_display = str(place_val)
+        place_str = str(place_val).strip()
+        if place_str in ["1", "2", "3"]:
+            preview_place_display = place_str
             place_color = "#E0E0E0"
-            if str(place_val) == "1":
+            if place_str == "1":
                 preview_place_display = "🥇"
                 place_color = "#FFD700"
-            elif str(place_val) == "2":
+            elif place_str == "2":
                 preview_place_display = "🥈"
                 place_color = "#C0C0C0"
-            elif str(place_val) == "3":
+            elif place_str == "3":
                 preview_place_display = "🥉"
                 place_color = "#CD7F32"
 
@@ -391,7 +392,7 @@ def Tab2(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
                 rx.table.row(*cells, _hover={"bg": "#1C1C20"})
             )
 
-            if idx_row < 3:
+            if place_display in ["1", "2", "3"]:
                 preview_place_display = place_display
                 place_color = "#E0E0E0"
                 if place_display == "1":
@@ -523,7 +524,7 @@ def Tab2(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
 
     if not accordion_items:
         return rx.vstack(
-            rx.hstack(
+            rx.flex(
                 rx.heading(
                     f"Season {season_num} Race Results",
                     size="6",
@@ -546,7 +547,9 @@ def Tab2(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
                     rx.fragment()
                 ),
                 width="100%",
-                align="center",
+                direction=rx.breakpoints(initial="column", sm="row"),
+                align=rx.breakpoints(initial="start", sm="center"),
+                gap="4",
                 padding_y="2.5%",
                 padding_x="2%",
             ),
@@ -556,7 +559,7 @@ def Tab2(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
         )
 
     return rx.vstack(
-        rx.hstack(
+        rx.flex(
             rx.heading(
                 f"Season {season_num} Race Results",
                 size="6",
@@ -579,16 +582,27 @@ def Tab2(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
                 rx.fragment()
             ),
             width="100%",
-            align="center",
+            direction=rx.breakpoints(initial="column", sm="row"),
+            align=rx.breakpoints(initial="start", sm="center"),
+            gap="4",
             padding_y="2.5%",
             padding_x="2%",
         ),
         rx.box(
-            rx.accordion.root(
-                *accordion_items,
-                collapsible=True,
-                width="100%",
-                variant="ghost",
+            rx.cond(
+                sprint_only_var,
+                rx.accordion.root(
+                    *regular_items,
+                    collapsible=True,
+                    width="100%",
+                    variant="ghost",
+                ),
+                rx.accordion.root(
+                    *(preseason_items + regular_items + postseason_items),
+                    collapsible=True,
+                    width="100%",
+                    variant="ghost",
+                ),
             ),
             width="100%",
             bg="#18181C",

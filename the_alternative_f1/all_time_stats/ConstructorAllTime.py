@@ -45,6 +45,20 @@ def constructor_stats_view(num_seasons: int) -> rx.Component:
             )
         return rx.table.cell(rx.text("—", color="#555555", font_size="13px"))
 
+    def streak_cell(value: int) -> rx.Component:
+        if value >= 3:
+            return rx.table.cell(
+                rx.badge(
+                    f"🔥 {value}",
+                    color_scheme="orange",
+                    variant="soft",
+                    font_size="11px",
+                ),
+            )
+        return rx.table.cell(
+            rx.text(str(value), color="#AAAAAA", font_size="13px")
+        )
+
     def season_cell(season_num: int, team_name: str, drivers_str: str) -> rx.Component:
         if not drivers_str or drivers_str == "—" or drivers_str.strip() == "":
             return rx.table.cell(rx.text("—", color="#555555", font_size="13px"))
@@ -109,6 +123,8 @@ def constructor_stats_view(num_seasons: int) -> rx.Component:
                         header_cell("2nd"),
                         header_cell("3rd"),
                         header_cell("Championships"),
+                        header_cell("Win Streak"),
+                        header_cell("SS Streak"),
                         *[header_cell(f"S{i+1}") for i in range(num_seasons)],
                         bg="#111111",
                     )
@@ -136,6 +152,8 @@ def constructor_stats_view(num_seasons: int) -> rx.Component:
                             data_cell(row["2nd Place"]),
                             data_cell(row["3rd Place"]),
                             champion_cell(row["Constructor's Champion"]),
+                            streak_cell(row["Win Streak"]),
+                            streak_cell(row["Single Season Win Streak"]),
                             *[
                                 season_cell(s, row["Team"], row.get(f"Season {s}", "—"))
                                 for s in range(1, num_seasons + 1)
@@ -155,6 +173,13 @@ def constructor_stats_view(num_seasons: int) -> rx.Component:
             border_radius="xl",
             border="1px solid #2C2C32",
             padding="4",
+        ),
+        rx.hstack(
+            rx.badge("🔥 3+ consecutive wins", color_scheme="orange", variant="soft", font_size="10px"),
+            rx.text("SS Streak = Single Season Win Streak", color="#666666", font_size="10px"),
+            spacing="4",
+            margin_top="3",
+            align="center",
         ),
         width="100%",
         align_items="start",

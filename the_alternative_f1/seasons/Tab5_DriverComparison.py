@@ -358,7 +358,7 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
     has_sprint = data.get("has_sprint", False)
 
     return rx.vstack(
-        rx.hstack(
+        rx.flex(
             rx.heading(
                 f"Season {season_num} Driver Comparisons",
                 size="6",
@@ -381,7 +381,9 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
                 rx.fragment()
             ),
             width="100%",
-            align="center",
+            direction=rx.breakpoints(initial="column", sm="row"),
+            align=rx.breakpoints(initial="start", sm="center"),
+            gap="4",
             padding_y="2.5%",
             padding_x="2%",
         ),

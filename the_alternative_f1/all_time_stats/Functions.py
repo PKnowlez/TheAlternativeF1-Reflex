@@ -225,77 +225,74 @@ def CalculateAllTime(NumSeason, tORd):
     
     combined_totals[x] = combined_totals[x].astype(int)
 
-    # Read in all season dataframes and concatenate them
-    dfs_all_seasons = []
-    for i in range(NumSeason):
-        sheet = "Season" + str(i+1)
-        df_season = pd.read_excel(file, sheet_name=sheet)
-        df_season['Season'] = i + 1
-        df_season['Driver'] = df_season['Driver'].astype(str).str.strip()
-        df_season['Team'] = df_season['Team'].astype(str).str.strip()
-        dfs_all_seasons.append(df_season)
-    all_races_df = pd.concat(dfs_all_seasons)
+    # Chronological list of all race winners
+    # List elements: (season, race_name, winner_driver, winner_team)
+    all_races_winners = []
+    for s in range(NumSeason):
+        season_num = s + 1
+        try:
+            df_season = pd.read_excel(file, sheet_name="Season" + str(season_num))
+            df_season['Driver'] = df_season['Driver'].astype(str).str.strip()
+            df_season['Team'] = df_season['Team'].astype(str).str.strip()
+            
+            sched_sheet = "S" + str(season_num) + "Schedule"
+            schedule = pd.read_excel(file, sheet_name=sched_sheet)
+            
+            for race in schedule['Race']:
+                if str(race).lower().startswith(('pre', 'post')):
+                    continue
+                col_name = str(race) + "Place"
+                if col_name in df_season.columns:
+                    winners = df_season[df_season[col_name] == 1]
+                    if not winners.empty:
+                        driver = winners['Driver'].iloc[0]
+                        team = winners['Team'].iloc[0]
+                        all_races_winners.append((season_num, race, driver, team))
+        except Exception:
+            pass
 
-    # Melt the dataframe to have a single column for race results
-    melted_races = all_races_df.melt(id_vars=[tORd, 'Season'], value_vars=[col for col in all_races_df.columns if col.endswith('Place')], var_name='Race', value_name='Place')
+    # Calculate streaks for drivers/teams
+    from collections import defaultdict
+    max_streak = defaultdict(int)
+    curr_streak = defaultdict(int)
+    max_ss_streak = defaultdict(int)
+    curr_ss_streak = defaultdict(int)
     
-    # Sort the dataframe by season and then race to ensure correct streak calculations
-    melted_races['Race_Order'] = melted_races.groupby('Season')['Race'].rank(method='dense')
-    melted_races = melted_races.sort_values(by=['Season', 'Race_Order']).reset_index(drop=True)
+    last_season = None
+    for season, race, driver, team in all_races_winners:
+        entity = driver if tORd == 'Driver' else team
+        
+        if last_season is not None and season != last_season:
+            curr_ss_streak.clear()
+            
+        # Update overall streak for the winning entity
+        curr_streak[entity] += 1
+        # Reset overall streaks for all other entities
+        for e in list(curr_streak.keys()):
+            if e != entity:
+                max_streak[e] = max(max_streak[e], curr_streak[e])
+                curr_streak[e] = 0
+                
+        # Update single-season streak for the winning entity
+        curr_ss_streak[entity] += 1
+        # Reset single-season streaks for all other entities
+        for e in list(curr_ss_streak.keys()):
+            if e != entity:
+                max_ss_streak[e] = max(max_ss_streak[e], curr_ss_streak[e])
+                curr_ss_streak[e] = 0
+                
+        last_season = season
+        
+    # Flush final current streaks to max streaks
+    for e in curr_streak:
+        max_streak[e] = max(max_streak[e], curr_streak[e])
+    for e in curr_ss_streak:
+        max_ss_streak[e] = max(max_ss_streak[e], curr_ss_streak[e])
+        
+    combined_totals['Win Streak'] = combined_totals[tORd].map(max_streak).fillna(0).astype(int)
+    combined_totals['Single Season Win Streak'] = combined_totals[tORd].map(max_ss_streak).fillna(0).astype(int)
 
-    # Calculate streaks
     if tORd == 'Driver':
-        combined_totals['Win Streak'] = 0
-        combined_totals['Single Season Win Streak'] = 0
-        
-        for entity in combined_totals[tORd].unique():
-            entity_df = melted_races[melted_races[tORd] == entity].sort_values(by=['Season', 'Race_Order']).copy()
-            
-            # Overall win streak
-            max_win_streak = 0
-            current_win_streak = 0
-            
-            # Single-season win streak
-            max_ss_win_streak = 0
-            current_ss_win_streak = 0
-            
-            last_season = None
-            
-            for index, row in entity_df.iterrows():
-                place = row['Place']
-                season = row['Season']
-                
-                # Overall win streak logic
-                is_win = place == 1
-
-                if is_win:
-                    current_win_streak += 1
-                else:
-                    max_win_streak = max(max_win_streak, current_win_streak)
-                    current_win_streak = 0
-                
-                # Single-season win streak logic
-                if last_season is not None and season != last_season:
-                    max_ss_win_streak = max(max_ss_win_streak, current_ss_win_streak)
-                    current_ss_win_streak = 0
-                
-                if is_win:
-                    current_ss_win_streak += 1
-                else:
-                    max_ss_win_streak = max(max_ss_win_streak, current_ss_win_streak)
-                    current_ss_win_streak = 0
-                
-                last_season = season
-                
-            max_win_streak = max(max_win_streak, current_win_streak)
-            max_ss_win_streak = max(max_ss_win_streak, current_ss_win_streak)
-            
-            combined_totals.loc[combined_totals[tORd] == entity, 'Win Streak'] = int(max_win_streak)
-            combined_totals.loc[combined_totals[tORd] == entity, 'Single Season Win Streak'] = int(max_ss_win_streak)
-        
-        combined_totals['Win Streak'] = combined_totals['Win Streak'].astype(int)
-        combined_totals['Single Season Win Streak'] = combined_totals['Single Season Win Streak'].astype(int)
-        
         # Map teams and drivers for each season
         for i in range(NumSeason):
             season_num = i + 1
@@ -338,7 +335,7 @@ def CalculateAllTime(NumSeason, tORd):
 
         # Reorder columns for teams
         season_cols = [f'Season {i+1}' for i in range(NumSeason)]
-        combined_totals = combined_totals[['Place', tORd, 'Points', '1st Place', '2nd Place', '3rd Place', x] + season_cols]
+        combined_totals = combined_totals[['Place', tORd, 'Points', '1st Place', '2nd Place', '3rd Place', x, 'Win Streak', 'Single Season Win Streak'] + season_cols]
         combined_totals['Place'] = combined_totals.index + 1
 
     return combined_totals
