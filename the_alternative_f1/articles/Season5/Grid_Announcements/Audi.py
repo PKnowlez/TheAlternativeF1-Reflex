@@ -5,7 +5,7 @@ article = {
     "title": "The Rookie and The Vet",
     "blurb": "Audi looks to take the league by storm with their balance of experience and fresh energy.",
     "content": [
-        "The German racing outfit is coming in hot with two drivers looking to prove themselves. Senad has been a perennial challenger in The Alternative F1's ranks. While Austin is bringing in a wealth of new energy, and some sources are saying, a wealth of .gifs and memes.",
+        "The German racing outfit is coming in hot with two drivers looking to prove themselves. Senad has been a perennial challenger in The Alternative F1's ranks. While Evelo is bringing in a wealth of new energy, and some sources are saying, a wealth of .gifs and memes.",
         "Audi being a new constructor on the grid means the sky is the limit for the team. Expecations are of course set appropriately, but behind the scenes rumors are running through the paddock that the driver pairing is expected to do great things.",
         "Mattia Binotto discussed the team's potential with the media recently,",
         rx.box(

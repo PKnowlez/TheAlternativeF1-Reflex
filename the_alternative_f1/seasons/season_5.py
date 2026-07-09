@@ -14,7 +14,7 @@ season = {
     "schedule_sheet": "S5Schedule",
 
     # Rookies: drivers not present in Season 4
-    "rookies": {"Grayson", "Josh C.", "Randy", "Austin"},
+    "rookies": {"Grayson", "Josh C.", "Randy", "Evelo"},
 
     "articles": [Williams_Article, McLaren_Article, Ferrari_Article, Cadillac_Article, RedBull_Article, Erick_Article, Haas_Article],
 
@@ -46,7 +46,7 @@ season = {
         "Grayson": "DodgerBlue",
         "Josh C.": "#99ccff",
         "Boz": "#A33E2C",
-        "Austin": "#9E6156",
+        "Evelo": "#9E6156",
         "Jaden": "red",
         "Leo": "#ff6060",
         "Jairo": "black",
@@ -65,7 +65,7 @@ season = {
         "Grayson":  [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
         "Josh C.":  [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
         "Boz":      [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        "Austin":   [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Evelo":   [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
         "Jaden":    [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
         "Leo":      [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
         "Jairo":    [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
