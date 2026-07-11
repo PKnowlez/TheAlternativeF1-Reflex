@@ -599,7 +599,7 @@ class State(rx.State):
         n_teams = len(teams)
         for idx, team in enumerate(teams):
             delay = 0.5 + idx * 0.15
-            offset = "-0.5vh" if idx % 2 == 0 else "0.5vh"
+            offset = "-0.3vh" if idx % 2 == 0 else "0.3vh"
             result.append({
                 "team": team,
                 "index": idx,
@@ -952,8 +952,8 @@ def power_rankings_starting_grid() -> rx.Component:
             # Grid Box image
             rx.image(
                 src=f"{R2_CUSTOM_DOMAIN}/Power Rankings/Car Icons/Icon_GridBox.png",
-                width=["6.4vh", "8.8vh", "11.2vh"],
-                height=["4vh", "5.5vh", "7vh"],
+                width=["4.8vh", "6.56vh", "8.32vh"],
+                height=["3vh", "4.1vh", "5.2vh"],
                 object_fit="contain",
                 opacity=0.6,
                 display="block",
@@ -961,17 +961,17 @@ def power_rankings_starting_grid() -> rx.Component:
             # Car icon overlay
             rx.image(
                 src=item["icon"],
-                width=["5.6vh", "8.0vh", "10.15vh"],
-                height=["3.2vh", "4.6vh", "5.8vh"],
+                width=["4.2vh", "5.74vh", "7.28vh"],
+                height=["2.4vh", "3.28vh", "4.16vh"],
                 object_fit="contain",
                 position="absolute",
-                top=["0.4vh", "0.45vh", "0.6vh"],
-                left=["0.4vh", "0.6vh", "0.8vh"],
+                top=["0.3vh", "0.41vh", "0.52vh"],
+                left=["0.3vh", "0.41vh", "0.52vh"],
                 class_name="car-drive-in",
                 style={"animationDelay": item["delay"]},
             ),
             position="relative",
-            height=["4vh", "5.5vh", "7vh"],
+            height=["3vh", "4.1vh", "5.2vh"],
             margin_top=item["offset"],
             margin_x=["0px", "1px", "2px"],
         )
@@ -2182,7 +2182,7 @@ def footer() -> rx.Component:
                 ),
                 rx.button(
                     rx.image(
-                        src="/Icons/IconLogin.png",
+                        src="/Icons/IconPowerRanking.png",
                         height="22px",
                         object_fit="contain",
                     ),
