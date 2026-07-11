@@ -101,8 +101,10 @@ def init_db_from_json():
                 print("Successfully migrated comments.json to the database.")
             except Exception as e:
                 print(f"Error migrating comments.json to database: {e}")
+R2_CUSTOM_DOMAIN = os.getenv("R2_CUSTOM_DOMAIN", "https://pknowlez.com").rstrip("/")
 
-
+def get_current_constructors() -> set:
+    return {'Red Bull', 'McLaren', 'Cadillac', 'Haas', 'Williams', 'Audi', 'Ferrari', 'Mercedes'}
 
 from the_alternative_f1.articles import articles
 from the_alternative_f1.regulations_settings.Regulations import Regulations as regulations_content
@@ -249,6 +251,10 @@ class State(rx.State):
     season_picker_open: bool = False
     rookies_only: bool = False
     sprint_only: bool = False
+
+    # ── Power Rankings State ─────────────────────────────────────────────
+    show_power_rankings_header: bool = True
+    power_rankings_header_phase: str = "animating_in"
 
     # ── Discord Login State ──────────────────────────────────────────────
     discord_username: str = rx.LocalStorage("", name="discord_username", sync=True)
@@ -566,6 +572,203 @@ class State(rx.State):
             return f"{self.ticker_items[self.ticker_index][3]}s"
         return "3s"
 
+    @rx.var(auto_deps=False, deps=[])
+    def latest_power_rankings_header(self) -> list[dict]:
+        from the_alternative_f1.seasons.power_rankings import load_power_rankings
+        from the_alternative_f1.seasons import LATEST_SEASON, seasons
+        
+        pr = load_power_rankings(LATEST_SEASON)
+        races = pr.get("races", [])
+        rankings = pr.get("rankings", {})
+        
+        teams = []
+        if races and len(races) > 1:
+            latest_race = races[-1]
+            teams = rankings.get(latest_race, [])
+        else:
+            if "Preseason" in rankings:
+                teams = rankings["Preseason"]
+            else:
+                latest_s = seasons[-1]
+                teams = sorted(list(latest_s["team_colors"].keys()))
+        
+        current_constructors = get_current_constructors()
+        teams = [t for t in teams if t in current_constructors]
+        
+        result = []
+        n_teams = len(teams)
+        for idx, team in enumerate(teams):
+            delay = 0.5 + idx * 0.15
+            offset = "-0.5vh" if idx % 2 == 0 else "0.5vh"
+            result.append({
+                "team": team,
+                "index": idx,
+                "delay": f"{delay:.2f}s, calc({delay:.2f}s + 1.5s)",
+                "offset": offset,
+                "icon": f"{R2_CUSTOM_DOMAIN}/Power Rankings/Car Icons/Icon_{team.replace(' ', '')}.png"
+            })
+        return result
+
+    def _get_svg_raw_data(self) -> dict:
+        from the_alternative_f1.seasons.power_rankings import load_power_rankings
+        from the_alternative_f1.seasons import seasons
+        
+        pr = load_power_rankings(self.selected_season)
+        races = pr.get("races", [])
+        rankings = pr.get("rankings", {})
+        
+        season_dict = None
+        for s in seasons:
+            if s["season_number"] == self.selected_season:
+                season_dict = s
+                break
+        
+        if not season_dict or not races:
+            return {"races": [], "paths": [], "y_labels": [], "view_box": "0 0 1000 500"}
+            
+        current_constructors = get_current_constructors()
+        team_colors = season_dict.get("team_colors", {})
+        latest_season_dict = seasons[-1]
+        latest_team_colors = latest_season_dict.get("team_colors", {})
+        teams = [t for t in latest_team_colors.keys() if t in current_constructors]
+        
+        M = len(races)
+        N = len(teams)
+        
+        view_w, view_h = 1000, 500
+        margin_l, margin_r = 100, 100
+        margin_t, margin_b = 40, 50
+        chart_w = view_w - margin_l - margin_r
+        chart_h = view_h - margin_t - margin_b
+        
+        dx = chart_w / (M - 1) if M > 1 else chart_w
+        dy = chart_h / (N - 1) if N > 1 else chart_h
+        
+        x_coords = [margin_l + i * dx for i in range(M)]
+        
+        paths = []
+        for team in teams:
+            points = []
+            for i, race_name in enumerate(races):
+                race_rankings = rankings.get(race_name, [])
+                filtered_rankings = [t for t in race_rankings if t in current_constructors]
+                if team in filtered_rankings:
+                    rank_idx = filtered_rankings.index(team)
+                    y = margin_t + rank_idx * dy
+                    points.append((x_coords[i], y))
+            
+            if points:
+                path_str = f"M {points[0][0]:.1f} {points[0][1]:.1f} " + " ".join([f"L {p[0]:.1f} {p[1]:.1f}" for p in points[1:]])
+                leading_x, leading_y = points[-1]
+                
+                paths.append({
+                    "team": team,
+                    "color": team_colors.get(team) or latest_team_colors.get(team, "#555555"),
+                    "path_string": path_str,
+                    "leading_x": leading_x,
+                    "leading_y": leading_y,
+                    "icon": f"{R2_CUSTOM_DOMAIN}/Power Rankings/Car Icons/Icon_{team.replace(' ', '')}.png"
+                })
+                
+        x_labels = [{"name": race_name, "x": x_coords[i]} for i, race_name in enumerate(races)]
+        y_labels = [{"rank": r + 1, "y": margin_t + r * dy} for r in range(N)]
+        
+        return {
+            "races": x_labels,
+            "paths": paths,
+            "y_labels": y_labels,
+            "view_box": f"0 0 {view_w} {view_h}"
+        }
+
+    @rx.var(auto_deps=False, deps=["selected_season"])
+    def power_rankings_races(self) -> list[dict]:
+        return self._get_svg_raw_data()["races"]
+
+    @rx.var(auto_deps=False, deps=["selected_season"])
+    def power_rankings_paths(self) -> list[dict]:
+        return self._get_svg_raw_data()["paths"]
+
+    @rx.var(auto_deps=False, deps=["selected_season"])
+    def power_rankings_y_labels(self) -> list[dict]:
+        return self._get_svg_raw_data()["y_labels"]
+
+    @rx.var(auto_deps=False, deps=["selected_season"])
+    def power_rankings_view_box(self) -> str:
+        return self._get_svg_raw_data()["view_box"]
+
+    @rx.var(auto_deps=False, deps=["selected_season"])
+    def power_rankings_list_data(self) -> list[dict]:
+        from the_alternative_f1.seasons.power_rankings import load_power_rankings
+        
+        pr = load_power_rankings(self.selected_season)
+        races = pr.get("races", [])
+        rankings = pr.get("rankings", {})
+        
+        if not races:
+            return []
+            
+        current_constructors = get_current_constructors()
+        latest_race = races[-1]
+        latest_ranking = rankings.get(latest_race, [])
+        latest_ranking = [t for t in latest_ranking if t in current_constructors]
+        
+        prev_ranking = []
+        if len(races) > 1:
+            prev_race = races[-2]
+            prev_ranking = rankings.get(prev_race, [])
+            prev_ranking = [t for t in prev_ranking if t in current_constructors]
+            
+        result = []
+        for idx, team in enumerate(latest_ranking):
+            rank = idx + 1
+            change_str = "▬"
+            change_color = "#888888"
+            
+            if prev_ranking and team in prev_ranking:
+                prev_idx = prev_ranking.index(team)
+                prev_rank = prev_idx + 1
+                change = prev_rank - rank
+                if change > 0:
+                    change_str = f"▲ +{change}"
+                    change_color = "#30d158"
+                elif change < 0:
+                    change_str = f"▼ {change}"
+                    change_color = "#ff453a"
+                    
+            result.append({
+                "rank": rank,
+                "team": team,
+                "change": change_str,
+                "change_color": change_color,
+                "icon": f"{R2_CUSTOM_DOMAIN}/Power Rankings/Car Icons/Icon_{team.replace(' ', '')}.png"
+            })
+        return result
+
+    @rx.event(background=True)
+    async def on_app_mount(self):
+        yield State.start_ticker_loop
+        while True:
+            async with self:
+                self.show_power_rankings_header = True
+                self.power_rankings_header_phase = "animating_in"
+            
+            await asyncio.sleep(8.05)
+            
+            async with self:
+                self.power_rankings_header_phase = "animating_out"
+                
+            await asyncio.sleep(0.5)
+            
+            async with self:
+                self.show_power_rankings_header = False
+                
+            await asyncio.sleep(90.0)
+
+    def go_to_power_rankings(self):
+        self.active_nav = "power_rankings"
+        self.selected_article_title = ""
+        self.show_power_rankings_header = False
+
     def initialize_ticker(self):
         if self.ticker_initialized:
             return
@@ -739,7 +942,66 @@ def header_ticker() -> rx.Component:
         ),
         spacing="0",
         align_items="end",
-        on_mount=State.start_ticker_loop,
+    )
+
+
+def power_rankings_starting_grid() -> rx.Component:
+    """The animated starting grid showing constructor cars in power ranking order."""
+    def render_grid_spot(item: dict) -> rx.Component:
+        return rx.box(
+            # Grid Box image
+            rx.image(
+                src=f"{R2_CUSTOM_DOMAIN}/Power Rankings/Car Icons/Icon_GridBox.png",
+                width=["6.4vh", "8.8vh", "11.2vh"],
+                height=["4vh", "5.5vh", "7vh"],
+                object_fit="contain",
+                opacity=0.6,
+                display="block",
+            ),
+            # Car icon overlay
+            rx.image(
+                src=item["icon"],
+                width=["5.6vh", "8.0vh", "10.15vh"],
+                height=["3.2vh", "4.6vh", "5.8vh"],
+                object_fit="contain",
+                position="absolute",
+                top=["0.4vh", "0.45vh", "0.6vh"],
+                left=["0.4vh", "0.6vh", "0.8vh"],
+                class_name="car-drive-in",
+                style={"animationDelay": item["delay"]},
+            ),
+            position="relative",
+            height=["4vh", "5.5vh", "7vh"],
+            margin_top=item["offset"],
+            margin_x=["0px", "1px", "2px"],
+        )
+
+    return rx.hstack(
+        # Finish line
+        rx.image(
+            src=f"{R2_CUSTOM_DOMAIN}/Power Rankings/Car Icons/Icon_FinishLine.png",
+            height=["5vh", "6.5vh", "8vh"],
+            width="auto",
+            object_fit="contain",
+            margin_right=["2px", "4px", "6px"],
+        ),
+        # Constructor cars
+        rx.foreach(
+            State.latest_power_rankings_header,
+            render_grid_spot
+        ),
+
+        class_name=rx.cond(
+            State.power_rankings_header_phase == "animating_out",
+            "header-animate-out",
+            ""
+        ),
+        spacing={"initial": "1", "sm": "2", "md": "3"},
+        align_items="center",
+        justify="end",
+        height="100%",
+        padding_right="5%",
+        style={"overflow": "visible"},
     )
 
 
@@ -755,11 +1017,15 @@ def header() -> rx.Component:
             on_click=State.go_home,
         ),
         rx.spacer(),
-        # Right-aligned Ticker
+        # Right-aligned content: animated starting grid on load, otherwise ticker
         rx.cond(
-            State.ticker_items,
-            header_ticker(),
-            rx.fragment(),
+            State.show_power_rankings_header,
+            power_rankings_starting_grid(),
+            rx.cond(
+                State.ticker_items,
+                header_ticker(),
+                rx.fragment(),
+            ),
         ),
         width="100%",
         height="8vh",
@@ -1920,7 +2186,7 @@ def footer() -> rx.Component:
                         height="22px",
                         object_fit="contain",
                     ),
-                    bg=rx.cond(State.active_nav == "login", "#00b4da", "transparent"),
+                    bg=rx.cond(State.active_nav == "power_rankings", "#00b4da", "transparent"),
                     border="1px solid #00b4da",
                     color="white",
                     border_radius="sm",
@@ -1928,7 +2194,7 @@ def footer() -> rx.Component:
                     height="36px",
                     min_width="36px",
                     max_width="36px",
-                    on_click=lambda: State.set_nav("login"),
+                    on_click=lambda: State.set_nav("power_rankings"),
                     _hover={"bg": "#00b4da", "transform": "scale(1.05)"},
                     cursor="pointer",
                     padding="0",
@@ -1958,6 +2224,266 @@ def footer() -> rx.Component:
     )
 
 
+def power_rankings_table() -> rx.Component:
+    """A table showing the current power rankings with change indicators."""
+    def render_row(item: dict) -> rx.Component:
+        return rx.table.row(
+            # Rank
+            rx.table.cell(
+                rx.text(
+                    item["rank"],
+                    font_weight="bold",
+                    color="white",
+                ),
+                align="center",
+            ),
+            # Icon & Team Name
+            rx.table.cell(
+                rx.hstack(
+                    rx.image(
+                        src=item["icon"],
+                        width="24px",
+                        height="16px",
+                        object_fit="contain",
+                    ),
+                    rx.text(
+                        item["team"],
+                        font_weight="600",
+                        color="white",
+                        font_family="Outfit",
+                    ),
+                    align_items="center",
+                    spacing="2",
+                ),
+            ),
+            # Change Indicator
+            rx.table.cell(
+                rx.text(
+                    item["change"],
+                    color=item["change_color"],
+                    font_weight="bold",
+                    font_size="sm",
+                ),
+                align="center",
+            ),
+        )
+
+    return rx.vstack(
+        rx.text(
+            "Current Standings & Form",
+            color="white",
+            font_size="lg",
+            font_weight="bold",
+            margin_bottom="2",
+        ),
+        rx.table.root(
+            rx.table.header(
+                rx.table.row(
+                    rx.table.column_header_cell("Rank", align="center", color="#888888"),
+                    rx.table.column_header_cell("Constructor", color="#888888"),
+                    rx.table.column_header_cell("Change", align="center", color="#888888"),
+                ),
+            ),
+            rx.table.body(
+                rx.foreach(
+                    State.power_rankings_list_data,
+                    render_row
+                ),
+            ),
+            width="100%",
+            variant="ghost",
+        ),
+        width="100%",
+    )
+
+
+def power_rankings_trajectory_graph() -> rx.Component:
+    """The interactive SVG bump chart showing power ranking trajectories."""
+    return rx.vstack(
+        rx.text(
+            "Ranking Trajectory",
+            color="white",
+            font_size="lg",
+            font_weight="bold",
+            margin_bottom="2",
+        ),
+        rx.el.svg(
+            # Grid background lines
+            rx.foreach(
+                State.power_rankings_races,
+                lambda race: rx.el.line(
+                    x1=race["x"],
+                    y1=40,
+                    x2=race["x"],
+                    y2=450,
+                    stroke="rgba(255, 255, 255, 0.08)",
+                    stroke_width="1",
+                )
+            ),
+            rx.foreach(
+                State.power_rankings_y_labels,
+                lambda label: rx.el.line(
+                    x1=100,
+                    y1=label["y"],
+                    x2=900,
+                    y2=label["y"],
+                    stroke="rgba(255, 255, 255, 0.08)",
+                    stroke_width="1",
+                )
+            ),
+            # Y-axis Labels
+            rx.foreach(
+                State.power_rankings_y_labels,
+                lambda label: rx.el.text(
+                    label["rank"],
+                    x=60,
+                    y=label["y"],
+                    dy="4",
+                    fill="#888888",
+                    font_size="12",
+                    font_family="Outfit",
+                    font_weight="bold",
+                    text_anchor="middle",
+                )
+            ),
+            # X-axis Labels
+            rx.foreach(
+                State.power_rankings_races,
+                lambda race: rx.el.text(
+                    race["name"],
+                    x=race["x"],
+                    y=480,
+                    fill="#CCCCCC",
+                    font_size="10",
+                    font_family="Outfit",
+                    text_anchor="middle",
+                )
+            ),
+            # Trajectory Paths
+            rx.foreach(
+                State.power_rankings_paths,
+                lambda path: rx.el.g(
+                    rx.el.path(
+                        d=path["path_string"],
+                        stroke=path["color"],
+                        stroke_width="4",
+                        fill="none",
+                        opacity=0.8,
+                    ),
+                    rx.el.image(
+                        href=path["icon"],
+                        x=path["leading_x"],
+                        y=path["leading_y"],
+                        width="30",
+                        height="30",
+                        transform="translate(-15px, -15px)",
+                    ),
+                )
+            ),
+            view_box=State.power_rankings_view_box,
+            width="100%",
+            height="auto",
+        ),
+        width="100%",
+    )
+
+
+def power_rankings_view() -> rx.Component:
+    """The Power Rankings page."""
+    from the_alternative_f1.seasons import seasons
+
+    # Season picker buttons (shown when expanded)
+    season_picker_buttons = rx.cond(
+        State.season_picker_open,
+        rx.vstack(
+            *[_season_picker_button(s) for s in seasons],
+            spacing="1",
+        ),
+        rx.fragment(),
+    )
+
+    # Sidebar for Season Selector
+    sidebar = rx.vstack(
+        # Season picker toggle
+        rx.button(
+            rx.cond(
+                State.season_picker_open,
+                "▼",
+                "▶",
+            ),
+            bg=rx.cond(State.season_picker_open, "#00b4da", "#18181C"),
+            color="white",
+            font_size="10px",
+            font_weight="bold",
+            width="26px",
+            height="34px",
+            min_height="34px",
+            border_radius="0px 8px 8px 0px",
+            border="1px solid #2D2D32",
+            border_left="none",
+            on_click=State.toggle_season_picker,
+            _hover={"bg": "#00b4da", "transform": "scaleX(1.05)"},
+            cursor="pointer",
+            padding="0",
+        ),
+        season_picker_buttons,
+        spacing="1",
+        align_items="start",
+        padding_top="4",
+        position="fixed",
+        left="0",
+        top="12vh",
+        z_index="99",
+    )
+
+    # Main content layout
+    content = rx.vstack(
+        # Title
+        rx.heading(
+            f"Power Rankings: Season {State.selected_season}",
+            size="6",
+            color="white",
+            font_family="Outfit",
+            margin_bottom="4",
+        ),
+        # Trajectory Graph Container
+        rx.box(
+            power_rankings_trajectory_graph(),
+            width="100%",
+            bg="#18181C",
+            border="1px solid #2C2C32",
+            padding="4",
+            border_radius="xl",
+            margin_bottom="6",
+        ),
+        # Rankings Table Container
+        rx.box(
+            power_rankings_table(),
+            width="100%",
+            bg="#18181C",
+            border="1px solid #2C2C32",
+            padding="4",
+            border_radius="xl",
+        ),
+        width="100%",
+        spacing="4",
+    )
+
+    return rx.hstack(
+        sidebar,
+        rx.box(
+            content,
+            width="100%",
+            padding_left=["31px", "44px", "56px"],
+            padding_right=["31px", "44px", "56px"],
+        ),
+        width="100%",
+        max_width="1200px",
+        align_items="start",
+        spacing="0",
+    )
+
+
 def index() -> rx.Component:
     """The main view structure."""
     return rx.box(
@@ -1984,9 +2510,13 @@ def index() -> rx.Component:
                                             State.active_nav == "seasons",
                                             seasons_view(),
                                             rx.cond(
-                                                State.active_nav == "login",
-                                                login_view(),
-                                                rx.text("Not found", color="white"),
+                                                State.active_nav == "power_rankings",
+                                                power_rankings_view(),
+                                                rx.cond(
+                                                    State.active_nav == "login",
+                                                    login_view(),
+                                                    rx.text("Not found", color="white"),
+                                                )
                                             )
                                         )
                                     )
@@ -2018,6 +2548,7 @@ def index() -> rx.Component:
         width="100%",
         height="100vh",
         overflow="hidden",
+        on_mount=State.on_app_mount,
     )
 
 

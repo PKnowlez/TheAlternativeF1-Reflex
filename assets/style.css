@@ -104,4 +104,84 @@
   animation: tickerDataFade 3s ease-in-out forwards;
 }
 
+/* Power Rankings Animations */
+@keyframes drive-in-burnout {
+    0% {
+        transform: translateX(120vw) rotate(0deg);
+        opacity: 0;
+    }
+    70% {
+        transform: translateX(15px) rotate(0deg);
+        opacity: 1;
+    }
+    75% {
+        transform: translateX(5px) rotate(-12deg);
+    }
+    80% {
+        transform: translateX(2px) rotate(12deg);
+    }
+    85% {
+        transform: translateX(1px) rotate(-8deg);
+    }
+    90% {
+        transform: translateX(0.5px) rotate(8deg);
+    }
+    95% {
+        transform: translateX(0) rotate(-3deg);
+    }
+    100% {
+        transform: translateX(0) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+@keyframes engine-rumble {
+    0% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-1px);
+    }
+    100% {
+        transform: translateY(1px);
+    }
+}
+
+.car-drive-in {
+    animation-name: drive-in-burnout, engine-rumble;
+    animation-duration: 1.5s, 0.15s;
+    animation-timing-function: cubic-bezier(0.1, 0.8, 0.2, 1), linear;
+    animation-iteration-count: 1, infinite;
+    animation-fill-mode: both, none;
+}
+
+@keyframes fade-out-header {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-8vh);
+    }
+}
+
+.header-animate-out {
+    animation: fade-out-header 0.5s ease-in-out forwards;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.ticker-fade-in {
+    animation: fade-in 0.5s ease-in-out forwards;
+}
+
+
 
