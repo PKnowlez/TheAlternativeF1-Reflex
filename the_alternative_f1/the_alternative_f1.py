@@ -733,7 +733,7 @@ def header_ticker() -> rx.Component:
             color="white",
             font_weight="600",
             margin="0",
-            white_space=["pre-line", "nowrap", "nowrap"],
+            white_space="nowrap",
             key=State.ticker_index,
             class_name="ticker-data-fade",
         ),
