@@ -6,101 +6,47 @@ from rxconfig import config
 import asyncio
 import json
 import os
-import sqlalchemy
-import sqlmodel
-from sqlmodel import Field, Relationship, select
+from supabase import create_client, Client as SupabaseClient
 from the_alternative_f1.oauth_discord import oauth_discord
+from pydantic import BaseModel
 
-class CommentReply(rx.Model, table=True):
-    comment_id: int = Field(foreign_key="comment.id")
-    username: str
-    avatar: str
-    text: str
+class CommentReplyData(BaseModel):
+    id: int = 0
+    comment_id: int = 0
+    username: str = ""
+    avatar: str = ""
+    text: str = ""
     likes: int = 0
     dislikes: int = 0
-    liked_by: list[str] = Field(
-        default=[],
-        sa_column=sqlalchemy.Column(sqlalchemy.JSON)
-    )
-    disliked_by: list[str] = Field(
-        default=[],
-        sa_column=sqlalchemy.Column(sqlalchemy.JSON)
-    )
-    comment: "Comment" = Relationship(back_populates="replies")
+    liked_by: list[str] = []
+    disliked_by: list[str] = []
 
-class Comment(rx.Model, table=True):
-    article_title: str
-    username: str
-    avatar: str
-    text: str
+class CommentData(BaseModel):
+    id: int = 0
+    article_title: str = ""
+    username: str = ""
+    avatar: str = ""
+    text: str = ""
     likes: int = 0
     dislikes: int = 0
-    liked_by: list[str] = Field(
-        default=[],
-        sa_column=sqlalchemy.Column(sqlalchemy.JSON)
-    )
-    disliked_by: list[str] = Field(
-        default=[],
-        sa_column=sqlalchemy.Column(sqlalchemy.JSON)
-    )
-    replies: list[CommentReply] = Relationship(
-        back_populates="comment",
-        sa_relationship_kwargs={"lazy": "selectin"}
-    )
+    liked_by: list[str] = []
+    disliked_by: list[str] = []
+    replies: list[CommentReplyData] = []
 
-COMMENTS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "comments.json")
-DB_INITIALIZED = False
+_supabase_client: SupabaseClient | None = None
 
-def init_db_from_json():
-    # Automatically create tables if they do not exist
-    try:
-        rx.Model.metadata.create_all(rx.db.engine)
-    except Exception as e:
-        print(f"Error creating database tables: {e}")
-
-    # If comments.json exists and the database is empty, migrate comments to SQL
-    with rx.session() as session:
-        try:
-            count = len(session.exec(select(Comment)).all())
-        except Exception:
-            count = 0
-        if count == 0 and os.path.exists(COMMENTS_FILE):
-            try:
-                with open(COMMENTS_FILE, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                
-                # Import comments
-                for item in data:
-                    comment_obj = Comment(
-                        article_title=item["article_title"],
-                        username=item["username"],
-                        avatar=item["avatar"],
-                        text=item["text"],
-                        likes=item.get("likes", 0),
-                        dislikes=item.get("dislikes", 0),
-                        liked_by=item.get("liked_by", []),
-                        disliked_by=item.get("disliked_by", [])
-                    )
-                    session.add(comment_obj)
-                    session.commit()
-                    
-                    # Import replies for this comment
-                    for r in item.get("replies", []):
-                        reply_obj = CommentReply(
-                            comment_id=comment_obj.id,
-                            username=r["username"],
-                            avatar=r["avatar"],
-                            text=r["text"],
-                            likes=r.get("likes", 0),
-                            dislikes=r.get("dislikes", 0),
-                            liked_by=r.get("liked_by", []),
-                            disliked_by=r.get("disliked_by", [])
-                        )
-                        session.add(reply_obj)
-                    session.commit()
-                print("Successfully migrated comments.json to the database.")
-            except Exception as e:
-                print(f"Error migrating comments.json to database: {e}")
+def get_supabase_client() -> SupabaseClient:
+    global _supabase_client
+    if _supabase_client is None:
+        url = os.getenv("SUPABASE_URL", "").strip()
+        key = os.getenv("SUPABASE_KEY", "").strip()
+        if not url or not key:
+            from the_alternative_f1.oauth_discord import load_env
+            load_env()
+            url = os.getenv("SUPABASE_URL", "").strip()
+            key = os.getenv("SUPABASE_KEY", "").strip()
+        _supabase_client = create_client(url, key)
+    return _supabase_client
 R2_CUSTOM_DOMAIN = os.getenv("R2_CUSTOM_DOMAIN", "https://pknowlez.com").rstrip("/")
 
 def get_current_constructors() -> set:
@@ -261,11 +207,13 @@ class State(rx.State):
     discord_avatar: str = rx.LocalStorage("", name="discord_avatar", sync=True)
 
     # ── Comments State ───────────────────────────────────────────────────
-    comments_list: list[Comment] = []
+    comments_list: list[CommentData] = []
     new_comment_text: str = ""
     active_reply_comment_id: int = -1
     new_reply_text: str = ""
     expanded_comment_ids: list[int] = []
+    show_comments_panel: bool = False
+    show_write_comment: bool = False
 
     # ── Articles Expand State ────────────────────────────────────────────
     home_articles_expanded: bool = False
@@ -314,20 +262,83 @@ class State(rx.State):
         self.active_nav = "home"
 
     def load_comments(self):
-        global DB_INITIALIZED
-        if not DB_INITIALIZED:
-            init_db_from_json()
-            DB_INITIALIZED = True
-        
         try:
-            with rx.session() as session:
-                self.comments_list = session.exec(
-                    select(Comment).where(Comment.article_title == self.selected_article_title)
-                ).all()
-        except Exception as e:
-            print(f"Error loading comments: {e}")
-            self.comments_list = []
+            supabase = get_supabase_client()
+            comments_res = supabase.table("comments")\
+                .select("*")\
+                .eq("article_title", self.selected_article_title)\
+                .order("created_at", desc=False)\
+                .execute()
+            
+            comments_data = comments_res.data or []
+            
+            if not comments_data:
+                self.comments_list = []
+                return
 
+            comment_ids = [c["id"] for c in comments_data]
+            replies_res = supabase.table("comment_replies")\
+                .select("*")\
+                .in_("comment_id", comment_ids)\
+                .order("created_at", desc=False)\
+                .execute()
+            
+            replies_data = replies_res.data or []
+            
+            replies_by_comment = {}
+            for r in replies_data:
+                c_id = r["comment_id"]
+                if c_id not in replies_by_comment:
+                    replies_by_comment[c_id] = []
+                
+                liked_by = r.get("liked_by")
+                if not isinstance(liked_by, list):
+                    liked_by = []
+                disliked_by = r.get("disliked_by")
+                if not isinstance(disliked_by, list):
+                    disliked_by = []
+
+                replies_by_comment[c_id].append(CommentReplyData(
+                    id=int(r["id"]),
+                    comment_id=int(r["comment_id"]),
+                    username=r.get("username", ""),
+                    avatar=r.get("avatar", ""),
+                    text=r.get("text", ""),
+                    likes=int(r.get("likes", 0)),
+                    dislikes=int(r.get("dislikes", 0)),
+                    liked_by=liked_by,
+                    disliked_by=disliked_by
+                ))
+
+            comments_list = []
+            for c in comments_data:
+                c_id = c["id"]
+                c_replies = replies_by_comment.get(c_id, [])
+                
+                liked_by = c.get("liked_by")
+                if not isinstance(liked_by, list):
+                    liked_by = []
+                disliked_by = c.get("disliked_by")
+                if not isinstance(disliked_by, list):
+                    disliked_by = []
+
+                comments_list.append(CommentData(
+                    id=int(c_id),
+                    article_title=c.get("article_title", ""),
+                    username=c.get("username", ""),
+                    avatar=c.get("avatar", ""),
+                    text=c.get("text", ""),
+                    likes=int(c.get("likes", 0)),
+                    dislikes=int(c.get("dislikes", 0)),
+                    liked_by=liked_by,
+                    disliked_by=disliked_by,
+                    replies=c_replies
+                ))
+                
+            self.comments_list = comments_list
+        except Exception as e:
+            print(f"Error loading comments from Supabase: {e}")
+            self.comments_list = []
 
     def add_comment(self):
         if not self.discord_username:
@@ -337,21 +348,19 @@ class State(rx.State):
             return
         
         try:
-            with rx.session() as session:
-                new_comment = Comment(
-                    article_title=self.selected_article_title,
-                    username=self.discord_username,
-                    avatar=self.discord_avatar,
-                    text=text,
-                    likes=0,
-                    dislikes=0,
-                    liked_by=[],
-                    disliked_by=[],
-                )
-                session.add(new_comment)
-                session.commit()
+            supabase = get_supabase_client()
+            supabase.table("comments").insert({
+                "article_title": self.selected_article_title,
+                "username": self.discord_username,
+                "avatar": self.discord_avatar,
+                "text": text,
+                "likes": 0,
+                "dislikes": 0,
+                "liked_by": [],
+                "disliked_by": []
+            }).execute()
         except Exception as e:
-            print(f"Error adding comment: {e}")
+            print(f"Error adding comment to Supabase: {e}")
             
         self.new_comment_text = ""
         self.load_comments()
@@ -364,24 +373,22 @@ class State(rx.State):
             return
         
         try:
-            with rx.session() as session:
-                new_reply = CommentReply(
-                    comment_id=comment_id,
-                    username=self.discord_username,
-                    avatar=self.discord_avatar,
-                    text=text,
-                    likes=0,
-                    dislikes=0,
-                    liked_by=[],
-                    disliked_by=[],
-                )
-                session.add(new_reply)
-                session.commit()
-                
-                if comment_id not in self.expanded_comment_ids:
-                    self.expanded_comment_ids.append(comment_id)
+            supabase = get_supabase_client()
+            supabase.table("comment_replies").insert({
+                "comment_id": comment_id,
+                "username": self.discord_username,
+                "avatar": self.discord_avatar,
+                "text": text,
+                "likes": 0,
+                "dislikes": 0,
+                "liked_by": [],
+                "disliked_by": []
+            }).execute()
+            
+            if comment_id not in self.expanded_comment_ids:
+                self.expanded_comment_ids.append(comment_id)
         except Exception as e:
-            print(f"Error adding reply: {e}")
+            print(f"Error adding reply to Supabase: {e}")
                 
         self.new_reply_text = ""
         self.active_reply_comment_id = -1
@@ -393,43 +400,49 @@ class State(rx.State):
         user = self.discord_username
         
         try:
-            with rx.session() as session:
-                if reply_id is None:
-                    c = session.exec(select(Comment).where(Comment.id == comment_id)).first()
-                    if c:
-                        liked = list(c.liked_by)
-                        disliked = list(c.disliked_by)
-                        if user in liked:
-                            liked.remove(user)
-                        else:
-                            if user in disliked:
-                                disliked.remove(user)
-                            liked.append(user)
-                        c.liked_by = liked
-                        c.disliked_by = disliked
-                        c.likes = len(liked)
-                        c.dislikes = len(disliked)
-                        session.add(c)
-                        session.commit()
-                else:
-                    r = session.exec(select(CommentReply).where(CommentReply.id == reply_id)).first()
-                    if r:
-                        liked = list(r.liked_by)
-                        disliked = list(r.disliked_by)
-                        if user in liked:
-                            liked.remove(user)
-                        else:
-                            if user in disliked:
-                                disliked.remove(user)
-                            liked.append(user)
-                        r.liked_by = liked
-                        r.disliked_by = disliked
-                        r.likes = len(liked)
-                        r.dislikes = len(disliked)
-                        session.add(r)
-                        session.commit()
+            supabase = get_supabase_client()
+            if reply_id is None:
+                res = supabase.table("comments").select("*").eq("id", comment_id).execute()
+                if res.data:
+                    c = res.data[0]
+                    liked_by = c.get("liked_by") or []
+                    disliked_by = c.get("disliked_by") or []
+                    
+                    if user in liked_by:
+                        liked_by.remove(user)
+                    else:
+                        if user in disliked_by:
+                            disliked_by.remove(user)
+                        liked_by.append(user)
+                    
+                    supabase.table("comments").update({
+                        "liked_by": liked_by,
+                        "disliked_by": disliked_by,
+                        "likes": len(liked_by),
+                        "dislikes": len(disliked_by)
+                    }).eq("id", comment_id).execute()
+            else:
+                res = supabase.table("comment_replies").select("*").eq("id", reply_id).execute()
+                if res.data:
+                    r = res.data[0]
+                    liked_by = r.get("liked_by") or []
+                    disliked_by = r.get("disliked_by") or []
+                    
+                    if user in liked_by:
+                        liked_by.remove(user)
+                    else:
+                        if user in disliked_by:
+                            disliked_by.remove(user)
+                        liked_by.append(user)
+                    
+                    supabase.table("comment_replies").update({
+                        "liked_by": liked_by,
+                        "disliked_by": disliked_by,
+                        "likes": len(liked_by),
+                        "dislikes": len(disliked_by)
+                    }).eq("id", reply_id).execute()
         except Exception as e:
-            print(f"Error liking comment/reply: {e}")
+            print(f"Error liking comment/reply in Supabase: {e}")
                     
         self.load_comments()
 
@@ -439,43 +452,49 @@ class State(rx.State):
         user = self.discord_username
         
         try:
-            with rx.session() as session:
-                if reply_id is None:
-                    c = session.exec(select(Comment).where(Comment.id == comment_id)).first()
-                    if c:
-                        liked = list(c.liked_by)
-                        disliked = list(c.disliked_by)
-                        if user in disliked:
-                            disliked.remove(user)
-                        else:
-                            if user in liked:
-                                liked.remove(user)
-                            disliked.append(user)
-                        c.liked_by = liked
-                        c.disliked_by = disliked
-                        c.likes = len(liked)
-                        c.dislikes = len(disliked)
-                        session.add(c)
-                        session.commit()
-                else:
-                    r = session.exec(select(CommentReply).where(CommentReply.id == reply_id)).first()
-                    if r:
-                        liked = list(r.liked_by)
-                        disliked = list(r.disliked_by)
-                        if user in disliked:
-                            disliked.remove(user)
-                        else:
-                            if user in liked:
-                                liked.remove(user)
-                            disliked.append(user)
-                        r.liked_by = liked
-                        r.disliked_by = disliked
-                        r.likes = len(liked)
-                        r.dislikes = len(disliked)
-                        session.add(r)
-                        session.commit()
+            supabase = get_supabase_client()
+            if reply_id is None:
+                res = supabase.table("comments").select("*").eq("id", comment_id).execute()
+                if res.data:
+                    c = res.data[0]
+                    liked_by = c.get("liked_by") or []
+                    disliked_by = c.get("disliked_by") or []
+                    
+                    if user in disliked_by:
+                        disliked_by.remove(user)
+                    else:
+                        if user in liked_by:
+                            liked_by.remove(user)
+                        disliked_by.append(user)
+                    
+                    supabase.table("comments").update({
+                        "liked_by": liked_by,
+                        "disliked_by": disliked_by,
+                        "likes": len(liked_by),
+                        "dislikes": len(disliked_by)
+                    }).eq("id", comment_id).execute()
+            else:
+                res = supabase.table("comment_replies").select("*").eq("id", reply_id).execute()
+                if res.data:
+                    r = res.data[0]
+                    liked_by = r.get("liked_by") or []
+                    disliked_by = r.get("disliked_by") or []
+                    
+                    if user in disliked_by:
+                        disliked_by.remove(user)
+                    else:
+                        if user in liked_by:
+                            liked_by.remove(user)
+                        disliked_by.append(user)
+                    
+                    supabase.table("comment_replies").update({
+                        "liked_by": liked_by,
+                        "disliked_by": disliked_by,
+                        "likes": len(liked_by),
+                        "dislikes": len(disliked_by)
+                    }).eq("id", reply_id).execute()
         except Exception as e:
-            print(f"Error disliking comment/reply: {e}")
+            print(f"Error disliking comment/reply in Supabase: {e}")
                     
         self.load_comments()
 
@@ -495,11 +514,20 @@ class State(rx.State):
 
     def select_article(self, title: str):
         self.selected_article_title = title
-        self.load_comments()
+        self.show_comments_panel = False
+
+    def toggle_comments_panel(self):
+        self.show_comments_panel = not self.show_comments_panel
+        if self.show_comments_panel:
+            self.load_comments()
+
+    def toggle_write_comment(self):
+        self.show_write_comment = not self.show_write_comment
 
     def set_nav(self, nav_name: str):
         self.active_nav = nav_name
         self.selected_article_title = ""
+        self.show_comments_panel = False
         self.home_articles_expanded = False
         self.season_articles_expanded = False
         if nav_name == "regulations":
@@ -539,6 +567,7 @@ class State(rx.State):
     def go_home(self):
         self.active_nav = "home"
         self.selected_article_title = ""
+        self.show_comments_panel = False
         self.home_articles_expanded = False
         self.season_articles_expanded = False
 
@@ -599,7 +628,7 @@ class State(rx.State):
         n_teams = len(teams)
         for idx, team in enumerate(teams):
             delay = 0.5 + idx * 0.15
-            offset = "-0.3vh" if idx % 2 == 0 else "0.3vh"
+            offset = "-0.2vh" if idx % 2 == 0 else "0.2vh"
             result.append({
                 "team": team,
                 "index": idx,
@@ -952,8 +981,8 @@ def power_rankings_starting_grid() -> rx.Component:
             # Grid Box image
             rx.image(
                 src=f"{R2_CUSTOM_DOMAIN}/Power Rankings/Car Icons/Icon_GridBox.png",
-                width=["4.8vh", "6.56vh", "8.32vh"],
-                height=["3vh", "4.1vh", "5.2vh"],
+                width=["3.2vh", "4.48vh", "5.76vh"],
+                height=["2vh", "2.8vh", "3.6vh"],
                 object_fit="contain",
                 opacity=0.6,
                 display="block",
@@ -961,17 +990,17 @@ def power_rankings_starting_grid() -> rx.Component:
             # Car icon overlay
             rx.image(
                 src=item["icon"],
-                width=["4.2vh", "5.74vh", "7.28vh"],
-                height=["2.4vh", "3.28vh", "4.16vh"],
+                width=["2.8vh", "3.92vh", "5.04vh"],
+                height=["1.6vh", "2.24vh", "2.88vh"],
                 object_fit="contain",
                 position="absolute",
-                top=["0.3vh", "0.41vh", "0.52vh"],
-                left=["0.3vh", "0.41vh", "0.52vh"],
+                top=["0.2vh", "0.28vh", "0.36vh"],
+                left=["0.2vh", "0.28vh", "0.36vh"],
                 class_name="car-drive-in",
                 style={"animationDelay": item["delay"]},
             ),
             position="relative",
-            height=["3vh", "4.1vh", "5.2vh"],
+            height=["2vh", "2.8vh", "3.6vh"],
             margin_top=item["offset"],
             margin_x=["0px", "1px", "2px"],
         )
@@ -1180,10 +1209,10 @@ def articles_list() -> rx.Component:
         align="center",
         padding_bottom="160px",
     )
-def comment_card(comment: Comment) -> rx.Component:
+def comment_card(comment: CommentData) -> rx.Component:
     """An individual comment card containing its text, actions, and replies."""
     
-    def render_reply_item(reply: CommentReply) -> rx.Component:
+    def render_reply_item(reply: CommentReplyData) -> rx.Component:
         return rx.hstack(
             rx.avatar(
                 src=reply.avatar,
@@ -1413,91 +1442,191 @@ def comment_card(comment: Comment) -> rx.Component:
     )
 
 
-def comments_section() -> rx.Component:
-    """The comments section container below the article."""
-    return rx.vstack(
-        rx.divider(border_color="#2C2C32", margin_y="6"),
-        rx.heading("Discussion", size="5", color="white", font_weight="800", margin_bottom="4"),
-        
-        # New comment input
-        rx.cond(
-            State.discord_username == "",
-            # Prompt to login
-            rx.hstack(
-                rx.text("You must be logged in to comment.", color="#AAAAAA", font_size="sm"),
-                rx.button(
-                    "Login with Discord",
-                    bg="#5865F2",
-                    color="white",
-                    size="2",
-                    on_click=State.login_with_discord,
-                    cursor="pointer",
-                ),
-                bg="#18181C",
-                border="1px solid #2C2C32",
-                padding="4",
-                border_radius="lg",
-                width="100%",
-                align="center",
-                justify="between",
-                margin_bottom="4",
+def comment_fab() -> rx.Component:
+    """A floating purple comment button positioned bottom-left, 5% above navigation."""
+    return rx.cond(
+        State.selected_article_title != "",
+        rx.button(
+            rx.icon("message-square", size=24, color="white"),
+            position="fixed",
+            bottom="calc(60px + 5vh)",
+            left="24px",
+            z_index="1000",
+            width="56px",
+            height="56px",
+            border_radius="50%",
+            bg="#8A2BE2", # Vibrant Purple
+            box_shadow="0 4px 15px rgba(138, 43, 226, 0.4)",
+            cursor="pointer",
+            on_click=State.toggle_comments_panel,
+            _hover={
+                "bg": "#9A3BEE",
+                "transform": "scale(1.1)",
+                "box_shadow": "0 6px 20px rgba(138, 43, 226, 0.6)",
+            },
+            transition="all 0.2s ease-in-out",
+        ),
+        rx.fragment()
+    )
+
+
+def comments_popout_panel() -> rx.Component:
+    """The pop-out sliding comments panel, sliding in from the left."""
+    return rx.cond(
+        State.show_comments_panel,
+        rx.box(
+            # Backdrop overlay to close when clicking outside
+            rx.box(
+                position="fixed",
+                top="0",
+                left="0",
+                width="100vw",
+                height="100vh",
+                bg="rgba(0,0,0,0.5)",
+                z_index="1999",
+                on_click=State.toggle_comments_panel,
             ),
-            # Input to submit comment
+            # Sliding panel container
             rx.vstack(
+                # Header row
                 rx.hstack(
-                    rx.avatar(
-                        src=State.discord_avatar,
+                    rx.button(
+                        rx.hstack(
+                            rx.icon("plus-circle", size=16),
+                            rx.text("Add Comment", font_size="sm"),
+                            spacing="2",
+                        ),
+                        bg="#8A2BE2",
+                        color="white",
+                        on_click=State.toggle_write_comment,
+                        _hover={"bg": "#9A3BEE"},
+                        cursor="pointer",
                         size="2",
-                        fallback="U",
-                        bg="#5865F2",
                     ),
-                    rx.text(f"Commenting as {State.discord_username}", color="white", font_size="sm", font_weight="bold"),
-                    spacing="2",
+                    rx.spacer(),
+                    rx.icon(
+                        "x",
+                        size=24,
+                        color="#AAAAAA",
+                        cursor="pointer",
+                        on_click=State.toggle_comments_panel,
+                        _hover={"color": "white"},
+                    ),
+                    width="100%",
                     align="center",
                 ),
-                rx.text_area(
-                    placeholder="Join the discussion...",
-                    value=State.new_comment_text,
-                    on_change=State.set_new_comment_text,
+                
+                # New comment input form
+                rx.cond(
+                    State.show_write_comment,
+                    rx.cond(
+                        State.discord_username == "",
+                        # Prompt to login
+                        rx.hstack(
+                            rx.text("You must be logged in to comment.", color="#AAAAAA", font_size="sm"),
+                            rx.button(
+                                "Login with Discord",
+                                bg="#5865F2",
+                                color="white",
+                                size="2",
+                                on_click=State.login_with_discord,
+                                cursor="pointer",
+                            ),
+                            bg="#18181C",
+                            border="1px solid #2C2C32",
+                            padding="2%",  # REQ-58: 2% padding
+                            border_radius="lg",
+                            width="100%",
+                            align="center",
+                            justify="between",
+                            margin_bottom="4",
+                        ),
+                        # Input to submit comment
+                        rx.vstack(
+                            rx.hstack(
+                                rx.avatar(
+                                    src=State.discord_avatar,
+                                    size="2",
+                                    fallback="U",
+                                    bg="#5865F2",
+                                ),
+                                rx.text(f"Commenting as {State.discord_username}", color="white", font_size="sm", font_weight="bold"),
+                                spacing="2",
+                                align="center",
+                            ),
+                            rx.text_area(
+                                placeholder="Join the discussion...",
+                                value=State.new_comment_text,
+                                on_change=State.set_new_comment_text,
+                                width="100%",
+                                bg="#18181C",
+                                border="1px solid #2C2C32",
+                                color="white",
+                                height="100px",
+                            ),
+                            rx.button(
+                                "Submit Comment",
+                                bg="#00b4da",
+                                color="white",
+                                on_click=State.add_comment,
+                                align_self="end",
+                                _hover={"bg": "#009bbd"},
+                                cursor="pointer",
+                            ),
+                            spacing="3",
+                            width="100%",
+                            bg="#18181C",
+                            border="1px solid #2C2C32",
+                            padding="2%",  # REQ-58: 2% padding
+                            border_radius="lg",
+                            margin_bottom="6",
+                        )
+                    ),
+                    rx.fragment()
+                ),
+                
+                # List of comments
+                rx.vstack(
+                    rx.cond(
+                        State.comments_list.length() > 0,
+                        rx.vstack(
+                            rx.foreach(State.comments_list, comment_card),
+                            width="100%",
+                            spacing="4",
+                        ),
+                        rx.text(
+                            "No comments yet. Start the conversation!",
+                            color="#888888",
+                            font_size="sm",
+                            text_align="center",
+                            width="100%",
+                            padding_y="8"
+                        )
+                    ),
                     width="100%",
-                    bg="#18181C",
-                    border="1px solid #2C2C32",
-                    color="white",
-                    height="100px",
+                    overflow_y="auto",
+                    flex="1",
                 ),
-                rx.button(
-                    "Submit Comment",
-                    bg="#00b4da",
-                    color="white",
-                    on_click=State.add_comment,
-                    align_self="end",
-                    _hover={"bg": "#009bbd"},
-                    cursor="pointer",
-                ),
-                spacing="3",
-                width="100%",
-                bg="#18181C",
-                border="1px solid #2C2C32",
+                
+                # Main panel styling
+                position="fixed",
+                top="0",
+                left="0",
+                height="100vh",
+                width=["100%", "400px", "450px"],
+                bg="#111113",
+                border_right="1px solid #2C2C32",
+                box_shadow="10px 0px 30px rgba(0,0,0,0.5)",
+                z_index="2000",
                 padding="4",
-                border_radius="lg",
-                margin_bottom="6",
-            )
-        ),
-        
-        # List of comment cards
-        rx.cond(
-            State.comments_list.length() > 0,
-            rx.vstack(
-                rx.foreach(State.comments_list, comment_card),
-                width="100%",
-                spacing="4",
+                align_items="start",
+                class_name="comments-panel-slide",
             ),
-            rx.text("No comments yet. Start the conversation!", color="#888888", font_size="sm", text_align="center", width="100%", padding_y="8")
+            # Container wrapper
+            position="relative",
+            z_index="1999",
         ),
-        
-        width="100%",
-        align_items="start",
-        padding_x=["2%", "2%", "0px"],
+        rx.fragment()
     )
 
 
@@ -1548,7 +1677,6 @@ def article_detail() -> rx.Component:
                 width="100%",
                 padding_x=["2%", "2%", "0px"],
             ),
-            comments_section(),
             width="100%",
             max_width="800px",
             align_items="start",
@@ -2543,6 +2671,8 @@ def index() -> rx.Component:
             height="100vh",
             spacing="0",
         ),
+        comment_fab(),
+        comments_popout_panel(),
         font_family="Outfit",
         bg="black",
         width="100%",

@@ -5,3 +5,4 @@ openpyxl==3.1.5
 sqlmodel==0.0.39
 sqlalchemy==2.0.51
 python-dotenv==1.2.2
+supabase>=2.15.0
