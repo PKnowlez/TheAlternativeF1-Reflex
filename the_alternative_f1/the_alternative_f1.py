@@ -745,37 +745,21 @@ def header_ticker() -> rx.Component:
 
 def header() -> rx.Component:
     """The permanent header (8% height) with the logo."""
-    return rx.box(
-        # Center wrapper for Logo
-        rx.center(
-            rx.image(
-                src="/The Alternative F1 NEW Logo.png",
-                height=["4vh", "5vh", "5.6vh"],
-                object_fit="contain",
-                cursor="pointer",
-                on_click=State.go_home,
-            ),
-            width="100%",
-            height="100%",
-            position="absolute",
-            left="0",
-            top="0",
-            z_index="1",
+    return rx.hstack(
+        # Left-aligned Logo
+        rx.image(
+            src="/The Alternative F1 NEW Logo.png",
+            height=["4vh", "5vh", "5.6vh"],
+            object_fit="contain",
+            cursor="pointer",
+            on_click=State.go_home,
         ),
-        # Right aligned wrapper for Ticker
-        rx.hstack(
-            rx.spacer(),
-            rx.cond(
-                State.ticker_items,
-                header_ticker(),
-                rx.fragment(),
-            ),
-            width="100%",
-            height="100%",
-            align_items="center",
-            padding_right="2.5%",
-            position="relative",
-            z_index="2",
+        rx.spacer(),
+        # Right-aligned Ticker
+        rx.cond(
+            State.ticker_items,
+            header_ticker(),
+            rx.fragment(),
         ),
         width="100%",
         height="8vh",
@@ -784,6 +768,9 @@ def header() -> rx.Component:
         position="sticky",
         top="0",
         z_index="100",
+        align_items="center",
+        padding_left="2.5%",
+        padding_right="2.5%",
     )
 
 
