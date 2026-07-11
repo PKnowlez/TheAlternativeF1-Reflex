@@ -5,6 +5,8 @@ from the_alternative_f1.articles.Season5.Grid_Announcements.Cadillac import arti
 from the_alternative_f1.articles.Season5.Grid_Announcements.Ferrari import article as Ferrari_Article
 from the_alternative_f1.articles.Season5.Grid_Announcements.McLaren import article as McLaren_Article
 from the_alternative_f1.articles.Season5.Grid_Announcements.Williams import article as Williams_Article
+from the_alternative_f1.articles.Season5.Tracks.Rankings import article as Rankings_Article
+from the_alternative_f1.articles.Season5.Tracks.Schedule import article as Schedule_Article
 from the_alternative_f1.articles.Season5.Grid_Announcements.Audi import article as Audi_Article
 from the_alternative_f1.articles.Season5.Grid_Announcements.Mercedes import article as Mercedes_Article
 
@@ -16,7 +18,8 @@ season = {
     # Rookies: drivers not present in Season 4
     "rookies": {"Grayson", "Josh C.", "Randy", "Evelo"},
 
-    "articles": [Williams_Article, McLaren_Article, Ferrari_Article, Cadillac_Article, RedBull_Article, Erick_Article, Haas_Article],
+    "articles": [Schedule_Article, Rankings_Article, Williams_Article, 
+    McLaren_Article, Ferrari_Article, Cadillac_Article, RedBull_Article, Erick_Article, Haas_Article],
 
     "team_colors": {
         "Alpine": "hotpink",
