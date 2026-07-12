@@ -573,6 +573,10 @@ class State(rx.State):
     def select_article(self, title: str):
         self.selected_article_title = title
         self.show_comments_panel = False
+        return rx.call_script(
+            "const container = document.getElementById('main-scroll-container'); "
+            "if (container) { container.scrollTo({top: 0, behavior: 'instant'}); }"
+        )
 
     def toggle_comments_panel(self):
         self.show_comments_panel = not self.show_comments_panel
@@ -1566,6 +1570,22 @@ def comments_popout_panel() -> rx.Component:
                         cursor="pointer",
                         size="2",
                     ),
+                    rx.cond(
+                        State.discord_username != "",
+                        rx.button(
+                            rx.hstack(
+                                rx.icon("log-out", size=16),
+                                rx.text("Logout", font_size="sm"),
+                                spacing="2",
+                            ),
+                            bg="#FF4B4B",
+                            color="white",
+                            on_click=State.logout,
+                            _hover={"bg": "#E04040"},
+                            cursor="pointer",
+                            size="2",
+                        ),
+                    ),
                     rx.spacer(),
                     rx.icon(
                         "x",
@@ -1577,6 +1597,7 @@ def comments_popout_panel() -> rx.Component:
                     ),
                     width="100%",
                     align="center",
+                    spacing="3",
                 ),
                 
                 # New comment input form
@@ -2727,6 +2748,7 @@ def index() -> rx.Component:
                     justify_content="center",
                     width="100%",
                 ),
+                id="main-scroll-container",
                 width="100%",
                 flex="1",
                 overflow_y="auto",
