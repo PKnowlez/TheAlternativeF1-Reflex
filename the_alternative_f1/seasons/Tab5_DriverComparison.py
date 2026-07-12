@@ -296,6 +296,7 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
                     rx.recharts.line(
                         data_key=r,
                         stroke=driver_colors.get(r, "#555555"),
+                        stroke_width=2,
                         dot={"fill": driver_colors.get(r, "#555555"), "stroke": driver_colors.get(r, "#555555")},
                         name=r,
                         type_="monotone",

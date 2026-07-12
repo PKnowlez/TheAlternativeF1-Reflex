@@ -49,6 +49,7 @@ def Tab1(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
                 rx.recharts.line(
                     data_key=team,
                     stroke=team_colors.get(team, "#555555"),
+                    stroke_width=2,
                     dot={"fill": team_colors.get(team, "#555555"), "stroke": team_colors.get(team, "#555555")},
                     name=team,
                     type_="monotone",
@@ -110,6 +111,7 @@ def Tab1(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
                 rx.recharts.line(
                     data_key=driver,
                     stroke=driver_colors.get(driver, "#555555"),
+                    stroke_width=2,
                     dot={"fill": driver_colors.get(driver, "#555555"), "stroke": driver_colors.get(driver, "#555555")},
                     name=driver,
                     type_="monotone",

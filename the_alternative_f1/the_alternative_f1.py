@@ -214,6 +214,8 @@ class State(rx.State):
     expanded_comment_ids: list[int] = []
     show_comments_panel: bool = False
     show_write_comment: bool = False
+    is_submitting: bool = False
+    is_submitting_reply: bool = False
 
     # ── Articles Expand State ────────────────────────────────────────────
     home_articles_expanded: bool = False
@@ -243,9 +245,8 @@ class State(rx.State):
         client_id = os.getenv("DISCORD_CLIENT_ID", "").strip()
         redirect_uri = os.getenv("DISCORD_REDIRECT_URI", "").strip()
 
-        # Fallback to local mock page if credentials aren't set
         if not client_id or not redirect_uri:
-            return rx.call_script("window.open('/oauth/discord', 'Discord Login', 'width=500,height=600')")
+            return rx.window_alert("Discord login is not configured on this server. Please set DISCORD_CLIENT_ID and DISCORD_REDIRECT_URI.")
 
         import urllib.parse
         encoded_redirect = urllib.parse.quote(redirect_uri, safe="")
@@ -253,7 +254,8 @@ class State(rx.State):
         return rx.call_script(f"window.open('{auth_url}', 'Discord Login', 'width=500,height=600')")
 
     def complete_discord_login(self):
-        self.active_nav = "home"
+        if self.active_nav == "login":
+            self.active_nav = "home"
         self.load_comments()
 
     def logout(self):
@@ -347,6 +349,33 @@ class State(rx.State):
         if not text:
             return
         
+        self.is_submitting = True
+        
+        # Optimistic update
+        temp_id = -1
+        if self.comments_list:
+            ids = [c.id for c in self.comments_list]
+            if ids:
+                temp_id = min(ids) - 1
+                if temp_id >= 0:
+                    temp_id = -1
+
+        new_comment = CommentData(
+            id=temp_id,
+            article_title=self.selected_article_title,
+            username=self.discord_username,
+            avatar=self.discord_avatar,
+            text=text,
+            likes=0,
+            dislikes=0,
+            liked_by=[],
+            disliked_by=[],
+            replies=[]
+        )
+        self.comments_list.append(new_comment)
+        self.new_comment_text = ""
+        yield
+        
         try:
             supabase = get_supabase_client()
             supabase.table("comments").insert({
@@ -362,8 +391,8 @@ class State(rx.State):
         except Exception as e:
             print(f"Error adding comment to Supabase: {e}")
             
-        self.new_comment_text = ""
         self.load_comments()
+        self.is_submitting = False
 
     def add_reply(self, comment_id: int):
         if not self.discord_username:
@@ -371,6 +400,39 @@ class State(rx.State):
         text = self.new_reply_text.strip()
         if not text:
             return
+        
+        self.is_submitting_reply = True
+        
+        # Optimistic update
+        for c in self.comments_list:
+            if c.id == comment_id:
+                temp_reply_id = -1
+                if c.replies:
+                    r_ids = [r.id for r in c.replies]
+                    if r_ids:
+                        temp_reply_id = min(r_ids) - 1
+                        if temp_reply_id >= 0:
+                            temp_reply_id = -1
+                
+                new_reply = CommentReplyData(
+                    id=temp_reply_id,
+                    comment_id=comment_id,
+                    username=self.discord_username,
+                    avatar=self.discord_avatar,
+                    text=text,
+                    likes=0,
+                    dislikes=0,
+                    liked_by=[],
+                    disliked_by=[]
+                )
+                c.replies.append(new_reply)
+                if comment_id not in self.expanded_comment_ids:
+                    self.expanded_comment_ids.append(comment_id)
+                break
+                
+        self.new_reply_text = ""
+        self.active_reply_comment_id = -1
+        yield
         
         try:
             supabase = get_supabase_client()
@@ -384,15 +446,11 @@ class State(rx.State):
                 "liked_by": [],
                 "disliked_by": []
             }).execute()
-            
-            if comment_id not in self.expanded_comment_ids:
-                self.expanded_comment_ids.append(comment_id)
         except Exception as e:
             print(f"Error adding reply to Supabase: {e}")
                 
-        self.new_reply_text = ""
-        self.active_reply_comment_id = -1
         self.load_comments()
+        self.is_submitting_reply = False
 
     def like_comment(self, comment_id: int, reply_id: int = None):
         if not self.discord_username:
@@ -628,7 +686,7 @@ class State(rx.State):
         n_teams = len(teams)
         for idx, team in enumerate(teams):
             delay = 0.5 + idx * 0.15
-            offset = "-0.2vh" if idx % 2 == 0 else "0.2vh"
+            offset = "-0.6vh" if idx % 2 == 0 else "0.6vh"
             result.append({
                 "team": team,
                 "index": idx,
@@ -995,7 +1053,7 @@ def power_rankings_starting_grid() -> rx.Component:
                 object_fit="contain",
                 position="absolute",
                 top=["0.2vh", "0.28vh", "0.36vh"],
-                left=["0.2vh", "0.28vh", "0.36vh"],
+                left=["0.6vh", "0.84vh", "1.08vh"],
                 class_name="car-drive-in",
                 style={"animationDelay": item["delay"]},
             ),
@@ -1370,12 +1428,17 @@ def comment_card(comment: CommentData) -> rx.Component:
                         cursor="pointer",
                     ),
                     rx.button(
-                        "Reply",
+                        rx.cond(
+                            State.is_submitting_reply,
+                            rx.spinner(size="1"),
+                            rx.text("Reply"),
+                        ),
                         size="1",
                         bg="#00b4da",
                         color="white",
                         on_click=lambda: State.add_reply(comment.id),
                         cursor="pointer",
+                        disabled=State.is_submitting_reply,
                     ),
                     spacing="2",
                     width="100%",
@@ -1492,7 +1555,7 @@ def comments_popout_panel() -> rx.Component:
                 rx.hstack(
                     rx.button(
                         rx.hstack(
-                            rx.icon("plus-circle", size=16),
+                            rx.icon("circle-plus", size=16),
                             rx.text("Add Comment", font_size="sm"),
                             spacing="2",
                         ),
@@ -1565,13 +1628,18 @@ def comments_popout_panel() -> rx.Component:
                                 height="100px",
                             ),
                             rx.button(
-                                "Submit Comment",
+                                rx.cond(
+                                    State.is_submitting,
+                                    rx.spinner(size="1"),
+                                    rx.text("Submit Comment"),
+                                ),
                                 bg="#00b4da",
                                 color="white",
                                 on_click=State.add_comment,
                                 align_self="end",
                                 _hover={"bg": "#009bbd"},
                                 cursor="pointer",
+                                disabled=State.is_submitting,
                             ),
                             spacing="3",
                             width="100%",
@@ -2673,6 +2741,11 @@ def index() -> rx.Component:
         ),
         comment_fab(),
         comments_popout_panel(),
+        rx.button(
+            id="complete-discord-login-btn",
+            on_click=State.complete_discord_login,
+            display="none",
+        ),
         font_family="Outfit",
         bg="black",
         width="100%",
