@@ -267,55 +267,45 @@ class State(rx.State):
         try:
             supabase = get_supabase_client()
             comments_res = supabase.table("comments")\
-                .select("*")\
+                .select("*, comment_replies(*)")\
                 .eq("article_title", self.selected_article_title)\
                 .order("created_at", desc=False)\
                 .execute()
             
             comments_data = comments_res.data or []
             
-            if not comments_data:
-                self.comments_list = []
-                return
-
-            comment_ids = [c["id"] for c in comments_data]
-            replies_res = supabase.table("comment_replies")\
-                .select("*")\
-                .in_("comment_id", comment_ids)\
-                .order("created_at", desc=False)\
-                .execute()
-            
-            replies_data = replies_res.data or []
-            
-            replies_by_comment = {}
-            for r in replies_data:
-                c_id = r["comment_id"]
-                if c_id not in replies_by_comment:
-                    replies_by_comment[c_id] = []
-                
-                liked_by = r.get("liked_by")
-                if not isinstance(liked_by, list):
-                    liked_by = []
-                disliked_by = r.get("disliked_by")
-                if not isinstance(disliked_by, list):
-                    disliked_by = []
-
-                replies_by_comment[c_id].append(CommentReplyData(
-                    id=int(r["id"]),
-                    comment_id=int(r["comment_id"]),
-                    username=r.get("username", ""),
-                    avatar=r.get("avatar", ""),
-                    text=r.get("text", ""),
-                    likes=int(r.get("likes", 0)),
-                    dislikes=int(r.get("dislikes", 0)),
-                    liked_by=liked_by,
-                    disliked_by=disliked_by
-                ))
-
             comments_list = []
             for c in comments_data:
                 c_id = c["id"]
-                c_replies = replies_by_comment.get(c_id, [])
+                
+                # Fetch and sort nested replies
+                raw_replies = c.get("comment_replies") or []
+                if isinstance(raw_replies, list):
+                    # Sort replies by created_at ascending
+                    raw_replies = sorted(raw_replies, key=lambda r: r.get("created_at", ""))
+                else:
+                    raw_replies = []
+                
+                c_replies = []
+                for r in raw_replies:
+                    liked_by = r.get("liked_by")
+                    if not isinstance(liked_by, list):
+                        liked_by = []
+                    disliked_by = r.get("disliked_by")
+                    if not isinstance(disliked_by, list):
+                        disliked_by = []
+
+                    c_replies.append(CommentReplyData(
+                        id=int(r["id"]),
+                        comment_id=int(r["comment_id"]),
+                        username=r.get("username", ""),
+                        avatar=r.get("avatar", ""),
+                        text=r.get("text", ""),
+                        likes=int(r.get("likes", 0)),
+                        dislikes=int(r.get("dislikes", 0)),
+                        liked_by=liked_by,
+                        disliked_by=disliked_by
+                    ))
                 
                 liked_by = c.get("liked_by")
                 if not isinstance(liked_by, list):
@@ -726,11 +716,16 @@ class State(rx.State):
         M = len(races)
         N = len(teams)
         
-        view_w, view_h = 1000, 500
+        view_w = 1000
+        max_race_len = max([len(str(r)) for r in races] or [0])
+        margin_b = max(50, max_race_len * 8 + 25)
+        
         margin_l, margin_r = 100, 100
-        margin_t, margin_b = 40, 50
+        margin_t = 40
+        view_h = 450 + margin_b
+        
         chart_w = view_w - margin_l - margin_r
-        chart_h = view_h - margin_t - margin_b
+        chart_h = 410
         
         dx = chart_w / (M - 1) if M > 1 else chart_w
         dy = chart_h / (N - 1) if N > 1 else chart_h
@@ -1569,6 +1564,8 @@ def comments_popout_panel() -> rx.Component:
                         _hover={"bg": "#9A3BEE"},
                         cursor="pointer",
                         size="2",
+                        margin_top="2.5%",
+                        margin_left="2.5%",
                     ),
                     rx.cond(
                         State.discord_username != "",
@@ -1584,6 +1581,7 @@ def comments_popout_panel() -> rx.Component:
                             _hover={"bg": "#E04040"},
                             cursor="pointer",
                             size="2",
+                            margin_top="2.5%",
                         ),
                     ),
                     rx.spacer(),
@@ -2492,6 +2490,8 @@ def power_rankings_table() -> rx.Component:
             font_size="lg",
             font_weight="bold",
             margin_bottom="2",
+            padding_left="2.5%",
+            padding_top="2.5%",
         ),
         rx.table.root(
             rx.table.header(
@@ -2523,6 +2523,8 @@ def power_rankings_trajectory_graph() -> rx.Component:
             font_size="lg",
             font_weight="bold",
             margin_bottom="2",
+            padding_left="2.5%",
+            padding_top="2.5%",
         ),
         rx.el.svg(
             # Grid background lines
@@ -2553,14 +2555,14 @@ def power_rankings_trajectory_graph() -> rx.Component:
                 State.power_rankings_y_labels,
                 lambda label: rx.el.text(
                     label["rank"],
-                    x=60,
+                    x=75,
                     y=label["y"],
                     dy="4",
-                    fill="#888888",
+                    fill="white",
                     font_size="12",
                     font_family="Outfit",
-                    font_weight="bold",
-                    text_anchor="middle",
+                    text_anchor="start",
+                    class_name="power-rankings-y-text",
                 )
             ),
             # X-axis Labels
@@ -2569,11 +2571,13 @@ def power_rankings_trajectory_graph() -> rx.Component:
                 lambda race: rx.el.text(
                     race["name"],
                     x=race["x"],
-                    y=480,
-                    fill="#CCCCCC",
+                    y=465,
+                    fill="white",
                     font_size="10",
                     font_family="Outfit",
-                    text_anchor="middle",
+                    text_anchor="end",
+                    transform=f"rotate(-90 {race['x']} 465)",
+                    class_name="power-rankings-x-text",
                 )
             ),
             # Trajectory Paths
@@ -2583,7 +2587,7 @@ def power_rankings_trajectory_graph() -> rx.Component:
                     rx.el.path(
                         d=path["path_string"],
                         stroke=path["color"],
-                        stroke_width="4",
+                        stroke_width="20",
                         fill="none",
                         opacity=0.8,
                     ),
@@ -2767,6 +2771,18 @@ def index() -> rx.Component:
             id="complete-discord-login-btn",
             on_click=State.complete_discord_login,
             display="none",
+        ),
+        rx.script(
+            """
+            window.addEventListener('storage', (event) => {
+                if (event.key === 'discord_username' && event.newValue) {
+                    const btn = document.getElementById('complete-discord-login-btn');
+                    if (btn) {
+                        btn.click();
+                    }
+                }
+            });
+            """
         ),
         font_family="Outfit",
         bg="black",

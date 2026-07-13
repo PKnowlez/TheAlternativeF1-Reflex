@@ -199,5 +199,46 @@
     animation: slideInLeft 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* Power Rankings SVG Font Sizes to keep them visually identical to Recharts (10px / 8px) on all screens */
+.power-rankings-y-text {
+    font-size: 11px !important;
+}
+.power-rankings-x-text {
+    font-size: 9px !important;
+}
 
+@media (max-width: 1199px) {
+    .power-rankings-y-text {
+        font-size: 13px !important;
+    }
+    .power-rankings-x-text {
+        font-size: 10px !important;
+    }
+}
 
+@media (max-width: 1023px) {
+    .power-rankings-y-text {
+        font-size: 16px !important;
+    }
+    .power-rankings-x-text {
+        font-size: 13px !important;
+    }
+}
+
+@media (max-width: 767px) {
+    .power-rankings-y-text {
+        font-size: 24px !important;
+    }
+    .power-rankings-x-text {
+        font-size: 19px !important;
+    }
+}
+
+@media (max-width: 479px) {
+    .power-rankings-y-text {
+        font-size: 33px !important;
+    }
+    .power-rankings-x-text {
+        font-size: 27px !important;
+    }
+}

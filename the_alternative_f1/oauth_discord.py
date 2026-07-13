@@ -24,6 +24,7 @@ load_env()
 class OauthState(rx.State):
     discord_username: str = rx.LocalStorage("", name="discord_username", sync=True)
     discord_avatar: str = rx.LocalStorage("", name="discord_avatar", sync=True)
+    error_message: str = ""
 
     @rx.var
     def is_oauth_callback(self) -> bool:
@@ -37,6 +38,7 @@ class OauthState(rx.State):
         # Check if code is present in query parameters
         code = self.router.url.query_parameters.get("code")
         if not code:
+            self.error_message = "No Discord authorization code was received. Please try logging in again from the main site."
             return
 
         try:
@@ -46,6 +48,7 @@ class OauthState(rx.State):
 
             if not client_id or not client_secret or not redirect_uri:
                 print("Missing Discord client ID, secret, or redirect URI in environment.")
+                self.error_message = "Discord OAuth client settings are missing on the server. Please contact an administrator."
                 return
 
             # Exchange code for token
@@ -68,12 +71,13 @@ class OauthState(rx.State):
                 method='POST'
             )
 
-            with urllib.request.urlopen(req) as response:
+            with urllib.request.urlopen(req, timeout=10) as response:
                 res_data = json.loads(response.read().decode('utf-8'))
                 access_token = res_data.get('access_token')
 
             if not access_token:
                 print("Failed to retrieve access token from Discord.")
+                self.error_message = "Failed to retrieve access token from Discord. Please try again."
                 return
 
             # Fetch user details
@@ -86,7 +90,7 @@ class OauthState(rx.State):
                 method='GET'
             )
 
-            with urllib.request.urlopen(req_user) as response:
+            with urllib.request.urlopen(req_user, timeout=10) as response:
                 user_info = json.loads(response.read().decode('utf-8'))
 
             username = user_info.get('global_name') or user_info.get('username', 'Unknown')
@@ -103,21 +107,39 @@ class OauthState(rx.State):
 
             return rx.call_script(
                 "if (window.opener) { "
-                "  const btn = window.opener.document.getElementById('complete-discord-login-btn');"
-                "  if (btn) btn.click();"
+                "  try { "
+                "    const btn = window.opener.document.getElementById('complete-discord-login-btn');"
+                "    if (btn) btn.click();"
+                "  } catch (e) { "
+                "    console.error('Error accessing opener document:', e);"
+                "  }"
                 "} "
                 "window.close();"
             )
         except Exception as e:
             print(f"OAuth callback handling failed: {e}")
+            self.error_message = f"An error occurred during authentication ({str(e)}). Please try logging in again from the main site."
 
 
 @rx.page(route="/oauth/discord", title="Discord Authorize", on_load=OauthState.handle_on_load)
 def oauth_discord() -> rx.Component:
     return rx.center(
         rx.cond(
-            OauthState.is_oauth_callback,
-            # Show a beautiful loading spinner during OAuth callback processing
+            OauthState.error_message != "",
+            # Show error message if it's set
+            rx.vstack(
+                rx.icon("x", color="#f43f5e", size=48),
+                rx.text("Invalid Login Attempt", color="white", font_weight="700", font_size="lg", margin_top="4"),
+                rx.text(OauthState.error_message, color="#b9bbbe", font_size="sm", text_align="center"),
+                align="center",
+                spacing="2",
+                bg="#36393f",
+                padding="8",
+                border_radius="lg",
+                box_shadow="0 8px 16px rgba(0,0,0,0.2)",
+                max_width="400px",
+            ),
+            # Show a beautiful loading spinner during OAuth callback processing (or default while waiting)
             rx.vstack(
                 rx.spinner(size="3", color="#5865F2"),
                 rx.text("Authorizing with Discord...", color="white", font_weight="700", font_size="lg", margin_top="4"),
@@ -128,19 +150,6 @@ def oauth_discord() -> rx.Component:
                 padding="8",
                 border_radius="lg",
                 box_shadow="0 8px 16px rgba(0,0,0,0.2)",
-            ),
-            # Show error message if it's not a callback (code parameter is missing)
-            rx.vstack(
-                rx.icon("x", color="#f43f5e", size=48),
-                rx.text("Invalid Login Attempt", color="white", font_weight="700", font_size="lg", margin_top="4"),
-                rx.text("No Discord authorization code was received. Please try logging in again from the main site.", color="#b9bbbe", font_size="sm", text_align="center"),
-                align="center",
-                spacing="2",
-                bg="#36393f",
-                padding="8",
-                border_radius="lg",
-                box_shadow="0 8px 16px rgba(0,0,0,0.2)",
-                max_width="400px",
             ),
         ),
         width="100%",

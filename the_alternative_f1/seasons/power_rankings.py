@@ -274,23 +274,39 @@ def calculate_all_seasons():
                 pass
     return data
 
+_power_rankings_cache = None
+
 def load_power_rankings(season_num: int):
-    data = {}
-    if JSON_PATH.exists():
-        try:
-            with open(JSON_PATH, "r", encoding="utf-8") as f:
-                data = json.load(f)
-        except Exception as e:
-            print(f"Error reading power_rankings.json: {e}")
+    global _power_rankings_cache
+    
+    excel_path = Path(__file__).parent.parent / "The_Alternative_F1.xlsx"
+    force_recalculate = False
+    
+    if excel_path.exists() and JSON_PATH.exists():
+        excel_mtime = excel_path.stat().st_mtime
+        json_mtime = JSON_PATH.stat().st_mtime
+        if excel_mtime > json_mtime:
+            force_recalculate = True
+
+    if _power_rankings_cache is None or force_recalculate:
+        if JSON_PATH.exists() and not force_recalculate:
+            try:
+                with open(JSON_PATH, "r", encoding="utf-8") as f:
+                    _power_rankings_cache = json.load(f)
+            except Exception as e:
+                print(f"Error reading power_rankings.json: {e}")
+                _power_rankings_cache = {}
+        else:
+            _power_rankings_cache = {}
             
     s_key = str(season_num)
-    if s_key not in data:
+    if force_recalculate or s_key not in _power_rankings_cache:
         calculated_data = calculate_all_seasons()
-        data.update(calculated_data)
+        _power_rankings_cache.update(calculated_data)
         try:
             with open(JSON_PATH, "w", encoding="utf-8") as f:
-                json.dump(data, f, indent=2)
+                json.dump(_power_rankings_cache, f, indent=2)
         except Exception as e:
             print(f"Error writing power_rankings.json: {e}")
             
-    return data.get(s_key, {"races": ["Preseason"], "rankings": {"Preseason": []}})
+    return _power_rankings_cache.get(s_key, {"races": ["Preseason"], "rankings": {"Preseason": []}})

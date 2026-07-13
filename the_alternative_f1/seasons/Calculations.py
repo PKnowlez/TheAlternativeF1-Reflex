@@ -13,8 +13,20 @@ import pandas as pd
 # Resolve the Excel file path relative to this module
 _EXCEL_PATH = str((Path(__file__).parent.parent / "The_Alternative_F1.xlsx").resolve())
 
+_calculations_cache = {}
+_calculations_mtime = {}
+
 
 def Calculations(season_data: dict, sprint_only: bool = False) -> dict:
+    # Use sheet_name and sprint_only as the cache key
+    cache_key = (season_data["sheet_name"], sprint_only)
+    
+    excel_path = Path(_EXCEL_PATH)
+    current_mtime = excel_path.stat().st_mtime if excel_path.exists() else 0
+    
+    if cache_key in _calculations_cache and _calculations_mtime.get(cache_key) == current_mtime:
+        return _calculations_cache[cache_key]
+
     """Run all calculations for the given season and return a results dict.
 
     Parameters
@@ -240,7 +252,7 @@ def Calculations(season_data: dict, sprint_only: bool = False) -> dict:
         columns=["Driver", "Color"],
     )
 
-    return {
+    result = {
         "team_race_totals": team_race_totals,
         "driver_race_totals": driver_race_totals,
         "df": df,
@@ -281,3 +293,6 @@ def Calculations(season_data: dict, sprint_only: bool = False) -> dict:
         "place_columns": place_columns,
         "has_sprint": has_sprint,
     }
+    _calculations_cache[cache_key] = result
+    _calculations_mtime[cache_key] = current_mtime
+    return result

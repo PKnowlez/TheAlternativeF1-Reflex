@@ -619,7 +619,9 @@
   },
   "5": {
     "races": [
-      "Preseason"
+      "Preseason",
+      "W1",
+      "W2"
     ],
     "rankings": {
       "Preseason": [
@@ -629,6 +631,26 @@
         "Ferrari",
         "Mercedes",
         "Haas",
+        "Williams",
+        "Audi"
+      ],
+      "W1": [
+        "McLaren",
+        "Cadillac",
+        "Red Bull",
+        "Ferrari",
+        "Mercedes",
+        "Haas",
+        "Williams",
+        "Audi"
+      ],
+      "W2": [
+        "McLaren",
+        "Red Bull",
+        "Cadillac",
+        "Ferrari",
+        "Haas",
+        "Mercedes",
         "Williams",
         "Audi"
       ]
