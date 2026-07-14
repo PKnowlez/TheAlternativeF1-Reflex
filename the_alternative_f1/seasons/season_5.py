@@ -9,6 +9,7 @@ from the_alternative_f1.articles.Season5.Tracks.Rankings import article as Ranki
 from the_alternative_f1.articles.Season5.Tracks.Schedule import article as Schedule_Article
 from the_alternative_f1.articles.Season5.Grid_Announcements.Audi import article as Audi_Article
 from the_alternative_f1.articles.Season5.Grid_Announcements.Mercedes import article as Mercedes_Article
+from the_alternative_f1.articles.Season5.Grid_Announcements.TheGrid import article as TheGrid_Article
 
 season = {
     "season_number": 5,
@@ -18,7 +19,7 @@ season = {
     # Rookies: drivers not present in Season 4
     "rookies": {"Grayson", "Josh C.", "Randy", "Evelo"},
 
-    "articles": [Audi_Article, Schedule_Article, Rankings_Article, Williams_Article, 
+    "articles": [Mercedes_Article, Audi_Article, Schedule_Article, Rankings_Article, Williams_Article, 
     McLaren_Article, Ferrari_Article, Cadillac_Article, RedBull_Article, Erick_Article, Haas_Article],
 
     "team_colors": {

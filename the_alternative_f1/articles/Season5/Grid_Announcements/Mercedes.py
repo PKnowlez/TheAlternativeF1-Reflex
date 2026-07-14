@@ -26,6 +26,6 @@ article = {
     ],
     "image": "/thealternativef1-cloudflare/Season5/Grid_Announcements/Grid_Mercedes.png",
     "author": "Patrick",
-    "date": "July 17, 2026",
+    "date": "July 14, 2026",
     "season": 5,
 }

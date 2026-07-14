@@ -12,7 +12,7 @@ article = {
         "The midfield, however, is anyone's guess. Haas looks promising, Audi looks balanced, Ferrari has a chip on their shoulders, and Williams is simply an unknown data point.",
         "Strap in for what is sure to be an exciting season."
     ],
-    "image": "/thealternativef1-cloudflare/Season5/Grid_Announcements/Full_Grid.png",
+    "image": "/thealternativef1-cloudflare/Season5/Grid_Announcements/Grid_Graphic.png",
     "author": "Patrick",
     "date": "July 20, 2026",
     "season": 5,
