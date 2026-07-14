@@ -113,8 +113,11 @@ class OauthState(rx.State):
                 "  } catch (e) { "
                 "    console.error('Error accessing opener document:', e);"
                 "  }"
-                "} "
-                "window.close();"
+                "  window.close();"
+                "} else { "
+                "  window.close();"
+                "  setTimeout(() => { window.location.href = '/'; }, 100);"
+                "}"
             )
         except Exception as e:
             print(f"OAuth callback handling failed: {e}")

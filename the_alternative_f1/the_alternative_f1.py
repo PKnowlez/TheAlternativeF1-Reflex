@@ -239,6 +239,18 @@ class State(rx.State):
     def set_new_reply_text(self, text: str):
         self.new_reply_text = text
 
+    @rx.var
+    def discord_auth_url(self) -> str:
+        from the_alternative_f1.oauth_discord import load_env
+        load_env()
+        client_id = os.getenv("DISCORD_CLIENT_ID", "").strip()
+        redirect_uri = os.getenv("DISCORD_REDIRECT_URI", "").strip()
+        if not client_id or not redirect_uri:
+            return ""
+        import urllib.parse
+        encoded_redirect = urllib.parse.quote(redirect_uri, safe="")
+        return f"https://discord.com/oauth2/authorize?client_id={client_id}&redirect_uri={encoded_redirect}&response_type=code&scope=identify"
+
     def login_with_discord(self):
         from the_alternative_f1.oauth_discord import load_env
         load_env()
@@ -565,7 +577,14 @@ class State(rx.State):
         self.show_comments_panel = False
         return rx.call_script(
             "const container = document.getElementById('main-scroll-container'); "
-            "if (container) { container.scrollTo({top: 0, behavior: 'instant'}); }"
+            "if (container) { "
+            "  if (document.getElementById('homepage-container')) { "
+            "    window.__homepage_scroll_pos = container.scrollTop; "
+            "  } "
+            "  window.__ignore_homepage_scroll = true; "
+            "  container.scrollTo({top: 0, behavior: 'instant'}); "
+            "  setTimeout(() => { window.__ignore_homepage_scroll = false; }, 100); "
+            "}"
         )
 
     def toggle_comments_panel(self):
@@ -617,11 +636,31 @@ class State(rx.State):
         self.sprint_only = value
 
     def go_home(self):
+        in_article = self.selected_article_title != ""
         self.active_nav = "home"
         self.selected_article_title = ""
         self.show_comments_panel = False
         self.home_articles_expanded = False
         self.season_articles_expanded = False
+
+        if in_article:
+            return rx.call_script(
+                "const container = document.getElementById('main-scroll-container'); "
+                "if (container) { "
+                "  const scrollPos = window.__homepage_scroll_pos || 0; "
+                "  window.__ignore_homepage_scroll = true; "
+                "  container.scrollTo({top: scrollPos, behavior: 'instant'}); "
+                "  setTimeout(() => { window.__ignore_homepage_scroll = false; }, 100); "
+                "}"
+            )
+        else:
+            return rx.call_script(
+                "const container = document.getElementById('main-scroll-container'); "
+                "if (container) { "
+                "  window.__homepage_scroll_pos = 0; "
+                "  container.scrollTo({top: 0, behavior: 'instant'}); "
+                "}"
+            )
 
     # ── Ticker State ─────────────────────────────────────────────────────
     ticker_index: int = 0
@@ -1265,6 +1304,7 @@ def articles_list() -> rx.Component:
         width="100%",
         align="center",
         padding_bottom="160px",
+        id="homepage-container",
     )
 def comment_card(comment: CommentData) -> rx.Component:
     """An individual comment card containing its text, actions, and replies."""
@@ -1606,13 +1646,17 @@ def comments_popout_panel() -> rx.Component:
                         # Prompt to login
                         rx.hstack(
                             rx.text("You must be logged in to comment.", color="#AAAAAA", font_size="sm"),
-                            rx.button(
-                                "Login with Discord",
-                                bg="#5865F2",
-                                color="white",
-                                size="2",
-                                on_click=State.login_with_discord,
-                                cursor="pointer",
+                            rx.link(
+                                rx.button(
+                                    "Login with Discord",
+                                    bg="#5865F2",
+                                    color="white",
+                                    size="2",
+                                    cursor="pointer",
+                                ),
+                                href=State.discord_auth_url,
+                                is_external=True,
+                                text_decoration="none",
                             ),
                             bg="#18181C",
                             border="1px solid #2C2C32",
@@ -1908,22 +1952,27 @@ def login_view() -> rx.Component:
                 ),
                 rx.heading("Driver Login", size="6", color="white", font_weight="900", text_align="center"),
                 rx.text("Authorize with Discord to submit comments and access the control panel.", color="#AAAAAA", font_size="sm", text_align="center", margin_bottom="6"),
-                rx.button(
-                    rx.hstack(
-                        rx.icon("log-in", size=18),
-                        rx.text("Login with Discord", font_weight="bold"),
-                        spacing="2",
-                        align="center",
+                rx.link(
+                    rx.button(
+                        rx.hstack(
+                            rx.icon("log-in", size=18),
+                            rx.text("Login with Discord", font_weight="bold"),
+                            spacing="2",
+                            align="center",
+                        ),
+                        bg="#5865F2",
+                        color="white",
+                        width="100%",
+                        height="44px",
+                        _hover={"bg": "#4752c4", "transform": "scale(1.02)"},
+                        transition="all 0.2s ease-in-out",
+                        cursor="pointer",
+                        border_radius="md",
                     ),
-                    bg="#5865F2",
-                    color="white",
+                    href=State.discord_auth_url,
+                    is_external=True,
+                    text_decoration="none",
                     width="100%",
-                    height="44px",
-                    on_click=State.login_with_discord,
-                    _hover={"bg": "#4752c4", "transform": "scale(1.02)"},
-                    transition="all 0.2s ease-in-out",
-                    cursor="pointer",
-                    border_radius="md",
                 ),
                 width="100%",
                 max_width="400px",
@@ -2782,6 +2831,15 @@ def index() -> rx.Component:
                     }
                 }
             });
+
+            // Capture scroll events on main-scroll-container to save homepage scroll position
+            document.addEventListener('scroll', (event) => {
+                if (event.target && event.target.id === 'main-scroll-container') {
+                    if (document.getElementById('homepage-container') && !window.__ignore_homepage_scroll) {
+                        window.__homepage_scroll_pos = event.target.scrollTop;
+                    }
+                }
+            }, true);
             """
         ),
         font_family="Outfit",

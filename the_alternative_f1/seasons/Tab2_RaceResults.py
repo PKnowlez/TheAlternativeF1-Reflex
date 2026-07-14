@@ -64,10 +64,9 @@ def _build_manual_race_item(race: dict, idx: int, prefix: str, bg_color: str = "
         fl_val = "-"
         if "FL" in r:
             flv = r.get("FL", False)
-            if isinstance(flv, bool):
-                fl_val = "Yes" if flv else "-"
-            else:
-                fl_val = "Yes" if str(flv).upper() == "Y" else "-"
+            is_fl = flv if isinstance(flv, bool) else (str(flv).upper() == "Y")
+            if is_fl:
+                fl_val = rx.icon("star", color="#FFD700", size=16)
 
         cells = [
             rx.table.cell(str(place_val), color="#E0E0E0", font_size="sm"),
@@ -94,28 +93,25 @@ def _build_manual_race_item(race: dict, idx: int, prefix: str, bg_color: str = "
         if show_dotd:
             dotd_val = "-"
             dv = r.get("DOTD", False)
-            if isinstance(dv, bool):
-                dotd_val = "Yes" if dv else "-"
-            else:
-                dotd_val = "Yes" if str(dv).upper() == "Y" else "-"
+            is_dotd = dv if isinstance(dv, bool) else (str(dv).upper() == "Y")
+            if is_dotd:
+                dotd_val = rx.icon("star", color="#FFD700", size=16)
             cells.append(rx.table.cell(dotd_val, color="#CCCCCC", font_size="sm"))
 
         if show_mot:
             mot_val = "-"
             mv = r.get("MOT", False)
-            if isinstance(mv, bool):
-                mot_val = "Yes" if mv else "-"
-            else:
-                mot_val = "Yes" if str(mv).upper() == "Y" else "-"
+            is_mot = mv if isinstance(mv, bool) else (str(mv).upper() == "Y")
+            if is_mot:
+                mot_val = rx.icon("star", color="#FFD700", size=16)
             cells.append(rx.table.cell(mot_val, color="#CCCCCC", font_size="sm"))
 
         if show_cd:
             cd_val = "-"
             cv = r.get("CD", False)
-            if isinstance(cv, bool):
-                cd_val = "Yes" if cv else "-"
-            else:
-                cd_val = "Yes" if str(cv).upper() == "Y" else "-"
+            is_cd = cv if isinstance(cv, bool) else (str(cv).upper() == "Y")
+            if is_cd:
+                cd_val = rx.icon("star", color="#FFD700", size=16)
             cells.append(rx.table.cell(cd_val, color="#CCCCCC", font_size="sm"))
 
         table_rows.append(
@@ -343,7 +339,8 @@ def Tab2(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
             fl_val = "-"
             if fastestlap_col in df.columns:
                 flv = row.get(fastestlap_col, "n")
-                fl_val = "Yes" if str(flv).upper() == "Y" else "-"
+                if str(flv).upper() == "Y":
+                    fl_val = rx.icon("star", color="#FFD700", size=16)
 
             # Optional columns
             cells = [
@@ -373,19 +370,22 @@ def Tab2(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
                 dotd_val = "-"
                 if dotd_col in df.columns:
                     dv = row.get(dotd_col, "n")
-                    dotd_val = "Yes" if str(dv).upper() == "Y" else "-"
+                    if str(dv).upper() == "Y":
+                        dotd_val = rx.icon("star", color="#FFD700", size=16)
                 cells.append(rx.table.cell(dotd_val, color="#CCCCCC", font_size="sm"))
 
                 mot_val = "-"
                 if mot_col in df.columns:
                     mv = row.get(mot_col, "n")
-                    mot_val = "Yes" if str(mv).upper() == "Y" else "-"
+                    if str(mv).upper() == "Y":
+                        mot_val = rx.icon("star", color="#FFD700", size=16)
                 cells.append(rx.table.cell(mot_val, color="#CCCCCC", font_size="sm"))
 
                 cd_val = "-"
                 if cd_col in df.columns:
                     cv = row.get(cd_col, "n")
-                    cd_val = "Yes" if str(cv).upper() == "Y" else "-"
+                    if str(cv).upper() == "Y":
+                        cd_val = rx.icon("star", color="#FFD700", size=16)
                 cells.append(rx.table.cell(cd_val, color="#CCCCCC", font_size="sm"))
 
             table_rows.append(
