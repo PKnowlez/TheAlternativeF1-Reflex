@@ -22,7 +22,7 @@ article = {
             width="100%",
         ),
         "So with that, we are without much more content from the interview. However, it is clear to see there is unfinished business left on the table from last season."
-        "With the champs back on the grid in a seemingly ruthless manner, every other team is certainly on notice. Jario and Austin look to do something no other team in league history has ever done, be the back-to-back undisputed champions.",
+        "With the champs back on the grid in a seemingly ruthless manner, every other team is certainly on notice. Jario and Randy look to do something no other team in league history has ever done, be the back-to-back undisputed champions.",
     ],
     "image": "/thealternativef1-cloudflare/Season5/Grid_Announcements/Grid_Mercedes.png",
     "author": "Patrick",
