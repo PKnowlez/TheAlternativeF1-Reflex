@@ -58,6 +58,7 @@ from the_alternative_f1.regulations_settings.Settings import Settings as setting
 from the_alternative_f1.all_time_stats.ConstructorAllTime import constructor_stats_view
 from the_alternative_f1.all_time_stats.DriverAllTime import driver_stats_view
 from the_alternative_f1.all_time_stats.RacesAllTime import races_all_time_view
+from the_alternative_f1.all_time_stats.DetailedAllTime import detailed_stats_view
 from the_alternative_f1.seasons import seasons, LATEST_SEASON
 from the_alternative_f1.seasons.Calculations import Calculations
 from the_alternative_f1.seasons.Tab0_LeagueNews import Tab0
@@ -1907,6 +1908,24 @@ def stats_view() -> rx.Component:
                 cursor="pointer",
                 padding="0",
             ),
+            # Detailed Tab
+            rx.button(
+                "DETAILED",
+                bg=rx.cond(State.selected_stats_tab == "detailed", "#00b4da", "#18181C"),
+                color="white",
+                font_size="10px",
+                font_weight="bold",
+                width="26px",
+                height="130px",
+                style={"writingMode": "vertical-rl"},
+                border_radius="0px 8px 8px 0px",
+                border="1px solid #2D2D32",
+                border_left="none",
+                on_click=lambda: State.set_stats_tab("detailed"),
+                _hover={"bg": "#00b4da", "transform": "scaleX(1.05)"},
+                cursor="pointer",
+                padding="0",
+            ),
             spacing="3",
             align_items="start",
             padding_top="8",
@@ -1923,7 +1942,11 @@ def stats_view() -> rx.Component:
                 rx.cond(
                     State.selected_stats_tab == "drivers",
                     driver_stats_view(NUM_SEASONS),
-                    races_all_time_view(NUM_SEASONS),
+                    rx.cond(
+                        State.selected_stats_tab == "races",
+                        races_all_time_view(NUM_SEASONS),
+                        detailed_stats_view(NUM_SEASONS),
+                    ),
                 ),
             ),
             width="100%",

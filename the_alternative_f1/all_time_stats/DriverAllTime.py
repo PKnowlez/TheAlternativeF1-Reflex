@@ -103,7 +103,7 @@ def driver_stats_view(num_seasons: int) -> rx.Component:
     return rx.vstack(
         rx.vstack(
             rx.heading(
-                "All Time Driver Statistics",
+                "All Time Driver Standings",
                 size="6",
                 color="white",
                 font_weight="900",

@@ -16,6 +16,26 @@ points_suffix = "Points"
 current_dir = Path(__file__).parent
 file = str((current_dir.parent / "The_Alternative_F1.xlsx").resolve())
 
+_excel_sheets_cache = {}
+_excel_mtime = 0
+_func_cache = {}
+
+def get_excel_sheet(sheet_name: str) -> pd.DataFrame:
+    global _excel_sheets_cache, _excel_mtime, _func_cache
+    excel_path = Path(file)
+    current_mtime = excel_path.stat().st_mtime if excel_path.exists() else 0
+    if _excel_mtime != current_mtime:
+        _excel_sheets_cache.clear()
+        _func_cache.clear()
+        _excel_mtime = current_mtime
+    if sheet_name not in _excel_sheets_cache:
+        xl = pd.ExcelFile(file)
+        if sheet_name in xl.sheet_names:
+            _excel_sheets_cache[sheet_name] = pd.read_excel(file, sheet_name=sheet_name)
+        else:
+            _excel_sheets_cache[sheet_name] = pd.DataFrame()
+    return _excel_sheets_cache[sheet_name].copy()
+
 team_colors = {
     'Alpine': 'hotpink', 
     'Aston Martin': 'teal',
@@ -33,13 +53,17 @@ team_colors = {
 }
 
 def PointTotals(season):
+    cache_key = ("PointTotals", season)
+    excel_path = Path(file)
+    current_mtime = excel_path.stat().st_mtime if excel_path.exists() else 0
+    if _excel_mtime == current_mtime and cache_key in _func_cache:
+        return _func_cache[cache_key]
+
     # Read in the appropriate sheet for the selected season
-    sheet = "Season" + str(season)
-    df = pd.read_excel(file, sheet_name=sheet)
+    df = get_excel_sheet("Season" + str(season))
 
     # Read in the list of races from the selected season
-    sheet_sched = "S" + str(season) + "Schedule"
-    schedule = pd.read_excel(file, sheet_name=sheet_sched)
+    schedule = get_excel_sheet("S" + str(season) + "Schedule")
 
     # Loop through the schedule and create lists for each global suffix
     races = []
@@ -100,15 +124,25 @@ def PointTotals(season):
     driver_totals = driver_race_totals[[last_col]].rename(columns={last_col: 'Points'}).reset_index()
     driver_totals = driver_totals.sort_values(by='Points', ascending=False).reset_index(drop=True)
 
-    return None, None, None, constructor_totals, None, driver_totals
+    res = (None, None, None, constructor_totals, None, driver_totals)
+    _func_cache[cache_key] = res
+    return res
 
 def is_season_completed(season):
-    sheet = "Season" + str(season)
+    cache_key = ("is_season_completed", season)
+    excel_path = Path(file)
+    current_mtime = excel_path.stat().st_mtime if excel_path.exists() else 0
+    if _excel_mtime == current_mtime and cache_key in _func_cache:
+        return _func_cache[cache_key]
+
     try:
-        df = pd.read_excel(file, sheet_name=sheet)
-        sheet_sched = "S" + str(season) + "Schedule"
-        schedule = pd.read_excel(file, sheet_name=sheet_sched)
+        df = get_excel_sheet("Season" + str(season))
+        schedule = get_excel_sheet("S" + str(season) + "Schedule")
+        if df.empty or schedule.empty:
+            _func_cache[cache_key] = False
+            return False
     except Exception:
+        _func_cache[cache_key] = False
         return False
 
     races = []
@@ -121,26 +155,38 @@ def is_season_completed(season):
         race_points.append(race_name + points_suffix)
 
     if not race_points:
+        _func_cache[cache_key] = False
         return False
 
     last_col = race_points[-1]
     if last_col not in df.columns:
+        _func_cache[cache_key] = False
         return False
 
     col_values = df[last_col].dropna()
     if col_values.empty:
+        _func_cache[cache_key] = False
         return False
 
     try:
         numeric_values = pd.to_numeric(col_values, errors='coerce').dropna()
         if numeric_values.empty or (numeric_values == 0).all():
+            _func_cache[cache_key] = False
             return False
     except Exception:
+        _func_cache[cache_key] = False
         return False
 
+    _func_cache[cache_key] = True
     return True
 
 def CalculateAllTime(NumSeason, tORd):
+    cache_key = ("CalculateAllTime", NumSeason, tORd)
+    excel_path = Path(file)
+    current_mtime = excel_path.stat().st_mtime if excel_path.exists() else 0
+    if _excel_mtime == current_mtime and cache_key in _func_cache:
+        return _func_cache[cache_key].copy()
+
     # Loop through the points scored for each tORd 
     dfs = []
     champs = []
@@ -168,8 +214,7 @@ def CalculateAllTime(NumSeason, tORd):
 
     dfs2 = []
     for i in range(NumSeason):
-        sheet = "Season" + str(i+1)
-        df_season = pd.read_excel(file, sheet_name=sheet)
+        df_season = get_excel_sheet("Season" + str(i+1))
 
         # Strip whitespaces
         df_season['Driver'] = df_season['Driver'].astype(str).str.strip()
@@ -197,7 +242,6 @@ def CalculateAllTime(NumSeason, tORd):
 
         dfs2.append(df2_i)
 
-    # Create the second dataframe that sums placements
     combined_df2 = pd.concat(dfs2)
     totals2 = combined_df2.groupby(tORd).sum().reset_index()  
     totals_sorted2 = totals2.sort_values(by=['1st Place', '2nd Place', '3rd Place'], ascending=False).reset_index(drop=True)
@@ -225,18 +269,15 @@ def CalculateAllTime(NumSeason, tORd):
     
     combined_totals[x] = combined_totals[x].astype(int)
 
-    # Chronological list of all race winners
-    # List elements: (season, race_name, winner_driver, winner_team)
     all_races_winners = []
     for s in range(NumSeason):
         season_num = s + 1
         try:
-            df_season = pd.read_excel(file, sheet_name="Season" + str(season_num))
+            df_season = get_excel_sheet("Season" + str(season_num))
             df_season['Driver'] = df_season['Driver'].astype(str).str.strip()
             df_season['Team'] = df_season['Team'].astype(str).str.strip()
             
-            sched_sheet = "S" + str(season_num) + "Schedule"
-            schedule = pd.read_excel(file, sheet_name=sched_sheet)
+            schedule = get_excel_sheet("S" + str(season_num) + "Schedule")
             
             for race in schedule['Race']:
                 if str(race).lower().startswith(('pre', 'post')):
@@ -251,7 +292,6 @@ def CalculateAllTime(NumSeason, tORd):
         except Exception:
             pass
 
-    # Calculate streaks for drivers/teams
     from collections import defaultdict
     max_streak = defaultdict(int)
     curr_streak = defaultdict(int)
@@ -265,17 +305,13 @@ def CalculateAllTime(NumSeason, tORd):
         if last_season is not None and season != last_season:
             curr_ss_streak.clear()
             
-        # Update overall streak for the winning entity
         curr_streak[entity] += 1
-        # Reset overall streaks for all other entities
         for e in list(curr_streak.keys()):
             if e != entity:
                 max_streak[e] = max(max_streak[e], curr_streak[e])
                 curr_streak[e] = 0
                 
-        # Update single-season streak for the winning entity
         curr_ss_streak[entity] += 1
-        # Reset single-season streaks for all other entities
         for e in list(curr_ss_streak.keys()):
             if e != entity:
                 max_ss_streak[e] = max(max_ss_streak[e], curr_ss_streak[e])
@@ -283,7 +319,6 @@ def CalculateAllTime(NumSeason, tORd):
                 
         last_season = season
         
-    # Flush final current streaks to max streaks
     for e in curr_streak:
         max_streak[e] = max(max_streak[e], curr_streak[e])
     for e in curr_ss_streak:
@@ -293,55 +328,52 @@ def CalculateAllTime(NumSeason, tORd):
     combined_totals['Single Season Win Streak'] = combined_totals[tORd].map(max_ss_streak).fillna(0).astype(int)
 
     if tORd == 'Driver':
-        # Map teams and drivers for each season
         for i in range(NumSeason):
             season_num = i + 1
-            sheet = "Season" + str(season_num)
             try:
-                df_season = pd.read_excel(file, sheet_name=sheet)
+                df_season = get_excel_sheet("Season" + str(season_num))
                 df_season['Driver'] = df_season['Driver'].astype(str).str.strip()
                 df_season['Team'] = df_season['Team'].astype(str).str.strip()
                 
-                # Group teams by driver for this season
                 driver_teams = df_season.groupby('Driver')['Team'].apply(lambda x: ", ".join(x.unique())).to_dict()
                 combined_totals[f'Season {season_num}'] = combined_totals['Driver'].map(driver_teams).fillna('—')
             except Exception:
                 combined_totals[f'Season {season_num}'] = '—'
 
-        # Reorder columns for drivers
         season_cols = [f'Season {i+1}' for i in range(NumSeason)]
         combined_totals = combined_totals[['Place', tORd, 'Points', '1st Place', '2nd Place', '3rd Place', 'Podiums', x, 'Win Streak', 'Single Season Win Streak'] + season_cols]
         combined_totals['Place'] = combined_totals.index + 1
 
     elif tORd == 'Team':
-        # Remove Podium columns as they are not needed for Team analysis as requested
         if 'Podiums' in combined_totals.columns:
             combined_totals = combined_totals.drop(columns=['Podiums'])
         
-        # Map teams and drivers for each season
         for i in range(NumSeason):
             season_num = i + 1
-            sheet = "Season" + str(season_num)
             try:
-                df_season = pd.read_excel(file, sheet_name=sheet)
+                df_season = get_excel_sheet("Season" + str(season_num))
                 df_season['Driver'] = df_season['Driver'].astype(str).str.strip()
                 df_season['Team'] = df_season['Team'].astype(str).str.strip()
                 
-                # Group drivers by team for this season
                 team_drivers = df_season.groupby('Team')['Driver'].apply(lambda x: ", ".join(x.unique())).to_dict()
                 combined_totals[f'Season {season_num}'] = combined_totals['Team'].map(team_drivers).fillna('—')
             except Exception:
                 combined_totals[f'Season {season_num}'] = '—'
 
-        # Reorder columns for teams
         season_cols = [f'Season {i+1}' for i in range(NumSeason)]
         combined_totals = combined_totals[['Place', tORd, 'Points', '1st Place', '2nd Place', '3rd Place', x, 'Win Streak', 'Single Season Win Streak'] + season_cols]
         combined_totals['Place'] = combined_totals.index + 1
 
+    _func_cache[cache_key] = combined_totals.copy()
     return combined_totals
 
 def GetSeasonChampions(num_seasons: int):
-    """Retrieve constructor and driver champions for each season."""
+    cache_key = ("GetSeasonChampions", num_seasons)
+    excel_path = Path(file)
+    current_mtime = excel_path.stat().st_mtime if excel_path.exists() else 0
+    if _excel_mtime == current_mtime and cache_key in _func_cache:
+        return _func_cache[cache_key]
+
     constructor_champs = {}
     driver_champs = {}
     for s in range(1, num_seasons + 1):
@@ -354,13 +386,20 @@ def GetSeasonChampions(num_seasons: int):
                     driver_champs[s] = df_driver['Driver'].iloc[0]
             except Exception:
                 pass
-    return constructor_champs, driver_champs
+    res = (constructor_champs, driver_champs)
+    _func_cache[cache_key] = res
+    return res
 
 def RacesAllTime(NumSeason, tORd):
+    cache_key = ("RacesAllTime", NumSeason, tORd)
+    excel_path = Path(file)
+    current_mtime = excel_path.stat().st_mtime if excel_path.exists() else 0
+    if _excel_mtime == current_mtime and cache_key in _func_cache:
+        return _func_cache[cache_key].copy()
+
     dfs3 = []
     for i in range(NumSeason):
-        sheet = "Season" + str(i + 1)
-        df = pd.read_excel(file, sheet_name=sheet)
+        df = get_excel_sheet("Season" + str(i + 1))
 
         df['Driver'] = df['Driver'].astype(str).str.strip()
         df['Team'] = df['Team'].astype(str).str.strip()
@@ -401,15 +440,12 @@ def RacesAllTime(NumSeason, tORd):
         summary_df = pd.DataFrame(summary_data)
         dfs3.append(summary_df)
 
-    # Concatenate all DataFrames
     final_df = pd.concat(dfs3, ignore_index=True)
-
-    # Group by 'Race' and aggregate 'Season X' columns
     grouped_df = final_df.groupby('Race').agg(lambda x: '\n\n'.join(x.dropna())).reset_index()
 
-    # Filter to only keep completed races (races that have scores in at least one season)
     season_cols = [col for col in grouped_df.columns if col.startswith('Season ')]
     is_completed = grouped_df[season_cols].apply(lambda row: any(str(val).strip() != "" for val in row), axis=1)
     grouped_df = grouped_df[is_completed].reset_index(drop=True)
 
+    _func_cache[cache_key] = grouped_df.copy()
     return grouped_df

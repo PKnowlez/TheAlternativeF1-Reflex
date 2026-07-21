@@ -367,43 +367,44 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
                 font_weight="900",
             ),
             rx.spacer(),
-            rx.cond(
-                has_sprint & (sprint_only_var is not None),
-                rx.hstack(
-                    rx.text("Sprint Championship", color="white", font_size="sm", font_weight="600"),
-                    rx.switch(
-                        checked=sprint_only_var,
-                        on_change=toggle_sprint_only,
-                        color_scheme="cyan",
+            rx.vstack(
+                rx.cond(
+                    has_sprint & (sprint_only_var is not None),
+                    rx.hstack(
+                        rx.text("Sprint Championship", color="white", font_size="sm", font_weight="600"),
+                        rx.switch(
+                            checked=sprint_only_var,
+                            on_change=toggle_sprint_only,
+                            color_scheme="cyan",
+                        ),
+                        spacing="2",
+                        align="center",
                     ),
-                    spacing="2",
-                    align="center",
+                    rx.fragment()
                 ),
-                rx.fragment()
+                rx.cond(
+                    (rookies_only_var is not None) & (len(season_data.get("rookies", [])) > 0),
+                    rx.hstack(
+                        rx.text("Rookies Only", color="white", font_size="sm", font_weight="600"),
+                        rx.switch(
+                            checked=rookies_only_var,
+                            on_change=toggle_rookies_only,
+                            color_scheme="cyan",
+                        ),
+                        spacing="2",
+                        align="center",
+                    ),
+                    rx.fragment()
+                ),
+                spacing="2",
+                align_items=rx.breakpoints(initial="start", sm="end"),
             ),
             width="100%",
             direction=rx.breakpoints(initial="column", sm="row"),
             align=rx.breakpoints(initial="start", sm="center"),
-            gap="4",
+            gap="2",
             padding_y="2.5%",
             padding_x="2%",
-        ),
-        # Rookies toggle
-        rx.cond(
-            (rookies_only_var is not None) & (len(season_data.get("rookies", [])) > 0),
-            rx.hstack(
-                rx.text("Rookies Only", color="white", font_size="sm", font_weight="600"),
-                rx.switch(
-                    checked=rookies_only_var,
-                    on_change=toggle_rookies_only,
-                    color_scheme="cyan",
-                ),
-                spacing="2",
-                align="center",
-                margin_bottom="4",
-                padding_x="2%",
-            ),
-            rx.fragment()
         ),
 
         # Leader badges

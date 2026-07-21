@@ -19,8 +19,12 @@ season = {
     # Rookies: drivers not present in Season 4
     "rookies": {"Grayson", "Josh C.", "Randy", "Evelo"},
 
-    "articles": [Mercedes_Article, Audi_Article, Schedule_Article, Rankings_Article, Williams_Article, 
-    McLaren_Article, Ferrari_Article, Cadillac_Article, RedBull_Article, Erick_Article, Haas_Article],
+    "articles": [TheGrid_Article, 
+    Mercedes_Article, Audi_Article,
+    Schedule_Article, Rankings_Article, 
+    Williams_Article, McLaren_Article, Ferrari_Article,
+    Cadillac_Article, RedBull_Article, Erick_Article,
+    Haas_Article],
 
     "team_colors": {
         "Ferrari": "red",
