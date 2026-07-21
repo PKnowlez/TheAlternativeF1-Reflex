@@ -10,7 +10,18 @@ article = {
         "At the onset of the season, pundits from around the league have put their votes in for the first power rankings of the season.",
         "The top contenders are currently Cadillac, the new look McLaren and Mercedes teams, and Red Bull."
         "The midfield, however, is anyone's guess. Haas looks promising, Audi looks balanced, Ferrari has a chip on their shoulders, and Williams is simply an unknown data point.",
-        "Strap in for what is sure to be an exciting season."
+        "Strap in for what is sure to be an exciting season, and click below to download the grid.",
+        rx.vstack(
+            zoomable_image(
+                src="/thealternativef1-cloudflare/Season5/Grid_Announcements/Grid_Graphic.png",
+                width="100%",
+                border_radius="md",
+                box_shadow="0 4px 12px rgba(0,0,0,0.4)"
+            ),
+            align_items="center",
+            width="100%",
+            margin_y="4",
+        ),
     ],
     "image": "/thealternativef1-cloudflare/Season5/Grid_Announcements/Grid_Graphic.png",
     "author": "Patrick",
