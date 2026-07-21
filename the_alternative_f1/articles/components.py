@@ -403,6 +403,337 @@ class DownloadState(rx.State):
 
 
 
+def zoomable_chart_script() -> rx.Component:
+    """Injects global CSS and native JavaScript event listeners for zoomable_chart bar value selection."""
+    js_code = """
+    (function() {
+        const IGNORED_KEYS = new Set([
+            'x', 'y', 'cx', 'cy', 'width', 'height', 'depth', 'index', 'rx', 'ry', 'r',
+            'strokeWidth', 'opacity', 'offset', 'minWidth', 'minHeight', 'maxHeight',
+            'maxWidth', 'margin', 'top', 'left', 'bottom', 'right', 'z', 'zIndex'
+        ]);
+
+        function handleChartClick(ev) {
+            const container = ev.target ? ev.target.closest('.zoomable-chart-popout-container, [role="dialog"]') : null;
+
+            const removeExisting = () => {
+                document.querySelectorAll('.bar-value-tag-box').forEach(t => t.remove());
+                document.querySelectorAll('.selected-bar-highlight').forEach(el => {
+                    el.classList.remove('selected-bar-highlight');
+                    if (el.dataset.origStroke !== undefined) el.style.stroke = el.dataset.origStroke;
+                    if (el.dataset.origStrokeWidth !== undefined) el.style.strokeWidth = el.dataset.origStrokeWidth;
+                    if (el.dataset.origFilter !== undefined) el.style.filter = el.dataset.origFilter;
+                });
+            };
+
+            if (!container) {
+                removeExisting();
+                return;
+            }
+
+            const clickX = ev.clientX;
+            const clickY = ev.clientY;
+            if (clickX === undefined || clickY === undefined) return;
+
+            let barNodes = Array.from(container.querySelectorAll(
+                '.recharts-bar-rectangle, .recharts-rectangle, .recharts-bar-rectangles path, .recharts-bar-rectangles rect, g.recharts-bar path, g.recharts-bar rect, path.recharts-bar-rectangle, rect.recharts-bar-rectangle, .recharts-bar path, .recharts-bar rect'
+            ));
+
+            barNodes = barNodes.filter(el => {
+                const r = el.getBoundingClientRect();
+                return r.width > 0 && r.height > 0;
+            });
+
+            if (barNodes.length === 0) {
+                removeExisting();
+                return;
+            }
+
+            let selectedBar = null;
+
+            if (ev.target && (ev.target.tagName === 'path' || ev.target.tagName === 'rect' || ev.target.tagName === 'PATH' || ev.target.tagName === 'RECT')) {
+                const r = ev.target.getBoundingClientRect();
+                if (r.width > 0 && r.height > 0 && container.contains(ev.target)) {
+                    selectedBar = ev.target;
+                }
+            }
+
+            if (!selectedBar) {
+                let selectedIdx = -1;
+                let minDist = Infinity;
+
+                for (let i = 0; i < barNodes.length; i++) {
+                    const r = barNodes[i].getBoundingClientRect();
+                    const minX = r.left - 6;
+                    const maxX = r.right + 6;
+                    const minY = Math.min(r.top, r.bottom) - 10;
+                    const maxY = Math.max(r.top, r.bottom) + 10;
+
+                    if (clickX >= minX && clickX <= maxX && clickY >= minY && clickY <= maxY) {
+                        const dist = Math.abs(clickX - (r.left + r.width / 2));
+                        if (dist < minDist) {
+                            minDist = dist;
+                            selectedBar = barNodes[i];
+                            selectedIdx = i;
+                        }
+                    }
+                }
+
+                if (!selectedBar) {
+                    for (let i = 0; i < barNodes.length; i++) {
+                        const r = barNodes[i].getBoundingClientRect();
+                        const centerX = r.left + r.width / 2;
+                        const centerY = r.top + r.height / 2;
+                        const dist = Math.hypot(clickX - centerX, clickY - centerY);
+                        if (dist < minDist && dist < 45) {
+                            minDist = dist;
+                            selectedBar = barNodes[i];
+                            selectedIdx = i;
+                        }
+                    }
+                }
+            }
+
+            if (!selectedBar) {
+                removeExisting();
+                return;
+            }
+
+            removeExisting();
+
+            selectedBar.classList.add('selected-bar-highlight');
+            selectedBar.dataset.origStroke = selectedBar.style.stroke || '';
+            selectedBar.dataset.origStrokeWidth = selectedBar.style.strokeWidth || '';
+            selectedBar.dataset.origFilter = selectedBar.style.filter || '';
+            selectedBar.style.stroke = '#FFFFFF';
+            selectedBar.style.strokeWidth = '2px';
+            selectedBar.style.filter = 'drop-shadow(0px 0px 6px rgba(255, 255, 255, 0.95))';
+
+            let val = null;
+            let nodeFiber = null;
+            let elForFiber = selectedBar;
+            while (!nodeFiber && elForFiber && elForFiber !== container) {
+                for (let k in elForFiber) {
+                    if (k.startsWith('__reactFiber') || k.startsWith('__reactInternalInstance')) {
+                        nodeFiber = elForFiber[k];
+                        break;
+                    }
+                }
+                elForFiber = elForFiber.parentElement;
+            }
+
+            let currFiber = nodeFiber;
+            let barDataKey = null;
+            let chartData = null;
+            let detectedLayout = 'horizontal';
+
+            while (currFiber) {
+                const props = currFiber.memoizedProps || currFiber.pendingProps;
+                if (props) {
+                    if (props.layout) detectedLayout = props.layout;
+                    if (props.dataKey && typeof props.dataKey === 'string') barDataKey = props.dataKey;
+                    if (props.data && Array.isArray(props.data)) chartData = props.data;
+
+                    if (val === null) {
+                        if (props.value !== undefined && props.value !== null) {
+                            if (typeof props.value === 'number') {
+                                val = props.value;
+                            } else if (Array.isArray(props.value)) {
+                                val = props.value.length >= 2 ? (props.value[1] - props.value[0]) : props.value[0];
+                            } else if (typeof props.value === 'string' && !isNaN(parseFloat(props.value))) {
+                                val = parseFloat(props.value);
+                            }
+                        }
+                    }
+
+                    if (val === null && props.payload && typeof props.payload === 'object') {
+                        if (barDataKey && props.payload[barDataKey] !== undefined && props.payload[barDataKey] !== null) {
+                            let p = parseFloat(props.payload[barDataKey]);
+                            val = !isNaN(p) ? p : props.payload[barDataKey];
+                        } else {
+                            for (let key in props.payload) {
+                                if (!IGNORED_KEYS.has(key) && key !== 'name' && key !== 'driver' && key !== 'team' && key !== 'race' && key !== 'track' && key !== 'placement' && key !== 'place' && key !== 'fill') {
+                                    let v = props.payload[key];
+                                    if (typeof v === 'number' && !isNaN(v)) {
+                                        val = v;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                currFiber = currFiber.return;
+            }
+
+            if (val === null && chartData) {
+                let barIdx = barNodes.indexOf(selectedBar);
+                if (barIdx >= 0 && barIdx < chartData.length) {
+                    const item = chartData[barIdx];
+                    if (item) {
+                        if (barDataKey && item[barDataKey] !== undefined && item[barDataKey] !== null) {
+                            let p = parseFloat(item[barDataKey]);
+                            val = !isNaN(p) ? p : item[barDataKey];
+                        } else if (typeof item === 'object') {
+                            for (let key in item) {
+                                if (!IGNORED_KEYS.has(key) && key !== 'name' && key !== 'driver' && key !== 'team' && key !== 'race' && key !== 'track' && key !== 'placement' && key !== 'place' && key !== 'fill') {
+                                    let v = item[key];
+                                    if (typeof v === 'number' && !isNaN(v)) {
+                                        val = v;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (val === null || val === undefined) {
+                const titleEl = selectedBar.querySelector('title') || (selectedBar.parentElement ? selectedBar.parentElement.querySelector('title') : null);
+                if (titleEl && titleEl.textContent) {
+                    const parts = titleEl.textContent.split(':');
+                    const parsed = parseFloat(parts[parts.length - 1].trim());
+                    if (!isNaN(parsed)) val = parsed;
+                }
+            }
+
+            if (val === null || val === undefined) {
+                val = 0;
+            }
+
+            let numVal = typeof val === 'number' ? val : parseFloat(val);
+            let displayVal = !isNaN(numVal) ? (Number.isInteger(numVal) ? numVal.toString() : numVal.toFixed(1)) : String(val);
+
+            const containerRect = container.getBoundingClientRect();
+            const barRect = selectedBar.getBoundingClientRect();
+
+            const tag = document.createElement('div');
+            tag.className = 'bar-value-tag-box';
+            tag.innerText = displayVal;
+
+            const isHorizontalBarChart = detectedLayout === 'vertical';
+            let tagTop, tagLeft;
+
+            if (isHorizontalBarChart) {
+                const isNegative = !isNaN(numVal) && numVal < 0;
+                tagTop = (barRect.top - containerRect.top + (barRect.height / 2)) + 'px';
+                tagLeft = isNegative
+                    ? (barRect.left - containerRect.left - 12) + 'px'
+                    : (barRect.right - containerRect.left + 12) + 'px';
+            } else {
+                const isNegative = !isNaN(numVal) && numVal < 0;
+                tagTop = isNegative 
+                    ? (barRect.bottom - containerRect.top + 8) + 'px'
+                    : Math.max(0, barRect.top - containerRect.top - 38) + 'px';
+                tagLeft = (barRect.left - containerRect.left + (barRect.width / 2)) + 'px';
+            }
+
+            Object.assign(tag.style, {
+                position: 'absolute',
+                top: tagTop,
+                left: tagLeft,
+                transform: isHorizontalBarChart ? 'translateY(-50%)' : 'translateX(-50%)',
+                backgroundColor: '#FFFFFF',
+                color: '#111115',
+                fontSize: '13px',
+                fontWeight: '800',
+                padding: '4px 10px',
+                borderRadius: '6px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.6)',
+                pointerEvents: 'none',
+                zIndex: '10000',
+                whiteSpace: 'nowrap',
+                fontFamily: 'Outfit, sans-serif',
+                border: '2px solid #00b4da'
+            });
+
+            const arrow = document.createElement('div');
+            if (!isHorizontalBarChart) {
+                const isNegative = !isNaN(numVal) && numVal < 0;
+                if (isNegative) {
+                    Object.assign(arrow.style, {
+                        position: 'absolute',
+                        top: '-7px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        width: '0',
+                        height: '0',
+                        borderLeft: '6px solid transparent',
+                        borderRight: '6px solid transparent',
+                        borderBottom: '7px solid #FFFFFF'
+                    });
+                } else {
+                    Object.assign(arrow.style, {
+                        position: 'absolute',
+                        bottom: '-7px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        width: '0',
+                        height: '0',
+                        borderLeft: '6px solid transparent',
+                        borderRight: '6px solid transparent',
+                        borderTop: '7px solid #FFFFFF'
+                    });
+                }
+            } else {
+                const isNegative = !isNaN(numVal) && numVal < 0;
+                if (isNegative) {
+                    Object.assign(arrow.style, {
+                        position: 'absolute',
+                        right: '-7px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        width: '0',
+                        height: '0',
+                        borderTop: '6px solid transparent',
+                        borderBottom: '6px solid transparent',
+                        borderLeft: '7px solid #FFFFFF'
+                    });
+                } else {
+                    Object.assign(arrow.style, {
+                        position: 'absolute',
+                        left: '-7px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        width: '0',
+                        height: '0',
+                        borderTop: '6px solid transparent',
+                        borderBottom: '6px solid transparent',
+                        borderRight: '7px solid #FFFFFF'
+                    });
+                }
+            }
+
+            tag.appendChild(arrow);
+            container.appendChild(tag);
+        }
+
+        if (window.__zoomableChartHandler) {
+            document.removeEventListener('click', window.__zoomableChartHandler, true);
+            document.removeEventListener('pointerdown', window.__zoomableChartHandler, true);
+        }
+        window.__zoomableChartHandler = handleChartClick;
+        document.addEventListener('click', handleChartClick, true);
+        document.addEventListener('pointerdown', handleChartClick, true);
+    })();
+    """
+    style_content = """
+    .zoomable-chart-popout-container:focus,
+    .zoomable-chart-popout-container:focus-visible,
+    .zoomable-chart-popout-container:focus-within,
+    .zoomable-chart-popout-container * :focus,
+    .zoomable-chart-popout-container * :focus-visible {
+        outline: none !important;
+        box-shadow: none !important;
+    }
+    """
+    return rx.fragment(
+        rx.html(f"<style>{style_content}</style>"),
+        rx.script(js_code),
+    )
+
+
 def zoomable_chart(chart_factory, title: str, chart_id: str, height: int = 350, large_height: int = 450) -> rx.Component:
     """Wraps a chart component to make it expandable in a modal dialog with a dynamic background download PNG button."""
     
@@ -418,165 +749,58 @@ def zoomable_chart(chart_factory, title: str, chart_id: str, height: int = 350, 
         },
     )
     
-    bar_click_js = f"""
-    (() => {{
-        const container = document.getElementById('{chart_id}');
-        if (!container) return;
-        const existing = container.querySelectorAll('.bar-value-tag-box');
-        existing.forEach(e => e.remove());
-
-        const ev = (typeof event !== 'undefined' && event) ? event : (window.event || null);
-        if (!ev) return;
-        let target = ev.target || (ev.touches && ev.touches[0] ? ev.touches[0].target : null);
-        if (!target) return;
-
-        let barElem = target.closest('.recharts-bar-rectangle, .recharts-rectangle, rect, path, .recharts-bar-cursor, .recharts-bar-symbol');
-        if (!barElem) return;
-
-        let val = null;
-
-        const extractFromProps = (p) => {{
-            if (!p) return null;
-            if (p.payload && p.dataKey && p.payload[p.dataKey] !== undefined && p.payload[p.dataKey] !== null) {{
-                return p.payload[p.dataKey];
-            }}
-            if (p.value !== undefined && p.value !== null) return p.value;
-            if (p.val !== undefined && p.val !== null) return p.val;
-            return null;
-        }};
-
-        const findProps = (el) => {{
-            if (!el) return null;
-            for (let k in el) {{
-                if (k.startsWith('__reactProps') || k.startsWith('__reactFiber')) {{
-                    let res = extractFromProps(el[k]);
-                    if (res !== null) return res;
-                    if (el[k].memoizedProps) {{
-                        res = extractFromProps(el[k].memoizedProps);
-                        if (res !== null) return res;
-                    }}
-                }}
-            }}
-            return null;
-        }};
-
-        let curr = barElem;
-        while (curr && curr !== container && val === null) {{
-            val = findProps(curr);
-            curr = curr.parentElement;
-        }}
-
-        if (val === null || val === undefined) {{
-            const tooltipVal = container.querySelector('.recharts-tooltip-item-value, .recharts-default-tooltip');
-            if (tooltipVal && tooltipVal.textContent) {{
-                let txt = tooltipVal.textContent.trim();
-                let matches = txt.match(/[-+]?\\d*\\.?\\d+/);
-                if (matches) val = matches[0];
-            }}
-        }}
-
-        if (val === null || val === undefined) {{
-            let titleEl = barElem.querySelector('title') || (barElem.parentElement ? barElem.parentElement.querySelector('title') : null);
-            if (titleEl && titleEl.textContent) {{
-                let parts = titleEl.textContent.split(':');
-                val = parts[parts.length - 1].trim();
-            }}
-        }}
-
-        if (val === null || val === undefined) return;
-
-        if (typeof val === 'number') {{
-            val = Number.isInteger(val) ? val.toString() : val.toFixed(1);
-        }}
-
-        const containerRect = container.getBoundingClientRect();
-        const barRect = barElem.getBoundingClientRect();
-
-        const tag = document.createElement('div');
-        tag.className = 'bar-value-tag-box';
-        tag.innerText = String(val);
-        Object.assign(tag.style, {{
-            position: 'absolute',
-            top: Math.max(0, barRect.top - containerRect.top - 32) + 'px',
-            left: (barRect.left - containerRect.left + (barRect.width / 2)) + 'px',
-            transform: 'translateX(-50%)',
-            backgroundColor: '#00b4da',
-            color: '#ffffff',
-            fontSize: '11px',
-            fontWeight: 'bold',
-            padding: '3px 8px',
-            borderRadius: '4px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
-            pointerEvents: 'none',
-            zIndex: '1000',
-            whiteSpace: 'nowrap',
-            fontFamily: 'Outfit, sans-serif'
-        }});
-
-        const arrow = document.createElement('div');
-        Object.assign(arrow.style, {{
-            position: 'absolute',
-            bottom: '-5px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: '0',
-            height: '0',
-            borderLeft: '5px solid transparent',
-            borderRight: '5px solid transparent',
-            borderTop: '5px solid #00b4da'
-        }});
-        tag.appendChild(arrow);
-        container.appendChild(tag);
-    }})();
-    """
-
-    return rx.dialog.root(
-        rx.dialog.trigger(small_chart_trigger),
-        rx.dialog.content(
-            # Close button (X) in the top-right corner
-            rx.dialog.close(
-                rx.button(
-                    rx.icon("x", size=16),
-                    variant="ghost",
-                    color="white",
-                    position="absolute",
-                    top="12px",
-                    right="12px",
-                    _hover={"bg": "#00b4da"},
-                    cursor="pointer",
-                ),
-            ),
-            # Modal layout (Large chart + Title + Download button)
-            rx.vstack(
-                rx.text(title, color="white", font_weight="700", font_size="md", align_self="start", margin_bottom="2"),
-                rx.box(
-                    chart_factory(large_height),
-                    id=chart_id,
-                    width="100%",
-                    position="relative",
-                    on_click=rx.call_script(bar_click_js),
-                ),
-                rx.button(
-                    rx.hstack(
-                        rx.icon("download", size=16),
-                        rx.text("Download PNG"),
-                        spacing="2",
+    return rx.fragment(
+        zoomable_chart_script(),
+        rx.dialog.root(
+            rx.dialog.trigger(small_chart_trigger),
+            rx.dialog.content(
+                # Close button (X) in the top-right corner
+                rx.dialog.close(
+                    rx.button(
+                        rx.icon("x", size=16),
+                        variant="ghost",
+                        color="white",
+                        position="absolute",
+                        top="12px",
+                        right="12px",
+                        _hover={"bg": "#00b4da"},
+                        cursor="pointer",
                     ),
-                    on_click=lambda: DownloadState.download_chart(chart_id, title),
-                    bg="#00b4da",
-                    color="white",
-                    _hover={"bg": "#009bbd"},
-                    cursor="pointer",
-                    margin_top="4",
                 ),
-                align="center",
-                width="100%",
-                spacing="4",
+                # Modal layout (Large chart + Title + Download button)
+                rx.vstack(
+                    rx.text(title, color="white", font_weight="700", font_size="md", align_self="start", margin_bottom="2"),
+                    rx.box(
+                        chart_factory(large_height),
+                        id=chart_id,
+                        class_name="zoomable-chart-popout-container",
+                        width="100%",
+                        position="relative",
+                        outline="none",
+                        style={"outline": "none", "boxShadow": "none"},
+                    ),
+                    rx.button(
+                        rx.hstack(
+                            rx.icon("download", size=16),
+                            rx.text("Download PNG"),
+                            spacing="2",
+                        ),
+                        on_click=lambda: DownloadState.download_chart(chart_id, title),
+                        bg="#00b4da",
+                        color="white",
+                        _hover={"bg": "#009bbd"},
+                        cursor="pointer",
+                        margin_top="4",
+                    ),
+                    align="center",
+                    width="100%",
+                    spacing="4",
+                ),
+                bg="var(--main-bg-color)",
+                border="1px solid #5a5a60",
+                max_width="90vw",
+                width=["100%", "90vw", "800px"],
             ),
-            bg="var(--main-bg-color)",
-            border="1px solid #5a5a60",
-            max_width="90vw",
-            width=["100%", "90vw", "800px"],
         ),
     )
 
