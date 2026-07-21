@@ -791,7 +791,7 @@ def detailed_stats_view(num_seasons: int = 5) -> rx.Component:
     )
 
     # Selection Controls (Requirement 78)
-    dropdown_section = rx.hstack(
+    dropdown_section = rx.flex(
         rx.vstack(
             rx.text("Category", color="#AAAAAA", font_size="xs", font_weight="600"),
             rx.select(
@@ -802,10 +802,12 @@ def detailed_stats_view(num_seasons: int = 5) -> rx.Component:
                 color="white",
                 border="1px solid #2C2C32",
                 border_radius="md",
-                width="160px",
+                width=["100%", "160px"],
+                max_width="100%",
             ),
             align_items="start",
             spacing="1",
+            width=["100%", "auto"],
         ),
         rx.vstack(
             rx.text("Selection", color="#AAAAAA", font_size="xs", font_weight="600"),
@@ -819,7 +821,8 @@ def detailed_stats_view(num_seasons: int = 5) -> rx.Component:
                     color="white",
                     border="1px solid #2C2C32",
                     border_radius="md",
-                    width="220px",
+                    width=["100%", "220px"],
+                    max_width="100%",
                 ),
                 rx.select(
                     DetailedStatsState.driver_options,
@@ -829,15 +832,21 @@ def detailed_stats_view(num_seasons: int = 5) -> rx.Component:
                     color="white",
                     border="1px solid #2C2C32",
                     border_radius="md",
-                    width="220px",
+                    width=["100%", "220px"],
+                    max_width="100%",
                 ),
             ),
             align_items="start",
             spacing="1",
+            width=["100%", "auto"],
         ),
-        spacing="4",
+        flex_wrap="wrap",
+        gap="4",
         align="center",
         margin_bottom="6",
+        width="100%",
+        max_width="100%",
+        padding_right=["4", "6", "8"],
     )
 
     return rx.vstack(
@@ -873,7 +882,9 @@ def detailed_stats_view(num_seasons: int = 5) -> rx.Component:
         track_pos_chart,
         track_score_chart,
         width="100%",
+        max_width="100%",
         align_items="start",
         margin_bottom="160px",
-        padding_right="4",
+        padding_right=["6", "8", "10"],
+        padding_left=["2", "4"],
     )
