@@ -418,6 +418,118 @@ def zoomable_chart(chart_factory, title: str, chart_id: str, height: int = 350, 
         },
     )
     
+    bar_click_js = f"""
+    (() => {{
+        const container = document.getElementById('{chart_id}');
+        if (!container) return;
+        const existing = container.querySelectorAll('.bar-value-tag-box');
+        existing.forEach(e => e.remove());
+
+        const ev = (typeof event !== 'undefined' && event) ? event : (window.event || null);
+        if (!ev) return;
+        let target = ev.target || (ev.touches && ev.touches[0] ? ev.touches[0].target : null);
+        if (!target) return;
+
+        let barElem = target.closest('.recharts-bar-rectangle, .recharts-rectangle, rect, path, .recharts-bar-cursor, .recharts-bar-symbol');
+        if (!barElem) return;
+
+        let val = null;
+
+        const extractFromProps = (p) => {{
+            if (!p) return null;
+            if (p.payload && p.dataKey && p.payload[p.dataKey] !== undefined && p.payload[p.dataKey] !== null) {{
+                return p.payload[p.dataKey];
+            }}
+            if (p.value !== undefined && p.value !== null) return p.value;
+            if (p.val !== undefined && p.val !== null) return p.val;
+            return null;
+        }};
+
+        const findProps = (el) => {{
+            if (!el) return null;
+            for (let k in el) {{
+                if (k.startsWith('__reactProps') || k.startsWith('__reactFiber')) {{
+                    let res = extractFromProps(el[k]);
+                    if (res !== null) return res;
+                    if (el[k].memoizedProps) {{
+                        res = extractFromProps(el[k].memoizedProps);
+                        if (res !== null) return res;
+                    }}
+                }}
+            }}
+            return null;
+        }};
+
+        let curr = barElem;
+        while (curr && curr !== container && val === null) {{
+            val = findProps(curr);
+            curr = curr.parentElement;
+        }}
+
+        if (val === null || val === undefined) {{
+            const tooltipVal = container.querySelector('.recharts-tooltip-item-value, .recharts-default-tooltip');
+            if (tooltipVal && tooltipVal.textContent) {{
+                let txt = tooltipVal.textContent.trim();
+                let matches = txt.match(/[-+]?\\d*\\.?\\d+/);
+                if (matches) val = matches[0];
+            }}
+        }}
+
+        if (val === null || val === undefined) {{
+            let titleEl = barElem.querySelector('title') || (barElem.parentElement ? barElem.parentElement.querySelector('title') : null);
+            if (titleEl && titleEl.textContent) {{
+                let parts = titleEl.textContent.split(':');
+                val = parts[parts.length - 1].trim();
+            }}
+        }}
+
+        if (val === null || val === undefined) return;
+
+        if (typeof val === 'number') {{
+            val = Number.isInteger(val) ? val.toString() : val.toFixed(1);
+        }}
+
+        const containerRect = container.getBoundingClientRect();
+        const barRect = barElem.getBoundingClientRect();
+
+        const tag = document.createElement('div');
+        tag.className = 'bar-value-tag-box';
+        tag.innerText = String(val);
+        Object.assign(tag.style, {{
+            position: 'absolute',
+            top: Math.max(0, barRect.top - containerRect.top - 32) + 'px',
+            left: (barRect.left - containerRect.left + (barRect.width / 2)) + 'px',
+            transform: 'translateX(-50%)',
+            backgroundColor: '#00b4da',
+            color: '#ffffff',
+            fontSize: '11px',
+            fontWeight: 'bold',
+            padding: '3px 8px',
+            borderRadius: '4px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
+            pointerEvents: 'none',
+            zIndex: '1000',
+            whiteSpace: 'nowrap',
+            fontFamily: 'Outfit, sans-serif'
+        }});
+
+        const arrow = document.createElement('div');
+        Object.assign(arrow.style, {{
+            position: 'absolute',
+            bottom: '-5px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '0',
+            height: '0',
+            borderLeft: '5px solid transparent',
+            borderRight: '5px solid transparent',
+            borderTop: '5px solid #00b4da'
+        }});
+        tag.appendChild(arrow);
+        container.appendChild(tag);
+    }})();
+    """
+
     return rx.dialog.root(
         rx.dialog.trigger(small_chart_trigger),
         rx.dialog.content(
@@ -441,6 +553,8 @@ def zoomable_chart(chart_factory, title: str, chart_id: str, height: int = 350, 
                     chart_factory(large_height),
                     id=chart_id,
                     width="100%",
+                    position="relative",
+                    on_click=rx.call_script(bar_click_js),
                 ),
                 rx.button(
                     rx.hstack(
@@ -465,3 +579,4 @@ def zoomable_chart(chart_factory, title: str, chart_id: str, height: int = 350, 
             width=["100%", "90vw", "800px"],
         ),
     )
+

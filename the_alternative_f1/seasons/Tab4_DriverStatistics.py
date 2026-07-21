@@ -386,11 +386,42 @@ def Tab4(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
                 cd_vals = new_df_CD.iloc[i, 1:].tolist()
                 cd_count = sum(1 for v in cd_vals if str(v).upper() == "Y")
 
+        # ── Single season win streak & podium streak calculations (Req 81 & 82) ──
+        max_ss_win_streak = 0
+        curr_ss_win_streak = 0
+        max_ss_podium_streak = 0
+        curr_ss_podium_streak = 0
+
+        for j in range(num_completed):
+            race_name = str(races_points_only[j]).strip() if j < len(races_points_only) else ""
+            p_val = driver_points[j] if j < len(driver_points) and not pd.isnull(driver_points[j]) else 0
+            plc_val = driver_place_list[j] if j < len(driver_place_list) else (1.0 if p_val >= 25 else 0.0)
+
+            # Single season win streak logic (consecutive 1st place finishes)
+            if plc_val == 1 or p_val >= 25:
+                curr_ss_win_streak += 1
+                max_ss_win_streak = max(max_ss_win_streak, curr_ss_win_streak)
+            else:
+                curr_ss_win_streak = 0
+
+            # Single season podium streak logic (exclude preseason, sprint, and postseason races)
+            if race_name.startswith(("Pre", "Post")) or "Sprint" in race_name:
+                continue
+
+            is_podium = (1.0 <= plc_val <= 3.0) or (p_val >= 15)
+            if is_podium:
+                curr_ss_podium_streak += 1
+                max_ss_podium_streak = max(max_ss_podium_streak, curr_ss_podium_streak)
+            else:
+                curr_ss_podium_streak = 0
+
         # ── Build stat badges ────────────────────────────────────────────
         badges = [
             f"Total Points: {total_pts:.1f}",
             f"Wins: {wins}",
+            f"Single Season Win Streak: {max_ss_win_streak}",
             f"Podiums: {podiums}",
+            f"Single Season Podium Streak: {max_ss_podium_streak}",
             f"Fastest Laps: {fl_count}",
             f"Avg Qualifying: {avg_qualifying:.1f}",
             f"Avg Place: {avg_place:.1f}",

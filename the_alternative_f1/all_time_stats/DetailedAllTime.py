@@ -1,13 +1,14 @@
 # All Time Detailed Driver & Constructor Statistics — Reflex Component
-# Implements TAF1APP-SDDFEAT-5 and downstream SDD requirements (78, 77, 75, 69, 71, 73, 74, 76, 70, 72, 79)
+# Implements TAF1APP-SDDFEAT-5 and downstream SDD requirements (78, 77, 75, 69, 71, 73, 74, 76, 70, 72, 79, 83)
 
+import math
 import os
 from pathlib import Path
 import pandas as pd
 import numpy as np
 import reflex as rx
 
-from the_alternative_f1.all_time_stats.Functions import get_excel_sheet, file as excel_file
+from the_alternative_f1.all_time_stats.Functions import get_excel_sheet, CalculateAllTime, file as excel_file
 from the_alternative_f1.articles.components import zoomable_chart
 
 _detailed_cache = {}
@@ -24,6 +25,24 @@ RACE_COLORS = [
 def _get_mtime():
     p = Path(excel_file)
     return p.stat().st_mtime if p.exists() else 0
+
+
+def _format_race_name(race_str: str) -> str:
+    """Format race names: Reverse -> (R), Sprint -> (S). (Requirement 83 & User Feedback)."""
+    res = str(race_str).strip()
+    if " Reverse" in res:
+        res = res.replace(" Reverse", " (R)")
+    if " Sprint" in res:
+        res = res.replace(" Sprint", " (S)")
+    return res
+
+
+def _extract_track_name(race_str: str) -> str:
+    """Extract base track name from race string for track-based statistics."""
+    res = str(race_str).strip()
+    res = res.replace(" Reverse", "").replace(" (R)", "")
+    res = res.replace(" Sprint", "").replace(" (S)", "")
+    return res.strip()
 
 
 def get_entity_lists(num_seasons: int = 5):
@@ -185,6 +204,9 @@ def compute_entity_detailed_metrics(num_seasons: int, entity_type: str, entity_n
             if not ((not valid_pts_s.empty and (valid_pts_s > 0).any()) or (not valid_place_s.empty and (valid_place_s > 0).any())):
                 continue  # Requirement 70: Skip unrun races (no points/finishes associated yet)
 
+            display_race = _format_race_name(race_str)
+            track_name = _extract_track_name(race_str)
+
             if entity_type == "Driver":
                 row = entity_rows.iloc[0]
                 pts = row[pts_col] if pts_col in row and not pd.isnull(row[pts_col]) else 0.0
@@ -217,8 +239,9 @@ def compute_entity_detailed_metrics(num_seasons: int, entity_type: str, entity_n
 
                 races_detail.append({
                     "season": s,
-                    "race": race_str,
-                    "track": race_str.replace(" Sprint", "").strip(),
+                    "race": display_race,
+                    "raw_race": race_str,
+                    "track": track_name,
                     "place": place_val,
                     "qual": qual_val,
                     "fl": str(fl).strip().upper() == "Y",
@@ -227,7 +250,7 @@ def compute_entity_detailed_metrics(num_seasons: int, entity_type: str, entity_n
                     "mot": str(mot).strip().upper() == "Y",
                     "cd": str(cd).strip().upper() == "Y",
                     "pos_change": pos_change,
-                    "label": f"S{s} {race_str}",
+                    "label": f"S{s} {display_race}",
                     "season_race_idx": season_race_count,
                 })
                 current_race_index += 1
@@ -251,8 +274,9 @@ def compute_entity_detailed_metrics(num_seasons: int, entity_type: str, entity_n
                         except Exception:
                             pass
 
-                place_val = min(valid_places) if valid_places else 0.0
-                qual_val = min(valid_quals) if valid_quals else 0.0
+                # Requirement 73: Average finish place per race for Constructor
+                place_val = float(np.mean(valid_places)) if valid_places else 0.0
+                qual_val = float(np.mean(valid_quals)) if valid_quals else 0.0
 
                 fl_cnt = (entity_rows[fl_col].astype(str).str.strip().str.upper() == "Y").sum() if fl_col in entity_rows.columns else 0
                 dotd_cnt = (entity_rows[dotd_col].astype(str).str.strip().str.upper() == "Y").sum() if dotd_col in entity_rows.columns else 0
@@ -263,8 +287,9 @@ def compute_entity_detailed_metrics(num_seasons: int, entity_type: str, entity_n
 
                 races_detail.append({
                     "season": s,
-                    "race": race_str,
-                    "track": race_str.replace(" Sprint", "").strip(),
+                    "race": display_race,
+                    "raw_race": race_str,
+                    "track": track_name,
                     "place": place_val,
                     "qual": qual_val,
                     "fl": fl_cnt > 0,
@@ -273,7 +298,7 @@ def compute_entity_detailed_metrics(num_seasons: int, entity_type: str, entity_n
                     "mot": mot_cnt > 0,
                     "cd": cd_cnt > 0,
                     "pos_change": pos_change,
-                    "label": f"S{s} {race_str}",
+                    "label": f"S{s} {display_race}",
                     "season_race_idx": season_race_count,
                 })
                 current_race_index += 1
@@ -360,10 +385,74 @@ class DetailedStatsState(rx.State):
             dotd_count, mot_count, cd_count = 0, 0, 0
             best_pts_str = "N/A"
 
+        # Requirement 75: Win Streak using CalculateAllTime method
+        win_streak = 0
+        try:
+            df_all_time = CalculateAllTime(num_seasons, entity_type)
+            if not df_all_time.empty:
+                col_name = entity_type
+                match_rows = df_all_time[df_all_time[col_name] == active_name]
+                if not match_rows.empty and "Win Streak" in match_rows.columns:
+                    win_streak = int(match_rows["Win Streak"].iloc[0])
+        except Exception:
+            pass
+
+        # Requirement 75: Podium Streak (1st, 2nd, or 3rd place only, exclude preseason, sprints, and postseason races)
+        podium_streak = 0
+        curr_podium_streak = 0
+        for s in range(1, num_seasons + 1):
+            df_s = get_excel_sheet(f"Season{s}")
+            sched_s = get_excel_sheet(f"S{s}Schedule")
+            if df_s.empty or sched_s.empty:
+                continue
+            df_s_copy = df_s.copy()
+            df_s_copy["Driver"] = df_s_copy["Driver"].astype(str).str.strip()
+            df_s_copy["Team"] = df_s_copy["Team"].astype(str).str.strip()
+            col_k = "Driver" if entity_type == "Driver" else "Team"
+            e_rows = df_s_copy[df_s_copy[col_k] == active_name]
+            if e_rows.empty:
+                continue
+
+            for r_name in sched_s["Race"]:
+                r_s = str(r_name).strip()
+                if r_s.startswith(("Pre", "Post")) or "Sprint" in r_s:
+                    continue
+                p_col = r_s + "Place"
+                pts_col = r_s + "Points"
+                v_pts = pd.to_numeric(df_s_copy[pts_col], errors='coerce').fillna(0) if pts_col in df_s_copy.columns else pd.Series()
+                v_plc = pd.to_numeric(df_s_copy[p_col], errors='coerce').fillna(0) if p_col in df_s_copy.columns else pd.Series()
+                if not ((not v_pts.empty and (v_pts > 0).any()) or (not v_plc.empty and (v_plc > 0).any())):
+                    continue
+
+                if entity_type == "Driver":
+                    r_val = e_rows.iloc[0][p_col] if p_col in e_rows.columns else None
+                    try:
+                        plc = float(r_val) if r_val is not None and not pd.isnull(r_val) else 0.0
+                    except Exception:
+                        plc = 0.0
+                else:
+                    v_p = []
+                    if p_col in e_rows.columns:
+                        for p_item in e_rows[p_col].dropna():
+                            try:
+                                v_p.append(float(p_item))
+                            except Exception:
+                                pass
+                    plc = float(np.mean(v_p)) if v_p else 0.0
+
+                if 1.0 <= plc <= 3.0:
+                    curr_podium_streak += 1
+                    podium_streak = max(podium_streak, curr_podium_streak)
+                else:
+                    curr_podium_streak = 0
+
+        # Requirement 75: All 14 Simple Statistics Bubbles in exact specified order
         badges = [
             f"Total Points: {tot_pts:.1f}",
             f"Wins: {wins}",
+            f"Win Streak: {win_streak}",
             f"Podiums: {podiums}",
+            f"Podium Streak: {podium_streak}",
             f"Fastest Laps: {fl_count}",
             f"Avg Qualifying: {avg_q:.1f}",
             f"Avg Place: {avg_p:.1f}",
@@ -413,10 +502,14 @@ class DetailedStatsState(rx.State):
         fixed_categories = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th+"]
         place_counts = {cat: 0 for cat in fixed_categories}
 
+        # Requirement 73: Placements summary (Constructor rounds non-integer down to nearest whole number)
         if not df_races.empty:
             valid_finishes = df_races[df_races["place"] > 0]["place"]
             for p_val in valid_finishes:
-                p_int = int(p_val)
+                if entity_type == "Constructor":
+                    p_int = int(math.floor(p_val))
+                else:
+                    p_int = int(p_val)
                 if 1 <= p_int <= 9:
                     suffix = "st" if p_int == 1 else "nd" if p_int == 2 else "rd" if p_int == 3 else "th"
                     place_counts[f"{p_int}{suffix}"] += 1
@@ -458,20 +551,23 @@ class DetailedStatsState(rx.State):
                     "fill": t_chg_fill,
                 })
 
-                score = ((t_avg_pts / 30.0) * 0.6) + ((t_pos_change / 22.0) * 0.4)
+                # Requirement 76: (((average points scored / 30) * 0.6) + ((0.99 / qualifying position) * 0.2) + ((positions gained/lost / 22) * 0.2)) * 100
+                q_term = (0.99 / t_avg_q * 0.2) if t_avg_q > 0 else 0.0
+                score = (((t_avg_pts / 30.0) * 0.6) + q_term + ((t_pos_change / 22.0) * 0.2)) * 100.0
                 track_score_data.append({
                     "track": tr,
                     "score": round(score, 3),
                 })
 
+            # Sort tracks best to worst (top of Y-axis to bottom)
             track_score_data.sort(key=lambda x: x["score"], reverse=True)
             for idx, item in enumerate(track_score_data):
                 if idx == 0:
-                    item["fill"] = "#FFD700"
+                    item["fill"] = "#FFD700"  # Gold
                 elif idx == 1:
-                    item["fill"] = "#C0C0C0"
+                    item["fill"] = "#C0C0C0"  # Silver
                 elif idx == 2:
-                    item["fill"] = "#CD7F32"
+                    item["fill"] = "#CD7F32"  # Bronze
                 else:
                     item["fill"] = "#00b4da"
 
