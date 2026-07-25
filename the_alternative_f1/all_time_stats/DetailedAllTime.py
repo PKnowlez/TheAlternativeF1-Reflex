@@ -237,18 +237,35 @@ def compute_entity_detailed_metrics(num_seasons: int, entity_type: str, entity_n
 
                 pos_change = (qual_val - place_val) if (qual_val > 0 and place_val > 0) else 0.0
 
+                is_fl = (str(fl).strip().upper() == "Y")
+                is_dotd = (str(dotd).strip().upper() == "Y")
+                is_mot = (str(mot).strip().upper() == "Y")
+                is_cd = (str(cd).strip().upper() == "Y")
+                is_pole = (qual_val == 1.0)
+                is_win = (place_val == 1.0)
+                is_podium = (1.0 <= place_val <= 3.0)
+
                 races_detail.append({
                     "season": s,
                     "race": display_race,
                     "raw_race": race_str,
                     "track": track_name,
                     "place": place_val,
+                    "all_places": [place_val] if place_val > 0 else [],
                     "qual": qual_val,
-                    "fl": str(fl).strip().upper() == "Y",
+                    "all_quals": [qual_val] if qual_val > 0 else [],
+                    "fl": is_fl,
+                    "fl_cnt": 1 if is_fl else 0,
                     "pts": pts_val,
-                    "dotd": str(dotd).strip().upper() == "Y",
-                    "mot": str(mot).strip().upper() == "Y",
-                    "cd": str(cd).strip().upper() == "Y",
+                    "dotd": is_dotd,
+                    "dotd_cnt": 1 if is_dotd else 0,
+                    "mot": is_mot,
+                    "mot_cnt": 1 if is_mot else 0,
+                    "cd": is_cd,
+                    "cd_cnt": 1 if is_cd else 0,
+                    "poles_cnt": 1 if is_pole else 0,
+                    "wins_cnt": 1 if is_win else 0,
+                    "podiums_cnt": 1 if is_podium else 0,
                     "pos_change": pos_change,
                     "label": f"S{s} {display_race}",
                     "season_race_idx": season_race_count,
@@ -278,10 +295,13 @@ def compute_entity_detailed_metrics(num_seasons: int, entity_type: str, entity_n
                 place_val = float(np.mean(valid_places)) if valid_places else 0.0
                 qual_val = float(np.mean(valid_quals)) if valid_quals else 0.0
 
-                fl_cnt = (entity_rows[fl_col].astype(str).str.strip().str.upper() == "Y").sum() if fl_col in entity_rows.columns else 0
-                dotd_cnt = (entity_rows[dotd_col].astype(str).str.strip().str.upper() == "Y").sum() if dotd_col in entity_rows.columns else 0
-                mot_cnt = (entity_rows[mot_col].astype(str).str.strip().str.upper() == "Y").sum() if mot_col in entity_rows.columns else 0
-                cd_cnt = (entity_rows[cd_col].astype(str).str.strip().str.upper() == "Y").sum() if cd_col in entity_rows.columns else 0
+                fl_cnt = int((entity_rows[fl_col].astype(str).str.strip().str.upper() == "Y").sum()) if fl_col in entity_rows.columns else 0
+                dotd_cnt = int((entity_rows[dotd_col].astype(str).str.strip().str.upper() == "Y").sum()) if dotd_col in entity_rows.columns else 0
+                mot_cnt = int((entity_rows[mot_col].astype(str).str.strip().str.upper() == "Y").sum()) if mot_col in entity_rows.columns else 0
+                cd_cnt = int((entity_rows[cd_col].astype(str).str.strip().str.upper() == "Y").sum()) if cd_col in entity_rows.columns else 0
+                poles_cnt = int(sum(1 for q in valid_quals if q == 1.0))
+                wins_cnt = int(sum(1 for p in valid_places if p == 1.0))
+                podiums_cnt = int(sum(1 for p in valid_places if 1.0 <= p <= 3.0))
 
                 pos_change = (qual_val - place_val) if (qual_val > 0 and place_val > 0) else 0.0
 
@@ -291,12 +311,21 @@ def compute_entity_detailed_metrics(num_seasons: int, entity_type: str, entity_n
                     "raw_race": race_str,
                     "track": track_name,
                     "place": place_val,
+                    "all_places": valid_places,
                     "qual": qual_val,
+                    "all_quals": valid_quals,
                     "fl": fl_cnt > 0,
+                    "fl_cnt": fl_cnt,
                     "pts": pts_sum,
                     "dotd": dotd_cnt > 0,
+                    "dotd_cnt": dotd_cnt,
                     "mot": mot_cnt > 0,
+                    "mot_cnt": mot_cnt,
                     "cd": cd_cnt > 0,
+                    "cd_cnt": cd_cnt,
+                    "poles_cnt": poles_cnt,
+                    "wins_cnt": wins_cnt,
+                    "podiums_cnt": podiums_cnt,
                     "pos_change": pos_change,
                     "label": f"S{s} {display_race}",
                     "season_race_idx": season_race_count,
@@ -364,18 +393,26 @@ class DetailedStatsState(rx.State):
 
         if not df_races.empty:
             tot_pts = float(df_races["pts"].sum())
-            wins = int((df_races["place"] == 1.0).sum())
-            podiums = int(((df_races["place"] >= 1.0) & (df_races["place"] <= 3.0)).sum())
-            fl_count = int(df_races["fl"].sum())
-            valid_q = df_races[df_races["qual"] > 0]["qual"]
-            avg_q = float(valid_q.mean()) if not valid_q.empty else 0.0
-            valid_p = df_races[df_races["place"] > 0]["place"]
-            avg_p = float(valid_p.mean()) if not valid_p.empty else 0.0
+            wins = int(df_races["wins_cnt"].sum())
+            podiums = int(df_races["podiums_cnt"].sum())
+            fl_count = int(df_races["fl_cnt"].sum())
+            poles = int(df_races["poles_cnt"].sum())
+            dotd_count = int(df_races["dotd_cnt"].sum())
+            mot_count = int(df_races["mot_cnt"].sum())
+            cd_count = int(df_races["cd_cnt"].sum())
+
+            if entity_type == "Constructor" and "all_places" in df_races.columns:
+                all_p_flat = [p for places in df_races["all_places"] for p in places if p > 0]
+                all_q_flat = [q for quals in df_races["all_quals"] for q in quals if q > 0]
+                avg_p = float(np.mean(all_p_flat)) if all_p_flat else 0.0
+                avg_q = float(np.mean(all_q_flat)) if all_q_flat else 0.0
+            else:
+                valid_q = df_races[df_races["qual"] > 0]["qual"]
+                avg_q = float(valid_q.mean()) if not valid_q.empty else 0.0
+                valid_p = df_races[df_races["place"] > 0]["place"]
+                avg_p = float(valid_p.mean()) if not valid_p.empty else 0.0
+
             avg_change = avg_q - avg_p
-            poles = int((df_races["qual"] == 1.0).sum())
-            dotd_count = int(df_races["dotd"].sum())
-            mot_count = int(df_races["mot"].sum())
-            cd_count = int(df_races["cd"].sum())
 
             best_row = df_races.loc[df_races["pts"].idxmax()]
             best_pts_str = f"{best_row['pts']:.0f} pts (S{best_row['season']} {best_row['race']})"
@@ -388,9 +425,10 @@ class DetailedStatsState(rx.State):
         # Requirement 75: Win Streak using CalculateAllTime method
         win_streak = 0
         try:
-            df_all_time = CalculateAllTime(num_seasons, entity_type)
+            t_or_d = "Team" if entity_type == "Constructor" else entity_type
+            df_all_time = CalculateAllTime(num_seasons, t_or_d)
             if not df_all_time.empty:
-                col_name = entity_type
+                col_name = t_or_d
                 match_rows = df_all_time[df_all_time[col_name] == active_name]
                 if not match_rows.empty and "Win Streak" in match_rows.columns:
                     win_streak = int(match_rows["Win Streak"].iloc[0])
@@ -430,6 +468,7 @@ class DetailedStatsState(rx.State):
                         plc = float(r_val) if r_val is not None and not pd.isnull(r_val) else 0.0
                     except Exception:
                         plc = 0.0
+                    is_podium = (1.0 <= plc <= 3.0)
                 else:
                     v_p = []
                     if p_col in e_rows.columns:
@@ -438,9 +477,10 @@ class DetailedStatsState(rx.State):
                                 v_p.append(float(p_item))
                             except Exception:
                                 pass
-                    plc = float(np.mean(v_p)) if v_p else 0.0
+                    # Requirement 75 v4: for constructors please use either teammate for the streak to extend
+                    is_podium = any(1.0 <= p <= 3.0 for p in v_p)
 
-                if 1.0 <= plc <= 3.0:
+                if is_podium:
                     curr_podium_streak += 1
                     podium_streak = max(podium_streak, curr_podium_streak)
                 else:
@@ -502,19 +542,30 @@ class DetailedStatsState(rx.State):
         fixed_categories = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th+"]
         place_counts = {cat: 0 for cat in fixed_categories}
 
-        # Requirement 73: Placements summary (Constructor rounds non-integer down to nearest whole number)
+        # Requirement 73: Placements summary (For constructor graph, both drivers count towards the tally)
         if not df_races.empty:
-            valid_finishes = df_races[df_races["place"] > 0]["place"]
-            for p_val in valid_finishes:
-                if entity_type == "Constructor":
-                    p_int = int(math.floor(p_val))
-                else:
+            if entity_type == "Constructor" and "all_places" in df_races.columns:
+                for places_list in df_races["all_places"]:
+                    if isinstance(places_list, (list, tuple, np.ndarray)):
+                        for p_val in places_list:
+                            try:
+                                p_int = int(p_val)
+                                if 1 <= p_int <= 9:
+                                    suffix = "st" if p_int == 1 else "nd" if p_int == 2 else "rd" if p_int == 3 else "th"
+                                    place_counts[f"{p_int}{suffix}"] += 1
+                                elif p_int >= 10:
+                                    place_counts["10th+"] += 1
+                            except Exception:
+                                pass
+            else:
+                valid_finishes = df_races[df_races["place"] > 0]["place"]
+                for p_val in valid_finishes:
                     p_int = int(p_val)
-                if 1 <= p_int <= 9:
-                    suffix = "st" if p_int == 1 else "nd" if p_int == 2 else "rd" if p_int == 3 else "th"
-                    place_counts[f"{p_int}{suffix}"] += 1
-                elif p_int >= 10:
-                    place_counts["10th+"] += 1
+                    if 1 <= p_int <= 9:
+                        suffix = "st" if p_int == 1 else "nd" if p_int == 2 else "rd" if p_int == 3 else "th"
+                        place_counts[f"{p_int}{suffix}"] += 1
+                    elif p_int >= 10:
+                        place_counts["10th+"] += 1
 
         for cat in fixed_categories:
             placements_data.append({
