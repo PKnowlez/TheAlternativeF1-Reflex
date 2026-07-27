@@ -1316,7 +1316,7 @@ def comment_card(comment: CommentData) -> rx.Component:
                 src=reply.avatar,
                 size="2",
                 fallback="U",
-                bg="#5865F2",
+                bg="transparent",
             ),
             rx.vstack(
                 rx.hstack(
@@ -1373,7 +1373,7 @@ def comment_card(comment: CommentData) -> rx.Component:
                 src=comment.avatar,
                 size="3",
                 fallback="U",
-                bg="#5865F2",
+                bg="transparent",
             ),
             rx.vstack(
                 rx.text(comment.username, color="white", font_weight="bold", font_size="sm"),
@@ -1675,7 +1675,7 @@ def comments_popout_panel() -> rx.Component:
                                     src=State.discord_avatar,
                                     size="2",
                                     fallback="U",
-                                    bg="#5865F2",
+                                    bg="transparent",
                                 ),
                                 rx.text(f"Commenting as {State.discord_username}", color="white", font_size="sm", font_weight="bold"),
                                 spacing="2",
@@ -2015,7 +2015,7 @@ def login_view() -> rx.Component:
                         src=State.discord_avatar,
                         size="5",
                         fallback="U",
-                        bg="#5865F2",
+                        bg="transparent",
                         border="2px solid #00b4da",
                     ),
                     rx.vstack(

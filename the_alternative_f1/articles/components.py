@@ -1,5 +1,6 @@
 import reflex as rx
 import os
+import httpx
 
 R2_CUSTOM_DOMAIN = os.getenv("R2_CUSTOM_DOMAIN", "https://pknowlez.com").rstrip("/")
 
@@ -28,27 +29,8 @@ def rewrite_paths_in_component(component):
             rewrite_paths_in_component(child)
 
 def download_external_image(url: str):
-    filename = url.split("/")[-1] or "download"
-    js_code = f"""
-    (async () => {{
-        try {{
-            const response = await fetch('{url}');
-            const blob = await response.blob();
-            const blobUrl = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = blobUrl;
-            a.download = '{filename}';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(blobUrl);
-        }} catch (e) {{
-            console.error('Failed to download image', e);
-            window.open('{url}', '_blank');
-        }}
-    }})();
-    """
-    return rx.call_script(js_code)
+    """Triggers backend download for an image file without opening a new tab."""
+    return DownloadState.download_image(url)
 
 def zoomable_image(src: str, **kwargs) -> rx.Component:
     """An image component that opens a fullscreen modal with a download button when clicked.
@@ -100,7 +82,7 @@ def zoomable_image(src: str, **kwargs) -> rx.Component:
                         rx.text("Download Image"),
                         spacing="2",
                     ),
-                    on_click=download_external_image(src),
+                    on_click=lambda: DownloadState.download_image(src),
                     bg="#00b4da",
                     color="white",
                     _hover={"bg": "#009bbd"},
@@ -120,6 +102,30 @@ def zoomable_image(src: str, **kwargs) -> rx.Component:
 
 
 class DownloadState(rx.State):
+    def download_image(self, url: str):
+        """Downloads an image file on the backend and sends an automatic download event to the browser."""
+        full_url = rewrite_r2_url(url)
+        filename = full_url.split("/")[-1].split("?")[0] or "image.png"
+        
+        # Local asset check
+        if full_url.startswith("/"):
+            rel_path = full_url.lstrip("/")
+            for p in [os.path.join("assets", rel_path), os.path.join("public", rel_path), rel_path]:
+                if os.path.exists(p):
+                    with open(p, "rb") as f:
+                        data = f.read()
+                    return rx.download(data=data, filename=filename)
+
+        # Remote URL fetch via HTTP Client (bypasses browser CORS)
+        try:
+            with httpx.Client(follow_redirects=True, timeout=15.0) as client:
+                resp = client.get(full_url)
+                resp.raise_for_status()
+                mime = resp.headers.get("content-type")
+                return rx.download(data=resp.content, filename=filename, mime_type=mime or None)
+        except Exception as e:
+            print(f"Error fetching image on backend for {full_url}: {e}")
+
     def download_chart(self, chart_id: str, title: str):
         js_code = f"""
         (async () => {{
@@ -139,6 +145,23 @@ class DownloadState(rx.State):
             const height = bbox.height || 450;
             const scaleFactor = 3.125; // 300 DPI / 96 DPI
             const titleSpace = 50;
+            
+            const triggerFileDownload = (href, downloadFilename) => {{
+                const downloadLink = document.createElement('a');
+                downloadLink.href = href;
+                downloadLink.download = downloadFilename;
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+            }};
+
+            const cleanTitle = "{title}".replace(/[^a-zA-Z0-9' \\(\\)\\-_]/g, '').trim();
+            const localDate = new Date();
+            const year = localDate.getFullYear();
+            const month = String(localDate.getMonth() + 1).padStart(2, '0');
+            const day = String(localDate.getDate()).padStart(2, '0');
+            const dateStr = `${{year}}-${{month}}-${{day}}`;
+            const targetFilename = `${{cleanTitle}}_${{dateStr}}.png`;
             
             // Try to fetch, convert and inline Outfit font from Google Fonts dynamically
             let fontCss = "";
@@ -191,15 +214,17 @@ class DownloadState(rx.State):
             `;
             clonedSvg.insertBefore(style, clonedSvg.firstChild);
             
-            // Serialize SVG to XML string
-            const svgString = new XMLSerializer().serializeToString(clonedSvg);
+            let svgString = new XMLSerializer().serializeToString(clonedSvg);
+            // Sanitize remote url() links to prevent canvas tainting
+            svgString = svgString.replace(/url\\(['"]?https?:\\/\\/[^'")\\s]+['"]?\\)/g, 'none');
+
             const svgBlob = new Blob([svgString], {{ type: 'image/svg+xml;charset=utf-8' }});
-            
-            const reader = new FileReader();
-            reader.onloadend = () => {{
-                const dataURL = reader.result;
-                const image = new Image();
-                image.onload = () => {{
+            const blobUrl = URL.createObjectURL(svgBlob);
+            const image = new Image();
+            image.crossOrigin = 'anonymous';
+
+            image.onload = () => {{
+                try {{
                     const canvas = document.createElement('canvas');
                     canvas.width = width * scaleFactor;
                     canvas.height = (height + titleSpace) * scaleFactor;
@@ -223,24 +248,20 @@ class DownloadState(rx.State):
                     
                     // Trigger download
                     const pngURL = canvas.toDataURL('image/png');
-                    const downloadLink = document.createElement('a');
-                    const cleanTitle = "{title}".replace(/[^a-zA-Z0-9' \\(\\)\\-_]/g, '').trim();
-                    
-                    const localDate = new Date();
-                    const year = localDate.getFullYear();
-                    const month = String(localDate.getMonth() + 1).padStart(2, '0');
-                    const day = String(localDate.getDate()).padStart(2, '0');
-                    const dateStr = `${{year}}-${{month}}-${{day}}`;
-                    
-                    downloadLink.href = pngURL;
-                    downloadLink.download = `${{cleanTitle}}_${{dateStr}}.png`;
-                    document.body.appendChild(downloadLink);
-                    downloadLink.click();
-                    document.body.removeChild(downloadLink);
-                }};
-                image.src = dataURL;
+                    triggerFileDownload(pngURL, targetFilename);
+                    URL.revokeObjectURL(blobUrl);
+                }} catch (e) {{
+                    console.error('Chart canvas export error:', e);
+                    triggerFileDownload(blobUrl, `${{cleanTitle}}_${{dateStr}}.svg`);
+                }}
             }};
-            reader.readAsDataURL(svgBlob);
+
+            image.onerror = (err) => {{
+                console.error('Chart SVG load error:', err);
+                triggerFileDownload(blobUrl, `${{cleanTitle}}_${{dateStr}}.svg`);
+            }};
+
+            image.src = blobUrl;
         }})();
         """
         return rx.call_script(js_code)
@@ -259,6 +280,23 @@ class DownloadState(rx.State):
             const height = bbox.height || 600;
             const scaleFactor = 3.125; // 300 DPI / 96 DPI
             const titleSpace = 50;
+            
+            const triggerFileDownload = (href, downloadFilename) => {{
+                const downloadLink = document.createElement('a');
+                downloadLink.href = href;
+                downloadLink.download = downloadFilename;
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+            }};
+
+            const cleanTitle = "{title}".replace(/[^a-zA-Z0-9' \\(\\)\\-_]/g, '').trim();
+            const localDate = new Date();
+            const year = localDate.getFullYear();
+            const month = String(localDate.getMonth() + 1).padStart(2, '0');
+            const day = String(localDate.getDate()).padStart(2, '0');
+            const dateStr = `${{year}}-${{month}}-${{day}}`;
+            const targetFilename = `${{cleanTitle}}_${{dateStr}}.png`;
             
             // Try to fetch, convert and inline Outfit font from Google Fonts dynamically
             let fontCss = "";
@@ -350,12 +388,12 @@ class DownloadState(rx.State):
             `;
             
             const svgBlob = new Blob([svgString], {{ type: 'image/svg+xml;charset=utf-8' }});
-            
-            const reader = new FileReader();
-            reader.onloadend = () => {{
-                const dataURL = reader.result;
-                const image = new Image();
-                image.onload = () => {{
+            const blobUrl = URL.createObjectURL(svgBlob);
+            const image = new Image();
+            image.crossOrigin = 'anonymous';
+
+            image.onload = () => {{
+                try {{
                     const canvas = document.createElement('canvas');
                     canvas.width = width * scaleFactor;
                     canvas.height = (height + titleSpace) * scaleFactor;
@@ -379,24 +417,20 @@ class DownloadState(rx.State):
                     
                     // Trigger download
                     const pngURL = canvas.toDataURL('image/png');
-                    const downloadLink = document.createElement('a');
-                    const cleanTitle = "{title}".replace(/[^a-zA-Z0-9' \\(\\)\\-_]/g, '').trim();
-                    
-                    const localDate = new Date();
-                    const year = localDate.getFullYear();
-                    const month = String(localDate.getMonth() + 1).padStart(2, '0');
-                    const day = String(localDate.getDate()).padStart(2, '0');
-                    const dateStr = `${{year}}-${{month}}-${{day}}`;
-                    
-                    downloadLink.href = pngURL;
-                    downloadLink.download = `${{cleanTitle}}_${{dateStr}}.png`;
-                    document.body.appendChild(downloadLink);
-                    downloadLink.click();
-                    document.body.removeChild(downloadLink);
-                }};
-                image.src = dataURL;
+                    triggerFileDownload(pngURL, targetFilename);
+                    URL.revokeObjectURL(blobUrl);
+                }} catch (e) {{
+                    console.error('Table canvas export error:', e);
+                    triggerFileDownload(blobUrl, `${{cleanTitle}}_${{dateStr}}.svg`);
+                }}
             }};
-            reader.readAsDataURL(svgBlob);
+
+            image.onerror = (err) => {{
+                console.error('Table SVG load error:', err);
+                triggerFileDownload(blobUrl, `${{cleanTitle}}_${{dateStr}}.svg`);
+            }};
+
+            image.src = blobUrl;
         }})();
         """
         return rx.call_script(js_code)
