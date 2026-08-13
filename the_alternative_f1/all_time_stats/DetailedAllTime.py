@@ -22,6 +22,14 @@ RACE_COLORS = [
 ]
 
 
+def is_truthy(val) -> bool:
+    if isinstance(val, bool):
+        return val
+    if val is None:
+        return False
+    return str(val).strip().upper() in ("Y", "YES", "TRUE", "1")
+
+
 def _get_mtime():
     p = Path(excel_file)
     return p.stat().st_mtime if p.exists() else 0
@@ -237,10 +245,10 @@ def compute_entity_detailed_metrics(num_seasons: int, entity_type: str, entity_n
 
                 pos_change = (qual_val - place_val) if (qual_val > 0 and place_val > 0) else 0.0
 
-                is_fl = (str(fl).strip().upper() == "Y")
-                is_dotd = (str(dotd).strip().upper() == "Y")
-                is_mot = (str(mot).strip().upper() == "Y")
-                is_cd = (str(cd).strip().upper() == "Y")
+                is_fl = is_truthy(fl)
+                is_dotd = is_truthy(dotd)
+                is_mot = is_truthy(mot)
+                is_cd = is_truthy(cd)
                 is_pole = (qual_val == 1.0)
                 is_win = (place_val == 1.0)
                 is_podium = (1.0 <= place_val <= 3.0)
@@ -295,10 +303,10 @@ def compute_entity_detailed_metrics(num_seasons: int, entity_type: str, entity_n
                 place_val = float(np.mean(valid_places)) if valid_places else 0.0
                 qual_val = float(np.mean(valid_quals)) if valid_quals else 0.0
 
-                fl_cnt = int((entity_rows[fl_col].astype(str).str.strip().str.upper() == "Y").sum()) if fl_col in entity_rows.columns else 0
-                dotd_cnt = int((entity_rows[dotd_col].astype(str).str.strip().str.upper() == "Y").sum()) if dotd_col in entity_rows.columns else 0
-                mot_cnt = int((entity_rows[mot_col].astype(str).str.strip().str.upper() == "Y").sum()) if mot_col in entity_rows.columns else 0
-                cd_cnt = int((entity_rows[cd_col].astype(str).str.strip().str.upper() == "Y").sum()) if cd_col in entity_rows.columns else 0
+                fl_cnt = int((entity_rows[fl_col].apply(is_truthy)).sum()) if fl_col in entity_rows.columns else 0
+                dotd_cnt = int((entity_rows[dotd_col].apply(is_truthy)).sum()) if dotd_col in entity_rows.columns else 0
+                mot_cnt = int((entity_rows[mot_col].apply(is_truthy)).sum()) if mot_col in entity_rows.columns else 0
+                cd_cnt = int((entity_rows[cd_col].apply(is_truthy)).sum()) if cd_col in entity_rows.columns else 0
                 poles_cnt = int(sum(1 for q in valid_quals if q == 1.0))
                 wins_cnt = int(sum(1 for p in valid_places if p == 1.0))
                 podiums_cnt = int(sum(1 for p in valid_places if 1.0 <= p <= 3.0))

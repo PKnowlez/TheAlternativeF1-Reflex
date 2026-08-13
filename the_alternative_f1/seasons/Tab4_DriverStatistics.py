@@ -12,6 +12,14 @@ import reflex as rx
 from the_alternative_f1.articles.components import zoomable_chart
 
 
+def is_truthy(val) -> bool:
+    if isinstance(val, bool):
+        return val
+    if val is None:
+        return False
+    return str(val).strip().upper() in ("Y", "YES", "TRUE", "1")
+
+
 def Tab4(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only=None) -> rx.Component:
     """Render the Driver Statistics tab."""
     new_df = data["new_df"]
@@ -294,7 +302,7 @@ def Tab4(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
         fl_count = 0
         if len(new_df_FL.columns) > 1:
             fl_values = new_df_FL.iloc[i, 1:].tolist()
-            fl_count = sum(1 for v in fl_values if str(v).upper() == "Y")
+            fl_count = sum(1 for v in fl_values if is_truthy(v))
 
         # ── Qualifying vs place analysis ────────────────────────────────
         index_a = int(index_x + 0.5)
@@ -378,13 +386,13 @@ def Tab4(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
         if has_dotd_mot_cd:
             if len(new_df_DOTD.columns) > 1:
                 dotd_vals = new_df_DOTD.iloc[i, 1:].tolist()
-                dotd_count = sum(1 for v in dotd_vals if str(v).upper() == "Y")
+                dotd_count = sum(1 for v in dotd_vals if is_truthy(v))
             if len(new_df_MOT.columns) > 1:
                 mot_vals = new_df_MOT.iloc[i, 1:].tolist()
-                mot_count = sum(1 for v in mot_vals if str(v).upper() == "Y")
+                mot_count = sum(1 for v in mot_vals if is_truthy(v))
             if len(new_df_CD.columns) > 1:
                 cd_vals = new_df_CD.iloc[i, 1:].tolist()
-                cd_count = sum(1 for v in cd_vals if str(v).upper() == "Y")
+                cd_count = sum(1 for v in cd_vals if is_truthy(v))
 
         # ── Single season win streak & podium streak calculations (Req 81 & 82) ──
         max_ss_win_streak = 0

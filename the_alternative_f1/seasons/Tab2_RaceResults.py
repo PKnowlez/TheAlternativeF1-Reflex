@@ -10,6 +10,14 @@ import pandas as pd
 import reflex as rx
 
 
+def is_truthy(val) -> bool:
+    if isinstance(val, bool):
+        return val
+    if val is None:
+        return False
+    return str(val).strip().upper() in ("Y", "YES", "TRUE", "1")
+
+
 def _build_manual_race_item(race: dict, idx: int, prefix: str, bg_color: str = "transparent", team_colors: dict = None) -> rx.Component:
     """Helper to build an accordion item for a custom manual pre-season or post-season race."""
     race_name = race.get("name", "Manual Race")
@@ -63,9 +71,7 @@ def _build_manual_race_item(race: dict, idx: int, prefix: str, bg_color: str = "
 
         fl_val = "-"
         if "FL" in r:
-            flv = r.get("FL", False)
-            is_fl = flv if isinstance(flv, bool) else (str(flv).upper() == "Y")
-            if is_fl:
+            if is_truthy(r.get("FL", False)):
                 fl_val = rx.icon("star", color="#FFD700", size=16)
 
         cells = [
@@ -92,25 +98,19 @@ def _build_manual_race_item(race: dict, idx: int, prefix: str, bg_color: str = "
 
         if show_dotd:
             dotd_val = "-"
-            dv = r.get("DOTD", False)
-            is_dotd = dv if isinstance(dv, bool) else (str(dv).upper() == "Y")
-            if is_dotd:
+            if is_truthy(r.get("DOTD", False)):
                 dotd_val = rx.icon("star", color="#FFD700", size=16)
             cells.append(rx.table.cell(dotd_val, color="#CCCCCC", font_size="sm"))
 
         if show_mot:
             mot_val = "-"
-            mv = r.get("MOT", False)
-            is_mot = mv if isinstance(mv, bool) else (str(mv).upper() == "Y")
-            if is_mot:
+            if is_truthy(r.get("MOT", False)):
                 mot_val = rx.icon("star", color="#FFD700", size=16)
             cells.append(rx.table.cell(mot_val, color="#CCCCCC", font_size="sm"))
 
         if show_cd:
             cd_val = "-"
-            cv = r.get("CD", False)
-            is_cd = cv if isinstance(cv, bool) else (str(cv).upper() == "Y")
-            if is_cd:
+            if is_truthy(r.get("CD", False)):
                 cd_val = rx.icon("star", color="#FFD700", size=16)
             cells.append(rx.table.cell(cd_val, color="#CCCCCC", font_size="sm"))
 
@@ -339,7 +339,7 @@ def Tab2(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
             fl_val = "-"
             if fastestlap_col in df.columns:
                 flv = row.get(fastestlap_col, "n")
-                if str(flv).upper() == "Y":
+                if is_truthy(flv):
                     fl_val = rx.icon("star", color="#FFD700", size=16)
 
             # Optional columns
@@ -370,21 +370,21 @@ def Tab2(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
                 dotd_val = "-"
                 if dotd_col in df.columns:
                     dv = row.get(dotd_col, "n")
-                    if str(dv).upper() == "Y":
+                    if is_truthy(dv):
                         dotd_val = rx.icon("star", color="#FFD700", size=16)
                 cells.append(rx.table.cell(dotd_val, color="#CCCCCC", font_size="sm"))
 
                 mot_val = "-"
                 if mot_col in df.columns:
                     mv = row.get(mot_col, "n")
-                    if str(mv).upper() == "Y":
+                    if is_truthy(mv):
                         mot_val = rx.icon("star", color="#FFD700", size=16)
                 cells.append(rx.table.cell(mot_val, color="#CCCCCC", font_size="sm"))
 
                 cd_val = "-"
                 if cd_col in df.columns:
                     cv = row.get(cd_col, "n")
-                    if str(cv).upper() == "Y":
+                    if is_truthy(cv):
                         cd_val = rx.icon("star", color="#FFD700", size=16)
                 cells.append(rx.table.cell(cd_val, color="#CCCCCC", font_size="sm"))
 
