@@ -11,6 +11,7 @@ from the_alternative_f1.articles.Season5.Grid_Announcements.Audi import article 
 from the_alternative_f1.articles.Season5.Grid_Announcements.Mercedes import article as Mercedes_Article
 from the_alternative_f1.articles.Season5.Grid_Announcements.TheGrid import article as TheGrid_Article
 from the_alternative_f1.articles.Season5.Preseason.PreseasonArticle import article as Preseason_Article
+from the_alternative_f1.articles.Season5.Preseason.MexicoRecap import article as Mexico_Recap_Article
 
 season = {
     "season_number": 5,
@@ -20,7 +21,7 @@ season = {
     # Rookies: drivers not present in Season 4
     "rookies": {"Grayson", "Josh C.", "Randy", "Evelo"},
 
-    "articles": [Preseason_Article, 
+    "articles": [Mexico_Recap_Article, Preseason_Article, 
     TheGrid_Article, Mercedes_Article, Audi_Article,
     Schedule_Article, Rankings_Article, Williams_Article, 
     McLaren_Article, Ferrari_Article, Cadillac_Article, 
