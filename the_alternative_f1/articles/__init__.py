@@ -13,8 +13,9 @@ from .Season5.Grid_Announcements.Mercedes import article as Mercedes_Article
 from .Season5.Grid_Announcements.TheGrid import article as TheGrid_Article
 from .Season5.Preseason.PreseasonArticle import article as Preseason_Article
 from .Season5.Preseason.MexicoRecap import article as Mexico_Recap_Article
+from .Season5.Preseason.VegasRecap import article as Vegas_Recap_Article
 
-articles = [Mexico_Recap_Article,
+articles = [Vegas_Recap_Article, Mexico_Recap_Article,
 Preseason_Article, TheGrid_Article, Mercedes_Article, 
 Audi_Article, Schedule_Article, Rankings_Article, 
 Williams_Article, McLaren_Article, Ferrari_Article, 

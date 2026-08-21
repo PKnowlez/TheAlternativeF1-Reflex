@@ -17,7 +17,7 @@ def Regulations() -> rx.Component:
         ("Race Start Incident", "During the start of a race or Red Flag restart, any driver found to be the cause of an incident will be penalized in the next main race they participate in.** An incident in this scenario is any collision, squeeze, or brake check, involving one or more cars getting damage or losing more than 3 places due to the incident. The driver at fault will be penalized by being unable to compete in Q2 of the next race. In other words, the driver will qualify last, unless there are late drivers, in which those drivers that are late will start behind the offending driver from the previous race. A penalty point will also be added to the driver's super license for the remainder of the season."),
         ("Causing a Collision", "In some scenarios, drivers may cause a collision that is not severe enough to meet the requirements of Regulation 8 - Endangering or Ruining Another Driver's Race. In these scenarios, drivers who cause a collision will be penalized with a 5 second or 10 second penalty to their finishing position. The size of the penalty will be based on league review and severity of the incident. A penalty point will also be added to the driver's super license for remainder of the season."),
         ("Race Restarts", "Races will not be restarted for racing incidents. If there is a bug or glitch during or before the race start, the race may be restarted depending on the scenario."),
-        ("Damaging Another Vehicle", "When the league's race monitoring bot is enabled, drivers who damage another driver's vehicle via contact will be given a 1 place grid penalty. This predominantly replaces Regulation 14 - Causing a Collision as there is some subjective nature to that regulation. Whereas, this regulation will be based on bot data. Neither replaces a severe incident which is handled by Regulation 8 - Endangering or Ruining Another Driver's Race.")
+        ("Damaging Another Vehicle", "When the league's race monitoring bot is enabled, drivers who damage another driver's vehicle via contact will be given a final place penalty based on severity. For repairable damage to the front wing or tires, a 1 place final result penalty will be handed to the offending party. For irrepairable damage to the floor, sidepods, rear wing, or other parts of the vehicle, a 2-3 place final result penalty will be handed to the offending driver at the discretion of the FIA.***")
     ]
 
     return rx.vstack(
@@ -55,6 +55,11 @@ def Regulations() -> rx.Component:
                 ),
                 rx.text(
                     "**This regulation will be modified for the final race of the season to penalize the driver on their finishing position in the final race, rather than carrying over to the next season.",
+                    font_size="xs",
+                    color="#888888",
+                ),
+                rx.text(
+                    "***This predominantly replaces Regulation 14 - Causing a Collision as there is some subjective nature to that regulation. Whereas, this regulation will be based on bot data. Neither replaces a severe incident which is handled by Regulation 8 - Endangering or Ruining Another Driver's Race.",
                     font_size="xs",
                     color="#888888",
                 ),

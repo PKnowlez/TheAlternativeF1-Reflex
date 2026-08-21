@@ -12,6 +12,7 @@ from the_alternative_f1.articles.Season5.Grid_Announcements.Mercedes import arti
 from the_alternative_f1.articles.Season5.Grid_Announcements.TheGrid import article as TheGrid_Article
 from the_alternative_f1.articles.Season5.Preseason.PreseasonArticle import article as Preseason_Article
 from the_alternative_f1.articles.Season5.Preseason.MexicoRecap import article as Mexico_Recap_Article
+from the_alternative_f1.articles.Season5.Preseason.VegasRecap import article as Vegas_Recap_Article
 
 season = {
     "season_number": 5,
@@ -21,7 +22,7 @@ season = {
     # Rookies: drivers not present in Season 4
     "rookies": {"Grayson", "Josh C.", "Randy", "Evelo"},
 
-    "articles": [Mexico_Recap_Article, Preseason_Article, 
+    "articles": [Vegas_Recap_Article, Mexico_Recap_Article, Preseason_Article, 
     TheGrid_Article, Mercedes_Article, Audi_Article,
     Schedule_Article, Rankings_Article, Williams_Article, 
     McLaren_Article, Ferrari_Article, Cadillac_Article, 
@@ -222,7 +223,122 @@ season = {
                     "CD": "-",
                 },
             ]
-        }
+        },
+        {
+            "name": "Pre-Season: Vegas",
+            "results": [
+                {
+                    "place": "1",
+                    "driver": "Joshua",
+                    "team": "Red Bull",
+                    "qualifying": "1",
+                    "FL": "Yes",
+                    "DOTD": "-",
+                    "MOT": "-",
+                    "CD": "-",
+                },
+                {
+                    "place": "2",
+                    "driver": "Jairo",
+                    "team": "Mercedes",
+                    "qualifying": "12",
+                    "FL": "-",
+                    "DOTD": "-",
+                    "MOT": "-",
+                    "CD": "-",
+                },
+                {
+                    "place": "3",
+                    "driver": "Nick",
+                    "team": "McLaren",
+                    "qualifying": "4",
+                    "FL": "-",
+                    "DOTD": "-",
+                    "MOT": "-",
+                    "CD": "Yes",
+                },
+                {
+                    "place": "4",
+                    "driver": "Patrick",
+                    "team": "Cadillac",
+                    "qualifying": "6",
+                    "FL": "-",
+                    "DOTD": "-",
+                    "MOT": "-",
+                    "CD": "-",
+                },
+                {
+                    "place": "5",
+                    "driver": "Del",
+                    "team": "McLaren",
+                    "qualifying": "13",
+                    "FL": "-",
+                    "DOTD": "Yes",
+                    "MOT": "Yes",
+                    "CD": "-",
+                },
+                {
+                    "place": "6",
+                    "driver": "Josh",
+                    "team": "Cadillac",
+                    "qualifying": "5",
+                    "FL": "-",
+                    "DOTD": "-",
+                    "MOT": "-",
+                    "CD": "-",
+                },
+                {
+                    "place": "7",
+                    "driver": "Leo",
+                    "team": "Ferrari",
+                    "qualifying": "3",
+                    "FL": "-",
+                    "DOTD": "-",
+                    "MOT": "-",
+                    "CD": "-",
+                },
+                {
+                    "place": "DNF",
+                    "driver": "Boz",
+                    "team": "Audi",
+                    "qualifying": "14",
+                    "FL": "-",
+                    "DOTD": "-",
+                    "MOT": "-",
+                    "CD": "-",
+                },
+                {
+                    "place": "DNF",
+                    "driver": "Jaden",
+                    "team": "Ferrari",
+                    "qualifying": "2",
+                    "FL": "-",
+                    "DOTD": "-",
+                    "MOT": "-",
+                    "CD": "-",
+                },
+                {
+                    "place": "DNF",
+                    "driver": "Brently",
+                    "team": "Haas",
+                    "qualifying": "10",
+                    "FL": "-",
+                    "DOTD": "-",
+                    "MOT": "-",
+                    "CD": "-",
+                },
+                {
+                    "place": "DSQ",
+                    "driver": "Evelo",
+                    "team": "Audi",
+                    "qualifying": "11",
+                    "FL": "-",
+                    "DOTD": "-",
+                    "MOT": "-",
+                    "CD": "-",
+                },
+            ]
+        },
     ],
     "postseason_races": [],
 }
