@@ -27,7 +27,7 @@ article = {
                 box_shadow="0 4px 12px rgba(0,0,0,0.3)"
             ),
             zoomable_image(
-                src="/thealternativef1-cloudflare/Season5/Preseason/Vegas/V3.png", 
+                src="/thealternativef1-cloudflare/Season5/Preseason/Vegas/V3-2.png", 
                 width="100%",
                 height="auto",
                 object_fit="contain",
