@@ -129,6 +129,15 @@ class DownloadState(rx.State):
     def download_chart(self, chart_id: str, title: str):
         js_code = f"""
         (async () => {{
+            const loadHtml2Canvas = () => new Promise((resolve, reject) => {{
+                if (window.html2canvas) return resolve(window.html2canvas);
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+                script.onload = () => resolve(window.html2canvas);
+                script.onerror = reject;
+                document.head.appendChild(script);
+            }});
+
             const container = document.getElementById('{chart_id}');
             if (!container) {{
                 console.error('Chart container {chart_id} not found');
@@ -163,6 +172,24 @@ class DownloadState(rx.State):
             const dateStr = `${{year}}-${{month}}-${{day}}`;
             const targetFilename = `${{cleanTitle}}_${{dateStr}}.png`;
             
+            const fallbackPngExport = async () => {{
+                try {{
+                    const html2canvas = await loadHtml2Canvas();
+                    const computedBg = getComputedStyle(document.documentElement).getPropertyValue('--main-bg-color').trim() || '#47474c';
+                    const chartCanvas = await html2canvas(container, {{
+                        scale: scaleFactor,
+                        backgroundColor: computedBg,
+                        useCORS: true,
+                        allowTaint: true,
+                        logging: false
+                    }});
+                    const pngURL = chartCanvas.toDataURL('image/png');
+                    triggerFileDownload(pngURL, targetFilename);
+                }} catch (err) {{
+                    console.error('Chart html2canvas fallback failed:', err);
+                }}
+            }};
+
             // Try to fetch, convert and inline Outfit font from Google Fonts dynamically
             let fontCss = "";
             try {{
@@ -189,7 +216,6 @@ class DownloadState(rx.State):
                         console.warn("Could not inline font file:", fontUrl, err);
                     }}
                 }}
-                // Strip out any remaining remote gstatic urls to prevent tainting the canvas
                 cssText = cssText.replace(/url\\(['"]?https:\\/\\/fonts\\.gstatic\\.com\\/[^'")\\s]+['"]?\\)/g, "local('Outfit')");
                 fontCss = cssText;
             }} catch (e) {{
@@ -204,7 +230,6 @@ class DownloadState(rx.State):
                 clonedSvg.setAttribute('viewBox', `0 0 ${{width}} ${{height}}`);
             }}
             
-            // Inject styles with embedded font-face to the SVG cloned element
             const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
             style.type = 'text/css';
             style.textContent = fontCss + `
@@ -215,7 +240,6 @@ class DownloadState(rx.State):
             clonedSvg.insertBefore(style, clonedSvg.firstChild);
             
             let svgString = new XMLSerializer().serializeToString(clonedSvg);
-            // Sanitize remote url() links to prevent canvas tainting
             svgString = svgString.replace(/url\\(['"]?https?:\\/\\/[^'")\\s]+['"]?\\)/g, 'none');
 
             const svgBlob = new Blob([svgString], {{ type: 'image/svg+xml;charset=utf-8' }});
@@ -230,35 +254,30 @@ class DownloadState(rx.State):
                     canvas.height = (height + titleSpace) * scaleFactor;
                     const context = canvas.getContext('2d');
                     
-                    // Get main bg color from CSS variable dynamically
                     const computedColor = getComputedStyle(document.documentElement).getPropertyValue('--main-bg-color').trim() || '#47474c';
                     
-                    // Fill canvas background
                     context.fillStyle = computedColor;
                     context.fillRect(0, 0, canvas.width, canvas.height);
                     
-                    // Draw Title Text at the top
                     context.fillStyle = '#FFFFFF';
                     context.font = `bold ${{Math.round(16 * scaleFactor)}}px Outfit, sans-serif`;
                     context.textBaseline = 'middle';
                     context.fillText("{title}", 20 * scaleFactor, (titleSpace / 2) * scaleFactor);
                     
-                    // Draw SVG image shifted below the title
                     context.drawImage(image, 0, titleSpace * scaleFactor, width * scaleFactor, height * scaleFactor);
                     
-                    // Trigger download
                     const pngURL = canvas.toDataURL('image/png');
                     triggerFileDownload(pngURL, targetFilename);
                     URL.revokeObjectURL(blobUrl);
                 }} catch (e) {{
                     console.error('Chart canvas export error:', e);
-                    triggerFileDownload(blobUrl, `${{cleanTitle}}_${{dateStr}}.svg`);
+                    fallbackPngExport();
                 }}
             }};
 
             image.onerror = (err) => {{
                 console.error('Chart SVG load error:', err);
-                triggerFileDownload(blobUrl, `${{cleanTitle}}_${{dateStr}}.svg`);
+                fallbackPngExport();
             }};
 
             image.src = blobUrl;
@@ -269,17 +288,20 @@ class DownloadState(rx.State):
     def download_table(self, table_id: str, title: str):
         js_code = f"""
         (async () => {{
+            const loadHtml2Canvas = () => new Promise((resolve, reject) => {{
+                if (window.html2canvas) return resolve(window.html2canvas);
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+                script.onload = () => resolve(window.html2canvas);
+                script.onerror = reject;
+                document.head.appendChild(script);
+            }});
+
             const tableElement = document.getElementById('{table_id}');
             if (!tableElement) {{
                 console.error('Table element {table_id} not found');
                 return;
             }}
-            
-            const bbox = tableElement.getBoundingClientRect();
-            const width = bbox.width || 500;
-            const height = bbox.height || 600;
-            const scaleFactor = 3.125; // 300 DPI / 96 DPI
-            const titleSpace = 50;
             
             const triggerFileDownload = (href, downloadFilename) => {{
                 const downloadLink = document.createElement('a');
@@ -297,140 +319,57 @@ class DownloadState(rx.State):
             const day = String(localDate.getDate()).padStart(2, '0');
             const dateStr = `${{year}}-${{month}}-${{day}}`;
             const targetFilename = `${{cleanTitle}}_${{dateStr}}.png`;
-            
-            // Try to fetch, convert and inline Outfit font from Google Fonts dynamically
-            let fontCss = "";
+
+            const computedBg = getComputedStyle(document.documentElement).getPropertyValue('--main-bg-color').trim() || '#47474c';
+            const scaleFactor = 2.5;
+            const titleSpace = 50;
+
             try {{
-                const cssResponse = await fetch("https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap");
-                let cssText = await cssResponse.text();
-                const urlRegex = /url\\(['"]?(https:\\/\\/fonts\\.gstatic\\.com\\/[^'")\\s]+)['"]?\\)/g;
-                let match;
-                const urlsToReplace = [];
-                while ((match = urlRegex.exec(cssText)) !== null) {{
-                    urlsToReplace.push(match[1]);
-                }}
-                for (const fontUrl of urlsToReplace) {{
-                    try {{
-                        const fontResponse = await fetch(fontUrl);
-                        const fontBlob = await fontResponse.blob();
-                        const reader = new FileReader();
-                        const base64Promise = new Promise((resolve) => {{
-                            reader.onloadend = () => resolve(reader.result);
-                        }});
-                        reader.readAsDataURL(fontBlob);
-                        const base64Url = await base64Promise;
-                        cssText = cssText.replaceAll(fontUrl, base64Url);
-                    }} catch (err) {{
-                        console.warn("Could not inline font file:", fontUrl, err);
-                    }}
-                }}
-                // Strip out any remaining remote gstatic urls to prevent tainting the canvas
-                cssText = cssText.replace(/url\\(['"]?https:\\/\\/fonts\\.gstatic\\.com\\/[^'")\\s]+['"]?\\)/g, "local('Outfit')");
-                fontCss = cssText;
-            }} catch (e) {{
-                console.warn("Could not fetch or inline Outfit font:", e);
+                const html2canvas = await loadHtml2Canvas();
+                const tableCanvas = await html2canvas(tableElement, {{
+                    scale: scaleFactor,
+                    backgroundColor: computedBg,
+                    useCORS: true,
+                    allowTaint: true,
+                    logging: false
+                }});
+
+                const finalCanvas = document.createElement('canvas');
+                finalCanvas.width = tableCanvas.width;
+                finalCanvas.height = tableCanvas.height + Math.round(titleSpace * scaleFactor);
+                const context = finalCanvas.getContext('2d');
+
+                // Fill canvas background
+                context.fillStyle = computedBg;
+                context.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+
+                // Draw Title Text at top
+                context.fillStyle = '#FFFFFF';
+                context.font = `bold ${{Math.round(16 * scaleFactor)}}px Outfit, sans-serif`;
+                context.textBaseline = 'middle';
+                context.fillText("{title}", Math.round(20 * scaleFactor), Math.round((titleSpace / 2) * scaleFactor));
+
+                // Draw table canvas below title
+                context.drawImage(tableCanvas, 0, Math.round(titleSpace * scaleFactor));
+
+                const pngURL = finalCanvas.toDataURL('image/png');
+                triggerFileDownload(pngURL, targetFilename);
+            }} catch (err) {{
+                console.error('Table PNG export error:', err);
+                const bbox = tableElement.getBoundingClientRect();
+                const fallbackCanvas = document.createElement('canvas');
+                fallbackCanvas.width = Math.round((bbox.width || 500) * scaleFactor);
+                fallbackCanvas.height = Math.round(((bbox.height || 400) + titleSpace) * scaleFactor);
+                const context = fallbackCanvas.getContext('2d');
+                context.fillStyle = computedBg;
+                context.fillRect(0, 0, fallbackCanvas.width, fallbackCanvas.height);
+                context.fillStyle = '#FFFFFF';
+                context.font = `bold ${{Math.round(16 * scaleFactor)}}px Outfit, sans-serif`;
+                context.textBaseline = 'middle';
+                context.fillText("{title}", Math.round(20 * scaleFactor), Math.round((titleSpace / 2) * scaleFactor));
+                const pngURL = fallbackCanvas.toDataURL('image/png');
+                triggerFileDownload(pngURL, targetFilename);
             }}
-            
-            // Helper function to clone element and inline all computed styles recursively, stripping remote/external url() references
-            const cloneWithStyles = (element) => {{
-                const clone = element.cloneNode(true);
-                const descClone = clone.getElementsByTagName('*');
-                const descOrig = element.getElementsByTagName('*');
-                
-                const sanitizeStyle = (styleObj, targetStyle) => {{
-                    for (let i = 0; i < styleObj.length; i++) {{
-                        const prop = styleObj[i];
-                        let val = styleObj.getPropertyValue(prop);
-                        
-                        if (val && val.includes('url(')) {{
-                            if (!val.includes('url("data:') && !val.includes("url('data:") && !val.includes("url(data:")) {{
-                                val = 'none';
-                            }}
-                        }}
-                        targetStyle.setProperty(prop, val, styleObj.getPropertyPriority(prop));
-                    }}
-                }};
-                
-                sanitizeStyle(getComputedStyle(element), clone.style);
-                
-                for (let i = 0; i < descOrig.length; i++) {{
-                    sanitizeStyle(getComputedStyle(descOrig[i]), descClone[i].style);
-                }}
-                
-                // Sanitize any img tags in the clone
-                const images = clone.getElementsByTagName('img');
-                for (let img of images) {{
-                    if (img.src && !img.src.startsWith('data:')) {{
-                        img.src = '';
-                    }}
-                }}
-                return clone;
-            }};
-            
-            const clonedTable = cloneWithStyles(tableElement);
-            
-            // Inject font and global styles inside the foreignObject SVG
-            const svgString = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="${{width}}" height="${{height}}">
-                    <foreignObject width="100%" height="100%">
-                        <div xmlns="http://www.w3.org/1999/xhtml" style="width:100%; height:100%; padding:0; margin:0; font-family: 'Outfit', sans-serif !important;">
-                            <style type="text/css">
-                                ${{fontCss}}
-                                * {{
-                                    font-family: 'Outfit', sans-serif !important;
-                                    box-sizing: border-box !important;
-                                }}
-                            </style>
-                            ${{new XMLSerializer().serializeToString(clonedTable)}}
-                        </div>
-                    </foreignObject>
-                </svg>
-            `;
-            
-            const svgBlob = new Blob([svgString], {{ type: 'image/svg+xml;charset=utf-8' }});
-            const blobUrl = URL.createObjectURL(svgBlob);
-            const image = new Image();
-            image.crossOrigin = 'anonymous';
-
-            image.onload = () => {{
-                try {{
-                    const canvas = document.createElement('canvas');
-                    canvas.width = width * scaleFactor;
-                    canvas.height = (height + titleSpace) * scaleFactor;
-                    const context = canvas.getContext('2d');
-                    
-                    // Get main bg color from CSS variable dynamically
-                    const computedColor = getComputedStyle(document.documentElement).getPropertyValue('--main-bg-color').trim() || '#47474c';
-                    
-                    // Fill canvas background
-                    context.fillStyle = computedColor;
-                    context.fillRect(0, 0, canvas.width, canvas.height);
-                    
-                    // Draw Title Text at the top
-                    context.fillStyle = '#FFFFFF';
-                    context.font = `bold ${{Math.round(16 * scaleFactor)}}px Outfit, sans-serif`;
-                    context.textBaseline = 'middle';
-                    context.fillText("{title}", 20 * scaleFactor, (titleSpace / 2) * scaleFactor);
-                    
-                    // Draw SVG image shifted below the title
-                    context.drawImage(image, 0, titleSpace * scaleFactor, width * scaleFactor, height * scaleFactor);
-                    
-                    // Trigger download
-                    const pngURL = canvas.toDataURL('image/png');
-                    triggerFileDownload(pngURL, targetFilename);
-                    URL.revokeObjectURL(blobUrl);
-                }} catch (e) {{
-                    console.error('Table canvas export error:', e);
-                    triggerFileDownload(blobUrl, `${{cleanTitle}}_${{dateStr}}.svg`);
-                }}
-            }};
-
-            image.onerror = (err) => {{
-                console.error('Table SVG load error:', err);
-                triggerFileDownload(blobUrl, `${{cleanTitle}}_${{dateStr}}.svg`);
-            }};
-
-            image.src = blobUrl;
         }})();
         """
         return rx.call_script(js_code)
