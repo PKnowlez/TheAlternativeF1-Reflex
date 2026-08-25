@@ -16,6 +16,8 @@ class CommentReplyData(BaseModel):
     username: str = ""
     avatar: str = ""
     text: str = ""
+    gif_url: str = ""
+    created_at: str = ""
     likes: int = 0
     dislikes: int = 0
     liked_by: list[str] = []
@@ -27,6 +29,8 @@ class CommentData(BaseModel):
     username: str = ""
     avatar: str = ""
     text: str = ""
+    gif_url: str = ""
+    created_at: str = ""
     likes: int = 0
     dislikes: int = 0
     liked_by: list[str] = []
@@ -230,8 +234,10 @@ class State(rx.State):
     # ── Comments State ───────────────────────────────────────────────────
     comments_list: list[CommentData] = []
     new_comment_text: str = ""
+    selected_gif_url: str = ""
     active_reply_comment_id: int = -1
     new_reply_text: str = ""
+    selected_reply_gif_url: str = ""
     expanded_comment_ids: list[int] = []
     show_comments_panel: bool = False
     show_write_comment: bool = False
@@ -259,6 +265,18 @@ class State(rx.State):
 
     def set_new_reply_text(self, text: str):
         self.new_reply_text = text
+
+    def set_selected_gif_url(self, url: str):
+        self.selected_gif_url = url
+
+    def set_selected_reply_gif_url(self, url: str):
+        self.selected_reply_gif_url = url
+
+    def clear_selected_gif(self):
+        self.selected_gif_url = ""
+
+    def clear_selected_reply_gif(self):
+        self.selected_reply_gif_url = ""
 
     @rx.var
     def discord_auth_url(self) -> str:
@@ -298,6 +316,20 @@ class State(rx.State):
 
     def load_comments(self):
         try:
+            from datetime import datetime
+            def format_dt(raw_dt):
+                if not raw_dt:
+                    return ""
+                try:
+                    dt_str = str(raw_dt).replace("Z", "+00:00")
+                    if "T" in dt_str:
+                        dt = datetime.fromisoformat(dt_str)
+                    else:
+                        dt = datetime.strptime(dt_str.split(".")[0], "%Y-%m-%d %H:%M:%S")
+                    return dt.strftime("%b %d, %Y %I:%M %p")
+                except Exception:
+                    return str(raw_dt).split(".")[0]
+
             supabase = get_supabase_client()
             comments_res = supabase.table("comments")\
                 .select("*, comment_replies(*)")\
@@ -334,6 +366,8 @@ class State(rx.State):
                         username=r.get("username", ""),
                         avatar=r.get("avatar", ""),
                         text=r.get("text", ""),
+                        gif_url=r.get("gif_url", "") or "",
+                        created_at=format_dt(r.get("created_at", "")),
                         likes=int(r.get("likes", 0)),
                         dislikes=int(r.get("dislikes", 0)),
                         liked_by=liked_by,
@@ -353,6 +387,8 @@ class State(rx.State):
                     username=c.get("username", ""),
                     avatar=c.get("avatar", ""),
                     text=c.get("text", ""),
+                    gif_url=c.get("gif_url", "") or "",
+                    created_at=format_dt(c.get("created_at", "")),
                     likes=int(c.get("likes", 0)),
                     dislikes=int(c.get("dislikes", 0)),
                     liked_by=liked_by,
@@ -369,11 +405,15 @@ class State(rx.State):
         if not self.discord_username:
             return
         text = self.new_comment_text.strip()
-        if not text:
+        gif_url = self.selected_gif_url.strip()
+        if not text and not gif_url:
             return
         
         self.is_submitting = True
         
+        from datetime import datetime
+        now_formatted = datetime.now().strftime("%b %d, %Y %I:%M %p")
+
         # Optimistic update
         temp_id = -1
         if self.comments_list:
@@ -389,6 +429,8 @@ class State(rx.State):
             username=self.discord_username,
             avatar=self.discord_avatar,
             text=text,
+            gif_url=gif_url,
+            created_at=now_formatted,
             likes=0,
             dislikes=0,
             liked_by=[],
@@ -397,6 +439,7 @@ class State(rx.State):
         )
         self.comments_list.append(new_comment)
         self.new_comment_text = ""
+        self.selected_gif_url = ""
         yield
         
         try:
@@ -406,6 +449,7 @@ class State(rx.State):
                 "username": self.discord_username,
                 "avatar": self.discord_avatar,
                 "text": text,
+                "gif_url": gif_url,
                 "likes": 0,
                 "dislikes": 0,
                 "liked_by": [],
@@ -421,11 +465,15 @@ class State(rx.State):
         if not self.discord_username:
             return
         text = self.new_reply_text.strip()
-        if not text:
+        gif_url = self.selected_reply_gif_url.strip()
+        if not text and not gif_url:
             return
         
         self.is_submitting_reply = True
         
+        from datetime import datetime
+        now_formatted = datetime.now().strftime("%b %d, %Y %I:%M %p")
+
         # Optimistic update
         for c in self.comments_list:
             if c.id == comment_id:
@@ -443,6 +491,8 @@ class State(rx.State):
                     username=self.discord_username,
                     avatar=self.discord_avatar,
                     text=text,
+                    gif_url=gif_url,
+                    created_at=now_formatted,
                     likes=0,
                     dislikes=0,
                     liked_by=[],
@@ -454,6 +504,7 @@ class State(rx.State):
                 break
                 
         self.new_reply_text = ""
+        self.selected_reply_gif_url = ""
         self.active_reply_comment_id = -1
         yield
         
@@ -464,6 +515,7 @@ class State(rx.State):
                 "username": self.discord_username,
                 "avatar": self.discord_avatar,
                 "text": text,
+                "gif_url": gif_url,
                 "likes": 0,
                 "dislikes": 0,
                 "liked_by": [],
@@ -1344,7 +1396,22 @@ def comment_card(comment: CommentData) -> rx.Component:
                     spacing="2",
                     align="center",
                 ),
-                rx.text(reply.text, color="#CCCCCC", font_size="xs"),
+                rx.cond(
+                    reply.gif_url != "",
+                    rx.image(
+                        src=reply.gif_url,
+                        max_height="180px",
+                        border_radius="md",
+                        object_fit="contain",
+                        margin_y="1",
+                    ),
+                    rx.fragment()
+                ),
+                rx.cond(
+                    reply.text != "",
+                    rx.text(reply.text, color="#CCCCCC", font_size="xs"),
+                    rx.fragment()
+                ),
                 rx.hstack(
                     rx.button(
                         rx.hstack(
@@ -1370,8 +1437,15 @@ def comment_card(comment: CommentData) -> rx.Component:
                         on_click=lambda: State.dislike_comment(comment.id, reply.id),
                         cursor="pointer",
                     ),
+                    rx.spacer(),
+                    rx.cond(
+                        reply.created_at != "",
+                        rx.text(reply.created_at, font_size="9px", color="#888888", align_self="center"),
+                        rx.fragment()
+                    ),
                     spacing="2",
                     align="center",
+                    width="100%",
                     margin_top="1",
                 ),
                 spacing="1",
@@ -1405,17 +1479,34 @@ def comment_card(comment: CommentData) -> rx.Component:
             width="100%",
         ),
 
-        # Comment Text
-        rx.text(
-            comment.text,
-            color="#E0E0E0",
-            font_size="sm",
-            line_height="1.5",
-            margin_top="2",
-            width="100%",
+        # Comment GIF Display (REQ-89)
+        rx.cond(
+            comment.gif_url != "",
+            rx.image(
+                src=comment.gif_url,
+                max_height="220px",
+                border_radius="md",
+                object_fit="contain",
+                margin_y="2",
+            ),
+            rx.fragment()
         ),
 
-        # Actions (Like, Dislike, Reply)
+        # Comment Text
+        rx.cond(
+            comment.text != "",
+            rx.text(
+                comment.text,
+                color="#E0E0E0",
+                font_size="sm",
+                line_height="1.5",
+                margin_top="1",
+                width="100%",
+            ),
+            rx.fragment()
+        ),
+
+        # Actions (Like, Dislike, Reply) + Date and Time (REQ-90)
         rx.hstack(
             rx.button(
                 rx.hstack(
@@ -1457,8 +1548,15 @@ def comment_card(comment: CommentData) -> rx.Component:
                 ),
                 rx.fragment()
             ),
+            rx.spacer(),
+            rx.cond(
+                comment.created_at != "",
+                rx.text(comment.created_at, font_size="10px", color="#888888", align_self="center"),
+                rx.fragment()
+            ),
             spacing="4",
             align="center",
+            width="100%",
             margin_top="3",
             margin_bottom="2",
         ),
@@ -1475,7 +1573,33 @@ def comment_card(comment: CommentData) -> rx.Component:
                     bg="#202225",
                     border="1px solid #2C2C32",
                     color="white",
-                    height="80px",
+                    height="70px",
+                ),
+                # Giphy GIF Selection for Reply (REQ-87)
+                rx.hstack(
+                    rx.icon("image", size=14, color="#888888"),
+                    rx.input(
+                        placeholder="Paste Giphy GIF URL...",
+                        value=State.selected_reply_gif_url,
+                        on_change=State.set_selected_reply_gif_url,
+                        width="100%",
+                        bg="#202225",
+                        border="1px solid #2C2C32",
+                        color="white",
+                        size="1",
+                    ),
+                    align="center",
+                    width="100%",
+                ),
+                rx.cond(
+                    State.selected_reply_gif_url != "",
+                    rx.hstack(
+                        rx.image(src=State.selected_reply_gif_url, max_height="80px", border_radius="md"),
+                        rx.button("Remove GIF", size="1", variant="ghost", color="#FF4B4B", on_click=State.clear_selected_reply_gif),
+                        align="center",
+                        spacing="2",
+                    ),
+                    rx.fragment()
                 ),
                 rx.hstack(
                     rx.spacer(),
@@ -1709,7 +1833,33 @@ def comments_popout_panel() -> rx.Component:
                                 bg="#18181C",
                                 border="1px solid #2C2C32",
                                 color="white",
-                                height="100px",
+                                height="90px",
+                            ),
+                            # Giphy GIF Selection (REQ-87)
+                            rx.hstack(
+                                rx.icon("image", size=16, color="#888888"),
+                                rx.input(
+                                    placeholder="Paste Giphy GIF URL (e.g. https://media.giphy.com/media/...)",
+                                    value=State.selected_gif_url,
+                                    on_change=State.set_selected_gif_url,
+                                    width="100%",
+                                    bg="#18181C",
+                                    border="1px solid #2C2C32",
+                                    color="white",
+                                    size="2",
+                                ),
+                                align="center",
+                                width="100%",
+                            ),
+                            rx.cond(
+                                State.selected_gif_url != "",
+                                rx.hstack(
+                                    rx.image(src=State.selected_gif_url, max_height="100px", border_radius="md"),
+                                    rx.button("Remove GIF", size="1", variant="ghost", color="#FF4B4B", on_click=State.clear_selected_gif),
+                                    align="center",
+                                    spacing="2",
+                                ),
+                                rx.fragment()
                             ),
                             rx.button(
                                 rx.cond(
