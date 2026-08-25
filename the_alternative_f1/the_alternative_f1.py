@@ -37,6 +37,10 @@ class CommentData(BaseModel):
     disliked_by: list[str] = []
     replies: list[CommentReplyData] = []
 
+class GifItemData(BaseModel):
+    preview_url: str = ""
+    original_url: str = ""
+
 _supabase_client: SupabaseClient | None = None
 
 def get_supabase_client() -> SupabaseClient:
@@ -278,6 +282,61 @@ class State(rx.State):
     def clear_selected_reply_gif(self):
         self.selected_reply_gif_url = ""
 
+    # ── Giphy GIF Search State ───────────────────────────────────────────
+    gif_search_query: str = ""
+    gif_search_results: list[GifItemData] = []
+    is_searching_gifs: bool = False
+    show_gif_picker: bool = False
+    active_gif_target: str = "comment"
+
+    def set_gif_search_query(self, query: str):
+        self.gif_search_query = query
+
+    def set_show_gif_picker(self, val: bool):
+        self.show_gif_picker = val
+
+    def toggle_gif_picker(self, target: str = "comment"):
+        self.active_gif_target = target
+        self.show_gif_picker = not self.show_gif_picker
+        if self.show_gif_picker and not self.gif_search_results:
+            return State.search_gifs("f1")
+
+    def search_gifs(self, query: str = None):
+        if query is not None and isinstance(query, str):
+            self.gif_search_query = query
+        q = self.gif_search_query.strip() or "f1"
+        self.is_searching_gifs = True
+        yield
+        
+        try:
+            import os, json, urllib.request, urllib.parse
+            api_key = os.getenv("GIPHY_API_KEY", "ldQeNHnpL3WcCxJE1uO8HTk17ICn8i34").strip()
+            encoded_q = urllib.parse.quote(q)
+            url = f"https://api.giphy.com/v1/gifs/search?api_key={api_key}&q={encoded_q}&limit=12&rating=g"
+            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                items = []
+                for g in data.get("data", []):
+                    imgs = g.get("images", {})
+                    prev = imgs.get("fixed_height_small", {}).get("url") or imgs.get("fixed_height", {}).get("url")
+                    orig = imgs.get("downsized_medium", {}).get("url") or imgs.get("original", {}).get("url") or prev
+                    if prev and orig:
+                        items.append(GifItemData(preview_url=prev, original_url=orig))
+                self.gif_search_results = items
+        except Exception as e:
+            print(f"Error fetching Giphy GIFs: {e}")
+            self.gif_search_results = []
+            
+        self.is_searching_gifs = False
+
+    def select_gif(self, original_url: str):
+        if self.active_gif_target == "comment":
+            self.selected_gif_url = original_url
+        else:
+            self.selected_reply_gif_url = original_url
+        self.show_gif_picker = False
+
     @rx.var
     def discord_auth_url(self) -> str:
         from the_alternative_f1.oauth_discord import load_env
@@ -444,17 +503,25 @@ class State(rx.State):
         
         try:
             supabase = get_supabase_client()
-            supabase.table("comments").insert({
+            payload = {
                 "article_title": self.selected_article_title,
                 "username": self.discord_username,
                 "avatar": self.discord_avatar,
                 "text": text,
-                "gif_url": gif_url,
                 "likes": 0,
                 "dislikes": 0,
                 "liked_by": [],
                 "disliked_by": []
-            }).execute()
+            }
+            if gif_url:
+                payload["gif_url"] = gif_url
+            try:
+                supabase.table("comments").insert(payload).execute()
+            except Exception as insert_err:
+                print(f"Insertion with gif_url failed, falling back to standard payload: {insert_err}")
+                if "gif_url" in payload:
+                    del payload["gif_url"]
+                    supabase.table("comments").insert(payload).execute()
         except Exception as e:
             print(f"Error adding comment to Supabase: {e}")
             
@@ -510,17 +577,25 @@ class State(rx.State):
         
         try:
             supabase = get_supabase_client()
-            supabase.table("comment_replies").insert({
+            payload = {
                 "comment_id": comment_id,
                 "username": self.discord_username,
                 "avatar": self.discord_avatar,
                 "text": text,
-                "gif_url": gif_url,
                 "likes": 0,
                 "dislikes": 0,
                 "liked_by": [],
                 "disliked_by": []
-            }).execute()
+            }
+            if gif_url:
+                payload["gif_url"] = gif_url
+            try:
+                supabase.table("comment_replies").insert(payload).execute()
+            except Exception as insert_err:
+                print(f"Insertion of reply with gif_url failed, falling back: {insert_err}")
+                if "gif_url" in payload:
+                    del payload["gif_url"]
+                    supabase.table("comment_replies").insert(payload).execute()
         except Exception as e:
             print(f"Error adding reply to Supabase: {e}")
                 
@@ -1379,6 +1454,131 @@ def articles_list() -> rx.Component:
         padding_bottom="160px",
         id="homepage-container",
     )
+
+
+def gif_picker_component() -> rx.Component:
+    """An interactive Giphy GIF search modal / popover."""
+    def render_gif_thumb(item: GifItemData) -> rx.Component:
+        return rx.box(
+            rx.image(
+                src=item.preview_url,
+                width="100%",
+                height="75px",
+                object_fit="cover",
+                border_radius="md",
+            ),
+            cursor="pointer",
+            border="2px solid transparent",
+            _hover={
+                "border_color": "#00b4da",
+                "transform": "scale(1.05)",
+            },
+            transition="all 0.15s ease-in-out",
+            on_click=lambda: State.select_gif(item.original_url),
+        )
+
+    categories = ["F1", "Cheering", "Funny", "Excited", "Bravo", "Facepalm"]
+
+    return rx.cond(
+        State.show_gif_picker,
+        rx.vstack(
+            # Header
+            rx.hstack(
+                rx.hstack(
+                    rx.icon("image", size=16, color="#00b4da"),
+                    rx.text("Search Giphy GIFs", color="white", font_weight="bold", font_size="xs"),
+                    spacing="2",
+                    align="center",
+                ),
+                rx.spacer(),
+                rx.icon(
+                    "x",
+                    size=16,
+                    color="#AAAAAA",
+                    cursor="pointer",
+                    on_click=lambda: State.set_show_gif_picker(False),
+                    _hover={"color": "white"},
+                ),
+                width="100%",
+                align="center",
+                margin_bottom="1",
+            ),
+            # Search Bar
+            rx.hstack(
+                rx.input(
+                    placeholder="Search GIFs (e.g. F1, cheering)...",
+                    value=State.gif_search_query,
+                    on_change=State.set_gif_search_query,
+                    bg="#222226",
+                    border="1px solid #33333A",
+                    color="white",
+                    size="1",
+                    width="100%",
+                ),
+                rx.button(
+                    rx.cond(
+                        State.is_searching_gifs,
+                        rx.spinner(size="1"),
+                        rx.icon("search", size=14),
+                    ),
+                    bg="#00b4da",
+                    color="white",
+                    on_click=State.search_gifs,
+                    cursor="pointer",
+                    size="1",
+                    disabled=State.is_searching_gifs,
+                ),
+                width="100%",
+                spacing="2",
+            ),
+            # Quick Category Chips
+            rx.hstack(
+                *[
+                    rx.badge(
+                        cat,
+                        bg="#222226",
+                        color="#AAAAAA",
+                        cursor="pointer",
+                        border="1px solid #33333A",
+                        font_size="10px",
+                        _hover={"bg": "#00b4da", "color": "white"},
+                        on_click=lambda c=cat: State.search_gifs(c),
+                    )
+                    for cat in categories
+                ],
+                wrap="wrap",
+                spacing="1",
+                margin_y="1",
+            ),
+            # GIF Results Grid
+            rx.cond(
+                State.is_searching_gifs,
+                rx.center(rx.spinner(size="1", color="#00b4da"), width="100%", padding="3"),
+                rx.cond(
+                    State.gif_search_results.length() > 0,
+                    rx.grid(
+                        rx.foreach(State.gif_search_results, render_gif_thumb),
+                        columns="3",
+                        spacing="2",
+                        width="100%",
+                        max_height="200px",
+                        overflow_y="auto",
+                    ),
+                    rx.text("No GIFs found. Try searching above!", color="#888888", font_size="xs", padding="2"),
+                )
+            ),
+            bg="#18181C",
+            border="1px solid #00b4da",
+            border_radius="lg",
+            padding="2.5%",
+            width="100%",
+            box_shadow="0 8px 25px rgba(0,0,0,0.6)",
+            margin_y="2",
+        ),
+        rx.fragment()
+    )
+
+
 def comment_card(comment: CommentData) -> rx.Component:
     """An individual comment card containing its text, actions, and replies."""
     
@@ -1577,28 +1777,37 @@ def comment_card(comment: CommentData) -> rx.Component:
                 ),
                 # Giphy GIF Selection for Reply (REQ-87)
                 rx.hstack(
-                    rx.icon("image", size=14, color="#888888"),
-                    rx.input(
-                        placeholder="Paste Giphy GIF URL...",
-                        value=State.selected_reply_gif_url,
-                        on_change=State.set_selected_reply_gif_url,
-                        width="100%",
-                        bg="#202225",
-                        border="1px solid #2C2C32",
-                        color="white",
+                    rx.button(
+                        rx.hstack(
+                            rx.icon("image", size=14),
+                            rx.text("Search GIF", font_size="xs"),
+                            spacing="1",
+                        ),
                         size="1",
+                        bg="#2A2A30",
+                        color="#00b4da",
+                        border="1px solid #00b4da",
+                        _hover={"bg": "#00b4da", "color": "white"},
+                        cursor="pointer",
+                        on_click=lambda: State.toggle_gif_picker("reply"),
+                    ),
+                    rx.spacer(),
+                    rx.cond(
+                        State.selected_reply_gif_url != "",
+                        rx.hstack(
+                            rx.image(src=State.selected_reply_gif_url, height="35px", border_radius="md"),
+                            rx.button("Remove GIF", size="1", variant="ghost", color="#FF4B4B", on_click=State.clear_selected_reply_gif),
+                            align="center",
+                            spacing="2",
+                        ),
+                        rx.fragment()
                     ),
                     align="center",
                     width="100%",
                 ),
                 rx.cond(
-                    State.selected_reply_gif_url != "",
-                    rx.hstack(
-                        rx.image(src=State.selected_reply_gif_url, max_height="80px", border_radius="md"),
-                        rx.button("Remove GIF", size="1", variant="ghost", color="#FF4B4B", on_click=State.clear_selected_reply_gif),
-                        align="center",
-                        spacing="2",
-                    ),
+                    State.active_gif_target == "reply",
+                    gif_picker_component(),
                     rx.fragment()
                 ),
                 rx.hstack(
@@ -1837,28 +2046,37 @@ def comments_popout_panel() -> rx.Component:
                             ),
                             # Giphy GIF Selection (REQ-87)
                             rx.hstack(
-                                rx.icon("image", size=16, color="#888888"),
-                                rx.input(
-                                    placeholder="Paste Giphy GIF URL (e.g. https://media.giphy.com/media/...)",
-                                    value=State.selected_gif_url,
-                                    on_change=State.set_selected_gif_url,
-                                    width="100%",
-                                    bg="#18181C",
-                                    border="1px solid #2C2C32",
-                                    color="white",
+                                rx.button(
+                                    rx.hstack(
+                                        rx.icon("image", size=16),
+                                        rx.text("Search GIF", font_size="xs"),
+                                        spacing="1",
+                                    ),
                                     size="2",
+                                    bg="#222226",
+                                    color="#00b4da",
+                                    border="1px solid #00b4da",
+                                    _hover={"bg": "#00b4da", "color": "white"},
+                                    cursor="pointer",
+                                    on_click=lambda: State.toggle_gif_picker("comment"),
+                                ),
+                                rx.spacer(),
+                                rx.cond(
+                                    State.selected_gif_url != "",
+                                    rx.hstack(
+                                        rx.image(src=State.selected_gif_url, height="45px", border_radius="md"),
+                                        rx.button("Remove GIF", size="1", variant="ghost", color="#FF4B4B", on_click=State.clear_selected_gif),
+                                        align="center",
+                                        spacing="2",
+                                    ),
+                                    rx.fragment()
                                 ),
                                 align="center",
                                 width="100%",
                             ),
                             rx.cond(
-                                State.selected_gif_url != "",
-                                rx.hstack(
-                                    rx.image(src=State.selected_gif_url, max_height="100px", border_radius="md"),
-                                    rx.button("Remove GIF", size="1", variant="ghost", color="#FF4B4B", on_click=State.clear_selected_gif),
-                                    align="center",
-                                    spacing="2",
-                                ),
+                                State.active_gif_target == "comment",
+                                gif_picker_component(),
                                 rx.fragment()
                             ),
                             rx.button(
