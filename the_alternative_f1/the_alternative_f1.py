@@ -182,7 +182,27 @@ def precompute_ticker_items() -> list[list]:
             ])
     return items
 
+def warm_up_caches():
+    """Pre-warm all season calculations and detailed metrics on server startup to eliminate cold-start latency."""
+    try:
+        from the_alternative_f1.seasons import seasons
+        from the_alternative_f1.seasons.Calculations import Calculations
+        from the_alternative_f1.all_time_stats.DetailedAllTime import get_entity_lists, compute_entity_detailed_metrics
+
+        for s in seasons:
+            Calculations(s, sprint_only=False)
+            Calculations(s, sprint_only=True)
+
+        drivers, teams = get_entity_lists(len(seasons))
+        for d in drivers:
+            compute_entity_detailed_metrics(len(seasons), "driver", d)
+        for t in teams:
+            compute_entity_detailed_metrics(len(seasons), "constructor", t)
+    except Exception:
+        pass
+
 STATIC_TICKER_ITEMS = precompute_ticker_items()
+warm_up_caches()
 
 
 class State(rx.State):
