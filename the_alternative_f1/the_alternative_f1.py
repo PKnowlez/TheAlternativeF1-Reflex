@@ -378,7 +378,9 @@ class State(rx.State):
 
     def load_comments(self):
         try:
+            import re
             from datetime import datetime
+            
             def format_dt(raw_dt):
                 if not raw_dt:
                     return ""
@@ -391,6 +393,16 @@ class State(rx.State):
                     return dt.strftime("%b %d, %Y %I:%M %p")
                 except Exception:
                     return str(raw_dt).split(".")[0]
+
+            def parse_text_and_gif(raw_text: str, raw_gif: str):
+                text = (raw_text or "").strip()
+                gif = (raw_gif or "").strip()
+                if not gif and "[GIF:" in text:
+                    match = re.search(r"\[GIF:(https?://[^\]]+)\]", text)
+                    if match:
+                        gif = match.group(1).strip()
+                        text = re.sub(r"\n?\[GIF:https?://[^\]]+\]", "", text).strip()
+                return text, gif
 
             supabase = get_supabase_client()
             comments_res = supabase.table("comments")\
@@ -422,13 +434,15 @@ class State(rx.State):
                     if not isinstance(disliked_by, list):
                         disliked_by = []
 
+                    r_text, r_gif = parse_text_and_gif(r.get("text", ""), r.get("gif_url", ""))
+
                     c_replies.append(CommentReplyData(
                         id=int(r["id"]),
                         comment_id=int(r["comment_id"]),
                         username=r.get("username", ""),
                         avatar=r.get("avatar", ""),
-                        text=r.get("text", ""),
-                        gif_url=r.get("gif_url", "") or "",
+                        text=r_text,
+                        gif_url=r_gif,
                         created_at=format_dt(r.get("created_at", "")),
                         likes=int(r.get("likes", 0)),
                         dislikes=int(r.get("dislikes", 0)),
@@ -443,13 +457,15 @@ class State(rx.State):
                 if not isinstance(disliked_by, list):
                     disliked_by = []
 
+                c_text, c_gif = parse_text_and_gif(c.get("text", ""), c.get("gif_url", ""))
+
                 comments_list.append(CommentData(
                     id=int(c_id),
                     article_title=c.get("article_title", ""),
                     username=c.get("username", ""),
                     avatar=c.get("avatar", ""),
-                    text=c.get("text", ""),
-                    gif_url=c.get("gif_url", "") or "",
+                    text=c_text,
+                    gif_url=c_gif,
                     created_at=format_dt(c.get("created_at", "")),
                     likes=int(c.get("likes", 0)),
                     dislikes=int(c.get("dislikes", 0)),
@@ -521,10 +537,11 @@ class State(rx.State):
             try:
                 supabase.table("comments").insert(payload).execute()
             except Exception as insert_err:
-                print(f"Insertion with gif_url failed, falling back to standard payload: {insert_err}")
-                if "gif_url" in payload:
-                    del payload["gif_url"]
-                    supabase.table("comments").insert(payload).execute()
+                print(f"Insertion with gif_url failed, falling back to embedded text: {insert_err}")
+                if gif_url:
+                    payload["text"] = f"{text}\n[GIF:{gif_url}]".strip()
+                payload.pop("gif_url", None)
+                supabase.table("comments").insert(payload).execute()
         except Exception as e:
             print(f"Error adding comment to Supabase: {e}")
             
@@ -595,10 +612,11 @@ class State(rx.State):
             try:
                 supabase.table("comment_replies").insert(payload).execute()
             except Exception as insert_err:
-                print(f"Insertion of reply with gif_url failed, falling back: {insert_err}")
-                if "gif_url" in payload:
-                    del payload["gif_url"]
-                    supabase.table("comment_replies").insert(payload).execute()
+                print(f"Insertion of reply with gif_url failed, falling back to embedded text: {insert_err}")
+                if gif_url:
+                    payload["text"] = f"{text}\n[GIF:{gif_url}]".strip()
+                payload.pop("gif_url", None)
+                supabase.table("comment_replies").insert(payload).execute()
         except Exception as e:
             print(f"Error adding reply to Supabase: {e}")
                 
