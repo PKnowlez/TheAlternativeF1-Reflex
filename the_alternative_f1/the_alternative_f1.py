@@ -299,11 +299,14 @@ class State(rx.State):
         self.active_gif_target = target
         self.show_gif_picker = not self.show_gif_picker
         if self.show_gif_picker and not self.gif_search_results:
-            return State.search_gifs("f1")
+            self.gif_search_query = "f1"
+            return State.search_gifs
 
-    def search_gifs(self, query: str = None):
-        if query is not None and isinstance(query, str):
-            self.gif_search_query = query
+    def search_category_gifs(self, category: str):
+        self.gif_search_query = category
+        return State.search_gifs
+
+    def search_gifs(self):
         q = self.gif_search_query.strip() or "f1"
         self.is_searching_gifs = True
         yield
@@ -1542,7 +1545,7 @@ def gif_picker_component() -> rx.Component:
                         border="1px solid #33333A",
                         font_size="10px",
                         _hover={"bg": "#00b4da", "color": "white"},
-                        on_click=lambda c=cat: State.search_gifs(c),
+                        on_click=State.search_category_gifs(cat),
                     )
                     for cat in categories
                 ],
