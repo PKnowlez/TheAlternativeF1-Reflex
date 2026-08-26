@@ -1393,8 +1393,7 @@ def article_card(article: dict) -> rx.Component:
         overflow="hidden",
         width="100%",
         max_width="360px",
-        margin_top="1%",
-        margin_bottom="1%",
+        margin="0",
         cursor="pointer",
         on_click=lambda: State.select_article(article["title"]),
         _hover={
@@ -1411,17 +1410,27 @@ def articles_list() -> rx.Component:
     first_six = articles[:6]
     remaining = articles[6:]
     return rx.vstack(
+        # rx.vstack(
+        #     rx.heading("League News", size="6", color="white", font_weight="900", padding_top="2.5%", padding_bottom="0.5%", padding_x="2%"),
+        #     rx.text(
+        #         "Click below to have our intern obliterate your self-esteem senselessly.",
+        #         color="#AAAAAA",
+        #         font_size="sm",
+        #         padding_x="2%",
+        #     ),
+        #     align_items="start",
+        #     width="100%",
+        #     max_width="1200px",
+        #     padding_bottom="2",
+        # ),
         rx.vstack(
-            rx.heading("League News", size="7", color="white", font_weight="900", padding_top="2.5%", padding_bottom="0%", padding_x="2%"),
             rx.text(
-                "Click below to have our intern obliterate your self-esteem senselessly.",
+                "",
                 color="#AAAAAA",
                 font_size="sm",
                 padding_x="2%",
-                padding_bottom="8"
             ),
             align_items="start",
-            spacing="1",
             width="100%",
             max_width="1200px",
             padding_bottom="2",
@@ -1466,12 +1475,13 @@ def articles_list() -> rx.Component:
             flex_wrap="wrap",
             justify="center",
             column_gap="4%",
-            row_gap="2%",
+            row_gap="16px",
             width="100%",
             max_width="1200px",
         ),
         width="100%",
         align="center",
+        spacing="3",
         padding_bottom="160px",
         id="homepage-container",
     )
