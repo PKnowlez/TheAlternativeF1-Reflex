@@ -5,10 +5,10 @@ article = {
     "title": "Season 5 Trophy Teaser",
     "blurb": "It's all to play for and this season we're going bigger than ever before.",
     "content": [
-        "One preaseason race left.",
+        "One preseason race left.",
         "One last chance to shake off the rust.",
         "One final opportunity to show off how strong each team is.",
-        "One more race between you and the tropy reveal.",
+        "One more race between you and the trophy reveal.",
         "A league like none other, deserves a trophy like none other.",
         "Mark your calendars, September 2nd, 2026.",
     ],
