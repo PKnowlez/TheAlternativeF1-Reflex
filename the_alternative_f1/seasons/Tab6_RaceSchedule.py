@@ -18,6 +18,10 @@ def Tab6(data: dict, season_data: dict) -> rx.Component:
     # Drop rows where all values are NaN
     schedule_df = schedule_df.dropna(how="all")
 
+    # Exclude 'Status' column if present
+    cols_to_include = [c for c in schedule_df.columns if str(c).strip().lower() != "status"]
+    schedule_df = schedule_df[cols_to_include]
+
     col_names = list(schedule_df.columns)
 
     # Build header

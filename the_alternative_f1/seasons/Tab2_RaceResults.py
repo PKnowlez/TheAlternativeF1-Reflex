@@ -152,7 +152,7 @@ def _build_manual_race_item(race: dict, idx: int, prefix: str, bg_color: str = "
                 rx.table.cell(str(qualifying_val), color="#CCCCCC", font_size="xs"),
             ]
             preview_rows.append(
-                rx.table.row(*preview_cells, _hover={"bg": "#1C1C20"})
+                rx.table.row(*preview_cells, align="center", _hover={"bg": "#1C1C20"})
             )
 
     preview_header_cells = [
@@ -164,16 +164,17 @@ def _build_manual_race_item(race: dict, idx: int, prefix: str, bg_color: str = "
     preview_table = rx.box(
         rx.table.root(
             rx.table.header(
-                rx.table.row(*preview_header_cells),
+                rx.table.row(*preview_header_cells, align="center"),
             ),
             rx.table.body(*preview_rows),
             width="100%",
             variant="ghost",
+            size="1",
         ),
         width="100%",
         overflow_x="auto",
         class_name="race-preview-table",
-        padding_top="2",
+        padding_top="0",
     )
 
     race_content = rx.vstack(
@@ -207,7 +208,7 @@ def _build_manual_race_item(race: dict, idx: int, prefix: str, bg_color: str = "
                 rx.text(f"Winner: {winner}", color="#00b4da", font_size="10px", font_weight="bold"),
                 preview_table,
                 align_items="start",
-                spacing="2",
+                spacing="0",
                 width="100%",
             ),
             width="100%",
@@ -425,7 +426,7 @@ def Tab2(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
                     rx.table.cell(qualifying_val, color="#CCCCCC", font_size="xs"),
                 ]
                 preview_rows.append(
-                    rx.table.row(*preview_cells, _hover={"bg": "#1C1C20"})
+                    rx.table.row(*preview_cells, align="center", _hover={"bg": "#1C1C20"})
                 )
 
         preview_header_cells = [
@@ -437,16 +438,17 @@ def Tab2(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
         preview_table = rx.box(
             rx.table.root(
                 rx.table.header(
-                    rx.table.row(*preview_header_cells),
+                    rx.table.row(*preview_header_cells, align="center"),
                 ),
                 rx.table.body(*preview_rows),
                 width="100%",
                 variant="ghost",
+                size="1",
             ),
             width="100%",
             overflow_x="auto",
             class_name="race-preview-table",
-            padding_top="2",
+            padding_top="0",
         )
 
         # Build header cells
@@ -498,7 +500,7 @@ def Tab2(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
                         rx.text(f"Winner: {winner}", color="#00b4da", font_size="10px", font_weight="bold"),
                         preview_table,
                         align_items="start",
-                        spacing="2",
+                        spacing="0",
                         width="100%",
                     ),
                     width="100%",
