@@ -35,7 +35,11 @@ def _build_manual_race_item(race: dict, idx: int, prefix: str, bg_color: str = "
 
     sorted_results = sorted(results, key=get_sort_key)
 
+    is_preseason = (prefix == "preseason") or ("preseason" in race_name.lower()) or ("pre-season" in race_name.lower())
+
     # Detect which optional columns are present in the results list
+    show_points = not is_preseason and any("points" in r for r in results)
+    show_fl = any("FL" in r for r in results)
     show_dotd = any("DOTD" in r for r in results)
     show_mot = any("MOT" in r for r in results)
     show_cd = any("CD" in r for r in results)
@@ -50,9 +54,11 @@ def _build_manual_race_item(race: dict, idx: int, prefix: str, bg_color: str = "
         rx.table.column_header_cell("Driver", color="#00b4da"),
         rx.table.column_header_cell("Team", color="#00b4da"),
         rx.table.column_header_cell("Qualifying", color="#00b4da"),
-        rx.table.column_header_cell("Points", color="#00b4da"),
-        rx.table.column_header_cell("Fastest Lap", color="#00b4da"),
     ]
+    if show_points:
+        header_cells.append(rx.table.column_header_cell("Points", color="#00b4da"))
+    if show_fl:
+        header_cells.append(rx.table.column_header_cell("Fastest Lap", color="#00b4da"))
     if show_dotd:
         header_cells.append(rx.table.column_header_cell("DOTD", color="#00b4da"))
     if show_mot:
@@ -68,11 +74,6 @@ def _build_manual_race_item(race: dict, idx: int, prefix: str, bg_color: str = "
         team_val = r.get("team", "-")
         qualifying_val = r.get("qualifying", "-")
         points_val = r.get("points", 0)
-
-        fl_val = "-"
-        if "FL" in r:
-            if is_truthy(r.get("FL", False)):
-                fl_val = rx.icon("star", color="#FFD700", size=16)
 
         cells = [
             rx.table.cell(str(place_val), color="#E0E0E0", font_size="sm"),
@@ -92,9 +93,17 @@ def _build_manual_race_item(race: dict, idx: int, prefix: str, bg_color: str = "
                 )
             ),
             rx.table.cell(str(qualifying_val), color="#CCCCCC", font_size="sm"),
-            rx.table.cell(str(points_val), color="#CCCCCC", font_size="sm"),
-            rx.table.cell(fl_val, color="#CCCCCC", font_size="sm"),
         ]
+
+        if show_points:
+            cells.append(rx.table.cell(str(points_val), color="#CCCCCC", font_size="sm"))
+
+        if show_fl:
+            fl_val = "-"
+            if "FL" in r:
+                if is_truthy(r.get("FL", False)):
+                    fl_val = rx.icon("star", color="#FFD700", size=16)
+            cells.append(rx.table.cell(fl_val, color="#CCCCCC", font_size="sm"))
 
         if show_dotd:
             dotd_val = "-"
@@ -294,6 +303,13 @@ def Tab2(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
             mot_col = race_name + "MOT"
             cd_col = race_name + "CD"
 
+        is_preseason_race = ("preseason" in race_name.lower()) or ("pre-season" in race_name.lower())
+        show_points = not is_preseason_race and (points_col in df.columns)
+        show_fl = fastestlap_col in df.columns
+        show_dotd = dotd_col in df.columns
+        show_mot = mot_col in df.columns
+        show_cd = cd_col in df.columns
+
         # Build the results rows
         table_rows = []
         preview_rows = []
@@ -337,12 +353,6 @@ def Tab2(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
 
             points_val = row[points_col] if not pd.isnull(row[points_col]) else 0
 
-            fl_val = "-"
-            if fastestlap_col in df.columns:
-                flv = row.get(fastestlap_col, "n")
-                if is_truthy(flv):
-                    fl_val = rx.icon("star", color="#FFD700", size=16)
-
             # Optional columns
             cells = [
                 rx.table.cell(place_display, color="#E0E0E0", font_size="sm"),
@@ -362,31 +372,37 @@ def Tab2(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
                     )
                 ),
                 rx.table.cell(qualifying_val, color="#CCCCCC", font_size="sm"),
-                rx.table.cell(str(points_val), color="#CCCCCC", font_size="sm"),
-                rx.table.cell(fl_val, color="#CCCCCC", font_size="sm"),
             ]
 
-            # Add DOTD/MOT/CD if they exist for this season
-            if has_dotd_mot_cd:
+            if show_points:
+                cells.append(rx.table.cell(str(points_val), color="#CCCCCC", font_size="sm"))
+
+            if show_fl:
+                fl_val = "-"
+                flv = row.get(fastestlap_col, "n")
+                if is_truthy(flv):
+                    fl_val = rx.icon("star", color="#FFD700", size=16)
+                cells.append(rx.table.cell(fl_val, color="#CCCCCC", font_size="sm"))
+
+            if show_dotd:
                 dotd_val = "-"
-                if dotd_col in df.columns:
-                    dv = row.get(dotd_col, "n")
-                    if is_truthy(dv):
-                        dotd_val = rx.icon("star", color="#FFD700", size=16)
+                dv = row.get(dotd_col, "n")
+                if is_truthy(dv):
+                    dotd_val = rx.icon("star", color="#FFD700", size=16)
                 cells.append(rx.table.cell(dotd_val, color="#CCCCCC", font_size="sm"))
 
+            if show_mot:
                 mot_val = "-"
-                if mot_col in df.columns:
-                    mv = row.get(mot_col, "n")
-                    if is_truthy(mv):
-                        mot_val = rx.icon("star", color="#FFD700", size=16)
+                mv = row.get(mot_col, "n")
+                if is_truthy(mv):
+                    mot_val = rx.icon("star", color="#FFD700", size=16)
                 cells.append(rx.table.cell(mot_val, color="#CCCCCC", font_size="sm"))
 
+            if show_cd:
                 cd_val = "-"
-                if cd_col in df.columns:
-                    cv = row.get(cd_col, "n")
-                    if is_truthy(cv):
-                        cd_val = rx.icon("star", color="#FFD700", size=16)
+                cv = row.get(cd_col, "n")
+                if is_truthy(cv):
+                    cd_val = rx.icon("star", color="#FFD700", size=16)
                 cells.append(rx.table.cell(cd_val, color="#CCCCCC", font_size="sm"))
 
             table_rows.append(
@@ -457,15 +473,17 @@ def Tab2(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
             rx.table.column_header_cell("Driver", color="#00b4da"),
             rx.table.column_header_cell("Team", color="#00b4da"),
             rx.table.column_header_cell("Qualifying", color="#00b4da"),
-            rx.table.column_header_cell("Points", color="#00b4da"),
-            rx.table.column_header_cell("Fastest Lap", color="#00b4da"),
         ]
-        if has_dotd_mot_cd:
-            header_cells.extend([
-                rx.table.column_header_cell("DOTD", color="#00b4da"),
-                rx.table.column_header_cell("Most Overtakes", color="#00b4da"),
-                rx.table.column_header_cell("Cleanest Driver", color="#00b4da"),
-            ])
+        if show_points:
+            header_cells.append(rx.table.column_header_cell("Points", color="#00b4da"))
+        if show_fl:
+            header_cells.append(rx.table.column_header_cell("Fastest Lap", color="#00b4da"))
+        if show_dotd:
+            header_cells.append(rx.table.column_header_cell("DOTD", color="#00b4da"))
+        if show_mot:
+            header_cells.append(rx.table.column_header_cell("Most Overtakes", color="#00b4da"))
+        if show_cd:
+            header_cells.append(rx.table.column_header_cell("Cleanest Driver", color="#00b4da"))
 
         race_content = rx.vstack(
             rx.text(

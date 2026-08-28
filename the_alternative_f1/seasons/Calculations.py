@@ -104,7 +104,11 @@ def Calculations(season_data: dict, sprint_only: bool = False) -> dict:
         qualifying_columns = [col for col in qualifying_columns if "Sprint" in col]
         place_columns = [col for col in place_columns if "Sprint" in col]
 
-    has_dotd_mot_cd = len(DOTD_columns) > 0
+    has_fl = len(fastest_lap_columns) > 0
+    has_dotd = len(DOTD_columns) > 0
+    has_mot = len(MOT_columns) > 0
+    has_cd = len(CD_columns) > 0
+    has_dotd_mot_cd = has_dotd or has_mot or has_cd
 
     # ── Total points column ──────────────────────────────────────────────
     df["Total"] = 0
@@ -280,6 +284,10 @@ def Calculations(season_data: dict, sprint_only: bool = False) -> dict:
         "drivers_points_df": drivers_points_df,
         "colors_driver_team": colors_driver_team,
         "colors_driver_df": colors_driver_df,
+        "has_fl": has_fl,
+        "has_dotd": has_dotd,
+        "has_mot": has_mot,
+        "has_cd": has_cd,
         "has_dotd_mot_cd": has_dotd_mot_cd,
         "team_line_data": team_line_data,
         "driver_line_data": driver_line_data,

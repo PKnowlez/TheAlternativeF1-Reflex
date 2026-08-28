@@ -31,7 +31,11 @@ def Tab4(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
     new_df_CD = data["new_df_CD"]
     races_points_only = data["races_points_only"]
     index_x = data["index_x"]
-    has_dotd_mot_cd = data["has_dotd_mot_cd"]
+    has_fl = data.get("has_fl", len(new_df_FL.columns) > 1)
+    has_dotd = data.get("has_dotd", len(new_df_DOTD.columns) > 1)
+    has_mot = data.get("has_mot", len(new_df_MOT.columns) > 1)
+    has_cd = data.get("has_cd", len(new_df_CD.columns) > 1)
+    has_dotd_mot_cd = data.get("has_dotd_mot_cd", has_dotd or has_mot or has_cd)
     season_num = season_data["season_number"]
     team_colors = data.get("team_colors", {})
     drivers_points_df = data["drivers_points_df"]
@@ -430,18 +434,21 @@ def Tab4(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
             f"Single Season Win Streak: {max_ss_win_streak}",
             f"Podiums: {podiums}",
             f"Single Season Podium Streak: {max_ss_podium_streak}",
-            f"Fastest Laps: {fl_count}",
+        ]
+        if has_fl:
+            badges.append(f"Fastest Laps: {fl_count}")
+        badges.extend([
             f"Avg Qualifying: {avg_qualifying:.1f}",
             f"Avg Place: {avg_place:.1f}",
             f"Avg Pos Change: {avg_change:+.1f}",
             f"Pole Positions: {pole_positions}",
-        ]
-        if has_dotd_mot_cd:
-            badges.extend([
-                f"DOTD Awards: {dotd_count}",
-                f"Most Overtakes: {mot_count}",
-                f"Cleanest Driver: {cd_count}",
-            ])
+        ])
+        if has_dotd:
+            badges.append(f"DOTD Awards: {dotd_count}")
+        if has_mot:
+            badges.append(f"Most Overtakes: {mot_count}")
+        if has_cd:
+            badges.append(f"Cleanest Driver: {cd_count}")
         badges.append(best_finish)
 
         badge_components = [
