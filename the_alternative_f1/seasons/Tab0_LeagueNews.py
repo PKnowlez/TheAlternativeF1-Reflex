@@ -65,8 +65,8 @@ def Tab0(season_data: dict, select_article = None, season_articles_expanded = No
                 rx.image(
                     src=article.get("image", ""),
                     width="100%",
-                    height="180px",
-                    object_fit="cover",
+                    height="auto",
+                    object_fit="contain",
                 ),
                 rx.vstack(
                     rx.text(
