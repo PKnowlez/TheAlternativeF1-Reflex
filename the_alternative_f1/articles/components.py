@@ -1,6 +1,8 @@
 import reflex as rx
 import os
 import httpx
+import json
+import html
 
 R2_CUSTOM_DOMAIN = os.getenv("R2_CUSTOM_DOMAIN", "https://pknowlez.com").rstrip("/")
 
@@ -776,4 +778,72 @@ def zoomable_chart(chart_factory, title: str, chart_id: str, height: int = 350, 
             ),
         ),
     )
+
+
+def image_carousel(
+    items: list,
+    auto_progress_seconds: float = 5.0,
+    height: str = "450px",
+    width: str = "100%",
+    max_width: str = "100%",
+    border_radius: str = "12px",
+    **kwargs
+) -> rx.Component:
+    """An interactive image and GIF carousel component.
+    
+    Features:
+    - Touch swipe gestures & desktop mouse drag
+    - Left/Right click zones and glassmorphic chevron buttons
+    - Auto-progression every N seconds (default: 5.0)
+    - Smooth animated progress bar & pause on hover
+    - Pagination dots and item counter pill
+    - Supports both static images (.png, .jpg, .webp) and animated GIFs
+    - Automatically rewrites Cloudflare R2 URLs
+    """
+    normalized_items = []
+    for item in items:
+        if isinstance(item, str):
+            src = rewrite_r2_url(item)
+            normalized_items.append({"src": src, "caption": ""})
+        elif isinstance(item, dict):
+            src = rewrite_r2_url(item.get("src", ""))
+            caption = item.get("caption", item.get("title", ""))
+            normalized_items.append({"src": src, "caption": caption})
+        elif isinstance(item, (list, tuple)) and len(item) >= 1:
+            src = rewrite_r2_url(item[0])
+            caption = item[1] if len(item) > 1 else ""
+            normalized_items.append({"src": src, "caption": caption})
+
+    items_json = json.dumps(normalized_items)
+    escaped_items_json = html.escape(items_json, quote=True)
+    auto_progress_ms = int(auto_progress_seconds * 1000)
+
+    carousel_html = (
+        f'<f1-carousel data-items="{escaped_items_json}" '
+        f'auto-progress="{auto_progress_ms}" '
+        f'style="width: 100%; height: 100%; display: block; border-radius: {border_radius};">'
+        f'</f1-carousel>'
+    )
+
+    margin_y = kwargs.pop("margin_y", "4")
+
+    return rx.fragment(
+        rx.script(src="/carousel.js"),
+        rx.box(
+            rx.html(
+                carousel_html,
+                height="100%",
+                width="100%",
+                style={"height": "100%", "width": "100%"},
+            ),
+            width=width,
+            max_width=max_width,
+            height=height,
+            border_radius=border_radius,
+            overflow="hidden",
+            margin_y=margin_y,
+            **kwargs,
+        ),
+    )
+
 

@@ -15,6 +15,7 @@ from the_alternative_f1.articles.Season5.Preseason.MexicoRecap import article as
 from the_alternative_f1.articles.Season5.Preseason.VegasRecap import article as Vegas_Recap_Article
 from the_alternative_f1.articles.Season5.TrophyReveal.TrophyTeaser import article as TrophyTeaser_Article
 from the_alternative_f1.articles.Season5.Preseason.HungaryRecap import article as Hungary_Recap_Article
+from the_alternative_f1.articles.Season5.TrophyReveal.TrophyReveal import article as TrophyReveal_Article
 
 season = {
     "season_number": 5,
@@ -24,7 +25,7 @@ season = {
     # Rookies: drivers not present in Season 4
     "rookies": {"Grayson", "Josh C.", "Randy", "Evelo"},
 
-    "articles": [Hungary_Recap_Article, TrophyTeaser_Article, 
+    "articles": [TrophyReveal_Article, Hungary_Recap_Article, TrophyTeaser_Article, 
     Vegas_Recap_Article, Mexico_Recap_Article, Preseason_Article, 
     TheGrid_Article, Mercedes_Article, Audi_Article,
     Schedule_Article, Rankings_Article, Williams_Article, 

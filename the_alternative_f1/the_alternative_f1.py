@@ -3301,6 +3301,7 @@ app = rx.App(
     head_components=[
         rx.el.link(rel="icon", href="/Icons/IconLogoApp.png"),
         rx.el.link(rel="apple-touch-icon", href="/Icons/IconLogoApp.png"),
+        rx.el.script(src="/carousel.js"),
     ],
 )
 app.add_page(index)

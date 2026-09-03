@@ -1,9 +1,9 @@
 import reflex as rx
-from the_alternative_f1.articles.components import zoomable_image
+from the_alternative_f1.articles.components import zoomable_image, image_carousel
 
 article = {
     "title": "Article Template & Sample Rich Card",
-    "blurb": "A showcase of dynamic content, images, subheaders, quotes, white boxes, gifs, and video elements.",
+    "blurb": "A showcase of dynamic content, images, carousels, subheaders, quotes, white boxes, gifs, and video elements.",
     "content": [
         # Two paragraphs with bold, italics, underline, and highlighted text throughout
         rx.text(
@@ -82,6 +82,37 @@ article = {
                 box_shadow="0 4px 12px rgba(0,0,0,0.4)"
             ),
             align_items="center",
+            width="100%",
+            margin_y="4",
+        ),
+
+        # An interactive carousel of images and gifs with swipe, side-click navigation, and 5-second auto progression
+        rx.heading(
+            "Interactive Image & GIF Carousel", 
+            size="4", 
+            color="#00b4da", 
+            margin_top="6", 
+            margin_bottom="2",
+            font_family="Outfit"
+        ),
+        rx.text(
+            "This carousel demonstrates multi-asset presentation with both static images and animated GIFs. "
+            "Users can swipe on touch devices or drag with a mouse, click the left or right chevron buttons and side zones to advance slides, "
+            "and enjoy automatic 5-second progression with a visual progress bar. Hovering or touching pauses the timer.",
+            color="#E0E0E0",
+            font_size="md",
+            line_height="1.7",
+            margin_bottom="3",
+        ),
+        image_carousel(
+            items=[
+                "/thealternativef1-cloudflare/Season5/Trophy Reveal/Season 5 Trophy.png",
+                {"src": "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3BxeDR6bXY0N3Rrb3V4dnZ0YnRqcDZ6N2x1eGFsZ3FhcDZtc3E3ZCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7TKSjRrfIPjei1fG/giphy.gif", "caption": "Pit Stop Precision (High-Speed Action GIF)"},
+                {"src": "/thealternativef1-cloudflare/Season5/Trophy Reveal/Season 5 Trophy - Reveal.png", "caption": "Season 5 Trophy - Reveal Detail"},
+                {"src": "https://media.giphy.com/media/3o7TKTDnUxE0g2fSE8/giphy.gif", "caption": "Chequered Flag Celebration (Animated GIF)"},
+            ],
+            auto_progress_seconds=5.0,
+            height="420px",
             width="100%",
             margin_y="4",
         ),
