@@ -40,7 +40,7 @@ article = {
             ),
             rx.text(
                 "Looking forward, the league heads down under to race the hybrid street track at Albert Park. \
-                    The Aussie track boasts a number of unique features, a curvey back straight, four straight \
+                    The Aussie track boasts a number of unique features, a curvey back straight, five straight \
                         mode zones, and a slow speed final corner perfect for catching up and utilizing boost \
                             into the massive front straight.",
                 "By the end of what many are expecting to be chaos, we will have a league leader in both \
