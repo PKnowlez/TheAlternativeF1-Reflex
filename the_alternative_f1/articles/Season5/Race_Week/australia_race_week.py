@@ -28,7 +28,7 @@ article = {
                 the limit for either outfit.",
         rx.box(
             zoomable_image(
-                src="/thealternativef1-cloudflare/Season5/Race_Week/Australia_Track.png",
+                src="/thealternativef1-cloudflare/Season5/Race_Week/Australia_Track.jpeg",
                 float="right", 
                 width="250px", 
                 margin_left="16px",
@@ -63,7 +63,7 @@ article = {
                 and the driver's nervous jitters remain between now and the first official race day \
                     of Season 5. May the odds be ever in your favor."
     ],
-    "image": "/thealternativef1-cloudflare/Season5/Race_Week/Australia_Cover.png",
+    "image": "/thealternativef1-cloudflare/Season5/Race_Week/Australia_Cover.jpeg",
     "author": "Patrick",
     "date": "September 6, 2026",
     "season": 5,
