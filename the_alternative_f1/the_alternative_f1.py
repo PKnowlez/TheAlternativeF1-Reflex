@@ -81,6 +81,40 @@ from the_alternative_f1.seasons.Tab6_RaceSchedule import Tab6
 NUM_SEASONS: int = LATEST_SEASON
 # ─────────────────────────────────────────────────────────────────────────────
 
+def find_upcoming_race(schedule_dataframe) -> tuple[str | None, str | None]:
+    """Determine the next upcoming race from a schedule dataframe based on calendar date."""
+    if schedule_dataframe is None or schedule_dataframe.empty:
+        return None, None
+    import datetime
+    import pandas as pd
+
+    sched = schedule_dataframe.copy()
+    # Exclude Post-Season events
+    sched = sched[~sched["Race"].astype(str).str.contains("Post-Season", case=False, na=False)]
+    # Exclude races explicitly marked final
+    if "Status" in sched.columns:
+        sched = sched[sched["Status"].astype(str).str.lower() != "final"]
+    # If Date column exists, prioritize races occurring today or in the future
+    if "Date" in sched.columns:
+        parsed_dates = pd.to_datetime(sched["Date"], errors="coerce")
+        valid_mask = parsed_dates.notna()
+        today = pd.Timestamp.now().normalize()
+        future_sched = sched[valid_mask & (parsed_dates >= today)]
+        if not future_sched.empty:
+            future_sched = future_sched.assign(_dt=parsed_dates[valid_mask & (parsed_dates >= today)])
+            future_sched = future_sched.sort_values("_dt")
+            raw_date = future_sched["Date"].iloc[0]
+            if isinstance(raw_date, (pd.Timestamp, datetime.date, datetime.datetime)):
+                date_str = raw_date.strftime("%m/%d/%Y")
+            else:
+                date_str = str(raw_date).strip().replace(" 00:00:00", "")
+            return future_sched["Race"].iloc[0], date_str
+        return None, None
+    elif not sched.empty:
+        return sched["Race"].iloc[0], ""
+    return None, None
+
+
 def precompute_ticker_items() -> list[list]:
     import pandas as pd
     from the_alternative_f1.seasons import seasons
@@ -158,25 +192,13 @@ def precompute_ticker_items() -> list[list]:
         current_season = seasons[-1]
         try:
             curr_res = Calculations(current_season)
-            sched = curr_res["schedule_df"]
-            if "Status" in sched.columns:
-                pending = sched[sched["Status"].astype(str).str.lower() != "final"]
-                pending = pending[~pending["Race"].str.contains("Post-Season", case=False, na=False)]
-                if not pending.empty:
-                    upcoming_race_name = pending["Race"].iloc[0]
-                    upcoming_race_date = pending["Date"].iloc[0] if "Date" in pending.columns else ""
+            upcoming_race_name, upcoming_race_date = find_upcoming_race(curr_res.get("schedule_df"))
         except Exception:
             pass
 
-        if not upcoming_race_name:
+        if not upcoming_race_name and target_res:
             try:
-                sched = target_res["schedule_df"]
-                if "Status" in sched.columns:
-                    pending = sched[sched["Status"].astype(str).str.lower() != "final"]
-                    pending = pending[~pending["Race"].str.contains("Post-Season", case=False, na=False)]
-                    if not pending.empty:
-                        upcoming_race_name = pending["Race"].iloc[0]
-                        upcoming_race_date = pending["Date"].iloc[0] if "Date" in pending.columns else ""
+                upcoming_race_name, upcoming_race_date = find_upcoming_race(target_res.get("schedule_df"))
             except Exception:
                 pass
 
@@ -1066,127 +1088,7 @@ class State(rx.State):
     def initialize_ticker(self):
         if self.ticker_initialized:
             return
-        
-        import pandas as pd
-        from the_alternative_f1.seasons import seasons
-        from the_alternative_f1.seasons.Calculations import Calculations
-
-        target_season = None
-        target_res = None
-
-        # Find the most recent season with at least one race result posted
-        for s in reversed(seasons):
-            try:
-                res = Calculations(s)
-                completed = 0
-                df = res["df"]
-                race_place = res["race_place"]
-                for col in race_place:
-                    if not pd.isnull(df.iloc[0][col]):
-                        completed += 1
-                if completed > 0:
-                    target_season = s
-                    target_res = res
-                    break
-            except Exception as e:
-                # Silently ignore or log error
-                print(f"Error checking season: {e}")
-
-        items = []
-
-        if target_res and target_season:
-            # A. Constructor Standings (top 3)
-            constructor_totals = target_res["constructor_totals"]
-            medals = ["🥇", "🥈", "🥉"]
-            for idx, (_, row) in enumerate(constructor_totals.head(3).iterrows()):
-                team_name = row["Team"]
-                pts = row["Points"]
-                medal = medals[idx] if idx < len(medals) else ""
-                items.append([
-                    "Constructor Standings",
-                    f"{medal} {team_name}\n({pts} pts)",
-                    0,
-                    9
-                ])
-
-            # B. Driver Standings (top 3)
-            driver_totals = target_res["driver_totals"]
-            for idx, (_, row) in enumerate(driver_totals.head(3).iterrows()):
-                driver_name = row["Driver"]
-                pts = row["Points"]
-                medal = medals[idx] if idx < len(medals) else ""
-                items.append([
-                    "Driver Standings",
-                    f"{medal} {driver_name}\n({pts} pts)",
-                    1,
-                    9
-                ])
-
-            # C. Most Recent Race Winner
-            df = target_res["df"]
-            races = target_res["races"]
-            race_place = target_res["race_place"]
-            
-            last_completed_race_name = None
-            last_completed_winner = None
-            last_completed_team = None
-            
-            for i in reversed(range(len(races))):
-                place_col = race_place[i]
-                if not pd.isnull(df.iloc[0][place_col]):
-                    last_completed_race_name = races[i]
-                    df_sorted = df.sort_values(place_col, ascending=True)
-                    last_completed_winner = df_sorted["Driver"].iloc[0]
-                    last_completed_team = df_sorted["Team"].iloc[0]
-                    break
-            
-            if last_completed_race_name:
-                items.append([
-                    f"{last_completed_race_name} Winner",
-                    f"🏆 {last_completed_winner}\n({last_completed_team})",
-                    2,
-                    3
-                ])
-
-            # D. Upcoming Race from current season or target season
-            upcoming_race_name = None
-            upcoming_race_date = None
-
-            current_season = seasons[-1]
-            try:
-                curr_res = Calculations(current_season)
-                sched = curr_res["schedule_df"]
-                if "Status" in sched.columns:
-                    pending = sched[sched["Status"].astype(str).str.lower() != "final"]
-                    pending = pending[~pending["Race"].str.contains("Post-Season", case=False, na=False)]
-                    if not pending.empty:
-                        upcoming_race_name = pending["Race"].iloc[0]
-                        upcoming_race_date = pending["Date"].iloc[0] if "Date" in pending.columns else ""
-            except Exception as e:
-                print(f"Error checking current season schedule: {e}")
-
-            if not upcoming_race_name:
-                try:
-                    sched = target_res["schedule_df"]
-                    if "Status" in sched.columns:
-                        pending = sched[sched["Status"].astype(str).str.lower() != "final"]
-                        pending = pending[~pending["Race"].str.contains("Post-Season", case=False, na=False)]
-                        if not pending.empty:
-                            upcoming_race_name = pending["Race"].iloc[0]
-                            upcoming_race_date = pending["Date"].iloc[0] if "Date" in pending.columns else ""
-                except Exception:
-                    pass
-
-            if upcoming_race_name:
-                date_str = f"\n({upcoming_race_date})" if upcoming_race_date else ""
-                items.append([
-                    "Upcoming Race",
-                    f"📅 {upcoming_race_name}{date_str}",
-                    3,
-                    3
-                ])
-        
-        self.ticker_items = items
+        self.ticker_items = precompute_ticker_items()
         self.ticker_initialized = True
 
     @rx.event(background=True)
