@@ -42,12 +42,10 @@ article = {
                 "Looking forward, the league heads down under to race the hybrid street track at Albert Park. \
                     The Aussie track boasts a number of unique features, a curvey back straight, five straight \
                         mode zones, and a slow speed final corner perfect for catching up and utilizing boost \
-                            into the massive front straight.",
-                "By the end of what many are expecting to be chaos, we will have a league leader in both \
+                            into the massive front straight. By the end of what many are expecting to be chaos, we will have a league leader in both \
                     chamionships. Targets will be placed on backs and rivalries will brew again. But \
                         maybe most importantly, we will see if all the simulations on overtaking, battery deployment, \
-                            and tire management will prove to be true or just another ghost tale.",
-                "Melbourne provides more overtaking places than one might notice at first glance. The obvious \
+                            and tire management will prove to be true or just another ghost tale. Melbourne provides more overtaking places than one might notice at first glance. The obvious \
                     locations like Turn 1 and Turn 9 provide excellent places for battery micro-managers to power \
                         pass their opponents. Along with Turn 3, Turn 11, and Turn 13, drivers will have all the \
                             options to show their motorsport prowess and creativity.",
