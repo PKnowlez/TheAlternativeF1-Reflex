@@ -619,7 +619,8 @@
   },
   "5": {
     "races": [
-      "Preseason"
+      "Preseason",
+      "Final Preseason"
     ],
     "rankings": {
       "Preseason": [
@@ -631,6 +632,16 @@
         "Haas",
         "Williams",
         "Audi"
+      ],
+      "Final Preseason": [
+        "Red Bull",
+        "McLaren",
+        "Cadillac",
+        "Ferrari",
+        "Haas",
+        "Mercedes",
+        "Audi",
+        "Williams"
       ]
     }
   }

@@ -92,6 +92,17 @@ season = {
         "Audi",
     ],
 
+    "final_preseason_power_rankings": [
+        "Red Bull",
+        "McLaren",
+        "Cadillac",
+        "Ferrari",
+        "Haas",
+        "Mercedes",
+        "Audi",
+        "Williams",
+    ],
+
     "preseason_races": [
         {
             "name": "Pre-Season: Mexico",

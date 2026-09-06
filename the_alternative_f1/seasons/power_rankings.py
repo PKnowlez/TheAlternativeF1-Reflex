@@ -187,9 +187,18 @@ def calculate_all_seasons():
                     "Preseason": teams.copy()
                 }
             
+            final_preseason = s.get("final_preseason_power_rankings")
+            if final_preseason:
+                final_preseason_list = [t for t in final_preseason if t in teams]
+                for t in teams:
+                    if t not in final_preseason_list:
+                        final_preseason_list.append(t)
+                completed_race_names.insert(1, "Final Preseason")
+                rankings["Final Preseason"] = final_preseason_list
+            
             for idx in range(completed_races_count):
                 r_name = races[idx]
-                prev_race_name = "Preseason" if idx == 0 else races[idx - 1]
+                prev_race_name = ("Final Preseason" if final_preseason else "Preseason") if idx == 0 else races[idx - 1]
                 prev_rankings_list = rankings[prev_race_name]
                 
                 # Fetch Standings
