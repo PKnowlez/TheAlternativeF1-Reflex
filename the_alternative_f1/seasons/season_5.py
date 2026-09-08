@@ -527,7 +527,7 @@ season = {
                 {
                     "place": "DNF",
                     "driver": "Jaden",
-                    "team": "Mercedes",
+                    "team": "Ferrari",
                     "qualifying": "10",
                     "FL": "-",
                     "DOTD": "-",

@@ -934,14 +934,40 @@ class State(rx.State):
                 season_dict = s
                 break
         
+        TEAM_SHORT_CODES = {
+            "Red Bull": "RBR",
+            "McLaren": "MCL",
+            "Ferrari": "FER",
+            "Mercedes": "MER",
+            "Haas": "HAA",
+            "Audi": "AUD",
+            "Cadillac": "CAD",
+            "Williams": "WIL",
+            "Aston Martin": "AMR",
+            "Alpine": "ALP",
+            "Alfa Romeo": "ALR",
+            "AlphaTauri": "ALT",
+            "VCARB": "VCB",
+        }
+
         if not season_dict or not races:
-            return {"races": [], "paths": [], "y_labels": [], "view_box": "0 0 1000 500"}
+            empty_payload = json.dumps({"season": self.selected_season, "races": [], "teams": []})
+            return {"races": [], "paths": [], "y_labels": [], "view_box": "0 0 1000 500", "chart_json": empty_payload}
             
         current_constructors = get_current_constructors()
         team_colors = season_dict.get("team_colors", {})
         latest_season_dict = seasons[-1]
         latest_team_colors = latest_season_dict.get("team_colors", {})
-        teams = [t for t in latest_team_colors.keys() if t in current_constructors]
+        
+        # Only display teams in selected season that are also current constructors (per requirements)
+        season_teams = list(team_colors.keys())
+        teams = [t for t in season_teams if t in current_constructors]
+        if not teams:
+            teams = [t for t in latest_team_colors.keys() if t in current_constructors]
+
+        # Order teams by their initial ranking at race 0
+        preseason_rankings = rankings.get(races[0], []) if races else []
+        teams = sorted(teams, key=lambda t: preseason_rankings.index(t) if t in preseason_rankings else 999)
         
         M = len(races)
         N = len(teams)
@@ -963,15 +989,24 @@ class State(rx.State):
         x_coords = [margin_l + i * dx for i in range(M)]
         
         paths = []
+        chart_teams = []
         for team in teams:
             points = []
+            team_color = team_colors.get(team) or latest_team_colors.get(team, "#00b4da")
+            if team_color.lower() in ("black", "#000000", "#000"):
+                team_color = "#00D2BE"
+
+            team_rankings = []
             for i, race_name in enumerate(races):
                 race_rankings = rankings.get(race_name, [])
-                filtered_rankings = [t for t in race_rankings if t in current_constructors]
+                filtered_rankings = [t for t in race_rankings if t in current_constructors and t in teams]
                 if team in filtered_rankings:
                     rank_idx = filtered_rankings.index(team)
-                    y = margin_t + rank_idx * dy
-                    points.append((x_coords[i], y))
+                else:
+                    rank_idx = len(filtered_rankings)
+                y = margin_t + rank_idx * dy
+                points.append((x_coords[i], y))
+                team_rankings.append({"race": race_name, "rank": rank_idx + 1})
             
             if points:
                 path_str = f"M {points[0][0]:.1f} {points[0][1]:.1f} " + " ".join([f"L {p[0]:.1f} {p[1]:.1f}" for p in points[1:]])
@@ -979,21 +1014,36 @@ class State(rx.State):
                 
                 paths.append({
                     "team": team,
-                    "color": team_colors.get(team) or latest_team_colors.get(team, "#555555"),
+                    "color": team_color,
                     "path_string": path_str,
                     "leading_x": leading_x,
                     "leading_y": leading_y,
                     "icon": f"{R2_CUSTOM_DOMAIN}/Power Rankings/Car Icons/Icon_{team.replace(' ', '')}.png"
                 })
+
+            chart_teams.append({
+                "name": team,
+                "short_name": TEAM_SHORT_CODES.get(team, team[:3].upper()),
+                "color": team_color,
+                "icon": f"{R2_CUSTOM_DOMAIN}/Power Rankings/Car Icons/Icon_{team.replace(' ', '')}.png",
+                "rankings": team_rankings,
+            })
                 
         x_labels = [{"name": race_name, "x": x_coords[i]} for i, race_name in enumerate(races)]
         y_labels = [{"rank": r + 1, "y": margin_t + r * dy} for r in range(N)]
         
+        chart_data_dict = {
+            "season": self.selected_season,
+            "races": races,
+            "teams": chart_teams,
+        }
+
         return {
             "races": x_labels,
             "paths": paths,
             "y_labels": y_labels,
-            "view_box": f"0 0 {view_w} {view_h}"
+            "view_box": f"0 0 {view_w} {view_h}",
+            "chart_json": json.dumps(chart_data_dict),
         }
 
     @rx.var(auto_deps=False, deps=["selected_season"])
@@ -1011,6 +1061,21 @@ class State(rx.State):
     @rx.var(auto_deps=False, deps=["selected_season"])
     def power_rankings_view_box(self) -> str:
         return self._get_svg_raw_data()["view_box"]
+
+    @rx.var(auto_deps=False, deps=["selected_season"])
+    def power_rankings_chart_json(self) -> str:
+        return self._get_svg_raw_data()["chart_json"]
+
+    @rx.var(auto_deps=False, deps=["selected_season"])
+    def power_rankings_chart_html(self) -> str:
+        import html
+        chart_json = self._get_svg_raw_data()["chart_json"]
+        escaped_json = html.escape(chart_json, quote=True)
+        return (
+            f'<power-rankings-chart data-chart="{escaped_json}" '
+            f'style="width: 100%; display: block;">'
+            f'</power-rankings-chart>'
+        )
 
     @rx.var(auto_deps=False, deps=["selected_season"])
     def power_rankings_list_data(self) -> list[dict]:
@@ -2907,8 +2972,17 @@ def power_rankings_table() -> rx.Component:
     )
 
 
+@rx.memo
+def memoized_power_rankings_chart(*, html_content: rx.Var[str]) -> rx.Component:
+    """Memoized wrapper preventing React re-renders from ticker loops or unrelated state."""
+    return rx.box(
+        rx.html(html_content),
+        width="100%",
+    )
+
+
 def power_rankings_trajectory_graph() -> rx.Component:
-    """The interactive SVG bump chart showing power ranking trajectories."""
+    """The interactive animated bump chart showing power ranking trajectories."""
     return rx.vstack(
         rx.text(
             "Ranking Trajectory",
@@ -2919,85 +2993,7 @@ def power_rankings_trajectory_graph() -> rx.Component:
             padding_left="2.5%",
             padding_top="2.5%",
         ),
-        rx.el.svg(
-            # Grid background lines
-            rx.foreach(
-                State.power_rankings_races,
-                lambda race: rx.el.line(
-                    x1=race["x"],
-                    y1=40,
-                    x2=race["x"],
-                    y2=450,
-                    stroke="rgba(255, 255, 255, 0.08)",
-                    stroke_width="1",
-                )
-            ),
-            rx.foreach(
-                State.power_rankings_y_labels,
-                lambda label: rx.el.line(
-                    x1=100,
-                    y1=label["y"],
-                    x2=900,
-                    y2=label["y"],
-                    stroke="rgba(255, 255, 255, 0.08)",
-                    stroke_width="1",
-                )
-            ),
-            # Y-axis Labels
-            rx.foreach(
-                State.power_rankings_y_labels,
-                lambda label: rx.el.text(
-                    label["rank"],
-                    x=75,
-                    y=label["y"],
-                    dy="4",
-                    fill="white",
-                    font_size="12",
-                    font_family="Outfit",
-                    text_anchor="start",
-                    class_name="power-rankings-y-text",
-                )
-            ),
-            # X-axis Labels
-            rx.foreach(
-                State.power_rankings_races,
-                lambda race: rx.el.text(
-                    race["name"],
-                    x=race["x"],
-                    y=465,
-                    fill="white",
-                    font_size="10",
-                    font_family="Outfit",
-                    text_anchor="end",
-                    transform=f"rotate(-90 {race['x']} 465)",
-                    class_name="power-rankings-x-text",
-                )
-            ),
-            # Trajectory Paths
-            rx.foreach(
-                State.power_rankings_paths,
-                lambda path: rx.el.g(
-                    rx.el.path(
-                        d=path["path_string"],
-                        stroke=path["color"],
-                        stroke_width="20",
-                        fill="none",
-                        opacity=0.8,
-                    ),
-                    rx.el.image(
-                        href=path["icon"],
-                        x=path["leading_x"],
-                        y=path["leading_y"],
-                        width="30",
-                        height="30",
-                        transform="translate(-15px, -15px)",
-                    ),
-                )
-            ),
-            view_box=State.power_rankings_view_box,
-            width="100%",
-            height="auto",
-        ),
+        memoized_power_rankings_chart(html_content=State.power_rankings_chart_html),
         width="100%",
     )
 
@@ -3204,6 +3200,7 @@ app = rx.App(
         rx.el.link(rel="icon", href="/Icons/IconLogoApp.png"),
         rx.el.link(rel="apple-touch-icon", href="/Icons/IconLogoApp.png"),
         rx.el.script(src="/carousel.js"),
+        rx.el.script(src="/power_rankings_chart.js?v=20260907_13"),
     ],
 )
 app.add_page(index)
