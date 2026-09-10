@@ -3200,7 +3200,7 @@ app = rx.App(
         rx.el.link(rel="icon", href="/Icons/IconLogoApp.png"),
         rx.el.link(rel="apple-touch-icon", href="/Icons/IconLogoApp.png"),
         rx.el.script(src="/carousel.js"),
-        rx.el.script(src="/power_rankings_chart.js?v=20260907_13"),
+        rx.el.script(src="/power_rankings_chart.js?v=20260907_14"),
     ],
 )
 app.add_page(index)

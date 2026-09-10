@@ -232,7 +232,10 @@
     }
 
     startAnimation() {
-      if (this.isPlaying) return;
+      if (this.rafId) {
+        cancelAnimationFrame(this.rafId);
+        this.rafId = null;
+      }
       if (this.progress >= 1.0 || PRC_STORE.hasCompleted) {
         this.progress = 0.0;
         PRC_STORE.progress = 0.0;
@@ -244,6 +247,7 @@
       PRC_STORE.userPaused = false;
       this.lastTimestamp = null;
       this.updatePlayBtnVisual();
+      this.updateVisuals(this.progress);
       this.rafId = requestAnimationFrame(this.animateFrame);
     }
 
@@ -293,20 +297,9 @@
       if (this.isPlaying) {
         this.userPaused = true;
         PRC_STORE.userPaused = true;
-        PRC_STORE.isPlaying = false;
         this.stopAnimation();
       } else {
         // User explicitly tapped Play / Replay
-        this.userPaused = false;
-        PRC_STORE.userPaused = false;
-        this.isPlaying = true;
-        PRC_STORE.isPlaying = true;
-
-        if (this.progress >= 1.0 || PRC_STORE.hasCompleted) {
-          this.progress = 0.0;
-          PRC_STORE.progress = 0.0;
-          PRC_STORE.hasCompleted = false;
-        }
         this.startAnimation();
       }
     }
@@ -738,6 +731,10 @@
             box-sizing: border-box !important;
             line-height: 1 !important;
             transition: all 0.18s ease;
+          }
+
+          .prc-btn * {
+            pointer-events: none;
           }
 
           .prc-btn:hover {
