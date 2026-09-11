@@ -94,7 +94,7 @@ def get_team_awards_score(team, r_name, df):
                     count += 1
     return count * 0.1
 
-def get_final_rankings(prev_rankings, moves):
+def get_final_rankings(prev_rankings, moves, final_vals=None):
     n = len(prev_rankings)
     prev_rank = {team: idx + 1 for idx, team in enumerate(prev_rankings)}
     target_rank = {}
@@ -109,6 +109,15 @@ def get_final_rankings(prev_rankings, moves):
         if tgt_a != tgt_b:
             return -1 if tgt_a < tgt_b else 1
             
+        # Tie breaking:
+        if final_vals is not None and team_a in final_vals and team_b in final_vals:
+            # 1. Higher recent race score takes precedence
+            if abs(final_vals[team_a] - final_vals[team_b]) > 1e-4:
+                return -1 if final_vals[team_a] > final_vals[team_b] else 1
+            # 2. Team moving forward or holding beats team moving back
+            if moves[team_a] != moves[team_b]:
+                return -1 if moves[team_a] > moves[team_b] else 1
+                
         rank_a = prev_rank[team_a]
         rank_b = prev_rank[team_b]
         
@@ -203,67 +212,51 @@ def calculate_all_seasons():
                 
                 # Fetch Standings
                 StandingsRank_recent = get_constructor_standings(idx, races, teams, df)
-                if idx == 0:
-                    StandingsRank_prev = {team: teams.index(team) + 1 for team in teams}
-                else:
-                    StandingsRank_prev = get_constructor_standings(idx - 1, races, teams, df)
+                
+                # Grid ranks for this race
+                race_place_avg = {}
+                race_quali_avg = {}
+                for team in teams:
+                    p_avg = get_team_place_avg(team, r_name, df)
+                    q_avg = get_team_qualifying_avg(team, r_name, df)
+                    race_place_avg[team] = p_avg if not pd.isna(p_avg) and not np.isnan(p_avg) else 99.0
+                    race_quali_avg[team] = q_avg if not pd.isna(q_avg) and not np.isnan(q_avg) else 99.0
+                    
+                grid_place_rank = {team: r + 1 for r, team in enumerate(sorted(teams, key=lambda t: (race_place_avg[t], t)))}
+                grid_quali_rank = {team: r + 1 for r, team in enumerate(sorted(teams, key=lambda t: (race_quali_avg[t], t)))}
                 
                 moves = {}
+                final_vals = {}
                 for team in teams:
-                    # Seasonal Averages Calculations
-                    Q_recent = get_team_qualifying_avg(team, r_name, df)
-                    P_recent = get_team_place_avg(team, r_name, df)
+                    curr_rank = prev_rankings_list.index(team) + 1
                     
-                    Q_seasonal = get_team_seasonal_qualifying_avg(team, idx, races, df)
-                    P_seasonal = get_team_seasonal_place_avg(team, idx, races, df)
+                    # Performance delta relative to current power rank:
+                    # Positive delta means the constructor outperformed its current power rank on the grid
+                    s_diff = curr_rank - StandingsRank_recent[team]
+                    p_diff = curr_rank - grid_place_rank[team]
+                    q_diff = curr_rank - grid_quali_rank[team]
                     
-                    qualifying_avg_score = get_comparison_score(Q_recent, Q_seasonal)
-                    finishing_place_avg_score = get_comparison_score(P_recent, P_seasonal)
-                    
-                    # Overall standings rank comparison
-                    rank_recent = StandingsRank_recent[team]
-                    rank_prev = StandingsRank_prev[team]
-                    if rank_recent < rank_prev:
-                        overall_standings_score = 2
-                    elif rank_recent > rank_prev:
-                        overall_standings_score = -2
-                    else:
-                        overall_standings_score = 0
-                        
-                    seasonal_avg_total = (qualifying_avg_score + finishing_place_avg_score + overall_standings_score) / 3.0
-                    
-                    # Recent Race vs Last Race Calculations
                     awards_score = get_team_awards_score(team, r_name, df)
                     
-                    if idx == 0:
-                        qualifying_avg_score_vs_last = 0
-                        finishing_place_avg_score_vs_last = 0
-                    else:
-                        Q_last = get_team_qualifying_avg(team, prev_race_name, df)
-                        P_last = get_team_place_avg(team, prev_race_name, df)
-                        
-                        qualifying_avg_score_vs_last = get_comparison_score(Q_recent, Q_last)
-                        finishing_place_avg_score_vs_last = get_comparison_score(P_recent, P_last)
-                        
-                    recent_vs_last_total = (awards_score + qualifying_avg_score_vs_last + finishing_place_avg_score_vs_last) / 3.0
+                    # Weighted composite score: 50% Standings Anchor, 35% Race Finish, 15% Qualifying + Awards
+                    final_val = 0.50 * s_diff + 0.35 * p_diff + 0.15 * q_diff + awards_score
+                    final_vals[team] = final_val
                     
-                    # Final Value
-                    final_val = seasonal_avg_total * 0.65 + recent_vs_last_total * 0.35
-                    
-                    if final_val >= 1.0:
+                    # Movement Thresholds (max +/- 2 per week)
+                    if final_val >= 1.5:
                         move = 2
                     elif final_val >= 0.5:
                         move = 1
                     elif final_val > -0.5:
                         move = 0
-                    elif final_val > -1.0:
+                    elif final_val > -1.5:
                         move = -1
                     else:
                         move = -2
                         
                     moves[team] = move
                     
-                sorted_teams = get_final_rankings(prev_rankings_list, moves)
+                sorted_teams = get_final_rankings(prev_rankings_list, moves, final_vals)
                 rankings[r_name] = sorted_teams
                 
             data[s_num] = {
