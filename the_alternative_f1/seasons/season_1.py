@@ -10,24 +10,32 @@ season = {
 
     "articles": [],
 
+    "preseason_power_rankings": [
+        "McLaren",
+        "Mercedes",
+        "Red Bull",
+        "Aston Martin",
+        "Ferrari",
+    ],
+
     "team_colors": {
         "McLaren": "#FF6A00",
-        "Aston Martin": "teal",
-        "Mercedes": "black",
+        "Aston Martin": "#006F62",
+        "Mercedes": "#00D2BE",
         "Red Bull": "darkblue",
-        "Ferrari": "red",
+        "Ferrari": "#EF1A2D",
     },
 
     "driver_colors": {
         "Nick": "#FF6A00",
         "Travis": "#FFAE00",
-        "Zane": "teal",
-        "David": "#01C79E",
-        "Erick": "black",
-        "Marcus": "#909090",
+        "Zane": "#006F62",
+        "David": "#2CB69A",
+        "Erick": "#00D2BE",
+        "Marcus": "#70ECE0",
         "Josh L": "darkblue",
-        "Boz": "#8888c9",
-        "Gary": "red",
+        "Boz": "#455A94",
+        "Gary": "#EF1A2D",
     },
 
     "super_license_points": {

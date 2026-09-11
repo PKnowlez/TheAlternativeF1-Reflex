@@ -10,6 +10,7 @@ import reflex as rx
 
 from the_alternative_f1.all_time_stats.Functions import get_excel_sheet, CalculateAllTime, file as excel_file
 from the_alternative_f1.articles.components import zoomable_chart
+from the_alternative_f1.race_metrics import get_race_metrics
 
 _detailed_cache = {}
 _detailed_mtime = 0
@@ -91,50 +92,47 @@ def compute_all_time_avg_pos_change(num_seasons: int, entity_type: str, active_e
     all_drivers, all_teams = get_entity_lists(num_seasons)
     entities = all_drivers if entity_type == "Driver" else all_teams
 
+    from collections import defaultdict
+    entity_pos_changes = defaultdict(list)
+
+    for s in range(1, num_seasons + 1):
+        df = get_excel_sheet(f"Season{s}")
+        sched = get_excel_sheet(f"S{s}Schedule")
+        if df.empty or sched.empty:
+            continue
+
+        df_copy = df.copy()
+        df_copy["Driver"] = df_copy["Driver"].astype(str).str.strip()
+        df_copy["Team"] = df_copy["Team"].astype(str).str.strip()
+
+        for race_name in sched["Race"]:
+            race_str = str(race_name).strip()
+            if race_str.startswith(("Pre", "Post")):
+                continue
+            place_col = race_str + "Place"
+            qual_col = race_str + "Qualifying"
+            pts_col = race_str + "Points"
+
+            valid_pts_s = pd.to_numeric(df_copy[pts_col], errors='coerce').fillna(0) if pts_col in df_copy.columns else pd.Series()
+            valid_place_s = pd.to_numeric(df_copy[place_col], errors='coerce').fillna(0) if place_col in df_copy.columns else pd.Series()
+            if not ((not valid_pts_s.empty and (valid_pts_s > 0).any()) or (not valid_place_s.empty and (valid_place_s > 0).any())):
+                continue  # Requirement 70: Skip unrun races
+
+            if place_col in df_copy.columns:
+                metrics = get_race_metrics(df_copy, place_col, qual_col if qual_col in df_copy.columns else None, s)
+                for _, r in df_copy.iterrows():
+                    d_name = str(r["Driver"]).strip()
+                    t_name = str(r["Team"]).strip()
+                    d_info = metrics["drivers"].get(d_name, {})
+                    if d_info.get("competed") and d_info.get("pos_change") is not None:
+                        if entity_type == "Driver":
+                            entity_pos_changes[d_name].append(d_info["pos_change"])
+                        else:
+                            entity_pos_changes[t_name].append(d_info["pos_change"])
+
     results = []
     for entity in entities:
-        pos_changes = []
-        for s in range(1, num_seasons + 1):
-            df = get_excel_sheet(f"Season{s}")
-            sched = get_excel_sheet(f"S{s}Schedule")
-            if df.empty or sched.empty:
-                continue
-
-            df_copy = df.copy()
-            df_copy["Driver"] = df_copy["Driver"].astype(str).str.strip()
-            df_copy["Team"] = df_copy["Team"].astype(str).str.strip()
-
-            col_key = "Driver" if entity_type == "Driver" else "Team"
-            rows = df_copy[df_copy[col_key] == entity]
-            if rows.empty:
-                continue
-
-            for race_name in sched["Race"]:
-                race_str = str(race_name).strip()
-                if race_str.startswith(("Pre", "Post")):
-                    continue
-                place_col = race_str + "Place"
-                qual_col = race_str + "Qualifying"
-                pts_col = race_str + "Points"
-
-                valid_pts_s = pd.to_numeric(df_copy[pts_col], errors='coerce').fillna(0) if pts_col in df_copy.columns else pd.Series()
-                valid_place_s = pd.to_numeric(df_copy[place_col], errors='coerce').fillna(0) if place_col in df_copy.columns else pd.Series()
-                if not ((not valid_pts_s.empty and (valid_pts_s > 0).any()) or (not valid_place_s.empty and (valid_place_s > 0).any())):
-                    continue  # Requirement 70: Skip unrun races
-
-                if place_col in df_copy.columns and qual_col in df_copy.columns:
-                    for _, r in rows.iterrows():
-                        p = r[place_col]
-                        q = r[qual_col]
-                        if not pd.isnull(p) and not pd.isnull(q):
-                            try:
-                                p_val = float(p)
-                                q_val = float(q)
-                                if p_val > 0 and q_val > 0:
-                                    pos_changes.append(q_val - p_val)
-                            except Exception:
-                                pass
-
+        pos_changes = entity_pos_changes.get(entity, [])
         avg_change = float(np.mean(pos_changes)) if pos_changes else 0.0
         is_active = (entity == active_entity)
         if is_active:
@@ -215,35 +213,29 @@ def compute_entity_detailed_metrics(num_seasons: int, entity_type: str, entity_n
             display_race = _format_race_name(race_str)
             track_name = _extract_track_name(race_str)
 
+            metrics = get_race_metrics(df_copy, place_col, qual_col if qual_col in df_copy.columns else None, s)
+
             if entity_type == "Driver":
                 row = entity_rows.iloc[0]
+                d_info = metrics["drivers"].get(entity_name, {})
+                competed = d_info.get("competed", False)
                 pts = row[pts_col] if pts_col in row and not pd.isnull(row[pts_col]) else 0.0
-                place = row[place_col] if place_col in row and not pd.isnull(row[place_col]) else None
-                qual = row[qual_col] if qual_col in row and not pd.isnull(row[qual_col]) else None
                 fl = row[fl_col] if fl_col in row and not pd.isnull(row[fl_col]) else "N"
                 dotd = row[dotd_col] if dotd_col in row and not pd.isnull(row[dotd_col]) else "N"
                 mot = row[mot_col] if mot_col in row and not pd.isnull(row[mot_col]) else "N"
                 cd = row[cd_col] if cd_col in row and not pd.isnull(row[cd_col]) else "N"
 
-                if pd.isnull(pts) and pd.isnull(place):
+                if not competed and pd.isnull(pts):
                     continue
 
-                try:
-                    place_val = float(place) if place is not None and not pd.isnull(place) else 0.0
-                except Exception:
-                    place_val = 0.0
-
-                try:
-                    qual_val = float(qual) if qual is not None and not pd.isnull(qual) else 0.0
-                except Exception:
-                    qual_val = 0.0
+                place_val = float(d_info.get("effective_place")) if d_info.get("effective_place") is not None else 0.0
+                qual_val = float(d_info.get("effective_qual")) if d_info.get("effective_qual") is not None else 0.0
+                pos_change = d_info.get("pos_change")
 
                 try:
                     pts_val = float(pts) if pts is not None and not pd.isnull(pts) else 0.0
                 except Exception:
                     pts_val = 0.0
-
-                pos_change = (qual_val - place_val) if (qual_val > 0 and place_val > 0) else 0.0
 
                 is_fl = is_truthy(fl)
                 is_dotd = is_truthy(dotd)
@@ -258,6 +250,7 @@ def compute_entity_detailed_metrics(num_seasons: int, entity_type: str, entity_n
                     "race": display_race,
                     "raw_race": race_str,
                     "track": track_name,
+                    "competed": competed,
                     "place": place_val,
                     "all_places": [place_val] if place_val > 0 else [],
                     "qual": qual_val,
@@ -286,22 +279,25 @@ def compute_entity_detailed_metrics(num_seasons: int, entity_type: str, entity_n
 
                 valid_places = []
                 valid_quals = []
-                if place_col in entity_rows.columns:
-                    for p in entity_rows[place_col].dropna():
-                        try:
-                            valid_places.append(float(p))
-                        except Exception:
-                            pass
-                if qual_col in entity_rows.columns:
-                    for q in entity_rows[qual_col].dropna():
-                        try:
-                            valid_quals.append(float(q))
-                        except Exception:
-                            pass
+                team_pos_changes = []
+                for _, r in entity_rows.iterrows():
+                    d_name = str(r["Driver"]).strip()
+                    d_info = metrics["drivers"].get(d_name, {})
+                    if d_info.get("competed"):
+                        ep = d_info.get("effective_place")
+                        eq = d_info.get("effective_qual")
+                        pchg = d_info.get("pos_change")
+                        if ep is not None:
+                            valid_places.append(float(ep))
+                        if eq is not None:
+                            valid_quals.append(float(eq))
+                        if pchg is not None:
+                            team_pos_changes.append(float(pchg))
 
-                # Requirement 73: Average finish place per race for Constructor
                 place_val = float(np.mean(valid_places)) if valid_places else 0.0
                 qual_val = float(np.mean(valid_quals)) if valid_quals else 0.0
+                pos_change = float(np.mean(team_pos_changes)) if team_pos_changes else None
+                competed = len(valid_places) > 0
 
                 fl_cnt = int((entity_rows[fl_col].apply(is_truthy)).sum()) if fl_col in entity_rows.columns else 0
                 dotd_cnt = int((entity_rows[dotd_col].apply(is_truthy)).sum()) if dotd_col in entity_rows.columns else 0
@@ -311,13 +307,12 @@ def compute_entity_detailed_metrics(num_seasons: int, entity_type: str, entity_n
                 wins_cnt = int(sum(1 for p in valid_places if p == 1.0))
                 podiums_cnt = int(sum(1 for p in valid_places if 1.0 <= p <= 3.0))
 
-                pos_change = (qual_val - place_val) if (qual_val > 0 and place_val > 0) else 0.0
-
                 races_detail.append({
                     "season": s,
                     "race": display_race,
                     "raw_race": race_str,
                     "track": track_name,
+                    "competed": competed,
                     "place": place_val,
                     "all_places": valid_places,
                     "qual": qual_val,
@@ -415,9 +410,10 @@ class DetailedStatsState(rx.State):
                 avg_p = float(np.mean(all_p_flat)) if all_p_flat else 0.0
                 avg_q = float(np.mean(all_q_flat)) if all_q_flat else 0.0
             else:
-                valid_q = df_races[df_races["qual"] > 0]["qual"]
+                valid_competed = df_races[df_races["competed"] == True] if "competed" in df_races.columns else df_races
+                valid_q = valid_competed[valid_competed["qual"] > 0]["qual"]
                 avg_q = float(valid_q.mean()) if not valid_q.empty else 0.0
-                valid_p = df_races[df_races["place"] > 0]["place"]
+                valid_p = valid_competed[valid_competed["place"] > 0]["place"]
                 avg_p = float(valid_p.mean()) if not valid_p.empty else 0.0
 
             avg_change = avg_q - avg_p
@@ -538,13 +534,14 @@ class DetailedStatsState(rx.State):
                     "fill": pts_fill,
                 })
 
-                p_chg = float(row["pos_change"])
-                p_chg_fill = "#3cb44b" if p_chg > 0 else "#e6194b" if p_chg < 0 else "#888888"
-                indiv_pos_change_data.append({
-                    "race": f"S{row['season']} {row['race']}",
-                    "pos_change": p_chg,
-                    "fill": p_chg_fill,
-                })
+                if row.get("competed", True) and row.get("pos_change") is not None:
+                    p_chg = float(row["pos_change"])
+                    p_chg_fill = "#3cb44b" if p_chg > 0 else "#e6194b" if p_chg < 0 else "#888888"
+                    indiv_pos_change_data.append({
+                        "race": f"S{row['season']} {row['race']}",
+                        "pos_change": p_chg,
+                        "fill": p_chg_fill,
+                    })
 
         placements_data = []
         fixed_categories = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th+"]
@@ -566,7 +563,8 @@ class DetailedStatsState(rx.State):
                             except Exception:
                                 pass
             else:
-                valid_finishes = df_races[df_races["place"] > 0]["place"]
+                valid_competed = df_races[df_races["competed"] == True] if "competed" in df_races.columns else df_races
+                valid_finishes = valid_competed[valid_competed["place"] > 0]["place"]
                 for p_val in valid_finishes:
                     p_int = int(p_val)
                     if 1 <= p_int <= 9:
@@ -594,11 +592,13 @@ class DetailedStatsState(rx.State):
                 t_df = track_groups.get_group(tr)
                 t_tot_pts = float(t_df["pts"].sum())
                 t_avg_pts = float(t_df["pts"].mean())
-                t_valid_q = t_df[t_df["qual"] > 0]["qual"]
-                t_valid_p = t_df[t_df["place"] > 0]["place"]
+                t_competed = t_df[t_df["competed"] == True] if "competed" in t_df.columns else t_df
+                t_valid_q = t_competed[t_competed["qual"] > 0]["qual"]
+                t_valid_p = t_competed[t_competed["place"] > 0]["place"]
                 t_avg_q = float(t_valid_q.mean()) if not t_valid_q.empty else 0.0
                 t_avg_p = float(t_valid_p.mean()) if not t_valid_p.empty else 0.0
-                t_pos_change = t_avg_q - t_avg_p
+                t_pos_changes = [float(c) for c in t_competed["pos_change"].dropna() if c is not None]
+                t_pos_change = float(np.mean(t_pos_changes)) if t_pos_changes else (t_avg_q - t_avg_p)
 
                 track_total_pts_data.append({"track": tr, "total_points": round(t_tot_pts, 1)})
                 track_avg_pts_data.append({"track": tr, "avg_points": round(t_avg_pts, 2)})

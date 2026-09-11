@@ -17,6 +17,7 @@ from the_alternative_f1.articles.Season5.TrophyReveal.TrophyTeaser import articl
 from the_alternative_f1.articles.Season5.Preseason.HungaryRecap import article as Hungary_Recap_Article
 from the_alternative_f1.articles.Season5.TrophyReveal.TrophyReveal import article as TrophyReveal_Article
 from the_alternative_f1.articles.Season5.Race_Week.australia_race_week import article as Australia_Race_Week_Article
+from the_alternative_f1.articles.Season5.Race_Recap.australia_race_recap import article as Australia_Race_Recap_Article
 
 season = {
     "season_number": 5,
@@ -26,7 +27,7 @@ season = {
     # Rookies: drivers not present in Season 4
     "rookies": {"Grayson", "Josh C.", "Randy", "Evelo"},
 
-    "articles": [Australia_Race_Week_Article, 
+    "articles": [Australia_Race_Recap_Article, Australia_Race_Week_Article, 
     TrophyReveal_Article, Hungary_Recap_Article, TrophyTeaser_Article, 
     Vegas_Recap_Article, Mexico_Recap_Article, Preseason_Article, 
     TheGrid_Article, Mercedes_Article, Audi_Article,
@@ -35,33 +36,33 @@ season = {
     RedBull_Article, Erick_Article, Haas_Article],
 
     "team_colors": {
-        "Ferrari": "red",
+        "Ferrari": "#EF1A2D",
         "McLaren": "#FF6A00",
         "Red Bull": "darkblue",
-        "Mercedes": "black",
-        "Haas": "white",
+        "Mercedes": "#00D2BE",
+        "Haas": "#E0E0E0",
         "Audi": "#A33E2C",
         "Cadillac": "#FFEA00",
-        "Williams": "DodgerBlue",
+        "Williams": "#00A0DE",
     },
 
     "driver_colors": {
         "Joshua": "darkblue",
-        "Eddie": "#8888c9",
+        "Eddie": "#455A94",
         "Nick": "#FF6A00",
         "Del": "#FFAE00",
         "Patrick": "#FFEA00",
-        "Josh": "#A8A153",
-        "Matthew": "white",
-        "Brently": "#C5C5C5",
-        "Grayson": "DodgerBlue",
-        "Josh C.": "#99ccff",
+        "Josh": "#D4AF37",
+        "Matthew": "#A0A0A0",
+        "Brently": "#E0E0E0",
+        "Grayson": "#00A0DE",
+        "Josh C.": "#6CD5FF",
         "Boz": "#A33E2C",
         "Evelo": "#9E6156",
-        "Jaden": "red",
-        "Leo": "#ff6060",
-        "Jairo": "black",
-        "Randy": "#909090",
+        "Jaden": "#EF1A2D",
+        "Leo": "#FF6B7A",
+        "Jairo": "#00D2BE",
+        "Randy": "#70ECE0",
     },
 
     "super_license_points": {

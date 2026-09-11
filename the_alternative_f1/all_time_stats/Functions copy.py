@@ -19,19 +19,19 @@ points_suffix = "Points"
 file = "The_Alternative_F1.xlsx"
 # More color names can be found here: https://www.w3schools.com/cssref/css_colors.php
 team_colors = {
-        'Alpine': 'hotpink', 
-        'Aston Martin': 'teal',
-        'Ferrari': 'red',
-        'McLaren': 'darkorange',
+        'Alpine': '#0093CC', 
+        'Aston Martin': '#006F62',
+        'Ferrari': '#EF1A2D',
+        'McLaren': '#FF6A00',
         'Red Bull': 'darkblue',
-        'VCARB': 'blue',
-        'AlphaTauri': 'LightSlateGray',
-        'Alfa Romeo': 'Maroon',
-        'Mercedes': 'black',
-        'Haas': 'white',
+        'VCARB': '#1634CB',
+        'AlphaTauri': '#5E8FAA',
+        'Alfa Romeo': '#C92D4B',
+        'Mercedes': '#00D2BE',
+        'Haas': '#E0E0E0',
         'Audi': '#A33E2C',
         'Cadillac': '#FFEA00',
-        'Williams': 'DodgerBlue',
+        'Williams': '#00A0DE',
     }  
 
 def PointTotals(season):

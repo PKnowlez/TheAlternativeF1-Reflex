@@ -170,9 +170,9 @@
           this.updateVisuals(1.0);
           this.updatePlayBtnVisual();
         } else if (this.isPlaying && !this.userPaused) {
-          // Continue playing current animation without resetting
-          this.lastTimestamp = null;
+          // Continue playing current animation smoothly
           if (!this.rafId) {
+            this.lastTimestamp = performance.now();
             this.rafId = requestAnimationFrame(this.animateFrame);
           }
         } else {
@@ -182,10 +182,13 @@
     }
 
     disconnectedCallback() {
-      if (this.rafId) {
-        cancelAnimationFrame(this.rafId);
-        this.rafId = null;
-      }
+      // Delay cancellation slightly to prevent hitching if DOM is reconciled
+      setTimeout(() => {
+        if (!this.isConnected && this.rafId) {
+          cancelAnimationFrame(this.rafId);
+          this.rafId = null;
+        }
+      }, 50);
     }
 
     parseData() {
@@ -269,8 +272,11 @@
         this.lastTimestamp = timestamp;
       }
 
-      const delta = timestamp - this.lastTimestamp;
+      let delta = timestamp - this.lastTimestamp;
       this.lastTimestamp = timestamp;
+
+      // Clamp delta to prevent sudden jumps if a background frame is delayed
+      if (delta > 100) delta = 100;
 
       const totalDuration = this.getTotalDurationMs();
       const step = delta / (totalDuration / this.speed);
@@ -382,18 +388,18 @@
     updateVisuals(p) {
       const slider = this.shadowRoot.getElementById('scrubber');
       if (slider && document.activeElement !== slider) {
-        slider.value = Math.round(p * 1000);
-      }
-
-      // Update slider gradient track
-      if (slider) {
-        const pct = (p * 100).toFixed(1);
-        slider.style.background = `linear-gradient(to right, #00b4da 0%, #00b4da ${pct}%, #2C2C32 ${pct}%, #2C2C32 100%)`;
+        const sliderVal = Math.round(p * 1000);
+        if (this._lastSliderVal !== sliderVal) {
+          slider.value = sliderVal;
+          const pct = (sliderVal / 10).toFixed(1);
+          slider.style.background = `linear-gradient(to right, #00b4da 0%, #00b4da ${pct}%, #2C2C32 ${pct}%, #2C2C32 100%)`;
+          this._lastSliderVal = sliderVal;
+        }
       }
 
       if (!this.chartData || !this.computedLayout) return;
 
-      const { races, teams, plateaus, totalIntervals } = this.computedLayout;
+      const { races, teams, plateaus, totalIntervals, windowViewW, viewH, raceIncW, numRaces } = this.computedLayout;
       const K = totalIntervals;
 
       // Calculate current interval and fraction
@@ -401,27 +407,55 @@
       const s = Math.min(K - 1, Math.floor(u));
       const f = p >= 1.0 ? 1.0 : Math.min(1.0, Math.max(0.0, u - s));
 
-      // Update Status / Checkpoint Badge in Toolbar
+      // Pan With Cars (TAF1APP-SDDREQ-91): After 2 race increments, pan with the cars keeping 3 increments visible (next 1 and previous 2)
+      let panX = 0;
+      if (numRaces > 3) {
+        const raceCoord = (s + f) / 2.0;
+        if (raceCoord > 2.0) {
+          panX = (raceCoord - 2.0) * raceIncW;
+          const maxPanX = (numRaces - 3) * raceIncW;
+          panX = Math.min(panX, maxPanX);
+        }
+      }
+
+      const chartSvg = this.shadowRoot.getElementById('chart-svg');
+      if (chartSvg) {
+        chartSvg.setAttribute('viewBox', `${panX.toFixed(1)} 0 ${windowViewW} ${viewH}`);
+      }
+
+      const yAxisLayer = this.shadowRoot.getElementById('y-axis-layer');
+      if (yAxisLayer) {
+        yAxisLayer.setAttribute('transform', `translate(${panX.toFixed(1)}, 0)`);
+      }
+
+      // Update Status / Checkpoint Badge in Toolbar (cached to avoid layout thrashing)
       const stageEl = this.shadowRoot.getElementById('stage-name');
       const stageContainer = this.shadowRoot.getElementById('stage-badge-container');
       if (stageEl && races.length > 0) {
+        let newStageHtml = '';
+        let newBorderColor = '';
         if (p >= 1.0) {
           const finalRace = races[races.length - 1];
-          stageEl.innerHTML = `<span style="color:#00E700;">🏁 Final:</span> ${finalRace}`;
-          if (stageContainer) stageContainer.style.borderColor = 'rgba(0, 231, 0, 0.45)';
+          newStageHtml = `<span style="color:#00E700;">🏁 Final:</span> ${finalRace}`;
+          newBorderColor = 'rgba(0, 231, 0, 0.45)';
         } else if (s % 2 === 0) {
           // Plateau interval
           const raceIdx = s / 2;
-          stageEl.innerHTML = `<span style="color:#00b4da;">Level:</span> ${races[raceIdx] || ''}`;
-          if (stageContainer) stageContainer.style.borderColor = 'rgba(0, 180, 218, 0.35)';
+          newStageHtml = `<span style="color:#00b4da;">Level:</span> ${races[raceIdx] || ''}`;
+          newBorderColor = 'rgba(0, 180, 218, 0.35)';
         } else {
           // Transition interval
           const fromIdx = Math.floor(s / 2);
           const toIdx = fromIdx + 1;
           const fromRace = races[fromIdx] || '';
           const toRace = races[toIdx] || '';
-          stageEl.innerHTML = `<span style="color:#FFB800;">→</span> ${fromRace} to ${toRace}`;
-          if (stageContainer) stageContainer.style.borderColor = 'rgba(255, 184, 0, 0.35)';
+          newStageHtml = `<span style="color:#FFB800;">→</span> ${fromRace} to ${toRace}`;
+          newBorderColor = 'rgba(255, 184, 0, 0.35)';
+        }
+        if (this._lastStageHtml !== newStageHtml) {
+          stageEl.innerHTML = newStageHtml;
+          this._lastStageHtml = newStageHtml;
+          if (stageContainer) stageContainer.style.borderColor = newBorderColor;
         }
       }
 
@@ -468,9 +502,10 @@
 
             const p0 = { x: platCurr.endX, y: y0 };
             const p3 = { x: platNext.startX, y: y1 };
-            const cx = (p0.x + p3.x) / 2;
-            const p1 = { x: cx, y: y0 };
-            const p2 = { x: cx, y: y1 };
+            const dx = p3.x - p0.x;
+            // Exact 1/3 and 2/3 horizontal control points guarantee 100% constant horizontal velocity
+            const p1 = { x: p0.x + dx / 3, y: y0 };
+            const p2 = { x: p0.x + (2 * dx) / 3, y: y1 };
 
             if (i < s) {
               // Completed transition - full 6 arguments for C command
@@ -506,10 +541,16 @@
           currentRank = f >= 0.5 ? r1 : r0;
         }
 
-        // Update rank badge text
-        const rankText = carEl.querySelector('.car-rank-text');
-        if (rankText) {
-          rankText.textContent = `#${currentRank} ${team.shortName}`;
+        // Update rank badge text only when changed to avoid DOM thrashing
+        if (!team._rankTextEl) {
+          team._rankTextEl = carEl.querySelector('.car-rank-text');
+        }
+        const newRankStr = `#${currentRank} ${team.shortName}`;
+        if (team._lastRankStr !== newRankStr) {
+          if (team._rankTextEl) {
+            team._rankTextEl.textContent = newRankStr;
+          }
+          team._lastRankStr = newRankStr;
         }
       });
     }
@@ -587,13 +628,20 @@
       // Reduced vertical spacing (dy = 44px) now that circular bubbles are removed!
       const dy = 44;
       const marginL = 60;
-      const marginR = 150; // room for car (56px) + badge (76px)
+      const marginR = 120; // room for car (56px) + badge (76px)
       const marginT = 65;
       const marginB = 22;
 
-      const stepW = Math.max(115, Math.round(360 / totalIntervals));
-      const usableW = totalIntervals * stepW;
-      const viewW = marginL + usableW + marginR;
+      // Fixed comfortable step width for race intervals
+      const stepW = 130;
+      const raceIncW = 2 * stepW;
+
+      // Pan With Cars (TAF1APP-SDDREQ-91): Keep only 3 x-axis increments visible at all times
+      // 3 race increments: 2 full race intervals (4 * stepW) + 3rd plateau (stepW) + margins
+      const windowViewW = marginL + 5 * stepW + marginR; // 60 + 650 + 120 = 830px
+
+      // Total view width for horizontal grid lines spanning all races
+      const totalViewW = marginL + (2 * numRaces - 1) * stepW + marginR;
 
       const chartH = numTeams > 1 ? (numTeams - 1) * dy : 300;
       const viewH = marginT + chartH + marginB;
@@ -635,12 +683,15 @@
         const finalRank = racePoints[racePoints.length - 1].rank;
         const delta = initialRank - finalRank;
 
+        const hasIcon = Boolean(t.has_icon !== false && t.icon && t.icon.length > 0);
+
         return {
           id: teamId,
           name: t.name,
           shortName: t.short_name || t.name.slice(0, 3).toUpperCase(),
           color: t.color || '#00b4da',
           icon: t.icon || '',
+          hasIcon: hasIcon,
           racePoints,
           initialRank,
           finalRank,
@@ -657,10 +708,13 @@
         marginT,
         marginL,
         marginR,
-        viewW,
+        viewW: windowViewW,
+        windowViewW,
+        totalViewW,
         viewH,
         chartH,
         stepW,
+        raceIncW,
         numRaces,
         numTeams
       };
@@ -864,7 +918,7 @@
             width: 100%;
             height: auto;
             max-width: 100%;
-            overflow: visible;
+            overflow: hidden;
           }
 
           .grid-line {
@@ -1028,9 +1082,9 @@
             </div>
           </div>
 
-          <!-- SVG Chart (Compact vertical layout, no bubble on car icons) -->
+          <!-- SVG Chart (Pan With Cars: TAF1APP-SDDREQ-91 - keeping only 3 increments visible at all times) -->
           <div class="prc-svg-wrapper">
-            <svg id="chart-svg" viewBox="0 0 ${viewW} ${viewH}" preserveAspectRatio="xMidYMid meet">
+            <svg id="chart-svg" viewBox="0 0 ${windowViewW} ${viewH}" preserveAspectRatio="xMidYMid meet">
               <defs>
                 <filter id="car-glow" x="-20%" y="-20%" width="140%" height="140%">
                   <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.8" />
@@ -1043,19 +1097,17 @@
                 <line x1="${plat.midX}" y1="${marginT - 14}" x2="${plat.midX}" y2="${marginT + chartH + 14}" stroke="rgba(255,255,255,0.05)" stroke-dasharray="4 4" />
                 
                 <!-- Column Header Pill at Top -->
-                <rect class="state-header-pill" x="${plat.midX - 75}" y="${marginT - 48}" width="150" height="34" />
+                <rect class="state-header-pill" x="${plat.midX - 68}" y="${marginT - 48}" width="136" height="34" />
                 <text class="state-header-title" x="${plat.midX}" y="${marginT - 31}">${plat.raceName.toUpperCase()}</text>
               `).join('')}
 
-              <!-- Horizontal Rank Grid Lines & Left Y-Axis Badges -->
-              ${Array.from({ length: numTeams }).map((_, r) => {
-                const y = marginT + r * dy;
-                return `
-                  <line class="grid-line" x1="${marginL - 8}" y1="${y}" x2="${viewW - marginR + 25}" y2="${y}"></line>
-                  <rect class="y-axis-badge" x="${marginL - 38}" y="${y - 12}" width="28" height="24" />
-                  <text class="y-axis-label" x="${marginL - 24}" y="${y}">#${r + 1}</text>
-                `;
-              }).join('')}
+              <!-- Horizontal Rank Grid Lines spanning totalViewW -->
+              <g id="grid-layer">
+                ${Array.from({ length: numTeams }).map((_, r) => {
+                  const y = marginT + r * dy;
+                  return `<line class="grid-line" x1="0" y1="${y}" x2="${totalViewW}" y2="${y}"></line>`;
+                }).join('')}
+              </g>
 
               <!-- Team Trajectory Paths -->
               <g id="paths-layer">
@@ -1064,19 +1116,37 @@
                 `).join('')}
               </g>
 
-              <!-- Leading Car Icons (NO bubble) & Badges -->
+              <!-- Leading Car Icons & Badges -->
               <g id="cars-layer">
                 ${processedTeams.map(team => `
                   <g id="car-group-${team.id}" class="car-group" transform="translate(-100, -100)" filter="url(#car-glow)">
-                    <!-- Car Icon Graphic mirrored horizontally (1:1 mirror, facing forward right) -->
-                    <g transform="scale(-1, 1)">
-                      <image href="${team.icon}" x="-28" y="-13" width="56" height="26" preserveAspectRatio="xMidYMid meet" />
-                    </g>
+                    ${team.hasIcon ? `
+                      <!-- Car Icon Graphic mirrored horizontally (1:1 mirror, facing forward right) -->
+                      <g transform="scale(-1, 1)">
+                        <image href="${team.icon}" x="-28" y="-13" width="56" height="26" preserveAspectRatio="xMidYMid meet" onerror="this.style.display='none'; if(this.parentElement.nextElementSibling) this.parentElement.nextElementSibling.style.display='block';" />
+                      </g>
+                    ` : `
+                      <!-- Team colored circle fallback -->
+                      <circle cx="0" cy="0" r="11" fill="${team.color}" stroke="#FFFFFF" stroke-width="2" />
+                    `}
+                    ${team.hasIcon ? `<circle cx="0" cy="0" r="11" fill="${team.color}" stroke="#FFFFFF" stroke-width="2" style="display:none;" />` : ''}
                     <!-- Compact Rank & Code Badge -->
                     <rect class="car-rank-badge" x="30" y="-12" width="76" height="24" />
                     <text class="car-rank-text" x="36" y="0">#1 ${team.shortName}</text>
                   </g>
                 `).join('')}
+              </g>
+
+              <!-- Pinned Left Y-Axis Badges with dark mask -->
+              <g id="y-axis-layer" transform="translate(0, 0)">
+                <rect x="-10" y="0" width="${marginL - 4 + 10}" height="${viewH}" fill="#15151A" />
+                ${Array.from({ length: numTeams }).map((_, r) => {
+                  const y = marginT + r * dy;
+                  return `
+                    <rect class="y-axis-badge" x="${marginL - 38}" y="${y - 12}" width="28" height="24" />
+                    <text class="y-axis-label" x="${marginL - 24}" y="${y}">#${r + 1}</text>
+                  `;
+                }).join('')}
               </g>
             </svg>
           </div>

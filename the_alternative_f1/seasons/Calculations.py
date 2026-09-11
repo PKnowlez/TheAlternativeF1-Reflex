@@ -9,6 +9,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from the_alternative_f1.race_metrics import get_race_metrics
 
 # Resolve the Excel file path relative to this module
 _EXCEL_PATH = str((Path(__file__).parent.parent / "The_Alternative_F1.xlsx").resolve())
@@ -220,6 +221,43 @@ def Calculations(season_data: dict, sprint_only: bool = False) -> dict:
     new_df_Place = df.set_index("Driver")[place_columns].reset_index() if place_columns else pd.DataFrame({"Driver": df["Driver"]})
     new_df_CD = df.set_index("Driver")[CD_columns].reset_index() if CD_columns else pd.DataFrame({"Driver": df["Driver"]})
 
+    # ── Dynamic race metrics (positions gained/lost with dynamic competitor count) ──
+    season_number = season_data.get("season_number", 1)
+    effective_place_dict = {"Driver": df["Driver"].tolist()}
+    effective_qual_dict = {"Driver": df["Driver"].tolist()}
+    pos_change_dict = {"Driver": df["Driver"].tolist()}
+
+    for col in place_columns:
+        qual_col = col.replace("Place", "Qualifying")
+        q_col_name = qual_col if qual_col in df.columns else None
+        start_col = col.replace("Place", "Starting")
+        s_col_name = start_col if (season_number >= 5 and start_col in df.columns) else None
+        metrics = get_race_metrics(df, col, q_col_name, season_number, starting_col=s_col_name)
+
+        col_eff_p = []
+        col_eff_q = []
+        col_chg = []
+        for d in df["Driver"]:
+            d_str = str(d).strip()
+            info = metrics["drivers"].get(d_str, {})
+            if info.get("competed"):
+                col_eff_p.append(info.get("effective_place"))
+                col_eff_q.append(info.get("effective_qual"))
+                col_chg.append(info.get("pos_change"))
+            else:
+                col_eff_p.append(np.nan)
+                col_eff_q.append(np.nan)
+                col_chg.append(np.nan)
+
+        effective_place_dict[col] = col_eff_p
+        if q_col_name:
+            effective_qual_dict[q_col_name] = col_eff_q
+        pos_change_dict[col] = col_chg
+
+    new_df_EffectivePlace = pd.DataFrame(effective_place_dict)
+    new_df_EffectiveQ = pd.DataFrame(effective_qual_dict)
+    new_df_PosChange = pd.DataFrame(pos_change_dict)
+
     # ── Driver total points list ─────────────────────────────────────────
     drivers_total_points = []
     for i in range(len(new_df)):
@@ -274,6 +312,9 @@ def Calculations(season_data: dict, sprint_only: bool = False) -> dict:
         "new_df_MOT": new_df_MOT,
         "new_df_Q": new_df_Q,
         "new_df_Place": new_df_Place,
+        "new_df_EffectivePlace": new_df_EffectivePlace,
+        "new_df_EffectiveQ": new_df_EffectiveQ,
+        "new_df_PosChange": new_df_PosChange,
         "new_df_CD": new_df_CD,
         "races_points_only": races_points_only,
         "drivers_total_points": drivers_total_points,

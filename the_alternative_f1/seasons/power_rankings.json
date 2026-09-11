@@ -24,144 +24,144 @@
     ],
     "rankings": {
       "Preseason": [
-        "Aston Martin",
-        "Ferrari",
         "McLaren",
         "Mercedes",
-        "Red Bull"
+        "Red Bull",
+        "Aston Martin",
+        "Ferrari"
       ],
       "Bahrain": [
-        "Aston Martin",
-        "Ferrari",
         "McLaren",
         "Mercedes",
-        "Red Bull"
+        "Red Bull",
+        "Aston Martin",
+        "Ferrari"
       ],
       "Saudi Arabia": [
-        "Ferrari",
-        "Mercedes",
-        "Aston Martin",
         "McLaren",
-        "Red Bull"
+        "Mercedes",
+        "Red Bull",
+        "Aston Martin",
+        "Ferrari"
       ],
       "Australia": [
-        "Ferrari",
-        "Mercedes",
-        "Aston Martin",
         "McLaren",
-        "Red Bull"
+        "Mercedes",
+        "Red Bull",
+        "Aston Martin",
+        "Ferrari"
       ],
       "Miami": [
-        "Ferrari",
-        "Mercedes",
         "McLaren",
+        "Mercedes",
+        "Red Bull",
         "Aston Martin",
-        "Red Bull"
+        "Ferrari"
       ],
       "Spain": [
-        "Ferrari",
         "Mercedes",
-        "Aston Martin",
         "McLaren",
-        "Red Bull"
+        "Red Bull",
+        "Aston Martin",
+        "Ferrari"
       ],
       "Canada": [
-        "Ferrari",
         "Mercedes",
-        "Aston Martin",
         "McLaren",
-        "Red Bull"
+        "Red Bull",
+        "Aston Martin",
+        "Ferrari"
       ],
       "Austria": [
-        "Ferrari",
         "Mercedes",
-        "Aston Martin",
         "McLaren",
-        "Red Bull"
+        "Red Bull",
+        "Aston Martin",
+        "Ferrari"
       ],
       "Silverstone": [
-        "Ferrari",
         "Mercedes",
         "McLaren",
+        "Red Bull",
         "Aston Martin",
-        "Red Bull"
+        "Ferrari"
       ],
       "Spa": [
-        "Ferrari",
         "Mercedes",
         "McLaren",
+        "Red Bull",
         "Aston Martin",
-        "Red Bull"
+        "Ferrari"
       ],
       "Zandvoort": [
-        "Ferrari",
         "Mercedes",
         "McLaren",
+        "Red Bull",
         "Aston Martin",
-        "Red Bull"
+        "Ferrari"
       ],
       "Monza": [
-        "Ferrari",
         "Mercedes",
         "McLaren",
+        "Red Bull",
         "Aston Martin",
-        "Red Bull"
+        "Ferrari"
       ],
       "Singapore": [
-        "Ferrari",
         "Mercedes",
         "McLaren",
+        "Red Bull",
         "Aston Martin",
-        "Red Bull"
+        "Ferrari"
       ],
       "Suzuka": [
-        "Ferrari",
         "Mercedes",
         "McLaren",
+        "Red Bull",
         "Aston Martin",
-        "Red Bull"
+        "Ferrari"
       ],
       "Qatar": [
-        "Ferrari",
         "Mercedes",
-        "Aston Martin",
+        "Red Bull",
         "McLaren",
-        "Red Bull"
+        "Aston Martin",
+        "Ferrari"
       ],
       "COTA": [
-        "Ferrari",
         "Mercedes",
-        "Aston Martin",
+        "Red Bull",
         "McLaren",
-        "Red Bull"
+        "Aston Martin",
+        "Ferrari"
       ],
       "Mexico": [
-        "Ferrari",
         "Mercedes",
-        "Aston Martin",
+        "Red Bull",
         "McLaren",
-        "Red Bull"
+        "Aston Martin",
+        "Ferrari"
       ],
       "Brazil": [
-        "Ferrari",
         "Mercedes",
-        "Aston Martin",
+        "Red Bull",
         "McLaren",
-        "Red Bull"
+        "Aston Martin",
+        "Ferrari"
       ],
       "Las Vegas": [
-        "Ferrari",
         "Mercedes",
-        "Aston Martin",
+        "Red Bull",
         "McLaren",
-        "Red Bull"
+        "Aston Martin",
+        "Ferrari"
       ],
       "Abu Dhabi": [
-        "Ferrari",
         "Mercedes",
-        "Aston Martin",
+        "Red Bull",
         "McLaren",
-        "Red Bull"
+        "Aston Martin",
+        "Ferrari"
       ]
     }
   },
@@ -181,103 +181,103 @@
     ],
     "rankings": {
       "Preseason": [
-        "Alfa Romeo",
-        "AlphaTauri",
-        "Alpine",
-        "Ferrari",
-        "McLaren",
         "Mercedes",
-        "Red Bull"
+        "McLaren",
+        "Ferrari",
+        "Alpine",
+        "Red Bull",
+        "Alfa Romeo",
+        "AlphaTauri"
       ],
       "Suzuka": [
-        "Alfa Romeo",
-        "AlphaTauri",
-        "Alpine",
-        "Ferrari",
-        "McLaren",
         "Mercedes",
-        "Red Bull"
+        "McLaren",
+        "Ferrari",
+        "Alpine",
+        "Red Bull",
+        "Alfa Romeo",
+        "AlphaTauri"
       ],
       "Monaco": [
-        "Alfa Romeo",
-        "AlphaTauri",
-        "Alpine",
-        "Ferrari",
-        "McLaren",
         "Mercedes",
-        "Red Bull"
+        "McLaren",
+        "Ferrari",
+        "Alpine",
+        "Alfa Romeo",
+        "Red Bull",
+        "AlphaTauri"
       ],
       "Abu Dhabi": [
-        "Alfa Romeo",
-        "AlphaTauri",
+        "Mercedes",
+        "McLaren",
         "Ferrari",
         "Alpine",
-        "McLaren",
-        "Mercedes",
-        "Red Bull"
+        "Alfa Romeo",
+        "Red Bull",
+        "AlphaTauri"
       ],
       "Monza": [
-        "Alfa Romeo",
-        "AlphaTauri",
+        "Mercedes",
+        "McLaren",
         "Ferrari",
         "Alpine",
-        "McLaren",
-        "Mercedes",
+        "Alfa Romeo",
+        "AlphaTauri",
         "Red Bull"
       ],
       "Zandvoort": [
-        "Alfa Romeo",
-        "AlphaTauri",
+        "McLaren",
+        "Mercedes",
         "Ferrari",
         "Alpine",
-        "McLaren",
+        "Alfa Romeo",
         "Red Bull",
-        "Mercedes"
+        "AlphaTauri"
       ],
       "Silverstone": [
-        "Alfa Romeo",
-        "AlphaTauri",
-        "Ferrari",
-        "Alpine",
         "McLaren",
         "Mercedes",
-        "Red Bull"
+        "Ferrari",
+        "Alpine",
+        "Alfa Romeo",
+        "Red Bull",
+        "AlphaTauri"
       ],
       "China": [
-        "Alfa Romeo",
-        "AlphaTauri",
-        "Alpine",
-        "Ferrari",
         "Mercedes",
         "McLaren",
-        "Red Bull"
+        "Alpine",
+        "Ferrari",
+        "Alfa Romeo",
+        "Red Bull",
+        "AlphaTauri"
       ],
       "COTA": [
-        "Alfa Romeo",
-        "AlphaTauri",
-        "Ferrari",
-        "Alpine",
         "Mercedes",
         "McLaren",
-        "Red Bull"
+        "Ferrari",
+        "Alpine",
+        "Alfa Romeo",
+        "Red Bull",
+        "AlphaTauri"
       ],
       "Spa": [
-        "Alfa Romeo",
-        "AlphaTauri",
-        "Ferrari",
-        "Alpine",
         "Mercedes",
         "McLaren",
-        "Red Bull"
+        "Ferrari",
+        "Alfa Romeo",
+        "Alpine",
+        "Red Bull",
+        "AlphaTauri"
       ],
       "Austria": [
-        "Alfa Romeo",
-        "AlphaTauri",
-        "Ferrari",
-        "Alpine",
         "Mercedes",
         "McLaren",
-        "Red Bull"
+        "Alfa Romeo",
+        "Ferrari",
+        "Alpine",
+        "Red Bull",
+        "AlphaTauri"
       ]
     }
   },
@@ -302,132 +302,132 @@
     ],
     "rankings": {
       "Preseason": [
-        "Alpine",
-        "Aston Martin",
-        "Ferrari",
         "McLaren",
-        "Red Bull",
-        "VCARB"
+        "Alpine",
+        "Ferrari",
+        "VCARB",
+        "Aston Martin",
+        "Red Bull"
       ],
       "Suzuka": [
-        "Alpine",
-        "Aston Martin",
-        "Ferrari",
         "McLaren",
-        "Red Bull",
-        "VCARB"
+        "Alpine",
+        "Ferrari",
+        "VCARB",
+        "Aston Martin",
+        "Red Bull"
       ],
       "Silverstone": [
+        "McLaren",
         "Alpine",
         "Ferrari",
-        "Aston Martin",
-        "McLaren",
+        "VCARB",
         "Red Bull",
-        "VCARB"
+        "Aston Martin"
       ],
       "Australia": [
-        "Alpine",
-        "Aston Martin",
-        "Ferrari",
         "McLaren",
+        "Alpine",
         "VCARB",
-        "Red Bull"
+        "Ferrari",
+        "Red Bull",
+        "Aston Martin"
       ],
       "Spa": [
-        "Alpine",
-        "Aston Martin",
-        "VCARB",
-        "Ferrari",
         "McLaren",
-        "Red Bull"
+        "Alpine",
+        "VCARB",
+        "Red Bull",
+        "Ferrari",
+        "Aston Martin"
       ],
       "Spain": [
-        "Alpine",
-        "Aston Martin",
-        "VCARB",
-        "Ferrari",
         "McLaren",
-        "Red Bull"
+        "Alpine",
+        "VCARB",
+        "Red Bull",
+        "Ferrari",
+        "Aston Martin"
       ],
       "China Sprint": [
-        "Alpine",
-        "Aston Martin",
-        "VCARB",
-        "Ferrari",
         "McLaren",
-        "Red Bull"
+        "Alpine",
+        "VCARB",
+        "Red Bull",
+        "Ferrari",
+        "Aston Martin"
       ],
       "China": [
-        "Alpine",
-        "Aston Martin",
-        "VCARB",
-        "Ferrari",
         "McLaren",
-        "Red Bull"
+        "Alpine",
+        "VCARB",
+        "Red Bull",
+        "Ferrari",
+        "Aston Martin"
       ],
       "Baku": [
-        "Alpine",
-        "Aston Martin",
-        "VCARB",
         "McLaren",
+        "Alpine",
+        "VCARB",
+        "Red Bull",
         "Ferrari",
-        "Red Bull"
+        "Aston Martin"
       ],
       "Canada": [
-        "Alpine",
-        "Aston Martin",
-        "VCARB",
         "McLaren",
+        "Alpine",
+        "VCARB",
+        "Red Bull",
         "Ferrari",
-        "Red Bull"
+        "Aston Martin"
       ],
       "Monza": [
-        "Alpine",
-        "Aston Martin",
-        "VCARB",
         "McLaren",
+        "Alpine",
+        "VCARB",
+        "Red Bull",
         "Ferrari",
-        "Red Bull"
+        "Aston Martin"
       ],
       "Abu Dhabi": [
-        "Alpine",
-        "Aston Martin",
-        "VCARB",
         "McLaren",
+        "Alpine",
+        "VCARB",
+        "Red Bull",
         "Ferrari",
-        "Red Bull"
+        "Aston Martin"
       ],
       "Austria Sprint": [
-        "Alpine",
-        "Aston Martin",
-        "VCARB",
         "McLaren",
+        "Alpine",
+        "VCARB",
         "Ferrari",
-        "Red Bull"
+        "Red Bull",
+        "Aston Martin"
       ],
       "Austria": [
-        "Alpine",
-        "Aston Martin",
-        "VCARB",
         "McLaren",
+        "Alpine",
+        "VCARB",
         "Ferrari",
-        "Red Bull"
+        "Red Bull",
+        "Aston Martin"
       ],
       "COTA Sprint": [
-        "Alpine",
-        "Aston Martin",
-        "VCARB",
         "McLaren",
+        "Alpine",
+        "VCARB",
         "Ferrari",
-        "Red Bull"
+        "Red Bull",
+        "Aston Martin"
       ],
       "COTA": [
-        "Alpine",
-        "Aston Martin",
-        "VCARB",
         "McLaren",
+        "Alpine",
+        "VCARB",
         "Ferrari",
-        "Red Bull"
+        "Red Bull",
+        "Aston Martin"
       ]
     }
   },
@@ -455,165 +455,165 @@
     "rankings": {
       "Preseason": [
         "Alpine",
-        "Aston Martin",
-        "Ferrari",
         "McLaren",
+        "VCARB",
         "Mercedes",
         "Red Bull",
-        "VCARB"
+        "Ferrari",
+        "Aston Martin"
       ],
       "Bahrain": [
         "Alpine",
-        "Aston Martin",
-        "Ferrari",
         "McLaren",
+        "VCARB",
         "Mercedes",
         "Red Bull",
-        "VCARB"
+        "Ferrari",
+        "Aston Martin"
       ],
       "Miami Sprint": [
-        "Alpine",
         "McLaren",
         "Mercedes",
-        "Aston Martin",
-        "Ferrari",
+        "Alpine",
+        "VCARB",
         "Red Bull",
-        "VCARB"
+        "Ferrari",
+        "Aston Martin"
       ],
       "Miami": [
-        "Alpine",
         "McLaren",
-        "Ferrari",
         "Mercedes",
-        "Aston Martin",
+        "Alpine",
+        "Ferrari",
         "Red Bull",
-        "VCARB"
+        "VCARB",
+        "Aston Martin"
       ],
       "Spain": [
-        "Alpine",
         "Mercedes",
+        "Alpine",
         "McLaren",
-        "Ferrari",
         "VCARB",
-        "Aston Martin",
-        "Red Bull"
+        "Ferrari",
+        "Red Bull",
+        "Aston Martin"
       ],
       "Mexico": [
         "Mercedes",
-        "Alpine",
         "McLaren",
-        "Ferrari",
+        "Alpine",
         "VCARB",
-        "Aston Martin",
-        "Red Bull"
+        "Ferrari",
+        "Red Bull",
+        "Aston Martin"
       ],
       "Baku": [
         "Mercedes",
-        "Alpine",
         "McLaren",
+        "Alpine",
         "Ferrari",
         "VCARB",
-        "Aston Martin",
-        "Red Bull"
+        "Red Bull",
+        "Aston Martin"
       ],
       "Austria Reverse": [
         "Mercedes",
         "Alpine",
-        "Ferrari",
         "McLaren",
+        "Ferrari",
         "VCARB",
-        "Aston Martin",
-        "Red Bull"
+        "Red Bull",
+        "Aston Martin"
       ],
       "Spa Sprint": [
         "Mercedes",
         "Alpine",
-        "Ferrari",
-        "VCARB",
         "McLaren",
-        "Aston Martin",
-        "Red Bull"
+        "VCARB",
+        "Ferrari",
+        "Red Bull",
+        "Aston Martin"
       ],
       "Spa": [
         "Mercedes",
         "Alpine",
-        "Ferrari",
-        "VCARB",
         "McLaren",
-        "Aston Martin",
-        "Red Bull"
+        "VCARB",
+        "Ferrari",
+        "Red Bull",
+        "Aston Martin"
       ],
       "Brazil Sprint": [
         "Mercedes",
         "Alpine",
-        "Ferrari",
-        "VCARB",
         "McLaren",
-        "Aston Martin",
-        "Red Bull"
+        "VCARB",
+        "Ferrari",
+        "Red Bull",
+        "Aston Martin"
       ],
       "Brazil": [
         "Mercedes",
         "Alpine",
-        "Ferrari",
-        "VCARB",
         "McLaren",
-        "Aston Martin",
-        "Red Bull"
+        "VCARB",
+        "Ferrari",
+        "Red Bull",
+        "Aston Martin"
       ],
       "Austria": [
         "Mercedes",
         "Alpine",
-        "Ferrari",
-        "VCARB",
         "McLaren",
-        "Aston Martin",
-        "Red Bull"
+        "VCARB",
+        "Ferrari",
+        "Red Bull",
+        "Aston Martin"
       ],
       "Zandvoort": [
         "Mercedes",
         "Alpine",
-        "Ferrari",
-        "VCARB",
         "McLaren",
-        "Aston Martin",
-        "Red Bull"
+        "VCARB",
+        "Ferrari",
+        "Red Bull",
+        "Aston Martin"
       ],
       "Jeddah": [
-        "Ferrari",
         "Mercedes",
         "Alpine",
         "VCARB",
+        "Ferrari",
         "McLaren",
-        "Aston Martin",
-        "Red Bull"
+        "Red Bull",
+        "Aston Martin"
       ],
       "Las Vegas": [
-        "Ferrari",
         "Mercedes",
         "Alpine",
         "VCARB",
+        "Ferrari",
         "McLaren",
-        "Aston Martin",
-        "Red Bull"
+        "Red Bull",
+        "Aston Martin"
       ],
       "Abu Dhabi": [
         "Mercedes",
-        "Ferrari",
         "Alpine",
         "VCARB",
-        "Aston Martin",
+        "Ferrari",
         "McLaren",
-        "Red Bull"
+        "Red Bull",
+        "Aston Martin"
       ],
       "Monza": [
         "Mercedes",
-        "Ferrari",
         "Alpine",
         "VCARB",
-        "Aston Martin",
+        "Ferrari",
         "McLaren",
-        "Red Bull"
+        "Red Bull",
+        "Aston Martin"
       ]
     }
   },

@@ -28,6 +28,9 @@ def Tab4(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
     new_df_MOT = data["new_df_MOT"]
     new_df_Q = data["new_df_Q"]
     new_df_Place = data["new_df_Place"]
+    new_df_EffectivePlace = data.get("new_df_EffectivePlace", new_df_Place)
+    new_df_EffectiveQ = data.get("new_df_EffectiveQ", new_df_Q)
+    new_df_PosChange = data.get("new_df_PosChange")
     new_df_CD = data["new_df_CD"]
     races_points_only = data["races_points_only"]
     index_x = data["index_x"]
@@ -312,32 +315,39 @@ def Tab4(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
         index_a = int(index_x + 0.5)
         driver_qualifying = []
         driver_place_list = []
+        driver_pos_changes = []
 
-        if len(new_df_Q.columns) > 1:
+        if new_df_EffectiveQ is not None and len(new_df_EffectiveQ.columns) > 1:
+            driver_qualifying = new_df_EffectiveQ.iloc[i, 1:index_a + 1].tolist()
+        elif len(new_df_Q.columns) > 1:
             driver_qualifying = new_df_Q.iloc[i, 1:index_a + 1].tolist()
-            driver_qualifying = pd.to_numeric(driver_qualifying, errors="coerce")
-            driver_qualifying = np.nan_to_num(driver_qualifying, nan=0)
 
-        if len(new_df_Place.columns) > 1:
+        if new_df_EffectivePlace is not None and len(new_df_EffectivePlace.columns) > 1:
+            driver_place_list = new_df_EffectivePlace.iloc[i, 1:index_a + 1].tolist()
+        elif len(new_df_Place.columns) > 1:
             driver_place_list = new_df_Place.iloc[i, 1:index_a + 1].tolist()
-            driver_place_list = pd.to_numeric(driver_place_list, errors="coerce")
-            driver_place_list = np.nan_to_num(driver_place_list, nan=0)
 
-        # Positions gained/lost
-        qualifying_place = []
-        if len(driver_qualifying) > 0 and len(driver_place_list) > 0:
-            qualifying_place = [
-                float(q - p) for q, p in zip(driver_qualifying, driver_place_list)
-            ]
+        if new_df_PosChange is not None and len(new_df_PosChange.columns) > 1:
+            driver_pos_changes = new_df_PosChange.iloc[i, 1:index_a + 1].tolist()
 
+        # Positions gained/lost (exclude DNS / unrun races)
         pos_change_data = []
-        for j, val in enumerate(qualifying_place):
+        for j in range(index_a):
             race = races_points_only[j] if j < len(races_points_only) else f"R{j+1}"
-            pos_change_data.append({
-                "race": race,
-                "change": val,
-                "fill": "green" if val >= 0 else "red",
-            })
+            chg = driver_pos_changes[j] if j < len(driver_pos_changes) else None
+            if chg is not None and not pd.isnull(chg):
+                val = float(chg)
+                pos_change_data.append({
+                    "race": race,
+                    "change": val,
+                    "fill": "green" if val >= 0 else "red",
+                })
+            else:
+                pos_change_data.append({
+                    "race": race,
+                    "change": None,
+                    "fill": "#555555",
+                })
 
         # Calculate dynamic x-axis height for pos_chart
         max_pos_race_len = max([len(str(item.get("race", ""))) for item in pos_change_data] or [0])
@@ -366,18 +376,15 @@ def Tab4(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
             large_height=350
         )
 
-        # ── Averages ────────────────────────────────────────────────────
-        avg_qualifying = 0.0
-        if len(driver_qualifying) > 0:
-            non_zero_q = [q for q in driver_qualifying if q > 0]
-            avg_qualifying = sum(non_zero_q) / len(non_zero_q) if non_zero_q else 0
+        # ── Averages (only across races actually competed) ──────────────
+        valid_chg = [float(c) for c in driver_pos_changes if c is not None and not pd.isnull(c)]
+        avg_change = sum(valid_chg) / len(valid_chg) if valid_chg else 0.0
 
-        avg_place = 0.0
-        if len(driver_place_list) > 0:
-            non_zero_p = [p for p in driver_place_list if p > 0]
-            avg_place = sum(non_zero_p) / len(non_zero_p) if non_zero_p else 0
+        valid_q = [float(q) for q in driver_qualifying if q is not None and not pd.isnull(q) and q > 0]
+        avg_qualifying = sum(valid_q) / len(valid_q) if valid_q else 0.0
 
-        avg_change = avg_qualifying - avg_place
+        valid_p = [float(p) for p in driver_place_list if p is not None and not pd.isnull(p) and p > 0]
+        avg_place = sum(valid_p) / len(valid_p) if valid_p else 0.0
 
         # ── Pole positions ──────────────────────────────────────────────
         pole_positions = sum(1 for q in driver_qualifying if q == 1) if len(driver_qualifying) > 0 else 0

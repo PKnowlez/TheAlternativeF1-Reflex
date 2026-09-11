@@ -73,6 +73,12 @@ def _build_manual_race_item(race: dict, idx: int, prefix: str, bg_color: str = "
         driver_val = r.get("driver", "-")
         team_val = r.get("team", "-")
         qualifying_val = r.get("qualifying", "-")
+        starting_val = r.get("starting")
+        if starting_val is not None and str(qualifying_val).upper() in ("DNF", "DNS", "DSQ"):
+            try:
+                qualifying_val = f"{qualifying_val} ({int(float(starting_val))})"
+            except (ValueError, TypeError):
+                qualifying_val = f"{qualifying_val} ({starting_val})"
         points_val = r.get("points", 0)
 
         cells = [
@@ -253,9 +259,71 @@ def Tab2(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
     preseason_items = []
     preseason_races = season_data.get("preseason_races", [])
     item_idx = 0
-    for idx, pr in enumerate(preseason_races):
+
+    if len(preseason_races) > 1:
+        nested_preseason_items = []
+        for idx, pr in enumerate(preseason_races):
+            inner_bg = "#16161A" if idx % 2 == 0 else "#101013"
+            nested_preseason_items.append(
+                _build_manual_race_item(pr, idx, "preseason", inner_bg, team_colors)
+            )
+
+        summary_names = [
+            pr.get("name", f"Race {i+1}").replace("Pre-Season: ", "").replace("Pre-Season ", "").replace("Pre-Season", "").strip()
+            for i, pr in enumerate(preseason_races)
+        ]
+        summary_text = " • ".join(summary_names)
+
+        group_bg = "#1E1E24" if item_idx % 2 == 0 else "#131316"
+        group_item = rx.accordion.item(
+            rx.accordion.trigger(
+                rx.vstack(
+                    rx.hstack(
+                        rx.icon("flag", color="#00b4da", size=18),
+                        rx.text("Pre-Season Races", color="white", font_weight="600"),
+                        align="center",
+                        spacing="2",
+                    ),
+                    rx.text(
+                        f"{len(preseason_races)} Races ({summary_text})",
+                        color="#00b4da",
+                        font_size="10px",
+                        font_weight="bold",
+                    ),
+                    align_items="start",
+                    spacing="1",
+                    width="100%",
+                ),
+                width="100%",
+            ),
+            rx.accordion.content(
+                rx.box(
+                    rx.accordion.root(
+                        *nested_preseason_items,
+                        collapsible=True,
+                        width="100%",
+                        variant="ghost",
+                    ),
+                    width="100%",
+                    padding_y="2",
+                    padding_x="2",
+                    border_left="2px solid #00b4da",
+                    border_radius="md",
+                    bg="#0E0E11",
+                ),
+            ),
+            value="preseason_group",
+            bg=group_bg,
+            border_radius="md",
+            padding_x="3",
+            margin_y="1",
+        )
+        preseason_items.append(group_item)
+        item_idx += 1
+    elif len(preseason_races) == 1:
+        pr = preseason_races[0]
         bg_color = "#1E1E24" if item_idx % 2 == 0 else "#131316"
-        preseason_items.append(_build_manual_race_item(pr, idx, "preseason", bg_color, team_colors))
+        preseason_items.append(_build_manual_race_item(pr, 0, "preseason", bg_color, team_colors))
         item_idx += 1
 
     regular_items = []
@@ -302,6 +370,21 @@ def Tab2(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
             dotd_col = race_name + "DOTD"
             mot_col = race_name + "MOT"
             cd_col = race_name + "CD"
+
+        starting_col = None
+        if season_num >= 5:
+            if place_col.replace("Place", "Starting") in df.columns:
+                starting_col = place_col.replace("Place", "Starting")
+            elif is_sprint:
+                if base_name + "SprintStarting" in df.columns:
+                    starting_col = base_name + "SprintStarting"
+                elif base_name + " SprintStarting" in df.columns:
+                    starting_col = base_name + " SprintStarting"
+            else:
+                if race_name + "Starting" in df.columns:
+                    starting_col = race_name + "Starting"
+                elif (race_name + " Starting") in df.columns:
+                    starting_col = race_name + " Starting"
 
         is_preseason_race = ("preseason" in race_name.lower()) or ("pre-season" in race_name.lower())
         show_points = not is_preseason_race and (points_col in df.columns)
@@ -350,6 +433,17 @@ def Tab2(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
                         qualifying_val = "DNS"
                     elif qualifying_val == "25":
                         qualifying_val = "DSQ"
+
+            # Check Starting column (Season 5+): DNx (Starting column value)
+            if season_num >= 5 and starting_col and starting_col in df.columns:
+                sv = row.get(starting_col)
+                if not pd.isnull(sv) and str(sv).strip() not in ("", "-", "NONE", "NAN", "NULL"):
+                    try:
+                        sv_int = int(float(sv))
+                        if qualifying_val in ("DNF", "DNS", "DSQ"):
+                            qualifying_val = f"{qualifying_val} ({sv_int})"
+                    except (ValueError, TypeError):
+                        pass
 
             points_val = row[points_col] if not pd.isnull(row[points_col]) else 0
 

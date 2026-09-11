@@ -28,6 +28,9 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
     drivers_total_points = data["drivers_total_points"]
     new_df_Q = data["new_df_Q"]
     new_df_Place = data["new_df_Place"]
+    new_df_EffectivePlace = data.get("new_df_EffectivePlace", new_df_Place)
+    new_df_EffectiveQ = data.get("new_df_EffectiveQ", new_df_Q)
+    new_df_PosChange = data.get("new_df_PosChange")
     index_x = data["index_x"]
     rookies = data["rookies"]
     driver_colors = data["driver_colors"]
@@ -43,22 +46,31 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
     for i in range(len(new_df)):
         dq = []
         dp = []
-        if len(new_df_Q.columns) > 1:
+        dchg = []
+        if new_df_EffectiveQ is not None and len(new_df_EffectiveQ.columns) > 1:
+            dq = new_df_EffectiveQ.iloc[i, 1:index_a + 1].tolist()
+        elif len(new_df_Q.columns) > 1:
             dq = new_df_Q.iloc[i, 1:index_a + 1].tolist()
-            dq = pd.to_numeric(dq, errors="coerce")
-            dq = np.nan_to_num(dq, nan=0)
-        if len(new_df_Place.columns) > 1:
-            dp = new_df_Place.iloc[i, 1:index_a + 1].tolist()
-            dp = pd.to_numeric(dp, errors="coerce")
-            dp = np.nan_to_num(dp, nan=0)
 
-        non_zero_q = [q for q in dq if q > 0] if len(dq) > 0 else []
-        non_zero_p = [p for p in dp if p > 0] if len(dp) > 0 else []
-        avg_q = sum(non_zero_q) / len(non_zero_q) if non_zero_q else 0
-        avg_p = sum(non_zero_p) / len(non_zero_p) if non_zero_p else 0
+        if new_df_EffectivePlace is not None and len(new_df_EffectivePlace.columns) > 1:
+            dp = new_df_EffectivePlace.iloc[i, 1:index_a + 1].tolist()
+        elif len(new_df_Place.columns) > 1:
+            dp = new_df_Place.iloc[i, 1:index_a + 1].tolist()
+
+        if new_df_PosChange is not None and len(new_df_PosChange.columns) > 1:
+            dchg = new_df_PosChange.iloc[i, 1:index_a + 1].tolist()
+
+        valid_q = [float(q) for q in dq if q is not None and not pd.isnull(q) and q > 0]
+        valid_p = [float(p) for p in dp if p is not None and not pd.isnull(p) and p > 0]
+        valid_chg = [float(c) for c in dchg if c is not None and not pd.isnull(c)]
+
+        avg_q = sum(valid_q) / len(valid_q) if valid_q else 0.0
+        avg_p = sum(valid_p) / len(valid_p) if valid_p else 0.0
+        avg_chg = sum(valid_chg) / len(valid_chg) if valid_chg else (avg_q - avg_p)
+
         average_qualifying.append(avg_q)
         average_place.append(avg_p)
-        average_changed.append(avg_q - avg_p)
+        average_changed.append(avg_chg)
 
     full_data_df = pd.DataFrame({
         "Driver": new_df["Driver"],

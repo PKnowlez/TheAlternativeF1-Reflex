@@ -27,9 +27,10 @@ article = {
             zoomable_image(
                 src="/article_f1_tech.png", 
                 float="right", 
-                width="150px", 
+                width="200px", 
                 margin_left="16px", 
                 margin_bottom="8px", 
+                margin_top="8px",
                 border_radius="md",
                 box_shadow="0 4px 12px rgba(0,0,0,0.3)"
             ),
@@ -51,24 +52,39 @@ article = {
             size="4", 
             color="#00b4da", 
             margin_top="6", 
-            margin_bottom="3",
+            margin_bottom="3", 
             font_family="Outfit"
         ),
         
         # A paragraph with a white background and black text in its own box within the article
         rx.box(
+            rx.heading(
+                "Official Notice / FIA Warnings", 
+                size="4", 
+                color="black", 
+                margin_top="0", 
+                margin_bottom="1rem", 
+                font_family="Outfit"
+            ),
             rx.text(
                 "CRITICAL UPDATE: This is a standalone callout box configured with a solid white background and crisp black text. It provides maximum contrast to immediately pull the reader's attention to warnings, official regulations, or race announcements.",
                 color="black",
                 font_weight="600",
                 font_size="sm",
+                margin_bottom="1rem",
+            ),
+            rx.text(
+                "Notice the line space between the heading and each paragraph, plus the internal padding on all four sides keeping text well away from the edges. 2px rounded corners complete the clean look.",
+                color="black",
+                font_weight="600",
+                font_size="sm",
             ),
             bg="white",
-            padding="4",
-            border_radius="md",
+            padding="20px",
+            border_radius="2px",
             border="1px solid #E0E0E0",
             width="100%",
-            margin_y="4",
+            margin_y="16px",
         ),
         
         # A .gif

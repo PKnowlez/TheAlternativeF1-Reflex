@@ -60,7 +60,13 @@ R2_CUSTOM_DOMAIN = os.getenv("R2_CUSTOM_DOMAIN", "https://pknowlez.com").rstrip(
 def get_current_constructors() -> set:
     return {'Red Bull', 'McLaren', 'Cadillac', 'Haas', 'Williams', 'Audi', 'Ferrari', 'Mercedes'}
 
+KNOWN_CAR_ICONS = {
+    "Alfa Romeo", "AlphaTauri", "Alpine", "Aston Martin", "Audi",
+    "Cadillac", "Ferrari", "Haas", "McLaren", "Mercedes", "Red Bull", "VCARB", "Williams"
+}
+
 from the_alternative_f1.articles import articles
+from the_alternative_f1.articles.components import DownloadState
 from the_alternative_f1.regulations_settings.Regulations import Regulations as regulations_content
 from the_alternative_f1.regulations_settings.Settings import Settings as settings_content
 from the_alternative_f1.all_time_stats.ConstructorAllTime import constructor_stats_view
@@ -796,6 +802,8 @@ class State(rx.State):
             self.selected_reg_tab = "regulations"
         if nav_name == "stats":
             self.selected_stats_tab = "constructors"
+        if nav_name == "power_rankings":
+            self.show_power_rankings_header = False
         if nav_name == "seasons":
             self.selected_season_tab = "standings"
             self.rookies_only = False
@@ -954,16 +962,10 @@ class State(rx.State):
             empty_payload = json.dumps({"season": self.selected_season, "races": [], "teams": []})
             return {"races": [], "paths": [], "y_labels": [], "view_box": "0 0 1000 500", "chart_json": empty_payload}
             
-        current_constructors = get_current_constructors()
         team_colors = season_dict.get("team_colors", {})
-        latest_season_dict = seasons[-1]
-        latest_team_colors = latest_season_dict.get("team_colors", {})
         
-        # Only display teams in selected season that are also current constructors (per requirements)
-        season_teams = list(team_colors.keys())
-        teams = [t for t in season_teams if t in current_constructors]
-        if not teams:
-            teams = [t for t in latest_team_colors.keys() if t in current_constructors]
+        # Only display constructors that were racing that season
+        teams = list(team_colors.keys())
 
         # Order teams by their initial ranking at race 0
         preseason_rankings = rankings.get(races[0], []) if races else []
@@ -992,14 +994,14 @@ class State(rx.State):
         chart_teams = []
         for team in teams:
             points = []
-            team_color = team_colors.get(team) or latest_team_colors.get(team, "#00b4da")
+            team_color = team_colors.get(team, "#00b4da")
             if team_color.lower() in ("black", "#000000", "#000"):
                 team_color = "#00D2BE"
 
             team_rankings = []
             for i, race_name in enumerate(races):
                 race_rankings = rankings.get(race_name, [])
-                filtered_rankings = [t for t in race_rankings if t in current_constructors and t in teams]
+                filtered_rankings = [t for t in race_rankings if t in teams]
                 if team in filtered_rankings:
                     rank_idx = filtered_rankings.index(team)
                 else:
@@ -1008,6 +1010,10 @@ class State(rx.State):
                 points.append((x_coords[i], y))
                 team_rankings.append({"race": race_name, "rank": rank_idx + 1})
             
+            clean_name = team.replace(" ", "")
+            has_icon = team in KNOWN_CAR_ICONS
+            icon_url = f"{R2_CUSTOM_DOMAIN}/Power Rankings/Car Icons/Icon_{clean_name}.png" if has_icon else ""
+
             if points:
                 path_str = f"M {points[0][0]:.1f} {points[0][1]:.1f} " + " ".join([f"L {p[0]:.1f} {p[1]:.1f}" for p in points[1:]])
                 leading_x, leading_y = points[-1]
@@ -1018,14 +1024,16 @@ class State(rx.State):
                     "path_string": path_str,
                     "leading_x": leading_x,
                     "leading_y": leading_y,
-                    "icon": f"{R2_CUSTOM_DOMAIN}/Power Rankings/Car Icons/Icon_{team.replace(' ', '')}.png"
+                    "icon": icon_url,
+                    "has_icon": has_icon,
                 })
 
             chart_teams.append({
                 "name": team,
                 "short_name": TEAM_SHORT_CODES.get(team, team[:3].upper()),
                 "color": team_color,
-                "icon": f"{R2_CUSTOM_DOMAIN}/Power Rankings/Car Icons/Icon_{team.replace(' ', '')}.png",
+                "icon": icon_url,
+                "has_icon": has_icon,
                 "rankings": team_rankings,
             })
                 
@@ -1078,8 +1086,148 @@ class State(rx.State):
         )
 
     @rx.var(auto_deps=False, deps=["selected_season"])
+    def power_rankings_full_chart_html(self) -> str:
+        from the_alternative_f1.seasons.power_rankings import load_power_rankings
+        from the_alternative_f1.seasons import seasons
+
+        pr = load_power_rankings(self.selected_season)
+        races = pr.get("races", [])
+        rankings = pr.get("rankings", {})
+
+        season_dict = None
+        for s in seasons:
+            if s["season_number"] == self.selected_season:
+                season_dict = s
+                break
+
+        if not season_dict or not races:
+            return '<div style="color:#888; padding:30px; text-align:center;">No data available.</div>'
+
+        team_colors = season_dict.get("team_colors", {})
+        teams = list(team_colors.keys())
+        preseason_rankings = rankings.get(races[0], []) if races else []
+        teams = sorted(teams, key=lambda t: preseason_rankings.index(t) if t in preseason_rankings else 999)
+
+        TEAM_SHORT_CODES = {
+            "Red Bull": "RBR", "McLaren": "MCL", "Ferrari": "FER", "Mercedes": "MER",
+            "Haas": "HAA", "Audi": "AUD", "Cadillac": "CAD", "Williams": "WIL",
+            "Aston Martin": "AMR", "Alpine": "ALP", "Alfa Romeo": "ALR",
+            "AlphaTauri": "ALT", "VCARB": "VCB",
+        }
+
+        num_races = len(races)
+        num_teams = len(teams)
+        dy = 44
+        margin_l = 60
+        margin_r = 160
+        margin_t = 65
+        margin_b = 25
+
+        step_w = max(110, 160 if num_races <= 6 else 130)
+        total_intervals = max(1, 2 * num_races - 1)
+        chart_w = total_intervals * step_w
+        view_w = margin_l + chart_w + margin_r
+        chart_h = (num_teams - 1) * dy if num_teams > 1 else 300
+        view_h = margin_t + chart_h + margin_b
+
+        # Compute plateaus
+        plateaus = []
+        for k in range(num_races):
+            start_x = margin_l + 2 * k * step_w
+            end_x = margin_l + (2 * k + 1) * step_w
+            mid_x = (start_x + end_x) / 2
+            plateaus.append({
+                "race": races[k],
+                "start_x": start_x,
+                "end_x": end_x,
+                "mid_x": mid_x,
+                "width": end_x - start_x
+            })
+
+        # Build paths and car icons for all teams
+        lines_svg = []
+        cars_svg = []
+        for t_idx, team in enumerate(teams):
+            color = team_colors.get(team, "#00b4da")
+            if color.lower() in ("black", "#000000", "#000"):
+                color = "#00D2BE"
+            short_code = TEAM_SHORT_CODES.get(team, team[:3].upper())
+            has_icon = team in KNOWN_CAR_ICONS
+            clean_name = team.replace(" ", "")
+            icon_url = f"{R2_CUSTOM_DOMAIN}/Power Rankings/Car Icons/Icon_{clean_name}.png" if has_icon else ""
+
+            # Points per race
+            team_y = []
+            for r_idx, r_name in enumerate(races):
+                r_rankings = rankings.get(r_name, [])
+                filtered = [t for t in r_rankings if t in teams]
+                rank = (filtered.index(team) + 1) if team in filtered else (t_idx + 1)
+                y = margin_t + (rank - 1) * dy
+                team_y.append((rank, y))
+
+            # Build smooth SVG path
+            d_parts = []
+            for i in range(total_intervals):
+                if i % 2 == 0:
+                    j = i // 2
+                    plat = plateaus[j]
+                    y = team_y[j][1]
+                    if i == 0:
+                        d_parts.append(f"M {plat['start_x']:.1f} {y:.1f}")
+                    d_parts.append(f"L {plat['end_x']:.1f} {y:.1f}")
+                else:
+                    j = i // 2
+                    p0_x = plateaus[j]["end_x"]
+                    p0_y = team_y[j][1]
+                    p3_x = plateaus[j + 1]["start_x"]
+                    p3_y = team_y[j + 1][1]
+                    dx = p3_x - p0_x
+                    p1_x = p0_x + dx / 3
+                    p2_x = p0_x + (2 * dx) / 3
+                    d_parts.append(f"C {p1_x:.1f} {p0_y:.1f}, {p2_x:.1f} {p3_y:.1f}, {p3_x:.1f} {p3_y:.1f}")
+
+            lines_svg.append(f'<path d="{" ".join(d_parts)}" fill="none" stroke="{color}" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" opacity="0.92" />')
+
+            # Leading car at final race
+            final_rank, final_y = team_y[-1]
+            final_x = plateaus[-1]["end_x"]
+            car_graphic = f'<g transform="scale(-1, 1)"><image href="{icon_url}" x="-28" y="-13" width="56" height="26" preserveAspectRatio="xMidYMid meet" /></g>' if has_icon else f'<circle cx="0" cy="0" r="11" fill="{color}" stroke="#FFFFFF" stroke-width="2" />'
+
+            cars_svg.append(f'''
+                <g transform="translate({final_x:.1f}, {final_y:.1f})">
+                    {car_graphic}
+                    <rect x="30" y="-12" width="76" height="24" rx="5" fill="#111116" stroke="rgba(255,255,255,0.25)" stroke-width="1.3" />
+                    <text x="36" y="0" fill="#FFFFFF" font-size="13px" font-weight="800" font-family="'Outfit', sans-serif" dominant-baseline="central">#{final_rank} {short_code}</text>
+                </g>
+            ''')
+
+        # Race columns background and header pills
+        cols_svg = []
+        for plat in plateaus:
+            cols_svg.append(f'''
+                <rect x="{plat['start_x']}" y="{margin_t - 14}" width="{plat['width']}" height="{chart_h + 28}" fill="rgba(255,255,255,0.025)" stroke="rgba(255,255,255,0.06)" stroke-width="1" rx="8" />
+                <line x1="{plat['mid_x']}" y1="{margin_t - 14}" x2="{plat['mid_x']}" y2="{margin_t + chart_h + 14}" stroke="rgba(255,255,255,0.05)" stroke-dasharray="4 4" />
+                <rect x="{plat['mid_x'] - 75}" y="{margin_t - 48}" width="150" height="34" rx="16" fill="#1B1B24" stroke="#343444" stroke-width="1.2" />
+                <text x="{plat['mid_x']}" y="{margin_t - 31}" fill="#FFFFFF" font-size="15px" font-weight="800" font-family="'Outfit', sans-serif" text-anchor="middle" dominant-baseline="central">{plat['race'].upper()}</text>
+            ''')
+
+        # Grid lines and left Y-axis rank badges
+        grid_svg = []
+        y_axis_svg = []
+        for r in range(num_teams):
+            y = margin_t + r * dy
+            grid_svg.append(f'<line x1="{margin_l - 8}" y1="{y}" x2="{view_w - margin_r + 25}" y2="{y}" stroke="rgba(255,255,255,0.08)" stroke-width="1.2" />')
+            y_axis_svg.append(f'''
+                <rect x="{margin_l - 38}" y="{y - 12}" width="28" height="24" rx="6" fill="#1A1A22" stroke="rgba(255,255,255,0.16)" stroke-width="1.2" />
+                <text x="{margin_l - 24}" y="{y}" fill="#9E9EA8" font-size="13px" font-weight="800" font-family="'Outfit', sans-serif" text-anchor="middle" dominant-baseline="central">#{r + 1}</text>
+            ''')
+
+        return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {view_w} {view_h}" width="{view_w}px" height="{view_h}px" style="display:block; max-width:none; background:#15151A; border-radius:12px;"><defs><filter id="full-car-glow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.8" /></filter></defs>{''.join(cols_svg)}{''.join(grid_svg)}{''.join(lines_svg)}<g filter="url(#full-car-glow)">{''.join(cars_svg)}</g>{''.join(y_axis_svg)}</svg>'''
+
+    @rx.var(auto_deps=False, deps=["selected_season"])
     def power_rankings_list_data(self) -> list[dict]:
         from the_alternative_f1.seasons.power_rankings import load_power_rankings
+        from the_alternative_f1.seasons import seasons
         
         pr = load_power_rankings(self.selected_season)
         races = pr.get("races", [])
@@ -1088,16 +1236,26 @@ class State(rx.State):
         if not races:
             return []
             
-        current_constructors = get_current_constructors()
+        season_dict = None
+        for s in seasons:
+            if s["season_number"] == self.selected_season:
+                season_dict = s
+                break
+        
+        season_teams = set(season_dict.get("team_colors", {}).keys()) if season_dict else set()
+        team_colors = season_dict.get("team_colors", {}) if season_dict else {}
+
         latest_race = races[-1]
         latest_ranking = rankings.get(latest_race, [])
-        latest_ranking = [t for t in latest_ranking if t in current_constructors]
+        if season_teams:
+            latest_ranking = [t for t in latest_ranking if t in season_teams]
         
         prev_ranking = []
         if len(races) > 1:
             prev_race = races[-2]
             prev_ranking = rankings.get(prev_race, [])
-            prev_ranking = [t for t in prev_ranking if t in current_constructors]
+            if season_teams:
+                prev_ranking = [t for t in prev_ranking if t in season_teams]
             
         result = []
         for idx, team in enumerate(latest_ranking):
@@ -1115,13 +1273,22 @@ class State(rx.State):
                 elif change < 0:
                     change_str = f"▼ {change}"
                     change_color = "#ff453a"
+            
+            color = team_colors.get(team, "#00b4da")
+            if color.lower() in ("black", "#000000", "#000"):
+                color = "#00D2BE"
+            clean_name = team.replace(" ", "")
+            has_icon = team in KNOWN_CAR_ICONS
+            icon_url = f"{R2_CUSTOM_DOMAIN}/Power Rankings/Car Icons/Icon_{clean_name}.png" if has_icon else ""
                     
             result.append({
                 "rank": rank,
                 "team": team,
+                "color": color,
                 "change": change_str,
                 "change_color": change_color,
-                "icon": f"{R2_CUSTOM_DOMAIN}/Power Rankings/Car Icons/Icon_{team.replace(' ', '')}.png"
+                "has_icon": has_icon,
+                "icon": icon_url,
             })
         return result
 
@@ -1130,13 +1297,15 @@ class State(rx.State):
         yield State.start_ticker_loop
         while True:
             async with self:
-                self.show_power_rankings_header = True
-                self.power_rankings_header_phase = "animating_in"
+                if self.active_nav != "power_rankings":
+                    self.show_power_rankings_header = True
+                    self.power_rankings_header_phase = "animating_in"
             
             await asyncio.sleep(8.05)
             
             async with self:
-                self.power_rankings_header_phase = "animating_out"
+                if self.active_nav != "power_rankings":
+                    self.power_rankings_header_phase = "animating_out"
                 
             await asyncio.sleep(0.5)
             
@@ -1169,6 +1338,10 @@ class State(rx.State):
             while True:
                 await asyncio.sleep(3)
                 async with self:
+                    # When user is on Power Rankings page, pause server ticker broadcasts
+                    # so WebSocket state diffs do not trigger React re-renders and freeze the animation
+                    if self.active_nav == "power_rankings":
+                        continue
                     if self.ticker_items:
                         self.ticker_index = (self.ticker_index + 1) % len(self.ticker_items)
         finally:
@@ -2913,11 +3086,22 @@ def power_rankings_table() -> rx.Component:
             # Icon & Team Name
             rx.table.cell(
                 rx.hstack(
-                    rx.image(
-                        src=item["icon"],
-                        width="24px",
-                        height="16px",
-                        object_fit="contain",
+                    rx.cond(
+                        item["has_icon"],
+                        rx.image(
+                            src=item["icon"],
+                            width="24px",
+                            height="16px",
+                            object_fit="contain",
+                        ),
+                        rx.box(
+                            width="14px",
+                            height="14px",
+                            border_radius="50%",
+                            bg=item["color"],
+                            border="2px solid rgba(255,255,255,0.7)",
+                            flex_shrink="0",
+                        ),
                     ),
                     rx.text(
                         item["team"],
@@ -2998,6 +3182,97 @@ def power_rankings_trajectory_graph() -> rx.Component:
     )
 
 
+def power_rankings_full_view_dialog() -> rx.Component:
+    """Popout dialog showing the full power rankings trajectory for the season and allowing PNG download."""
+    return rx.dialog.root(
+        rx.dialog.trigger(
+            rx.button(
+                rx.hstack(
+                    rx.icon("maximize-2", size=16),
+                    rx.text("View Full Power Rankings", font_family="Outfit"),
+                    spacing="2",
+                    align="center",
+                ),
+                bg="#18181C",
+                color="white",
+                border="1px solid #2C2C32",
+                _hover={"bg": "#00b4da", "border_color": "#00b4da"},
+                cursor="pointer",
+                padding_x="4",
+                padding_y="2",
+                border_radius="lg",
+                font_size="sm",
+                font_weight="600",
+            ),
+        ),
+        rx.dialog.content(
+            rx.vstack(
+                rx.hstack(
+                    rx.dialog.title(
+                        f"Season {State.selected_season} Full Power Rankings Trajectory",
+                        color="white",
+                        font_family="Outfit",
+                        font_weight="800",
+                        font_size="lg",
+                    ),
+                    rx.spacer(),
+                    rx.dialog.close(
+                        rx.button(
+                            rx.icon("x", size=18),
+                            variant="ghost",
+                            color="white",
+                            _hover={"bg": "#00b4da"},
+                            cursor="pointer",
+                            padding="1",
+                        ),
+                    ),
+                    width="100%",
+                    align="center",
+                    margin_bottom="3",
+                ),
+                rx.box(
+                    rx.html(State.power_rankings_full_chart_html),
+                    id="full_power_rankings_chart",
+                    width="100%",
+                    overflow_x="auto",
+                    bg="#15151A",
+                    border="1px solid #28282E",
+                    border_radius="xl",
+                    padding="2",
+                ),
+                rx.button(
+                    rx.hstack(
+                        rx.icon("download", size=16),
+                        rx.text("Download PNG", font_family="Outfit", font_weight="600"),
+                        spacing="2",
+                        align="center",
+                    ),
+                    on_click=lambda: DownloadState.download_chart(
+                        "full_power_rankings_chart",
+                        f"Season_{State.selected_season}_Full_Power_Rankings",
+                    ),
+                    bg="#00b4da",
+                    color="white",
+                    _hover={"bg": "#009bbd"},
+                    cursor="pointer",
+                    margin_top="3",
+                    padding_x="5",
+                    border_radius="lg",
+                ),
+                width="100%",
+                align="center",
+                spacing="3",
+            ),
+            bg="#111116",
+            border="1px solid #2C2C32",
+            border_radius="xl",
+            max_width="94vw",
+            width=["96vw", "94vw", "1150px"],
+            padding="5",
+        ),
+    )
+
+
 def power_rankings_view() -> rx.Component:
     """The Power Rankings page."""
     from the_alternative_f1.seasons import seasons
@@ -3048,12 +3323,18 @@ def power_rankings_view() -> rx.Component:
 
     # Main content layout
     content = rx.vstack(
-        # Title
-        rx.heading(
-            f"Power Rankings: Season {State.selected_season}",
-            size="6",
-            color="white",
-            font_family="Outfit",
+        # Title and Full View Action
+        rx.hstack(
+            rx.heading(
+                f"Power Rankings: Season {State.selected_season}",
+                size="6",
+                color="white",
+                font_family="Outfit",
+            ),
+            rx.spacer(),
+            power_rankings_full_view_dialog(),
+            width="100%",
+            align="center",
             margin_bottom="4",
         ),
         # Trajectory Graph Container
@@ -3200,7 +3481,7 @@ app = rx.App(
         rx.el.link(rel="icon", href="/Icons/IconLogoApp.png"),
         rx.el.link(rel="apple-touch-icon", href="/Icons/IconLogoApp.png"),
         rx.el.script(src="/carousel.js"),
-        rx.el.script(src="/power_rankings_chart.js?v=20260907_14"),
+        rx.el.script(src="/power_rankings_chart.js?v=20260911_01"),
     ],
 )
 app.add_page(index)
