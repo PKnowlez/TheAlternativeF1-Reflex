@@ -425,59 +425,59 @@ class SummaryState(rx.State):
         "reset"
     """
 
-    # Raw state fields
-    _event_type: str = ""          # "hover" | "click" | ""
-    _entity_type: str = ""         # "Constructor" | "Driver" | ""
-    _entity_name: str = ""
-    _entity_pts:  str = ""
-    _entity_meta: str = ""
+    # State fields
+    event_type: str = ""          # "hover" | "click" | ""
+    entity_type: str = ""         # "Constructor" | "Driver" | ""
+    entity_name: str = ""
+    entity_pts:  str = ""
+    entity_meta: str = ""
 
     # ── Reactive display vars ──────────────────────────────────────────────
     @rx.var
     def center_type_label(self) -> str:
-        if not self._entity_type:
+        if not self.entity_type:
             return "ALL-TIME LEAGUE"
-        return self._entity_type.upper()
+        return self.entity_type.upper()
 
     @rx.var
     def center_value(self) -> str:
-        if not self._entity_name:
+        if not self.entity_name:
             ds = precompute_summary_data()
             return f"{ds.get('total_league_points', 0):,.0f}"
-        return self._entity_name
+        return self.entity_name
 
     @rx.var
     def center_value_size(self) -> str:
-        name = self._entity_name
+        name = self.entity_name
         if not name:
             return "24px"
         return "15px" if len(name) > 10 else "22px"
 
     @rx.var
     def center_meta_label(self) -> str:
-        if not self._entity_pts:
+        if not self.entity_pts:
             return "TOTAL POINTS"
-        return self._entity_pts + " PTS • " + self._entity_meta
+        return self.entity_pts + " PTS • " + self.entity_meta
 
     @rx.var
     def center_type_fill(self) -> str:
-        if self._event_type == "click":
+        if self.event_type == "click":
             return "#00b4da"
         return "#8E8E93"
 
     # ── Event handler ─────────────────────────────────────────────────────
-    def select_donut_event(self, payload: str | list):
+    def select_donut_event(self, payload: str | list = ""):
         """Receives the structured payload string from donut_chart.js."""
         if isinstance(payload, list):
             payload = payload[0] if payload else ""
         payload = str(payload).strip()
 
         if not payload or payload == "reset":
-            self._event_type  = ""
-            self._entity_type = ""
-            self._entity_name = ""
-            self._entity_pts  = ""
-            self._entity_meta = ""
+            self.event_type  = ""
+            self.entity_type = ""
+            self.entity_name = ""
+            self.entity_pts  = ""
+            self.entity_meta = ""
             return
 
         # Expected: "hover:Type:Name:Pts:Meta" or "click:Type:Name:Pts:Meta"
@@ -486,11 +486,11 @@ class SummaryState(rx.State):
             return
 
         event_type, entity_type, entity_name, pts, meta = parts
-        self._event_type  = event_type.strip()
-        self._entity_type = entity_type.strip()
-        self._entity_name = entity_name.strip()
-        self._entity_pts  = pts.strip()
-        self._entity_meta = meta.strip()
+        self.event_type  = event_type.strip()
+        self.entity_type = entity_type.strip()
+        self.entity_name = entity_name.strip()
+        self.entity_pts  = pts.strip()
+        self.entity_meta = meta.strip()
 
 
 
@@ -535,6 +535,7 @@ def build_two_ring_donut_svg() -> str:
     ds = precompute_summary_data()
     c_slices = ds.get("constructor_slices", [])
     d_slices = ds.get("driver_slices", [])
+    total_pts = ds.get("total_league_points", 0)
 
     cx, cy = 260.0, 260.0
     r_out_in, r_out_out = 174.0, 242.0
@@ -609,66 +610,18 @@ def build_two_ring_donut_svg() -> str:
                 fill="#15151A" stroke="rgba(255,255,255,0.08)" stroke-width="1.5"
                 style="cursor: pointer;"
                 onclick="window.taf1DonutReset && window.taf1DonutReset(event)" />
+
+        <!-- Center Information Display (inside SVG: saved in image export, immune to React context re-renders) -->
+        <g id="donut-svg-center-group" pointer-events="none" text-anchor="middle" font-family="'Outfit', sans-serif" style="user-select: none;">
+            <text id="donut-center-type" x="{cx}" y="230" dominant-baseline="middle"
+                  fill="#8E8E93" font-size="11" font-weight="700" letter-spacing="1">ALL-TIME LEAGUE</text>
+            <text id="donut-center-value" x="{cx}" y="260" dominant-baseline="middle"
+                  fill="#FFFFFF" font-size="24" font-weight="900">{total_pts:,.0f}</text>
+            <text id="donut-center-meta" x="{cx}" y="285" dominant-baseline="middle"
+                  fill="#00b4da" font-size="10.5" font-weight="700" letter-spacing="0.5">TOTAL POINTS</text>
+        </g>
     </svg>
     """
-
-
-def build_donut_center_overlay(total_pts: float) -> rx.Component:
-    """Reactive center display — separate Reflex component overlaid on the SVG hole.
-
-    Because rx.html() can't react to state, the center text is rendered as real
-    Reflex components positioned absolutely over the donut hole.
-    """
-    return rx.box(
-        # Type label (e.g. "ALL-TIME LEAGUE" / "CONSTRUCTOR" / "DRIVER")
-        rx.text(
-            SummaryState.center_type_label,
-            id="donut-center-type",
-            color=SummaryState.center_type_fill,
-            font_family="Outfit, sans-serif",
-            font_size="10px",
-            font_weight="700",
-            letter_spacing="1px",
-            text_align="center",
-            width="100%",
-        ),
-        # Main value (total pts or entity name)
-        rx.text(
-            SummaryState.center_value,
-            id="donut-center-value",
-            color="white",
-            font_family="Outfit, sans-serif",
-            font_size=SummaryState.center_value_size,
-            font_weight="900",
-            text_align="center",
-            width="100%",
-            style={"textShadow": "0 2px 4px rgba(0,0,0,0.8)"},
-        ),
-        # Sub-label ("TOTAL POINTS" or pts + meta)
-        rx.text(
-            SummaryState.center_meta_label,
-            id="donut-center-meta",
-            color="#00b4da",
-            font_family="Outfit, sans-serif",
-            font_size="10px",
-            font_weight="700",
-            letter_spacing="0.5px",
-            text_align="center",
-            width="100%",
-        ),
-        # Position over the donut hole center
-        id="donut-center-overlay",
-        position="absolute",
-        top="50%",
-        left="50%",
-        transform="translate(-50%, -50%)",
-        width="140px",
-        display="flex",
-        flex_direction="column",
-        align_items="center",
-        gap="2px",
-        pointer_events="none",  # let clicks pass through to SVG
-    )
 
 
 
@@ -726,9 +679,8 @@ def summary_all_time_view(num_seasons: int = 5) -> rx.Component:
                 width="100%",
                 padding_x="1",
             ),
-            # Donut SVG with reactive center overlay (map-pattern)
+            # Donut SVG with native center information & download button
             rx.box(
-                # The SVG itself — visual-only, no interactive center text
                 rx.center(
                     rx.box(
                         rx.html(donut_svg_markup),
@@ -737,8 +689,6 @@ def summary_all_time_view(num_seasons: int = 5) -> rx.Component:
                     ),
                     width="100%",
                 ),
-                # Reactive center overlay — real Reflex component over the hole
-                build_donut_center_overlay(total_pts),
                 # Download button bottom-right (matching map style)
                 rx.button(
                     rx.icon("download", size=14),
@@ -784,7 +734,7 @@ def summary_all_time_view(num_seasons: int = 5) -> rx.Component:
 
     # Load the donut interaction script — rx.el.script (same as MapAllTime.py)
     donut_chart_card = rx.fragment(
-        rx.el.script(src="/donut_chart.js?v=20260912_01"),
+        rx.el.script(src="/donut_chart.js?v=20260912_02"),
         donut_chart_card,
     )
 
