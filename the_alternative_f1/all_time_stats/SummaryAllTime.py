@@ -22,8 +22,8 @@ from the_alternative_f1.articles.components import zoomable_chart, DownloadState
 
 # Comprehensive Driver Colors across all 24 drivers
 ALL_TIME_DRIVER_COLORS = {
-    "Joshua": "#1634CB",
-    "Eddie": "#455A94",
+    "Joshua": "#FD4BC7",
+    "Eddie": "#FFA0E0",
     "Nick": "#FF6A00",
     "Del": "#FFAE00",
     "Patrick": "#FFEA00",
@@ -33,7 +33,7 @@ ALL_TIME_DRIVER_COLORS = {
     "Grayson": "#00A0DE",
     "Josh C.": "#6CD5FF",
     "Erick": "#EF1A2D",
-    "Zane": "#FD4BC7",
+    "Zane": "#FF6B7A",
     "Jairo": "#00D2BE",
     "Marcus": "#006F62",
     "Boz": "#A33E2C",
@@ -46,6 +46,12 @@ ALL_TIME_DRIVER_COLORS = {
     "Randy": "#F032E6",
     "Josh L": "#BCF60C",
     "Evelo": "#008080",
+}
+
+# Explicit driver colors for specific constructor stints (e.g., secondary colors)
+DRIVER_TEAM_COLORS: dict[tuple[str, str], str] = {
+    ("Alpine", "Joshua"): "#FD4BC7",
+    ("Alpine", "Eddie"): "#FFA0E0",
 }
 
 # ── Color Utility Functions ───────────────────────────────────────────────────
@@ -373,7 +379,10 @@ def precompute_summary_data(num_seasons: int = 5) -> dict:
             d_end_angle = curr_driver_angle + d_angle_span
             curr_driver_angle = d_end_angle
 
-            d_color = _get_driver_shade(c_color, d_idx, num_team_drivers)
+            if (team, drv) in DRIVER_TEAM_COLORS:
+                d_color = DRIVER_TEAM_COLORS[(team, drv)]
+            else:
+                d_color = _get_driver_shade(c_color, d_idx, num_team_drivers)
             d_pct_of_team = (d_pts / c_pts) * 100.0
 
             driver_slices.append({
@@ -810,7 +819,10 @@ def summary_all_time_view(num_seasons: int = 5) -> rx.Component:
         stints = driver_stints.get(drv, [])
         for s_i, stint in enumerate(stints):
             stint_team = stint["team"]
-            stint_color = get_constructor_color(stint_team) if stint_team else ALL_TIME_DRIVER_COLORS.get(drv, "#00b4da")
+            stint_color = (
+                DRIVER_TEAM_COLORS.get((stint_team, drv))
+                or (get_constructor_color(stint_team) if stint_team else ALL_TIME_DRIVER_COLORS.get(drv, "#00b4da"))
+            )
             stint_key = f"{drv}__s{s_i}"
             driver_stint_lines.append(
                 rx.recharts.line(
@@ -874,7 +886,11 @@ def summary_all_time_view(num_seasons: int = 5) -> rx.Component:
     driver_legend_expander = interactive_line_chart_key(
         chart_id="driver_all_time_line_chart",
         items=[
-            (drv, get_constructor_color(driver_last_team[drv]) if driver_last_team.get(drv) else ALL_TIME_DRIVER_COLORS.get(drv, "#00b4da"))
+            (
+                drv,
+                DRIVER_TEAM_COLORS.get((driver_last_team.get(drv, ""), drv))
+                or (get_constructor_color(driver_last_team[drv]) if driver_last_team.get(drv) else ALL_TIME_DRIVER_COLORS.get(drv, "#00b4da"))
+            )
             for drv in sorted_drivers
         ],
         title="Key (Drivers)",

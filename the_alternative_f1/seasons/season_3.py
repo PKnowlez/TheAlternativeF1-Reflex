@@ -100,8 +100,8 @@ season = {
     "driver_colors": {
         "Nick": "#FF6A00",
         "Travis": "#FFAE00",
-        "Eddie": "#FD4BC7",
-        "Joshua": "#FFA0E0",
+        "Joshua": "#FD4BC7",
+        "Eddie": "#FFA0E0",
         "Erick": "#EF1A2D",
         "Zane": "#FF6B7A",
         "Del": "#B51020",
