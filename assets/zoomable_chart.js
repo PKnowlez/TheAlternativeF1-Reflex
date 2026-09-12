@@ -314,4 +314,289 @@
     window.__zoomableChartHandler = handleChartClick;
     document.addEventListener('click', handleChartClick, true);
     document.addEventListener('pointerdown', handleChartClick, true);
+
+    // ── Interactive Line Chart Highlighting (Animated Power Rankings Style) ─────
+    const LINE_HIGHLIGHT_STORE = (window.__TAF1_LINE_STORE = window.__TAF1_LINE_STORE || {});
+
+    function colorsMatch(c1, c2) {
+        if (!c1 || !c2) return false;
+        c1 = c1.trim().toLowerCase();
+        c2 = c2.trim().toLowerCase();
+        if (c1 === c2) return true;
+        const toRgb = (c) => {
+            if (c.startsWith('#')) {
+                let h = c.slice(1);
+                if (h.length === 3) h = h.split('').map(x => x + x).join('');
+                return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
+            }
+            const m = c.match(/\d+/g);
+            return m ? m.slice(0, 3).map(Number) : null;
+        };
+        const r1 = toRgb(c1);
+        const r2 = toRgb(c2);
+        return !!(r1 && r2 && r1[0] === r2[0] && r1[1] === r2[1] && r1[2] === r2[2]);
+    }
+
+    function getRechartsLineName(el) {
+        if (!el) return null;
+        try {
+            const key = Object.keys(el).find(k => k.startsWith('__reactFiber') || k.startsWith('__reactInternalInstance'));
+            let fiber = el[key];
+            while (fiber) {
+                const p = fiber.memoizedProps;
+                if (p) {
+                    if (p.name && typeof p.name === 'string') return p.name.trim();
+                    if (p.dataKey && typeof p.dataKey === 'string') return p.dataKey.trim();
+                }
+                fiber = fiber.return;
+            }
+        } catch(e) {}
+        return null;
+    }
+
+    function toggleLineHighlight(chartId, targetName, targetColor, targetIdx) {
+        if (!chartId) return;
+        const current = LINE_HIGHLIGHT_STORE[chartId];
+        const isCurrentActive = current && (
+            (targetName && current.name === targetName) ||
+            (targetIdx !== undefined && targetIdx !== null && current.idx === targetIdx)
+        );
+        const newTarget = isCurrentActive ? null : { name: targetName, color: targetColor, idx: targetIdx };
+        LINE_HIGHLIGHT_STORE[chartId] = newTarget;
+        applyLineHighlight(chartId, newTarget ? newTarget.name : null, newTarget ? newTarget.color : null, newTarget ? newTarget.idx : null);
+    }
+
+    function applyLineHighlight(chartId, activeName, activeColor, activeIdx) {
+        // 1. Update Key Badges
+        const keyContainers = document.querySelectorAll(`[data-key-for-chart="${chartId}"]`);
+        keyContainers.forEach(container => {
+            const items = container.querySelectorAll('.taf1-chart-key-item');
+            items.forEach(item => {
+                const iName = item.getAttribute('data-name');
+                const iIdxStr = item.getAttribute('data-idx');
+                const iIdx = iIdxStr !== null ? parseInt(iIdxStr, 10) : null;
+                const textEl = item.querySelector('.taf1-key-text') || item;
+
+                if (!activeName) {
+                    item.style.opacity = '1.0';
+                    item.style.borderColor = '#2A2A34';
+                    item.style.background = '#1B1B22';
+                    item.style.boxShadow = 'none';
+                    if (textEl) textEl.style.color = '#FFFFFF';
+                } else {
+                    const isKeyMatch = (activeIdx !== undefined && activeIdx !== null && iIdx === activeIdx) ||
+                                       (iName && activeName && iName.trim().toLowerCase() === activeName.trim().toLowerCase());
+                    if (isKeyMatch) {
+                        item.style.opacity = '1.0';
+                        item.style.borderColor = '#00b4da';
+                        item.style.background = '#252532';
+                        item.style.boxShadow = '0 0 10px rgba(0, 180, 218, 0.45)';
+                        if (textEl) textEl.style.color = '#00b4da';
+                    } else {
+                        item.style.opacity = '0.40';
+                        item.style.borderColor = '#2A2A34';
+                        item.style.background = '#1B1B22';
+                        item.style.boxShadow = 'none';
+                        if (textEl) textEl.style.color = '#FFFFFF';
+                    }
+                }
+            });
+        });
+
+        // 2. Update Lines & Dots in Chart Containers (Small Card and Popout Dialog)
+        const chartContainers = document.querySelectorAll(
+            `#card-${chartId}, #${chartId}, [data-chart-id="${chartId}"]`
+        );
+
+        chartContainers.forEach(chartContainer => {
+            const lineGroups = chartContainer.querySelectorAll('.recharts-line');
+            let matchedGroup = null;
+
+            lineGroups.forEach((g, idx) => {
+                const path = g.querySelector('.recharts-line-curve, path');
+                const dotsGroup = g.querySelector('.recharts-line-dots');
+                if (!path) return;
+
+                if (path.dataset.origStrokeWidth === undefined) {
+                    path.dataset.origStrokeWidth = path.getAttribute('stroke-width') || '2';
+                }
+
+                if (!activeName) {
+                    g.style.opacity = '1.0';
+                    g.style.transition = 'opacity 0.2s ease';
+                    path.style.opacity = '1.0';
+                    path.style.strokeWidth = path.dataset.origStrokeWidth + 'px';
+                    path.style.filter = '';
+                    g.querySelectorAll('circle, .recharts-dot').forEach(c => {
+                        c.style.opacity = '1.0';
+                        c.style.fillOpacity = '1.0';
+                        c.style.strokeOpacity = '1.0';
+                    });
+                    if (dotsGroup) {
+                        dotsGroup.style.opacity = '1.0';
+                    }
+                } else {
+                    const strokeVal = path.getAttribute('stroke') || path.style.stroke;
+                    const lineName = getRechartsLineName(g);
+
+                    // Strict, exclusive matching:
+                    // 1. First by fiber line name (if available)
+                    // 2. Otherwise by sequential index activeIdx (1:1 with key item)
+                    // 3. ONLY if both fail, fallback to color
+                    let isMatch = false;
+                    if (activeName && lineName) {
+                        isMatch = (lineName.trim().toLowerCase() === activeName.trim().toLowerCase());
+                    } else if (activeIdx !== undefined && activeIdx !== null && activeIdx >= 0) {
+                        isMatch = (idx === activeIdx);
+                    } else if (activeColor) {
+                        isMatch = colorsMatch(strokeVal, activeColor);
+                    }
+
+                    if (isMatch) {
+                        matchedGroup = g;
+                        g.style.opacity = '1.0';
+                        g.style.transition = 'opacity 0.2s ease';
+                        path.style.opacity = '1.0';
+                        path.style.strokeWidth = '4.5px';
+                        path.style.filter = `drop-shadow(0 0 7px ${activeColor || strokeVal})`;
+                        g.querySelectorAll('circle, .recharts-dot').forEach(c => {
+                            c.style.opacity = '1.0';
+                            c.style.fillOpacity = '1.0';
+                            c.style.strokeOpacity = '1.0';
+                        });
+                        if (dotsGroup) {
+                            dotsGroup.style.opacity = '1.0';
+                        }
+                    } else {
+                        // User request: non-selected points and lines at 40% opacity from original
+                        g.style.opacity = '0.40';
+                        g.style.transition = 'opacity 0.2s ease';
+                        path.style.opacity = '0.40';
+                        path.style.strokeWidth = path.dataset.origStrokeWidth + 'px';
+                        path.style.filter = '';
+                        g.querySelectorAll('circle, .recharts-dot').forEach(c => {
+                            c.style.opacity = '0.40';
+                            c.style.fillOpacity = '0.40';
+                            c.style.strokeOpacity = '0.40';
+                        });
+                        if (dotsGroup) {
+                            dotsGroup.style.opacity = '0.40';
+                        }
+                    }
+                }
+            });
+
+            // Also check any standalone dots groups in the chart container
+            const allDotsGroups = chartContainer.querySelectorAll('.recharts-line-dots');
+            allDotsGroups.forEach((dg, dIdx) => {
+                if (dg.closest('.recharts-line')) return;
+
+                if (!activeName) {
+                    dg.style.opacity = '1.0';
+                    dg.querySelectorAll('circle, .recharts-dot').forEach(c => {
+                        c.style.opacity = '1.0';
+                        c.style.fillOpacity = '1.0';
+                        c.style.strokeOpacity = '1.0';
+                    });
+                } else {
+                    const dgName = getRechartsLineName(dg);
+                    let isDotsMatch = false;
+                    if (activeName && dgName) {
+                        isDotsMatch = (dgName.trim().toLowerCase() === activeName.trim().toLowerCase());
+                    } else if (activeIdx !== undefined && activeIdx !== null && activeIdx >= 0) {
+                        isDotsMatch = (dIdx === activeIdx);
+                    } else if (activeColor) {
+                        const sampleCircle = dg.querySelector('circle');
+                        const fillVal = sampleCircle ? (sampleCircle.getAttribute('fill') || sampleCircle.getAttribute('stroke')) : null;
+                        isDotsMatch = colorsMatch(fillVal, activeColor);
+                    }
+
+                    if (isDotsMatch) {
+                        dg.style.opacity = '1.0';
+                        dg.querySelectorAll('circle, .recharts-dot').forEach(c => {
+                            c.style.opacity = '1.0';
+                            c.style.fillOpacity = '1.0';
+                            c.style.strokeOpacity = '1.0';
+                        });
+                    } else {
+                        dg.style.opacity = '0.40';
+                        dg.querySelectorAll('circle, .recharts-dot').forEach(c => {
+                            c.style.opacity = '0.40';
+                            c.style.fillOpacity = '0.40';
+                            c.style.strokeOpacity = '0.40';
+                        });
+                    }
+                }
+            });
+
+            // Elevate the highlighted line group to the top layer in SVG
+            if (matchedGroup && matchedGroup.parentElement) {
+                matchedGroup.parentElement.appendChild(matchedGroup);
+            }
+        });
+    }
+
+    window.taf1ToggleLineHighlight = toggleLineHighlight;
+    window.taf1ApplyLineHighlight = applyLineHighlight;
+
+    // Delegated click listener
+    document.addEventListener('click', (ev) => {
+        // A. Clicked a Key Badge
+        const keyItem = ev.target ? ev.target.closest('.taf1-chart-key-item') : null;
+        if (keyItem) {
+            const chartId = keyItem.getAttribute('data-chart-id');
+            const name = keyItem.getAttribute('data-name');
+            const color = keyItem.getAttribute('data-color');
+            const idxStr = keyItem.getAttribute('data-idx');
+            const idx = idxStr !== null ? parseInt(idxStr, 10) : null;
+            toggleLineHighlight(chartId, name, color, idx);
+            return;
+        }
+
+        // B. Clicked a Line Curve in a Chart
+        const lineCurve = ev.target ? ev.target.closest('.recharts-line, .recharts-line-curve') : null;
+        if (lineCurve) {
+            const chartContainer = lineCurve.closest('[data-chart-id], [id^="card-"], .zoomable-chart-popout-container');
+            if (chartContainer) {
+                let chartId = chartContainer.getAttribute('data-chart-id') || chartContainer.id;
+                if (chartId && chartId.startsWith('card-')) chartId = chartId.replace('card-', '');
+                const g = lineCurve.closest('.recharts-line');
+                if (g && chartId) {
+                    const allLines = Array.from(g.parentElement ? g.parentElement.querySelectorAll('.recharts-line') : []);
+                    const idx = allLines.indexOf(g);
+                    const path = g.querySelector('.recharts-line-curve, path');
+                    const stroke = path ? (path.getAttribute('stroke') || path.style.stroke) : null;
+                    const lineName = getRechartsLineName(g);
+                    const keyItem = (lineName ? document.querySelector(`[data-key-for-chart="${chartId}"] .taf1-chart-key-item[data-name="${lineName}"]`) : null) ||
+                                    document.querySelector(`[data-key-for-chart="${chartId}"] .taf1-chart-key-item[data-idx="${idx}"]`);
+                    const name = keyItem ? keyItem.getAttribute('data-name') : (lineName || (stroke ? stroke : 'line-' + idx));
+                    toggleLineHighlight(chartId, name, stroke, idx);
+                }
+            }
+        }
+    });
+
+    // Observer to re-apply active highlight when charts are mounted or re-rendered
+    const lineObserver = new MutationObserver((mutations) => {
+        for (const m of mutations) {
+            if (m.type === 'childList') {
+                for (const node of m.addedNodes) {
+                    if (node.nodeType === 1) {
+                        const chartEl = (node.matches && (node.matches('[data-chart-id], [id^="card-"], .zoomable-chart-popout-container')))
+                            ? node
+                            : (node.querySelector ? node.querySelector('[data-chart-id], [id^="card-"], .zoomable-chart-popout-container') : null);
+                        if (chartEl) {
+                            let chartId = chartEl.getAttribute('data-chart-id') || chartEl.id;
+                            if (chartId && chartId.startsWith('card-')) chartId = chartId.replace('card-', '');
+                            const active = LINE_HIGHLIGHT_STORE[chartId];
+                            if (active && active.name) {
+                                setTimeout(() => applyLineHighlight(chartId, active.name, active.color, active.idx), 60);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    });
+    lineObserver.observe(document.body, { childList: true, subtree: true });
 })();

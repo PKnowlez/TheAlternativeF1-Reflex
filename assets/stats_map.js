@@ -71,6 +71,13 @@
         var cleanId = id.replace(/^st-/, '').replace(/^pin-/, '').replace(/_/g, ' ');
         dispatchGroupSelection(cleanId);
       }
+      return;
+    }
+
+    // Check if clicked the gray space / SVG background (SDDREQ-114)
+    var bgElem = target.closest ? target.closest('#map-canvas-bg, .map-canvas-bg, #stats-map-svg') : null;
+    if (bgElem || (target.id === 'map-canvas-bg') || (target.id === 'stats-map-svg')) {
+      dispatchGroupSelection('_all_map_');
     }
   }, true);
 

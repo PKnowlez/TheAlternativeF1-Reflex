@@ -388,6 +388,9 @@ def zoomable_chart(chart_factory, title: str, chart_id: str, height: int = 350, 
     
     small_chart_trigger = rx.box(
         chart_factory(height),
+        id=f"card-{chart_id}",
+        custom_attrs={"data-chart-id": chart_id},
+        class_name="zoomable-chart-small-container",
         cursor="pointer",
         width="100%",
         border_radius="md",
@@ -449,6 +452,87 @@ def zoomable_chart(chart_factory, title: str, chart_id: str, height: int = 350, 
                 width=["100%", "90vw", "800px"],
             ),
         )
+
+
+def interactive_line_chart_key(
+    chart_id: str,
+    items: list[tuple[str, str]],
+    title: str = "Key",
+    hint: str = "Click to highlight",
+) -> rx.Component:
+    """Render an interactive animated-power-rankings style key below a line chart.
+    
+    Clicking any item toggles highlighting of that entity's line in the chart while dimming all others.
+    """
+    legend_items = []
+    for idx, (name, color) in enumerate(items):
+        item_box = rx.box(
+            rx.box(
+                width="8px",
+                height="8px",
+                border_radius="50%",
+                bg=color,
+                flex_shrink="0",
+            ),
+            rx.text(
+                name,
+                font_size="12px",
+                font_weight="700",
+                font_family="Outfit",
+                color="#FFFFFF",
+                class_name="taf1-key-text",
+                white_space="nowrap",
+            ),
+            class_name="taf1-chart-key-item prc-legend-item",
+            custom_attrs={
+                "data-chart-id": chart_id,
+                "data-name": name,
+                "data-color": color,
+                "data-idx": str(idx),
+            },
+            display="inline-flex",
+            align_items="center",
+            gap="6px",
+            padding="4px 8px",
+            border_radius="6px",
+            bg="#1B1B22",
+            border="1px solid #2A2A34",
+            cursor="pointer",
+            transition="all 0.15s ease",
+            _hover={
+                "border_color": "#00b4da",
+                "color": "#00b4da",
+                "transform": "translateY(-1px)",
+            },
+        )
+        legend_items.append(item_box)
+
+    return rx.box(
+        rx.hstack(
+            rx.text(title, color="#00b4da", font_weight="700", font_size="12px", font_family="Outfit"),
+            rx.text(f"({hint})", color="#8E8E98", font_size="11px", font_family="Outfit"),
+            spacing="2",
+            align="center",
+            margin_bottom="2",
+        ),
+        rx.flex(
+            *legend_items,
+            class_name="prc-legend",
+            flex_wrap="wrap",
+            gap="6px",
+            align="center",
+            width="100%",
+        ),
+        custom_attrs={"data-key-for-chart": chart_id},
+        class_name="taf1-chart-key-container prc-info-bar",
+        bg="#141418",
+        border="1px solid #28282E",
+        border_radius="10px",
+        padding="9px 13px",
+        width="100%",
+        box_sizing="border-box",
+        box_shadow="0 4px 14px rgba(0,0,0,0.35)",
+    )
 
 
 def image_carousel(

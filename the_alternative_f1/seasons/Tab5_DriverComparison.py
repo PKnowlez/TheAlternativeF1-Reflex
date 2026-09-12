@@ -9,7 +9,7 @@ import math
 import numpy as np
 import pandas as pd
 import reflex as rx
-from the_alternative_f1.articles.components import zoomable_chart
+from the_alternative_f1.articles.components import zoomable_chart, interactive_line_chart_key
 
 
 def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only_var = None, toggle_rookies_only = None, sprint_only_var = None, toggle_sprint_only = None) -> rx.Component:
@@ -337,30 +337,11 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
         rookie_chart_component = rx.vstack(
             rx.text("Rookie of the Year", color="white", font_weight="700", font_size="sm"),
             rookie_chart,
-            rx.accordion.root(
-                rx.accordion.item(
-                    rx.accordion.trigger(
-                        rx.text("Key", color="#555555", font_weight="600", font_size="13px", font_family="Outfit"),
-                    ),
-                    rx.accordion.content(
-                        rx.flex(
-                            *[
-                                rx.text(r, color=driver_colors.get(r, "#555555"), font_size="13px", font_family="Outfit", font_weight="600", text_shadow="0px 1px 4px rgba(0,0,0,0.2)")
-                                for r in rookie_names
-                            ],
-                            flex_wrap="wrap",
-                            gap="24px",
-                        ),
-                    ),
-                    value="rookie_key",
-                ),
-                collapsible=True,
-                width="100%",
-                variant="ghost",
-                bg="#F0F0F2",
-                border_radius="6px",
-                border="1px solid #CCCCCC",
-                box_shadow="0 2px 8px rgba(0,0,0,0.15)",
+            interactive_line_chart_key(
+                chart_id="rookie_chart",
+                items=[(r, driver_colors.get(r, "#555555")) for r in rookie_names],
+                title="Key (Rookies)",
+                hint="Click rookie to highlight",
             ),
             width="100%",
             bg="transparent",

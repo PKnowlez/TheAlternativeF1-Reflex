@@ -280,3 +280,45 @@
     outline: none !important;
     box-shadow: none !important;
 }
+
+/* Map All Time Stats: Segmented Control High-Contrast Styling */
+.map-segmented-control.rt-SegmentedControlRoot,
+.rt-SegmentedControlRoot:has(.map-segmented-control) {
+    background-color: #1a1a22 !important;
+    background-image: none !important;
+    border: 1px solid #32323a !important;
+}
+
+/* Unselected items: Light gray / white text */
+.map-segmented-control .rt-SegmentedControlItem[data-state='off'] .rt-SegmentedControlItemLabel,
+.map-segmented-control .rt-SegmentedControlItem[data-state='off'] .rt-SegmentedControlItemLabelInactive,
+.map-segmented-control .rt-SegmentedControlItem[data-state='off'] {
+    color: #e2e2e8 !important;
+    font-weight: 500 !important;
+    opacity: 0.9 !important;
+}
+
+/* Hover on unselected */
+.map-segmented-control .rt-SegmentedControlItem[data-state='off']:hover .rt-SegmentedControlItemLabel,
+.map-segmented-control .rt-SegmentedControlItem[data-state='off']:hover {
+    color: #ffffff !important;
+    opacity: 1 !important;
+}
+
+/* Selected item: Inverted light gray / white box with black / dark gray text */
+.map-segmented-control .rt-SegmentedControlIndicator::before {
+    background-color: #f0f0f4 !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4) !important;
+}
+
+.map-segmented-control .rt-SegmentedControlItem[data-state='on'] .rt-SegmentedControlItemLabel,
+.map-segmented-control .rt-SegmentedControlItem[data-state='on'] .rt-SegmentedControlItemLabelActive,
+.map-segmented-control .rt-SegmentedControlItem[data-state='on'] {
+    color: #121216 !important;
+    font-weight: 700 !important;
+}
+
+/* Separator styling */
+.map-segmented-control .rt-SegmentedControlItemSeparator {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+}

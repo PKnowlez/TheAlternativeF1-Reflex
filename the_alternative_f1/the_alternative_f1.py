@@ -74,6 +74,7 @@ from the_alternative_f1.all_time_stats.ConstructorAllTime import constructor_sta
 from the_alternative_f1.all_time_stats.DriverAllTime import driver_stats_view
 from the_alternative_f1.all_time_stats.RacesAllTime import races_all_time_view
 from the_alternative_f1.all_time_stats.DetailedAllTime import detailed_stats_view
+from the_alternative_f1.all_time_stats.SummaryAllTime import summary_all_time_view
 from the_alternative_f1.all_time_stats.MapAllTime import stats_map_view
 from the_alternative_f1.seasons import seasons, LATEST_SEASON
 from the_alternative_f1.seasons.Calculations import Calculations
@@ -250,7 +251,7 @@ class State(rx.State):
     selected_article_title: str = ""
     active_nav: str = "home"
     selected_reg_tab: str = "regulations"
-    selected_stats_tab: str = "constructors"
+    selected_stats_tab: str = "summary"
 
     # ── Seasons state ────────────────────────────────────────────────────
     selected_season: int = LATEST_SEASON
@@ -262,6 +263,7 @@ class State(rx.State):
     # ── Power Rankings State ─────────────────────────────────────────────
     show_power_rankings_header: bool = True
     power_rankings_header_phase: str = "animating_in"
+    header_loop_running: bool = False
 
     # ── Discord Login State ──────────────────────────────────────────────
     discord_username: str = rx.LocalStorage("", name="discord_username", sync=True)
@@ -805,7 +807,7 @@ class State(rx.State):
         if nav_name == "regulations":
             self.selected_reg_tab = "regulations"
         if nav_name == "stats":
-            self.selected_stats_tab = "constructors"
+            self.selected_stats_tab = "summary"
         if nav_name == "power_rankings":
             self.show_power_rankings_header = False
         if nav_name == "seasons":
@@ -865,35 +867,6 @@ class State(rx.State):
                 "}"
             )
 
-    # ── Ticker State ─────────────────────────────────────────────────────
-    ticker_index: int = 0
-    ticker_items: list[list] = STATIC_TICKER_ITEMS
-    ticker_initialized: bool = False
-    ticker_loop_running: bool = False
-
-    @rx.var
-    def ticker_header(self) -> str:
-        if self.ticker_items and self.ticker_index < len(self.ticker_items):
-            return self.ticker_items[self.ticker_index][0]
-        return ""
-
-    @rx.var
-    def ticker_data(self) -> str:
-        if self.ticker_items and self.ticker_index < len(self.ticker_items):
-            return self.ticker_items[self.ticker_index][1]
-        return ""
-
-    @rx.var
-    def major_index(self) -> int:
-        if self.ticker_items and self.ticker_index < len(self.ticker_items):
-            return self.ticker_items[self.ticker_index][2]
-        return 0
-
-    @rx.var
-    def header_animation_duration(self) -> str:
-        if self.ticker_items and self.ticker_index < len(self.ticker_items):
-            return f"{self.ticker_items[self.ticker_index][3]}s"
-        return "3s"
 
     @rx.var(auto_deps=False, deps=[])
     def latest_power_rankings_header(self) -> list[dict]:
@@ -1230,30 +1203,77 @@ class State(rx.State):
 
     @rx.event(background=True)
     async def on_app_mount(self):
-        yield State.start_ticker_loop
-        while True:
-            async with self:
-                if self.active_nav != "power_rankings":
-                    self.show_power_rankings_header = True
-                    self.power_rankings_header_phase = "animating_in"
-            
-            await asyncio.sleep(8.05)
-            
-            async with self:
-                if self.active_nav != "power_rankings":
-                    self.power_rankings_header_phase = "animating_out"
+        yield TickerState.start_ticker_loop
+        async with self:
+            if self.header_loop_running:
+                return
+            self.header_loop_running = True
+
+        try:
+            while True:
+                async with self:
+                    if self.active_nav != "power_rankings":
+                        self.show_power_rankings_header = True
+                        self.power_rankings_header_phase = "animating_in"
                 
-            await asyncio.sleep(0.5)
-            
-            async with self:
-                self.show_power_rankings_header = False
+                await asyncio.sleep(8.05)
                 
-            await asyncio.sleep(90.0)
+                async with self:
+                    if self.active_nav != "power_rankings":
+                        self.power_rankings_header_phase = "animating_out"
+                    
+                await asyncio.sleep(0.5)
+                
+                async with self:
+                    self.show_power_rankings_header = False
+                    
+                await asyncio.sleep(90.0)
+        except Exception:
+            pass
+        finally:
+            async with self:
+                self.header_loop_running = False
 
     def go_to_power_rankings(self):
         self.active_nav = "power_rankings"
         self.selected_article_title = ""
         self.show_power_rankings_header = False
+
+
+# ── Isolated Ticker Substate ─────────────────────────────────────────────────
+class TickerState(rx.State):
+    """Isolated substate for the sliding header ticker.
+    Completely decoupled from main app State to ensure ticker progress
+    never triggers WebSocket re-renders of charts, maps, or interactive selections.
+    """
+    ticker_index: int = 0
+    ticker_items: list[list] = STATIC_TICKER_ITEMS
+    ticker_initialized: bool = False
+    ticker_loop_running: bool = False
+
+    @rx.var
+    def ticker_header(self) -> str:
+        if self.ticker_items and self.ticker_index < len(self.ticker_items):
+            return self.ticker_items[self.ticker_index][0]
+        return ""
+
+    @rx.var
+    def ticker_data(self) -> str:
+        if self.ticker_items and self.ticker_index < len(self.ticker_items):
+            return self.ticker_items[self.ticker_index][1]
+        return ""
+
+    @rx.var
+    def major_index(self) -> int:
+        if self.ticker_items and self.ticker_index < len(self.ticker_items):
+            return self.ticker_items[self.ticker_index][2]
+        return 0
+
+    @rx.var
+    def header_animation_duration(self) -> str:
+        if self.ticker_items and self.ticker_index < len(self.ticker_items):
+            return f"{self.ticker_items[self.ticker_index][3]}s"
+        return "3s"
 
     def initialize_ticker(self):
         if self.ticker_initialized:
@@ -1274,10 +1294,6 @@ class State(rx.State):
             while True:
                 await asyncio.sleep(3)
                 async with self:
-                    # When user is on Power Rankings page, pause server ticker broadcasts
-                    # so WebSocket state diffs do not trigger React re-renders and freeze the animation
-                    if self.active_nav == "power_rankings":
-                        continue
                     if self.ticker_items:
                         self.ticker_index = (self.ticker_index + 1) % len(self.ticker_items)
         finally:
@@ -1289,25 +1305,25 @@ def header_ticker() -> rx.Component:
     """The sliding header ticker component."""
     return rx.vstack(
         rx.text(
-            State.ticker_header,
+            TickerState.ticker_header,
             font_size=["7px", "8px", "9px"],
             color="#00b4da",
             font_weight="bold",
             text_transform="uppercase",
             letter_spacing="1px",
             margin="0",
-            key=State.major_index,
+            key=TickerState.major_index,
             class_name="major-header-fade",
-            style={"animationDuration": State.header_animation_duration},
+            style={"animationDuration": TickerState.header_animation_duration},
         ),
         rx.text(
-            State.ticker_data,
+            TickerState.ticker_data,
             font_size=["10px", "11px", "13px"],
             color="white",
             font_weight="600",
             margin="0",
             white_space="nowrap",
-            key=State.ticker_index,
+            key=TickerState.ticker_index,
             class_name="ticker-data-fade",
         ),
         spacing="0",
@@ -1388,14 +1404,16 @@ def header() -> rx.Component:
         ),
         rx.spacer(),
         # Right-aligned content: animated starting grid on load, otherwise ticker
-        rx.cond(
-            State.show_power_rankings_header,
+        rx.box(
             power_rankings_starting_grid(),
-            rx.cond(
-                State.ticker_items,
-                header_ticker(),
-                rx.fragment(),
-            ),
+            display=rx.cond(State.show_power_rankings_header, "flex", "none"),
+            height="100%",
+        ),
+        rx.box(
+            header_ticker(),
+            display=rx.cond(State.show_power_rankings_header, "none", "flex"),
+            height="100%",
+            align_items="center",
         ),
         width="100%",
         height="8vh",
@@ -2369,6 +2387,7 @@ def _stats_tab_button(label: str, tab_key: str) -> rx.Component:
 def stats_view() -> rx.Component:
     """All Time Stats view with sidebar tabs for Constructors, Drivers, Races, Detailed, and Map."""
     stats_tabs = [
+        ("SUMMARY", "summary"),
         ("CONSTRUCTORS", "constructors"),
         ("DRIVERS", "drivers"),
         ("RACES", "races"),
@@ -2400,18 +2419,22 @@ def stats_view() -> rx.Component:
         # Content Display Area
         rx.box(
             rx.cond(
-                State.selected_stats_tab == "constructors",
-                constructor_stats_view(NUM_SEASONS),
+                State.selected_stats_tab == "summary",
+                summary_all_time_view(NUM_SEASONS),
                 rx.cond(
-                    State.selected_stats_tab == "drivers",
-                    driver_stats_view(NUM_SEASONS),
+                    State.selected_stats_tab == "constructors",
+                    constructor_stats_view(NUM_SEASONS),
                     rx.cond(
-                        State.selected_stats_tab == "races",
-                        races_all_time_view(NUM_SEASONS),
+                        State.selected_stats_tab == "drivers",
+                        driver_stats_view(NUM_SEASONS),
                         rx.cond(
-                            State.selected_stats_tab == "detailed",
-                            detailed_stats_view(NUM_SEASONS),
-                            stats_map_view(),
+                            State.selected_stats_tab == "races",
+                            races_all_time_view(NUM_SEASONS),
+                            rx.cond(
+                                State.selected_stats_tab == "detailed",
+                                detailed_stats_view(NUM_SEASONS),
+                                stats_map_view(),
+                            ),
                         ),
                     ),
                 ),
@@ -3295,7 +3318,8 @@ app = rx.App(
         rx.el.script(src="/carousel.js"),
         rx.el.script(src="/power_rankings_chart.js?v=20260911_01"),
         rx.el.script(src="/stats_map.js"),
-        rx.el.script(src="/zoomable_chart.js"),
+        rx.el.script(src="/donut_chart.js?v=20260912_01"),
+        rx.el.script(src="/zoomable_chart.js?v=20260912_05"),
     ],
 )
 app.add_page(index)

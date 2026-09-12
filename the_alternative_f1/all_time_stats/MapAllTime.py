@@ -20,6 +20,7 @@ Implements SDDFEAT-12 and downstream SDD Requirements:
 import json
 from pathlib import Path
 from collections import defaultdict
+import pandas as pd
 import reflex as rx
 
 from the_alternative_f1.all_time_stats.Functions import get_excel_sheet, is_season_completed, file as excel_file_path
@@ -291,8 +292,11 @@ def precompute_all_map_data(force: bool = False) -> dict:
         team_pts = defaultdict(float)
 
         for _, row in df_s.iterrows():
-            drv = row["Driver"]
-            team = row["Team"]
+            drv_raw = row["Driver"]
+            if pd.isna(drv_raw) or not str(drv_raw).strip() or str(drv_raw).strip().lower() in ("nan", "none", "—"):
+                continue
+            drv = str(drv_raw).strip()
+            team = str(row.get("Team", "")).strip()
             s_stats[drv]["team"] = team
 
             for r in races:
@@ -379,6 +383,9 @@ def precompute_all_map_data(force: bool = False) -> dict:
             drivers_in_state = defaultdict(set)
             drivers_in_metro = defaultdict(set)
 
+            all_map: dict = _build_blank_stats()
+            drivers_in_all_map = set()
+
             # Aggregate statistics per season incorporating driver location at that time (SDDREQ-106)
             for s in active_seasons:
                 s_data = season_driver_stats.get(s, {})
@@ -389,6 +396,7 @@ def precompute_all_map_data(force: bool = False) -> dict:
                     metro, state, region = _get_driver_loc(drv, s)
 
                     # Track driver membership
+                    drivers_in_all_map.add(drv)
                     if region in by_region:
                         drivers_in_region[region].add(drv)
                     if state in by_state:
@@ -397,6 +405,18 @@ def precompute_all_map_data(force: bool = False) -> dict:
                         drivers_in_metro[metro].add(drv)
 
                     # Accumulate metric values
+                    all_map["points"] += stats["points"]
+                    all_map["wins"] += stats["wins"]
+                    all_map["podiums"] += stats["podiums"]
+                    all_map["poles"] += stats["poles"]
+                    all_map["fastest_laps"] += stats["fastest_laps"]
+                    all_map["dotd"] += stats["dotd"]
+                    all_map["mot"] += stats["mot"]
+                    all_map["cd"] += stats["cd"]
+                    all_map["ancillary_total"] += (
+                        stats["fastest_laps"] + stats["dotd"] + stats["mot"] + stats["cd"]
+                    )
+
                     for target_dict, key in [(by_region, region), (by_state, state), (by_metro, metro)]:
                         if key in target_dict:
                             target = target_dict[key]
@@ -417,6 +437,7 @@ def precompute_all_map_data(force: bool = False) -> dict:
             for s in active_seasons:
                 d_champ = driver_champs_by_season.get(s)
                 if d_champ and (not act_only or d_champ in active_drivers_s5):
+                    all_map["driver_championships"] += 1
                     m_c, st_c, r_c = _get_driver_loc(d_champ, s)
                     if r_c in by_region:
                         by_region[r_c]["driver_championships"] += 1
@@ -429,6 +450,7 @@ def precompute_all_map_data(force: bool = False) -> dict:
                 for c_drv in c_drivers:
                     if act_only and c_drv not in active_drivers_s5:
                         continue
+                    all_map["constructor_championships"] += 1
                     m_c, st_c, r_c = _get_driver_loc(c_drv, s)
                     if r_c in by_region:
                         by_region[r_c]["constructor_championships"] += 1
@@ -437,6 +459,24 @@ def precompute_all_map_data(force: bool = False) -> dict:
                     if m_c in by_metro:
                         by_metro[m_c]["constructor_championships"] += 1
 
+            # Finalize counts and averages for all_map (whole map view)
+            d_list_all = sorted([str(d).strip() for d in drivers_in_all_map if d is not None and not pd.isna(d) and str(d).strip().lower() not in ("nan", "none", "", "—")])
+            all_map["drivers"] = d_list_all
+            cnt_all = len(d_list_all)
+            all_map["driver_count"] = cnt_all
+            all_map["points"] = round(all_map["points"], 1)
+
+            if cnt_all > 0:
+                all_map["avg_points"] = round(all_map["points"] / cnt_all, 1)
+                all_map["avg_wins"] = round(all_map["wins"] / cnt_all, 2)
+                all_map["avg_podiums"] = round(all_map["podiums"] / cnt_all, 2)
+                all_map["avg_poles"] = round(all_map["poles"] / cnt_all, 2)
+                all_map["avg_fastest_laps"] = round(all_map["fastest_laps"] / cnt_all, 2)
+                all_map["avg_dotd"] = round(all_map["dotd"] / cnt_all, 2)
+                all_map["avg_mot"] = round(all_map["mot"] / cnt_all, 2)
+                all_map["avg_cd"] = round(all_map["cd"] / cnt_all, 2)
+                all_map["avg_ancillary"] = round(all_map["ancillary_total"] / cnt_all, 2)
+
             # Finalize counts and averages per group
             for target_dict, driver_map in [
                 (by_region, drivers_in_region),
@@ -444,7 +484,7 @@ def precompute_all_map_data(force: bool = False) -> dict:
                 (by_metro, drivers_in_metro),
             ]:
                 for k, stats in target_dict.items():
-                    d_list = sorted(list(driver_map.get(k, set())))
+                    d_list = sorted([str(d).strip() for d in driver_map.get(k, set()) if d is not None and not pd.isna(d) and str(d).strip().lower() not in ("nan", "none", "", "—")])
                     stats["drivers"] = d_list
                     cnt = len(d_list)
                     stats["driver_count"] = cnt
@@ -471,7 +511,13 @@ def precompute_all_map_data(force: bool = False) -> dict:
                         stats["avg_cd"] = 0.0
                         stats["avg_ancillary"] = 0.0
 
+            # Store all_map entry also in lookup maps for seamless key resolution
+            by_region["_all_map_"] = all_map
+            by_state["_all_map_"] = all_map
+            by_metro["_all_map_"] = all_map
+
             permutations[cache_key] = {
+                "all_map": all_map,
                 "by_region": by_region,
                 "by_state": by_state,
                 "by_metro": by_metro,
@@ -495,7 +541,7 @@ class StatsMapState(rx.State):
     season_slider: int = 6            # 1..5 = Seasons 1..5, 6 = All Seasons
     single_season_only: bool = False  # Checkbox below slider
     stat_display: str = "default"     # "default", "driver_champs", "constructor_champs", "wins", "podiums", "points", "poles", "ancillary"
-    selected_group: str = "Northeast" # Current selected group
+    selected_group: str = "_all_map_" # Default selection is the whole map (Approved Downstream Req SDDREQ-114)
     hovered_group: str = ""
     full_screen_open: bool = False
 
@@ -538,6 +584,23 @@ class StatsMapState(rx.State):
     @rx.var
     def selected_group_metrics(self) -> dict:
         ds = precompute_all_map_data().get(self.current_dataset_key, {})
+
+        # Default whole-map view per SDDREQ-114 across all grouping modes (regions, states, metros)
+        if self.selected_group in ("_all_map_", "all_map", "all", "United States"):
+            all_stats = ds.get("all_map", _build_blank_stats())
+            res = dict(all_stats)
+            res["group_name"] = "_all_map_"
+            res["group_type"] = self.grouping
+            res["region_color"] = "#00b4da"
+            res["display_title"] = "United States"
+            if self.grouping == "region":
+                res["region_name"] = "All Regions"
+            elif self.grouping == "metro":
+                res["region_name"] = "All Metro Areas"
+            else:
+                res["region_name"] = "All States"
+            return res
+
         if self.grouping == "region":
             data_map = ds.get("by_region", {})
             default_key = "Northeast"
@@ -556,6 +619,7 @@ class StatsMapState(rx.State):
         if self.grouping == "region":
             res["region_color"] = REGION_COLORS.get(key, "#00b4da")
             res["region_name"] = key
+            res["display_title"] = key
         elif self.grouping == "metro":
             m_info = METRO_COORDS.get(key, {})
             r_name = m_info.get("region", "Northeast")
@@ -591,6 +655,7 @@ class StatsMapState(rx.State):
 
         states_svg = []
         selected = self.selected_group
+        is_all_map = (selected in ("_all_map_", "all_map", "all", "United States"))
 
         # Helper to determine state fill and stroke
         for code, info in SVG_DATA.get("states", {}).items():
@@ -607,9 +672,14 @@ class StatsMapState(rx.State):
             if self.grouping == "region":
                 is_selected = (region == selected)
                 fill_color = reg_color
-                fill_opacity = "0.80" if is_selected else "0.38"
-                stroke_color = "#00b4da" if is_selected else "rgba(255,255,255,0.4)"
-                stroke_width = "3.0" if is_selected else "1.0"
+                if is_all_map:
+                    fill_opacity = "0.78"
+                    stroke_color = "rgba(255,255,255,0.45)"
+                    stroke_width = "1.0"
+                else:
+                    fill_opacity = "0.80" if is_selected else "0.38"
+                    stroke_color = "#00b4da" if is_selected else "rgba(255,255,255,0.4)"
+                    stroke_width = "3.0" if is_selected else "1.0"
             elif self.grouping == "state":
                 is_selected = (code == selected)
                 if is_selected:
@@ -617,6 +687,11 @@ class StatsMapState(rx.State):
                     fill_opacity = "0.90"
                     stroke_color = "#FFFFFF"
                     stroke_width = "3.2"
+                elif is_all_map and has_drivers:
+                    fill_color = reg_color
+                    fill_opacity = "0.65"
+                    stroke_color = "rgba(255,255,255,0.7)"
+                    stroke_width = "1.3"
                 elif has_drivers:
                     fill_color = reg_color
                     fill_opacity = "0.58"
@@ -769,14 +844,18 @@ class StatsMapState(rx.State):
         view_box = SVG_DATA.get("viewBox", "0 0 959 593")
 
         return f"""
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="{view_box}" width="{w}" height="{h}"
-             style="display: block; width: 100%; height: auto; max-height: {'80vh' if is_fullscreen else '560px'}; background: #15151A; border-radius: 14px; user-select: none;">
+        <svg id="stats-map-svg" xmlns="http://www.w3.org/2000/svg" viewBox="{view_box}" width="{w}" height="{h}"
+             style="display: block; width: 100%; height: auto; max-height: {'80vh' if is_fullscreen else '560px'}; background: #15151A; border-radius: 14px; user-select: none;"
+             onclick="if(event.target===this||event.target.id==='map-canvas-bg')window.taf1SelectMapGroup('_all_map_')">
             <defs>
                 <filter id="map-glow" x="-10%" y="-10%" width="120%" height="120%">
                     <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000000" flood-opacity="0.75" />
                 </filter>
             </defs>
-            <rect width="959" height="593" fill="#15151A" rx="14" />
+            <rect id="map-canvas-bg" class="map-canvas-bg" width="959" height="593" fill="#15151A" rx="14"
+                  onclick="window.taf1SelectMapGroup('_all_map_')" style="cursor: pointer;">
+                <title>Click gray space to select whole map</title>
+            </rect>
             <g filter="url(#map-glow)">
                 {''.join(states_svg)}
                 {sep_svg}
@@ -792,13 +871,8 @@ class StatsMapState(rx.State):
         if isinstance(grouping, list):
             grouping = grouping[0] if grouping else "region"
         self.grouping = str(grouping)
-        # Automatically choose sensible default selection
-        if self.grouping == "region":
-            self.selected_group = "Northeast"
-        elif self.grouping == "metro":
-            self.selected_group = "New York"
-        else:
-            self.selected_group = "NY"
+        # Default to whole map on grouping switch (works across regions, states, metros per requirement)
+        self.selected_group = "_all_map_"
 
     def set_active_only(self, active_only: bool):
         self.active_only = active_only
@@ -819,6 +893,10 @@ class StatsMapState(rx.State):
         if not group_id:
             return
 
+        if group_id in ("_all_map_", "all_map", "all", "United States"):
+            self.selected_group = "_all_map_"
+            return
+
         if self.grouping == "region":
             # Map clicked state code to region if a state was clicked
             region = STATE_TO_REGION.get(group_id, group_id)
@@ -837,6 +915,7 @@ class StatsMapState(rx.State):
                     if m_info.get("state") == group_id:
                         self.selected_group = m_name
                         break
+
 
 
 # ── Region Legend Bar (rendered in real CSS with font size >= 14pt) ────────────
@@ -1200,7 +1279,7 @@ def stats_map_view() -> rx.Component:
         # Left: Map Container with top grouping & active toggle, map SVG, and bottom-right download button
         rx.box(
             rx.vstack(
-                # Top controls connected to the top of the map box: Grouping left, Active Only toggle right
+                # Top controls connected to the top of the map box: Grouping left, Active Only checkbox right
                 rx.hstack(
                     rx.segmented_control.root(
                         rx.segmented_control.item("Regions", value="region"),
@@ -1209,23 +1288,31 @@ def stats_map_view() -> rx.Component:
                         value=StatsMapState.grouping,
                         on_change=StatsMapState.set_grouping,
                         radius="large",
-                        size="2",
-                        bg="#18181C",
+                        size={"initial": "1", "sm": "2"},
+                        class_name="map-segmented-control",
                     ),
                     rx.spacer(),
                     rx.hstack(
-                        rx.text("Active Only", color="white", font_size="sm", font_weight="600"),
-                        rx.switch(
+                        rx.checkbox(
                             checked=StatsMapState.active_only,
                             on_change=StatsMapState.set_active_only,
                             color_scheme="cyan",
+                            size={"initial": "1", "sm": "2"},
                         ),
-                        spacing="2",
+                        rx.text(
+                            "Active Only",
+                            color="white",
+                            font_size=["11px", "13px", "14px"],
+                            font_weight="600",
+                            white_space="nowrap",
+                        ),
+                        spacing="1",
                         align="center",
+                        flex_shrink="0",
                     ),
                     width="100%",
                     align="center",
-                    padding_x="4px",
+                    padding_x=["2px", "4px", "4px"],
                     padding_top="4px",
                     padding_bottom="2px",
                 ),

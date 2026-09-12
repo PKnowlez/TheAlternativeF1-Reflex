@@ -5,7 +5,7 @@ scrollable modal popups for full standings tables.
 """
 
 import reflex as rx
-from the_alternative_f1.articles.components import zoomable_chart, DownloadState
+from the_alternative_f1.articles.components import zoomable_chart, DownloadState, interactive_line_chart_key
 
 
 def Tab1(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only=None) -> rx.Component:
@@ -75,31 +75,12 @@ def Tab1(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
         large_height=450
     )
 
-    # ── Constructor legend expander ──────────────────────────────────────
-    constructor_legend_expander = rx.accordion.root(
-        rx.accordion.item(
-            rx.accordion.trigger(
-                rx.text("Key", color="#555555", font_weight="600", font_size="13px", font_family="Outfit"),
-            ),
-            rx.accordion.content(
-                rx.flex(
-                    *[
-                        rx.text(team, color=team_colors.get(team, "#555555"), font_size="13px", font_family="Outfit", font_weight="600", text_shadow="0px 1px 4px rgba(0,0,0,0.2)")
-                        for team in teams_in_data
-                    ],
-                    flex_wrap="wrap",
-                    gap="24px",
-                ),
-            ),
-            value="constructor_key",
-        ),
-        collapsible=True,
-        width="100%",
-        variant="ghost",
-        bg="#F0F0F2",
-        border_radius="6px",
-        border="1px solid #CCCCCC",
-        box_shadow="0 2px 8px rgba(0,0,0,0.15)",
+    # ── Constructor interactive key ──────────────────────────────────────
+    constructor_legend_expander = interactive_line_chart_key(
+        chart_id="constructor_line_chart",
+        items=[(team, team_colors.get(team, "#555555")) for team in teams_in_data],
+        title="Key (Constructors)",
+        hint="Click constructor to highlight",
     )
 
     # ── Driver line chart ────────────────────────────────────────────────
@@ -137,31 +118,12 @@ def Tab1(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
         large_height=450
     )
 
-    # ── Driver legend expander ───────────────────────────────────────────
-    driver_legend_expander = rx.accordion.root(
-        rx.accordion.item(
-            rx.accordion.trigger(
-                rx.text("Key", color="#555555", font_weight="600", font_size="13px", font_family="Outfit"),
-            ),
-            rx.accordion.content(
-                rx.flex(
-                    *[
-                        rx.text(driver, color=driver_colors.get(driver, "#555555"), font_size="13px", font_family="Outfit", font_weight="600", text_shadow="0px 1px 4px rgba(0,0,0,0.2)")
-                        for driver in drivers_in_data
-                    ],
-                    flex_wrap="wrap",
-                    gap="24px",
-                ),
-            ),
-            value="driver_key",
-        ),
-        collapsible=True,
-        width="100%",
-        variant="ghost",
-        bg="#F0F0F2",
-        border_radius="6px",
-        border="1px solid #CCCCCC",
-        box_shadow="0 2px 8px rgba(0,0,0,0.15)",
+    # ── Driver interactive key ───────────────────────────────────────────
+    driver_legend_expander = interactive_line_chart_key(
+        chart_id="driver_line_chart",
+        items=[(driver, driver_colors.get(driver, "#555555")) for driver in drivers_in_data],
+        title="Key (Drivers)",
+        hint="Click driver to highlight",
     )
 
     # ── Constructor points bar chart data ────────────────────────────────
