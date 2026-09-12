@@ -1,3 +1,4 @@
+from the_alternative_f1.constructor_colors import CONSTRUCTOR_COLORS
 from the_alternative_f1.articles.Season4.LiveryRanking2026 import article as LiveryRanking2026_Article
 from the_alternative_f1.articles.Season4.PowerRankings import article as PowerRankings_Article
 from the_alternative_f1.articles.Season4.MonacoRecap import article as MonacoRecap_Article
@@ -107,13 +108,13 @@ season = {
     ],
 
     "team_colors": {
-        "Alpine": "#FD4BC7",
-        "McLaren": "#FF6A00",
-        "VCARB": "#0050FF",
-        "Mercedes": "#00D2BE",
-        "Red Bull": "darkblue",
-        "Ferrari": "#EF1A2D",
-        "Aston Martin": "#006F62",
+        "Alpine": CONSTRUCTOR_COLORS["Alpine"],
+        "McLaren": CONSTRUCTOR_COLORS["McLaren"],
+        "VCARB": CONSTRUCTOR_COLORS["VCARB"],
+        "Mercedes": CONSTRUCTOR_COLORS["Mercedes"],
+        "Red Bull": CONSTRUCTOR_COLORS["Red Bull"],
+        "Ferrari": CONSTRUCTOR_COLORS["Ferrari"],
+        "Aston Martin": CONSTRUCTOR_COLORS["Aston Martin"],
     },
 
     "driver_colors": {

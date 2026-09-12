@@ -29,28 +29,21 @@ def get_excel_sheet(sheet_name: str) -> pd.DataFrame:
         _func_cache.clear()
         _excel_mtime = current_mtime
     if sheet_name not in _excel_sheets_cache:
-        xl = pd.ExcelFile(file)
-        if sheet_name in xl.sheet_names:
-            _excel_sheets_cache[sheet_name] = pd.read_excel(file, sheet_name=sheet_name)
-        else:
+        try:
+            if excel_path.exists():
+                # Read all sheets in a single pass (takes ~0.4s total instead of re-reading per sheet)
+                all_sheets = pd.read_excel(file, sheet_name=None)
+                _excel_sheets_cache.update(all_sheets)
+            if sheet_name not in _excel_sheets_cache:
+                _excel_sheets_cache[sheet_name] = pd.DataFrame()
+        except Exception:
             _excel_sheets_cache[sheet_name] = pd.DataFrame()
     return _excel_sheets_cache[sheet_name].copy()
 
-team_colors = {
-    'Alpine': '#0093CC', 
-    'Aston Martin': '#006F62',
-    'Ferrari': '#EF1A2D',
-    'McLaren': '#FF6A00',
-    'Red Bull': 'darkblue',
-    'VCARB': '#1634CB',
-    'AlphaTauri': '#5E8FAA',
-    'Alfa Romeo': '#C92D4B',
-    'Mercedes': '#00D2BE',
-    "Haas": "#E0E0E0",
-    "Audi": "#A33E2C",
-    "Cadillac": "#FFEA00",
-    'Williams': "#00A0DE",
-}
+from the_alternative_f1.constructor_colors import CONSTRUCTOR_COLORS, get_constructor_color, TEAM_COLORS, get_team_color
+
+# Globally unified constructor colors (Alpine is #FD4BC7 pink)
+team_colors = CONSTRUCTOR_COLORS
 
 def PointTotals(season):
     cache_key = ("PointTotals", season)

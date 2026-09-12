@@ -270,3 +270,13 @@
         font-size: 27px !important;
     }
 }
+
+/* Zoomable Chart Popout container focus outline reset */
+.zoomable-chart-popout-container:focus,
+.zoomable-chart-popout-container:focus-visible,
+.zoomable-chart-popout-container:focus-within,
+.zoomable-chart-popout-container * :focus,
+.zoomable-chart-popout-container * :focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+}

@@ -65,6 +65,7 @@ KNOWN_CAR_ICONS = {
     "Cadillac", "Ferrari", "Haas", "McLaren", "Mercedes", "Red Bull", "VCARB", "Williams"
 }
 
+from the_alternative_f1.constructor_colors import CONSTRUCTOR_COLORS, get_constructor_color
 from the_alternative_f1.articles import articles
 from the_alternative_f1.articles.components import DownloadState
 from the_alternative_f1.regulations_settings.Regulations import Regulations as regulations_content
@@ -73,6 +74,7 @@ from the_alternative_f1.all_time_stats.ConstructorAllTime import constructor_sta
 from the_alternative_f1.all_time_stats.DriverAllTime import driver_stats_view
 from the_alternative_f1.all_time_stats.RacesAllTime import races_all_time_view
 from the_alternative_f1.all_time_stats.DetailedAllTime import detailed_stats_view
+from the_alternative_f1.all_time_stats.MapAllTime import stats_map_view
 from the_alternative_f1.seasons import seasons, LATEST_SEASON
 from the_alternative_f1.seasons.Calculations import Calculations
 from the_alternative_f1.seasons.Tab0_LeagueNews import Tab0
@@ -238,7 +240,9 @@ def warm_up_caches():
         pass
 
 STATIC_TICKER_ITEMS = precompute_ticker_items()
-warm_up_caches()
+
+import threading
+threading.Thread(target=warm_up_caches, daemon=True).start()
 
 
 class State(rx.State):
@@ -994,7 +998,7 @@ class State(rx.State):
         chart_teams = []
         for team in teams:
             points = []
-            team_color = team_colors.get(team, "#00b4da")
+            team_color = get_constructor_color(team, team_colors.get(team, "#00b4da"))
             if team_color.lower() in ("black", "#000000", "#000"):
                 team_color = "#00D2BE"
 
@@ -1148,7 +1152,7 @@ class State(rx.State):
         lines_svg = []
         cars_svg = []
         for t_idx, team in enumerate(teams):
-            color = team_colors.get(team, "#00b4da")
+            color = get_constructor_color(team, team_colors.get(team, "#00b4da"))
             if color.lower() in ("black", "#000000", "#000"):
                 color = "#00D2BE"
             short_code = TEAM_SHORT_CODES.get(team, team[:3].upper())
@@ -1223,74 +1227,6 @@ class State(rx.State):
             ''')
 
         return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {view_w} {view_h}" width="{view_w}px" height="{view_h}px" style="display:block; max-width:none; background:#15151A; border-radius:12px;"><defs><filter id="full-car-glow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.8" /></filter></defs>{''.join(cols_svg)}{''.join(grid_svg)}{''.join(lines_svg)}<g filter="url(#full-car-glow)">{''.join(cars_svg)}</g>{''.join(y_axis_svg)}</svg>'''
-
-    @rx.var(auto_deps=False, deps=["selected_season"])
-    def power_rankings_list_data(self) -> list[dict]:
-        from the_alternative_f1.seasons.power_rankings import load_power_rankings
-        from the_alternative_f1.seasons import seasons
-        
-        pr = load_power_rankings(self.selected_season)
-        races = pr.get("races", [])
-        rankings = pr.get("rankings", {})
-        
-        if not races:
-            return []
-            
-        season_dict = None
-        for s in seasons:
-            if s["season_number"] == self.selected_season:
-                season_dict = s
-                break
-        
-        season_teams = set(season_dict.get("team_colors", {}).keys()) if season_dict else set()
-        team_colors = season_dict.get("team_colors", {}) if season_dict else {}
-
-        latest_race = races[-1]
-        latest_ranking = rankings.get(latest_race, [])
-        if season_teams:
-            latest_ranking = [t for t in latest_ranking if t in season_teams]
-        
-        prev_ranking = []
-        if len(races) > 1:
-            prev_race = races[-2]
-            prev_ranking = rankings.get(prev_race, [])
-            if season_teams:
-                prev_ranking = [t for t in prev_ranking if t in season_teams]
-            
-        result = []
-        for idx, team in enumerate(latest_ranking):
-            rank = idx + 1
-            change_str = "▬"
-            change_color = "#888888"
-            
-            if prev_ranking and team in prev_ranking:
-                prev_idx = prev_ranking.index(team)
-                prev_rank = prev_idx + 1
-                change = prev_rank - rank
-                if change > 0:
-                    change_str = f"▲ +{change}"
-                    change_color = "#30d158"
-                elif change < 0:
-                    change_str = f"▼ {change}"
-                    change_color = "#ff453a"
-            
-            color = team_colors.get(team, "#00b4da")
-            if color.lower() in ("black", "#000000", "#000"):
-                color = "#00D2BE"
-            clean_name = team.replace(" ", "")
-            has_icon = team in KNOWN_CAR_ICONS
-            icon_url = f"{R2_CUSTOM_DOMAIN}/Power Rankings/Car Icons/Icon_{clean_name}.png" if has_icon else ""
-                    
-            result.append({
-                "rank": rank,
-                "team": team,
-                "color": color,
-                "change": change_str,
-                "change_color": change_color,
-                "has_icon": has_icon,
-                "icon": icon_url,
-            })
-        return result
 
     @rx.event(background=True)
     async def on_app_mount(self):
@@ -2408,90 +2344,58 @@ def article_detail() -> rx.Component:
     )
 
 
+def _stats_tab_button(label: str, tab_key: str) -> rx.Component:
+    """A single sidebar tab button for all-time stats that dynamically resizes within the vertical space."""
+    return rx.button(
+        label,
+        bg=rx.cond(State.selected_stats_tab == tab_key, "#00b4da", "#18181C"),
+        color="white",
+        font_size=["7px", "8px", "9px"],
+        font_weight="bold",
+        width="26px",
+        style={"writingMode": "vertical-rl"},
+        border_radius="0px 8px 8px 0px",
+        border="1px solid #2D2D32",
+        border_left="none",
+        on_click=lambda: State.set_stats_tab(tab_key),
+        _hover={"bg": "#00b4da", "transform": "scaleX(1.05)"},
+        cursor="pointer",
+        padding="0",
+        flex="1",
+        min_height=["22px", "26px", "30px"],
+    )
+
+
 def stats_view() -> rx.Component:
-    """All Time Stats view with sidebar tabs for Constructors, Drivers, and Races."""
+    """All Time Stats view with sidebar tabs for Constructors, Drivers, Races, Detailed, and Map."""
+    stats_tabs = [
+        ("CONSTRUCTORS", "constructors"),
+        ("DRIVERS", "drivers"),
+        ("RACES", "races"),
+        ("DETAILED", "detailed"),
+        ("MAP", "map"),
+    ]
+
     return rx.hstack(
         # Sidebar with vertical buck-tooth tabs on the left
         rx.vstack(
-            # Constructors Tab
-            rx.button(
-                "CONSTRUCTORS",
-                bg=rx.cond(State.selected_stats_tab == "constructors", "#00b4da", "#18181C"),
-                color="white",
-                font_size="10px",
-                font_weight="bold",
-                width="26px",
-                height="130px",
-                style={"writingMode": "vertical-rl"},
-                border_radius="0px 8px 8px 0px",
-                border="1px solid #2D2D32",
-                border_left="none",
-                on_click=lambda: State.set_stats_tab("constructors"),
-                _hover={"bg": "#00b4da", "transform": "scaleX(1.05)"},
-                cursor="pointer",
-                padding="0",
-            ),
-            # Drivers Tab
-            rx.button(
-                "DRIVERS",
-                bg=rx.cond(State.selected_stats_tab == "drivers", "#00b4da", "#18181C"),
-                color="white",
-                font_size="10px",
-                font_weight="bold",
-                width="26px",
-                height="130px",
-                style={"writingMode": "vertical-rl"},
-                border_radius="0px 8px 8px 0px",
-                border="1px solid #2D2D32",
-                border_left="none",
-                on_click=lambda: State.set_stats_tab("drivers"),
-                _hover={"bg": "#00b4da", "transform": "scaleX(1.05)"},
-                cursor="pointer",
-                padding="0",
-            ),
-            # Races Tab
-            rx.button(
-                "RACES",
-                bg=rx.cond(State.selected_stats_tab == "races", "#00b4da", "#18181C"),
-                color="white",
-                font_size="10px",
-                font_weight="bold",
-                width="26px",
-                height="130px",
-                style={"writingMode": "vertical-rl"},
-                border_radius="0px 8px 8px 0px",
-                border="1px solid #2D2D32",
-                border_left="none",
-                on_click=lambda: State.set_stats_tab("races"),
-                _hover={"bg": "#00b4da", "transform": "scaleX(1.05)"},
-                cursor="pointer",
-                padding="0",
-            ),
-            # Detailed Tab
-            rx.button(
-                "DETAILED",
-                bg=rx.cond(State.selected_stats_tab == "detailed", "#00b4da", "#18181C"),
-                color="white",
-                font_size="10px",
-                font_weight="bold",
-                width="26px",
-                height="130px",
-                style={"writingMode": "vertical-rl"},
-                border_radius="0px 8px 8px 0px",
-                border="1px solid #2D2D32",
-                border_left="none",
-                on_click=lambda: State.set_stats_tab("detailed"),
-                _hover={"bg": "#00b4da", "transform": "scaleX(1.05)"},
-                cursor="pointer",
-                padding="0",
-            ),
-            spacing="3",
+            *[_stats_tab_button(label, key) for label, key in stats_tabs],
+            spacing="1",
             align_items="start",
-            padding_top="8",
+            padding_top="4",
             position="fixed",
             left="0",
             top="12vh",
             z_index="99",
+            height="calc(100vh - 12vh - 60px - 10px)",
+            style={
+                "overflow_y": "auto",
+                "scrollbar_width": "none",  # Firefox
+                "-ms-overflow-style": "none",  # IE/Edge
+                "&::-webkit-scrollbar": {  # Chrome/Safari/Opera
+                    "display": "none",
+                },
+            },
         ),
         # Content Display Area
         rx.box(
@@ -2504,7 +2408,11 @@ def stats_view() -> rx.Component:
                     rx.cond(
                         State.selected_stats_tab == "races",
                         races_all_time_view(NUM_SEASONS),
-                        detailed_stats_view(NUM_SEASONS),
+                        rx.cond(
+                            State.selected_stats_tab == "detailed",
+                            detailed_stats_view(NUM_SEASONS),
+                            stats_map_view(),
+                        ),
                     ),
                 ),
             ),
@@ -3070,92 +2978,6 @@ def footer() -> rx.Component:
     )
 
 
-def power_rankings_table() -> rx.Component:
-    """A table showing the current power rankings with change indicators."""
-    def render_row(item: dict) -> rx.Component:
-        return rx.table.row(
-            # Rank
-            rx.table.cell(
-                rx.text(
-                    item["rank"],
-                    font_weight="bold",
-                    color="white",
-                ),
-                align="center",
-            ),
-            # Icon & Team Name
-            rx.table.cell(
-                rx.hstack(
-                    rx.cond(
-                        item["has_icon"],
-                        rx.image(
-                            src=item["icon"],
-                            width="24px",
-                            height="16px",
-                            object_fit="contain",
-                        ),
-                        rx.box(
-                            width="14px",
-                            height="14px",
-                            border_radius="50%",
-                            bg=item["color"],
-                            border="2px solid rgba(255,255,255,0.7)",
-                            flex_shrink="0",
-                        ),
-                    ),
-                    rx.text(
-                        item["team"],
-                        font_weight="600",
-                        color="white",
-                        font_family="Outfit",
-                    ),
-                    align_items="center",
-                    spacing="2",
-                ),
-            ),
-            # Change Indicator
-            rx.table.cell(
-                rx.text(
-                    item["change"],
-                    color=item["change_color"],
-                    font_weight="bold",
-                    font_size="sm",
-                ),
-                align="center",
-            ),
-        )
-
-    return rx.vstack(
-        rx.text(
-            "Current Standings & Form",
-            color="white",
-            font_size="lg",
-            font_weight="bold",
-            margin_bottom="2",
-            padding_left="2.5%",
-            padding_top="2.5%",
-        ),
-        rx.table.root(
-            rx.table.header(
-                rx.table.row(
-                    rx.table.column_header_cell("Rank", align="center", color="#888888"),
-                    rx.table.column_header_cell("Constructor", color="#888888"),
-                    rx.table.column_header_cell("Change", align="center", color="#888888"),
-                ),
-            ),
-            rx.table.body(
-                rx.foreach(
-                    State.power_rankings_list_data,
-                    render_row
-                ),
-            ),
-            width="100%",
-            variant="ghost",
-        ),
-        width="100%",
-    )
-
-
 @rx.memo
 def memoized_power_rankings_chart(*, html_content: rx.Var[str]) -> rx.Component:
     """Memoized wrapper preventing React re-renders from ticker loops or unrelated state."""
@@ -3345,16 +3167,6 @@ def power_rankings_view() -> rx.Component:
             border="1px solid #2C2C32",
             padding="4",
             border_radius="xl",
-            margin_bottom="6",
-        ),
-        # Rankings Table Container
-        rx.box(
-            power_rankings_table(),
-            width="100%",
-            bg="#18181C",
-            border="1px solid #2C2C32",
-            padding="4",
-            border_radius="xl",
         ),
         width="100%",
         spacing="4",
@@ -3482,6 +3294,8 @@ app = rx.App(
         rx.el.link(rel="apple-touch-icon", href="/Icons/IconLogoApp.png"),
         rx.el.script(src="/carousel.js"),
         rx.el.script(src="/power_rankings_chart.js?v=20260911_01"),
+        rx.el.script(src="/stats_map.js"),
+        rx.el.script(src="/zoomable_chart.js"),
     ],
 )
 app.add_page(index)

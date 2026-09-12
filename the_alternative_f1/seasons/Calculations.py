@@ -10,6 +10,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from the_alternative_f1.race_metrics import get_race_metrics
+from the_alternative_f1.all_time_stats.Functions import get_excel_sheet
 
 # Resolve the Excel file path relative to this module
 _EXCEL_PATH = str((Path(__file__).parent.parent / "The_Alternative_F1.xlsx").resolve())
@@ -60,14 +61,14 @@ def Calculations(season_data: dict, sprint_only: bool = False) -> dict:
     driver_colors = season_data["driver_colors"]
     rookies = season_data["rookies"]
 
-    # ── Read Excel data ──────────────────────────────────────────────────
-    df = pd.read_excel(_EXCEL_PATH, sheet_name=sheet_name)
+    # ── Read Excel data (using fast in-memory cache) ──────────────────────
+    df = get_excel_sheet(sheet_name)
     df = df.dropna(subset=["Driver"])
     df["Driver"] = df["Driver"].astype(str).str.strip()
     df["Team"] = df["Team"].astype(str).str.strip()
 
     # ── Read schedule ────────────────────────────────────────────────────
-    schedule_df = pd.read_excel(_EXCEL_PATH, sheet_name=schedule_sheet)
+    schedule_df = get_excel_sheet(schedule_sheet)
 
     # ── Identify column groups ───────────────────────────────────────────
     race_points = [col for col in df.columns if col.endswith("Points")]

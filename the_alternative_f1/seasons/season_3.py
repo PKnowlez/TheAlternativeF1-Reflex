@@ -1,3 +1,4 @@
+from the_alternative_f1.constructor_colors import CONSTRUCTOR_COLORS
 from the_alternative_f1.articles.Season3.HistoricalArchive import article as HistoricalArchive_Article
 from the_alternative_f1.articles.Season3.MonacoMassacre import article as MonacoMassacre_Article
 from the_alternative_f1.articles.Season3.ConstructorChampions import article as ConstructorChampions_Article
@@ -88,12 +89,12 @@ season = {
     ],
 
     "team_colors": {
-        "McLaren": "#FF6A00",
-        "Alpine": "#FD4BC7",
-        "Ferrari": "#EF1A2D",
-        "VCARB": "#0050FF",
-        "Aston Martin": "#006F62",
-        "Red Bull": "darkblue",
+        "McLaren": CONSTRUCTOR_COLORS["McLaren"],
+        "Alpine": CONSTRUCTOR_COLORS["Alpine"],
+        "Ferrari": CONSTRUCTOR_COLORS["Ferrari"],
+        "VCARB": CONSTRUCTOR_COLORS["VCARB"],
+        "Aston Martin": CONSTRUCTOR_COLORS["Aston Martin"],
+        "Red Bull": CONSTRUCTOR_COLORS["Red Bull"],
     },
 
     "driver_colors": {

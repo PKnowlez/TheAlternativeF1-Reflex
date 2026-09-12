@@ -1,3 +1,4 @@
+from the_alternative_f1.constructor_colors import CONSTRUCTOR_COLORS
 from the_alternative_f1.articles.Season5.Grid_Announcements.Haas import article as Haas_Article
 from the_alternative_f1.articles.Season5.Grid_Announcements.Erick import article as Erick_Article
 from the_alternative_f1.articles.Season5.Grid_Announcements.RedBull import article as RedBull_Article
@@ -36,14 +37,14 @@ season = {
     RedBull_Article, Erick_Article, Haas_Article],
 
     "team_colors": {
-        "Ferrari": "#EF1A2D",
-        "McLaren": "#FF6A00",
-        "Red Bull": "darkblue",
-        "Mercedes": "#00D2BE",
-        "Haas": "#E0E0E0",
-        "Audi": "#A33E2C",
-        "Cadillac": "#FFEA00",
-        "Williams": "#00A0DE",
+        "Ferrari": CONSTRUCTOR_COLORS["Ferrari"],
+        "McLaren": CONSTRUCTOR_COLORS["McLaren"],
+        "Red Bull": CONSTRUCTOR_COLORS["Red Bull"],
+        "Mercedes": CONSTRUCTOR_COLORS["Mercedes"],
+        "Haas": CONSTRUCTOR_COLORS["Haas"],
+        "Audi": CONSTRUCTOR_COLORS["Audi"],
+        "Cadillac": CONSTRUCTOR_COLORS["Cadillac"],
+        "Williams": CONSTRUCTOR_COLORS["Williams"],
     },
 
     "driver_colors": {

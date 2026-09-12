@@ -52,6 +52,15 @@ def parse_status(val: Any, season_num: int = 1) -> str:
     return "FINISH"
 
 
+_race_metrics_cache: Dict[tuple, Dict[str, Any]] = {}
+
+
+def clear_race_metrics_cache():
+    """Clear cached race metrics."""
+    global _race_metrics_cache
+    _race_metrics_cache.clear()
+
+
 def get_race_metrics(
     df: pd.DataFrame,
     place_col: str,
@@ -89,6 +98,10 @@ def get_race_metrics(
         candidate_start = place_col.replace("Place", "Starting")
         if candidate_start in df.columns:
             starting_col = candidate_start
+
+    cache_key = (season_num, place_col, qual_col, starting_col, len(df))
+    if cache_key in _race_metrics_cache:
+        return _race_metrics_cache[cache_key]
 
     # Find who actually competed
     competitors = []
@@ -172,7 +185,9 @@ def get_race_metrics(
             "pos_change": pos_change,
         }
 
-    return {
+    res = {
         "n_competed": n_competed,
         "drivers": drivers_data,
     }
+    _race_metrics_cache[cache_key] = res
+    return res

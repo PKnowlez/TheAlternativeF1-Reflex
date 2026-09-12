@@ -1,5 +1,7 @@
 """Season 2 data — 13 drivers, 7 teams, 10 races."""
 
+from the_alternative_f1.constructor_colors import CONSTRUCTOR_COLORS
+
 season = {
     "season_number": 2,
     "sheet_name": "Season2",
@@ -21,13 +23,13 @@ season = {
     ],
 
     "team_colors": {
-        "McLaren": "#FF6A00",
-        "Mercedes": "#00D2BE",
-        "Ferrari": "#EF1A2D",
-        "Alpine": "#FD4BC7",
-        "Red Bull": "darkblue",
-        "Alfa Romeo": "#8B0000",
-        "AlphaTauri": "#5E7A96",
+        "McLaren": CONSTRUCTOR_COLORS["McLaren"],
+        "Mercedes": CONSTRUCTOR_COLORS["Mercedes"],
+        "Ferrari": CONSTRUCTOR_COLORS["Ferrari"],
+        "Alpine": CONSTRUCTOR_COLORS["Alpine"],
+        "Red Bull": CONSTRUCTOR_COLORS["Red Bull"],
+        "Alfa Romeo": CONSTRUCTOR_COLORS["Alfa Romeo"],
+        "AlphaTauri": CONSTRUCTOR_COLORS["AlphaTauri"],
     },
 
     "driver_colors": {
