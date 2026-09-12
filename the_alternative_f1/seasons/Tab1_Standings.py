@@ -4,8 +4,144 @@ Constructor and Driver championship standings with line/bar charts and
 scrollable modal popups for full standings tables.
 """
 
+import pandas as pd
 import reflex as rx
 from the_alternative_f1.articles.components import zoomable_chart, DownloadState, interactive_line_chart_key
+from the_alternative_f1.constructor_colors import get_constructor_color
+from the_alternative_f1.all_time_stats.SummaryAllTime import _build_arc_path, _get_driver_shade
+
+
+def build_season_donut_svg(
+    season_num: int,
+    sorted_teams: list,
+    team_total_points: pd.Series,
+    team_to_drivers: dict,
+    team_colors: dict,
+    driver_color_map: dict,
+) -> str:
+    """Build high-precision SVG for the two-ring donut chart for a specific season."""
+    total_pts = float(team_total_points.sum())
+
+    cx, cy = 260.0, 260.0
+    r_out_in, r_out_out = 174.0, 242.0
+    r_in_in, r_in_out = 104.0, 170.0
+
+    curr_angle = -90.0  # 12 o'clock
+
+    outer_paths = []
+    inner_paths = []
+
+    if total_pts > 0:
+        for team in sorted_teams:
+            c_pts = float(team_total_points.get(team, 0.0))
+            if c_pts <= 0:
+                continue
+
+            c_angle_span = (c_pts / total_pts) * 360.0
+            c_start_angle = curr_angle
+            c_end_angle = curr_angle + c_angle_span
+            c_pct = (c_pts / total_pts) * 100.0
+            c_color = team_colors.get(team, get_constructor_color(team))
+
+            c_path_d = _build_arc_path(cx, cy, r_out_in, r_out_out, c_start_angle, c_end_angle)
+            outer_paths.append(f"""
+            <path class="donut-slice donut-constructor" d="{c_path_d}" fill="{c_color}" stroke="#15151A" stroke-width="2"
+                  style="cursor: pointer; transition: opacity 0.15s ease;"
+                  data-type="Constructor"
+                  data-name="{team}"
+                  data-pts="{c_pts:,.1f}"
+                  data-meta="{c_pct:.1f}% of Season"
+                  onmouseenter="window.taf1DonutEnter && window.taf1DonutEnter(this)"
+                  onmouseleave="window.taf1DonutLeave && window.taf1DonutLeave(this)"
+                  onclick="window.taf1DonutClick && window.taf1DonutClick(this, event)">
+                <title>{team}: {c_pts:,.1f} pts ({c_pct:.1f}% of Season)</title>
+            </path>
+            """)
+
+            # Drivers for this constructor
+            drivers = team_to_drivers.get(team, [])
+            pos_drivers = [(d, p) for (d, p) in drivers if p > 0]
+            num_pos = len(pos_drivers)
+
+            curr_driver_angle = c_start_angle
+            for d_idx, (d_name, d_pts) in enumerate(pos_drivers):
+                d_angle_span = c_angle_span * (d_pts / c_pts)
+                d_start_angle = curr_driver_angle
+                d_end_angle = curr_driver_angle + d_angle_span
+                curr_driver_angle = d_end_angle
+
+                d_pct_of_team = (d_pts / c_pts) * 100.0
+                d_color = driver_color_map.get(d_name) or _get_driver_shade(c_color, d_idx, num_pos)
+
+                d_path_d = _build_arc_path(cx, cy, r_in_in, r_in_out, d_start_angle, d_end_angle)
+                inner_paths.append(f"""
+                <path class="donut-slice donut-driver" d="{d_path_d}" fill="{d_color}" stroke="#15151A" stroke-width="1.8"
+                      style="cursor: pointer; transition: opacity 0.15s ease;"
+                      data-type="Driver"
+                      data-name="{d_name}"
+                      data-pts="{d_pts:,.1f}"
+                      data-meta="{team} • {d_pct_of_team:.1f}% of Team"
+                      onmouseenter="window.taf1DonutEnter && window.taf1DonutEnter(this)"
+                      onmouseleave="window.taf1DonutLeave && window.taf1DonutLeave(this)"
+                      onclick="window.taf1DonutClick && window.taf1DonutClick(this, event)">
+                    <title>{d_name} ({team}): {d_pts:,.1f} pts ({d_pct_of_team:.1f}% of {team})</title>
+                </path>
+                """)
+
+            curr_angle = c_end_angle
+
+    svg_id = f"season-donut-svg-{season_num}"
+
+    return f"""
+    <svg id="{svg_id}" class="donut-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 520" width="100%" height="100%"
+         data-default-points="{total_pts:,.0f}"
+         data-default-type="SEASON {season_num}"
+         data-default-meta="TOTAL POINTS"
+         style="display: block; max-width: 440px; max-height: 440px; margin: 0 auto; user-select: none;"
+         onclick="window.taf1DonutBgClick && window.taf1DonutBgClick(event)">
+        <defs>
+            <filter id="donut-shadow-{season_num}" x="-10%" y="-10%" width="120%" height="120%">
+                <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.5"/>
+            </filter>
+        </defs>
+
+        <!-- Outer Ring: Constructors -->
+        <g id="donut-outer-ring-{season_num}" filter="url(#donut-shadow-{season_num})">
+            {''.join(outer_paths)}
+        </g>
+
+        <!-- Inner Ring: Drivers -->
+        <g id="donut-inner-ring-{season_num}" filter="url(#donut-shadow-{season_num})">
+            {''.join(inner_paths)}
+        </g>
+
+        <!-- Donut center hole (clickable to reset) -->
+        <circle id="season-donut-center-hole-{season_num}" class="donut-center-hole" cx="{cx}" cy="{cy}" r="98"
+                fill="#15151A" stroke="rgba(255,255,255,0.08)" stroke-width="1.5"
+                style="cursor: pointer;"
+                onclick="window.taf1DonutReset && window.taf1DonutReset(event)" />
+
+        <!-- Center Information Display -->
+        <g class="donut-svg-center-group" pointer-events="none" text-anchor="middle" font-family="'Outfit', sans-serif" style="user-select: none;">
+            <text class="donut-center-type" x="{cx}" y="230" dominant-baseline="middle"
+                  fill="#8E8E93" font-size="11" font-weight="700" letter-spacing="1">SEASON {season_num}</text>
+            <text class="donut-center-value" x="{cx}" y="260" dominant-baseline="middle"
+                  fill="#FFFFFF" font-size="24" font-weight="900">{total_pts:,.0f}</text>
+            <text class="donut-center-meta" x="{cx}" y="285" dominant-baseline="middle"
+                  fill="#00b4da" font-size="10.5" font-weight="700" letter-spacing="0.5">TOTAL POINTS</text>
+        </g>
+    </svg>
+    """
+
+
+@rx.memo
+def memoized_season_donut_chart(*, html_content: rx.Var[str]) -> rx.Component:
+    """Memoized wrapper preventing React re-renders from ticker loops or unrelated state."""
+    return rx.box(
+        rx.html(html_content),
+        width="100%",
+        max_width="480px",
+    )
 
 
 def Tab1(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only=None) -> rx.Component:
@@ -284,6 +420,139 @@ def Tab1(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
 
     has_sprint = data.get("has_sprint", False)
 
+    # ── Season Donut Points Distribution Chart ───────────────────────────
+    drivers_points_df_copy = drivers_points_df.copy()
+    drivers_points_df_copy["Points"] = pd.to_numeric(
+        drivers_points_df_copy["Points"], errors="coerce"
+    ).fillna(0)
+
+    # Sort teams by total points descending
+    team_total_points = (
+        drivers_points_df_copy.groupby("Team")["Points"]
+        .sum()
+        .sort_values(ascending=False)
+    )
+    sorted_teams = team_total_points.index.tolist()
+
+    # Group drivers by team
+    team_to_drivers = {}
+    for _, row in drivers_points_df_copy.iterrows():
+        t = row["Team"]
+        d = row["Driver"]
+        p = float(row["Points"])
+        if t not in team_to_drivers:
+            team_to_drivers[t] = []
+        if d not in [x[0] for x in team_to_drivers[t]]:
+            team_to_drivers[t].append((d, p))
+
+    # Sort drivers within each team by points descending
+    for t in team_to_drivers:
+        team_to_drivers[t] = sorted(team_to_drivers[t], key=lambda x: x[1], reverse=True)
+
+    colors_driver_df = data.get("colors_driver_df", pd.DataFrame())
+    if not colors_driver_df.empty and "Driver" in colors_driver_df.columns and "Color" in colors_driver_df.columns:
+        driver_color_map = dict(zip(colors_driver_df["Driver"], colors_driver_df["Color"]))
+    else:
+        driver_color_map = driver_colors
+
+    season_donut_svg = build_season_donut_svg(
+        season_num=season_num,
+        sorted_teams=sorted_teams,
+        team_total_points=team_total_points,
+        team_to_drivers=team_to_drivers,
+        team_colors=team_colors,
+        driver_color_map=driver_color_map,
+    )
+
+    season_total_pts = float(team_total_points.sum())
+    download_container_id = f"season-{season_num}-donut-download-container"
+
+    season_donut_chart_card = rx.box(
+        rx.vstack(
+            rx.hstack(
+                rx.hstack(
+                    rx.icon("pie-chart", size=18, color="#00b4da"),
+                    rx.text(
+                        f"Season {season_num} Points Distribution",
+                        font_family="Outfit",
+                        font_weight="800",
+                        font_size="16px",
+                        color="white",
+                    ),
+                    spacing="2",
+                    align="center",
+                ),
+                rx.spacer(),
+                rx.badge(
+                    f"{season_total_pts:,.0f} Total Season Points",
+                    bg="rgba(0, 180, 218, 0.15)",
+                    color="#00b4da",
+                    border="1px solid rgba(0, 180, 218, 0.4)",
+                    border_radius="full",
+                    font_size="11px",
+                    font_weight="700",
+                    padding_x="8px",
+                    padding_y="3px",
+                ),
+                width="100%",
+                align="center",
+                flex_wrap="wrap",
+                gap="2",
+            ),
+            rx.text(
+                "Outer Ring: Constructors (colored by official team colors) | Inner Ring: Drivers (shaded by team color, radially aligned as slices). Click or hover any slice to inspect.",
+                font_size="12px",
+                color="#8E8E93",
+                margin_bottom="2",
+                white_space="normal",
+                word_break="break-word",
+                width="100%",
+                padding_x="1",
+            ),
+            # Donut SVG with native center information & download button
+            rx.box(
+                rx.center(
+                    memoized_season_donut_chart(html_content=season_donut_svg),
+                    width="100%",
+                ),
+                rx.button(
+                    rx.icon("download", size=14),
+                    on_click=lambda: DownloadState.download_chart(
+                        download_container_id, f"Season {season_num} Points Distribution"
+                    ),
+                    position="absolute",
+                    bottom="8px",
+                    right="8px",
+                    bg="rgba(0,180,218,0.15)",
+                    color="#00b4da",
+                    border="1px solid rgba(0,180,218,0.4)",
+                    border_radius="full",
+                    padding_x="10px",
+                    padding_y="6px",
+                    font_size="11px",
+                    cursor="pointer",
+                    _hover={"bg": "rgba(0,180,218,0.3)"},
+                ),
+                id=download_container_id,
+                position="relative",
+                width="100%",
+            ),
+            width="100%",
+            spacing="3",
+        ),
+        id=f"season-donut-chart-card-{season_num}",
+        class_name="donut-chart-card",
+        bg="#15151A",
+        border="1px solid #2C2C32",
+        border_radius="2xl",
+        padding=["16px", "20px", "24px"],
+        padding_x=["16px", "20px", "24px"],
+        padding_y=["16px", "20px", "24px"],
+        box_shadow="0 8px 24px rgba(0,0,0,0.4)",
+        width="100%",
+        box_sizing="border-box",
+    )
+
     return rx.vstack(
         rx.flex(
             rx.heading(
@@ -314,6 +583,7 @@ def Tab1(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
             padding_y="2.5%",
             padding_x="2%",
         ),
+        season_donut_chart_card,
 
         # Standings popup buttons
         rx.grid(

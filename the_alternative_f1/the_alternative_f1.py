@@ -1414,6 +1414,7 @@ def header() -> rx.Component:
             display=rx.cond(State.show_power_rankings_header, "none", "flex"),
             height="100%",
             align_items="center",
+            id="header-ticker",
         ),
         width="100%",
         height="8vh",
@@ -3318,7 +3319,7 @@ app = rx.App(
         rx.el.script(src="/carousel.js"),
         rx.el.script(src="/power_rankings_chart.js?v=20260911_01"),
         rx.el.script(src="/stats_map.js"),
-        rx.el.script(src="/donut_chart.js?v=20260912_02"),
+        rx.el.script(src="/donut_chart.js?v=20260912_05"),
         rx.el.script(src="/zoomable_chart.js?v=20260912_05"),
     ],
 )

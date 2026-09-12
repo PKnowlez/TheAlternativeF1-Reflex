@@ -634,6 +634,16 @@ def build_two_ring_donut_svg() -> str:
 
 
 
+@rx.memo
+def memoized_summary_donut_chart(*, html_content: rx.Var[str]) -> rx.Component:
+    """Memoized SVG container preventing React re-renders from ticker loops or unrelated state."""
+    return rx.box(
+        rx.html(html_content),
+        width="100%",
+        max_width="480px",
+    )
+
+
 # ── Summary View Component ────────────────────────────────────────────────────
 def summary_all_time_view(num_seasons: int = 5) -> rx.Component:
     """Render the All Time Summary page per SDDREQ-109 & SDDREQ-113."""
@@ -691,11 +701,7 @@ def summary_all_time_view(num_seasons: int = 5) -> rx.Component:
             # Donut SVG with native center information & download button
             rx.box(
                 rx.center(
-                    rx.box(
-                        rx.html(donut_svg_markup),
-                        width="100%",
-                        max_width="480px",
-                    ),
+                    memoized_summary_donut_chart(html_content=donut_svg_markup),
                     width="100%",
                 ),
                 # Download button bottom-right (matching map style)
@@ -743,7 +749,7 @@ def summary_all_time_view(num_seasons: int = 5) -> rx.Component:
 
     # Load the donut interaction script — rx.el.script (same as MapAllTime.py)
     donut_chart_card = rx.fragment(
-        rx.el.script(src="/donut_chart.js?v=20260912_02"),
+        rx.el.script(src="/donut_chart.js?v=20260912_03"),
         donut_chart_card,
     )
 

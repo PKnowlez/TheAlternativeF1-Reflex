@@ -1,28 +1,37 @@
 /**
- * donut_chart.js  –  All Time Points Distribution Donut Interaction Bridge
+ * donut_chart.js  –  Points Distribution Donut Interaction Bridge (All Time & Seasons)
  *
  * Provides:
  *   1. Robust slice selection (hover, click, touch) completely decoupled from
  *      the header ticker or any background timer re-renders.
  *   2. Center information rendered natively inside the SVG (<text> elements),
  *      ensuring it is fully preserved in saved/downloaded images.
- *   3. Direct Reflex event dispatch (window.__reflex) with hidden input fallback.
+ *   3. Independent multi-chart support: All-Time Summary and Season Constructors
+ *      maintain their own isolated selections without interference.
  *   4. Instant 0ms visual feedback (slice dimming/highlighting & center text updates).
- *   5. Gray area / background / center hole click to reset to all-time league view.
+ *   5. Gray area / background / center hole click to reset to default view.
  */
 (function () {
   'use strict';
 
   var REFLEX_EVENT = 'reflex___state____state.the_alternative_f1___all_time_stats____summary_all_time____summary_state.select_donut_event';
 
-  // Persistent state object: { type, name, pts, meta }
-  // Stored by value (not DOM node reference) so it survives React reconciliations
-  var activeSelection = null;
+  // Persistent state per SVG: { svgId: { type, name, pts, meta, svgId } }
+  var activeSelectionsBySvg = {};
   var lastHandledTouchTime = 0;
 
-  // ── Dispatch to Reflex State ──────────────────────────────────────────────
-  function dispatchToReflex(payload) {
+  // ── Dispatch to Reflex State (Strictly for All-Time Summary ONLY) ───────────
+  function dispatchToReflex(payload, svgEl) {
     if (!payload) payload = 'reset';
+
+    // Season charts MUST NEVER dispatch events to Reflex or trigger state cycles.
+    var isSummary = svgEl && (svgEl.id === 'summary-donut-svg' || (svgEl.closest && svgEl.closest('#summary-donut-svg')));
+    if (!isSummary) {
+      return;
+    }
+    if (!document.getElementById('summary-donut-svg')) {
+      return;
+    }
 
     // 1. Primary: Direct Reflex Event Loop
     try {
@@ -60,16 +69,36 @@
   }
 
   // ── SVG Element & Attribute Helpers ────────────────────────────────────────
-  function getSvgElement() {
-    return document.getElementById('summary-donut-svg');
+  function getSvgElement(el) {
+    if (el) {
+      var s = el.closest ? el.closest('svg') : null;
+      if (s) return s;
+    }
+    return document.querySelector('.donut-svg, svg[id*="donut-svg"], #summary-donut-svg');
   }
 
-  function getDefaultPoints() {
-    var svg = getSvgElement();
+  function getDefaultPoints(svgEl) {
+    var svg = svgEl || getSvgElement();
     if (svg && svg.getAttribute('data-default-points')) {
       return svg.getAttribute('data-default-points');
     }
     return '';
+  }
+
+  function getDefaultType(svgEl) {
+    var svg = svgEl || getSvgElement();
+    if (svg && svg.getAttribute('data-default-type')) {
+      return svg.getAttribute('data-default-type');
+    }
+    return 'ALL-TIME LEAGUE';
+  }
+
+  function getDefaultMeta(svgEl) {
+    var svg = svgEl || getSvgElement();
+    if (svg && svg.getAttribute('data-default-meta')) {
+      return svg.getAttribute('data-default-meta');
+    }
+    return 'TOTAL POINTS';
   }
 
   function dimExcept(svgEl, keepEl) {
@@ -93,10 +122,12 @@
   }
 
   // ── Native SVG Center Text Updates ────────────────────────────────────────
-  function updateCenterDom(type, name, pts, meta, isLocked) {
-    var typeEl = document.getElementById('donut-center-type');
-    var valEl  = document.getElementById('donut-center-value');
-    var metaEl = document.getElementById('donut-center-meta');
+  function updateCenterDom(type, name, pts, meta, isLocked, svgEl) {
+    var svg = svgEl || getSvgElement();
+    if (!svg) return;
+    var typeEl = svg.querySelector('.donut-center-type, #donut-center-type');
+    var valEl  = svg.querySelector('.donut-center-value, #donut-center-value');
+    var metaEl = svg.querySelector('.donut-center-meta, #donut-center-meta');
 
     if (typeEl) {
       typeEl.textContent = (type || '').toUpperCase();
@@ -116,14 +147,19 @@
     }
   }
 
-  function resetCenterDom() {
-    var typeEl = document.getElementById('donut-center-type');
-    var valEl  = document.getElementById('donut-center-value');
-    var metaEl = document.getElementById('donut-center-meta');
+  function resetCenterDom(svgEl) {
+    var svg = svgEl || getSvgElement();
+    if (!svg) return;
+    var typeEl = svg.querySelector('.donut-center-type, #donut-center-type');
+    var valEl  = svg.querySelector('.donut-center-value, #donut-center-value');
+    var metaEl = svg.querySelector('.donut-center-meta, #donut-center-meta');
 
-    var defPts = getDefaultPoints();
+    var defType = getDefaultType(svg);
+    var defPts = getDefaultPoints(svg);
+    var defMeta = getDefaultMeta(svg);
+
     if (typeEl) {
-      typeEl.textContent = 'ALL-TIME LEAGUE';
+      typeEl.textContent = defType.toUpperCase();
       typeEl.setAttribute('fill', '#8E8E93');
       typeEl.style.fill = '#8E8E93';
     }
@@ -133,52 +169,41 @@
       valEl.style.fontSize = '24px';
     }
     if (metaEl) {
-      metaEl.textContent = 'TOTAL POINTS';
+      metaEl.textContent = defMeta;
       metaEl.setAttribute('fill', '#00b4da');
       metaEl.style.fill = '#00b4da';
     }
   }
 
-  // ── State Persistence across Re-renders / Header Ticker updates ────────────
-  function reapplyState() {
-    if (!activeSelection) return;
-    var svg = getSvgElement();
-    if (!svg) return;
-
-    var activeEl = null;
-    var slices = svg.querySelectorAll('.donut-slice');
-    for (var i = 0; i < slices.length; i++) {
-      var s = slices[i];
-      if (s.getAttribute('data-name') === activeSelection.name &&
-          s.getAttribute('data-type') === activeSelection.type) {
-        activeEl = s;
-        break;
-      }
-    }
-    dimExcept(svg, activeEl);
-    updateCenterDom(activeSelection.type, activeSelection.name, activeSelection.pts, activeSelection.meta, true);
-  }
-
   // ── Core Action Handlers ───────────────────────────────────────────────────
   function handleSliceHover(el) {
-    if (activeSelection || !el) return;
+    if (!el) return;
+    var svg = el.closest ? el.closest('svg') : getSvgElement(el);
+    var svgId = svg ? svg.id : 'default';
+
+    // If a slice on this specific SVG is currently locked/selected, ignore hover
+    if (activeSelectionsBySvg[svgId]) return;
+
     var type = el.getAttribute('data-type') || '';
     var name = el.getAttribute('data-name') || '';
     var pts  = el.getAttribute('data-pts')  || '';
     var meta = el.getAttribute('data-meta') || '';
 
-    var svg = getSvgElement() || el.closest('svg');
     dimExcept(svg, el);
-    updateCenterDom(type, name, pts, meta, false);
-    dispatchToReflex('hover:' + type + ':' + name + ':' + pts + ':' + meta);
+    updateCenterDom(type, name, pts, meta, false, svg);
+    dispatchToReflex('hover:' + type + ':' + name + ':' + pts + ':' + meta, svg);
   }
 
   function handleSliceLeave(el) {
-    if (activeSelection) return;
-    var svg = getSvgElement() || (el ? el.closest('svg') : null);
+    var svg = el ? (el.closest ? el.closest('svg') : null) : getSvgElement();
+    var svgId = svg ? svg.id : 'default';
+
+    // If a slice on this specific SVG is currently locked/selected, leave it intact
+    if (activeSelectionsBySvg[svgId]) return;
+
     restoreAll(svg);
-    resetCenterDom();
-    dispatchToReflex('reset');
+    resetCenterDom(svg);
+    dispatchToReflex('reset', svg);
   }
 
   function handleSliceClick(el, event) {
@@ -190,30 +215,42 @@
     var pts  = el.getAttribute('data-pts')  || '';
     var meta = el.getAttribute('data-meta') || '';
 
-    var svg = getSvgElement() || el.closest('svg');
+    var svg = el.closest ? el.closest('svg') : getSvgElement(el);
+    var svgId = svg ? svg.id : 'default';
 
-    if (activeSelection && activeSelection.name === name && activeSelection.type === type) {
+    var current = activeSelectionsBySvg[svgId];
+
+    if (current && current.name === name && current.type === type) {
       // Toggle off / deselect
-      activeSelection = null;
+      delete activeSelectionsBySvg[svgId];
       restoreAll(svg);
-      resetCenterDom();
-      dispatchToReflex('reset');
+      resetCenterDom(svg);
+      dispatchToReflex('reset', svg);
     } else {
-      // Select slice
-      activeSelection = { type: type, name: name, pts: pts, meta: meta };
+      // Select / lock slice
+      activeSelectionsBySvg[svgId] = { type: type, name: name, pts: pts, meta: meta, svgId: svgId };
       dimExcept(svg, el);
-      updateCenterDom(type, name, pts, meta, true);
-      dispatchToReflex('click:' + type + ':' + name + ':' + pts + ':' + meta);
+      updateCenterDom(type, name, pts, meta, true, svg);
+      dispatchToReflex('click:' + type + ':' + name + ':' + pts + ':' + meta, svg);
     }
   }
 
-  function handleResetAll(event) {
+  function handleResetAll(event, targetSvg) {
     if (event && event.stopPropagation) event.stopPropagation();
-    activeSelection = null;
-    var svg = getSvgElement();
-    restoreAll(svg);
-    resetCenterDom();
-    dispatchToReflex('reset');
+    if (targetSvg && targetSvg.id) {
+      delete activeSelectionsBySvg[targetSvg.id];
+      restoreAll(targetSvg);
+      resetCenterDom(targetSvg);
+      dispatchToReflex('reset', targetSvg);
+    } else {
+      activeSelectionsBySvg = {};
+      var svgs = document.querySelectorAll('.donut-svg, svg[id*="donut-svg"], #summary-donut-svg');
+      for (var i = 0; i < svgs.length; i++) {
+        restoreAll(svgs[i]);
+        resetCenterDom(svgs[i]);
+      }
+      dispatchToReflex('reset', null);
+    }
   }
 
   // ── Expose Globally for Inline SVG Handlers ────────────────────────────────
@@ -230,17 +267,19 @@
   };
 
   window.taf1DonutReset = function (event) {
-    handleResetAll(event);
+    var svg = event && event.target && event.target.closest ? event.target.closest('svg') : null;
+    handleResetAll(event, svg);
   };
 
   window.taf1DonutBgClick = function (event) {
     if (!event || !event.target) {
-      handleResetAll(event);
+      handleResetAll(event, null);
       return;
     }
-    var targetId = event.target.id;
-    if (targetId === 'summary-donut-svg' || targetId === 'donut-center-hole') {
-      handleResetAll(event);
+    var target = event.target;
+    var svg = target.closest ? target.closest('svg') : null;
+    if (target.classList.contains('donut-svg') || (target.id && target.id.indexOf('donut-svg') !== -1) || target.classList.contains('donut-center-hole') || (target.id && target.id.indexOf('donut-center-hole') !== -1)) {
+      handleResetAll(event, svg);
     }
   };
 
@@ -264,15 +303,17 @@
     }
 
     // Check if clicked the donut center hole
-    if (target.id === 'donut-center-hole' || (target.closest && target.closest('#donut-center-hole'))) {
-      handleResetAll(event);
+    if (target.classList.contains('donut-center-hole') || (target.closest && target.closest('.donut-center-hole')) || (target.id && target.id.indexOf('donut-center-hole') !== -1)) {
+      var svgHole = target.closest ? target.closest('svg') : null;
+      handleResetAll(event, svgHole);
       return;
     }
 
     // Check if clicked the gray card area or container background
-    var card = target.closest ? target.closest('#donut-chart-card, #donut-download-container, #summary-donut-svg') : null;
+    var card = target.closest ? target.closest('.donut-chart-card, [id*="donut-chart-card"], [id*="donut-download-container"], .donut-svg, svg[id*="donut-svg"]') : null;
     if (card) {
-      handleResetAll(event);
+      var svgCard = card.querySelector ? card.querySelector('.donut-svg, svg[id*="donut-svg"]') : (card.closest ? card.closest('svg') : null);
+      handleResetAll(event, svgCard);
     }
   }, true);
 
@@ -292,19 +333,12 @@
       return;
     }
 
-    var card = target.closest ? target.closest('#donut-chart-card, #donut-download-container, #summary-donut-svg, #donut-center-hole') : null;
+    var card = target.closest ? target.closest('.donut-chart-card, [id*="donut-chart-card"], [id*="donut-download-container"], .donut-svg, svg[id*="donut-svg"], .donut-center-hole, [id*="donut-center-hole"]') : null;
     if (card) {
       lastHandledTouchTime = Date.now();
-      handleResetAll(event);
+      var svgCard = card.querySelector ? card.querySelector('.donut-svg, svg[id*="donut-svg"]') : (card.closest ? card.closest('svg') : null);
+      handleResetAll(event, svgCard);
     }
   }, { passive: true });
-
-  // ── MutationObserver to Reapply Active State on React Re-renders ───────────
-  var observer = new MutationObserver(function () {
-    if (activeSelection) {
-      reapplyState();
-    }
-  });
-  observer.observe(document.body, { childList: true, subtree: true });
 
 })();

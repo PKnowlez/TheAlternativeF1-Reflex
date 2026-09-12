@@ -4,11 +4,10 @@ Stacked constructor points chart and individual constructor accordions
 with per-race bar charts and callout stats.
 """
 
+import math
 import reflex as rx
 import pandas as pd
-from the_alternative_f1.articles.components import zoomable_chart
-
-
+from the_alternative_f1.articles.components import zoomable_chart, DownloadState
 def Tab3(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only=None) -> rx.Component:
     """Render the Constructor Statistics tab."""
     team_df = data["team_df"]
