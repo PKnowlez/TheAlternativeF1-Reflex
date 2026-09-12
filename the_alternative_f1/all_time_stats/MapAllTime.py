@@ -1032,21 +1032,15 @@ def save_map_dialog() -> rx.Component:
     return rx.dialog.root(
         rx.dialog.trigger(
             rx.button(
-                rx.hstack(
-                    rx.icon("download", size=15),
-                    rx.text("Save Map", font_family="Outfit", font_weight="600"),
-                    spacing="2",
-                    align="center",
-                ),
+                rx.icon("download", size=15),
                 bg="#18181C",
                 color="white",
                 border="1px solid #2C2C32",
                 _hover={"bg": "#00b4da", "border_color": "#00b4da"},
                 cursor="pointer",
-                padding_x="4",
-                padding_y="2",
+                padding="8px",
                 border_radius="lg",
-                font_size="sm",
+                title="Save Map",
             ),
         ),
         rx.dialog.content(
@@ -1119,49 +1113,6 @@ def save_map_dialog() -> rx.Component:
 # ── Main View Component ───────────────────────────────────────────────────────
 def stats_map_view() -> rx.Component:
     """The interactive All Time Stats Map page view component."""
-
-    # Control 1 & 2: Primary Grouping Buttons + Pop-out Active/Inactive Toggle below it
-    grouping_control = rx.vstack(
-        rx.segmented_control.root(
-            rx.segmented_control.item("Regions", value="region"),
-            rx.segmented_control.item("States", value="state"),
-            rx.segmented_control.item("Metro Area", value="metro"),
-            value=StatsMapState.grouping,
-            on_change=StatsMapState.set_grouping,
-            radius="large",
-            size="2",
-            bg="#18181C",
-        ),
-        # Pop-out active/inactive filter directly below the primary 3 selections
-        rx.hstack(
-            rx.text("Filter:", font_size="11px", color="#8E8E93", font_weight="bold"),
-            rx.segmented_control.root(
-                rx.segmented_control.item("Active + Inactive (24)", value="all"),
-                rx.segmented_control.item("Active Only (16)", value="active"),
-                value=rx.cond(StatsMapState.active_only, "active", "all"),
-                on_change=lambda v: StatsMapState.set_active_only(v == "active"),
-                size="1",
-                radius="full",
-                bg="#141418",
-            ),
-            align="center",
-            spacing="2",
-            padding_top="1",
-        ),
-        align_items="start",
-        spacing="1",
-    )
-
-    # Top controls bar: Grouping + Save Map button placed to its right
-    controls_bar = rx.hstack(
-        grouping_control,
-        save_map_dialog(),
-        align="start",
-        spacing="4",
-        width="100%",
-        wrap="wrap",
-        margin_bottom="1",
-    )
 
     # Season Slider Control: Made the same width as the map (100% width) with responsive reactivity
     season_slider_control = rx.box(
@@ -1244,13 +1195,56 @@ def stats_map_view() -> rx.Component:
         margin_bottom="3",
     )
 
-    # Side-by-side section: Map on the left (with legend below canvas), Stats Details Card on the right
+    # Side-by-side section: Map on the left (with integrated controls), Stats Details Card on the right
     map_and_stats_section = rx.flex(
-        # Left: Map Container with embedded SVG (no key at bottom per requirement)
+        # Left: Map Container with top grouping & active toggle, map SVG, and bottom-right download button
         rx.box(
-            rx.box(
-                rx.html(StatsMapState.map_svg_html),
+            rx.vstack(
+                # Top controls connected to the top of the map box: Grouping left, Active Only toggle right
+                rx.hstack(
+                    rx.segmented_control.root(
+                        rx.segmented_control.item("Regions", value="region"),
+                        rx.segmented_control.item("States", value="state"),
+                        rx.segmented_control.item("Metros", value="metro"),
+                        value=StatsMapState.grouping,
+                        on_change=StatsMapState.set_grouping,
+                        radius="large",
+                        size="2",
+                        bg="#18181C",
+                    ),
+                    rx.spacer(),
+                    rx.hstack(
+                        rx.text("Active Only", color="white", font_size="sm", font_weight="600"),
+                        rx.switch(
+                            checked=StatsMapState.active_only,
+                            on_change=StatsMapState.set_active_only,
+                            color_scheme="cyan",
+                        ),
+                        spacing="2",
+                        align="center",
+                    ),
+                    width="100%",
+                    align="center",
+                    padding_x="4px",
+                    padding_top="4px",
+                    padding_bottom="2px",
+                ),
+                # Map Container
+                rx.box(
+                    rx.html(StatsMapState.map_svg_html),
+                    width="100%",
+                ),
+                # Bottom controls: Download icon button justified to bottom right
+                rx.hstack(
+                    rx.spacer(),
+                    save_map_dialog(),
+                    width="100%",
+                    align="center",
+                    padding_x="4px",
+                    padding_bottom="4px",
+                ),
                 width="100%",
+                spacing="2",
             ),
             width=["100%", "100%", "65%"],
             bg="#15151A",
@@ -1282,7 +1276,6 @@ def stats_map_view() -> rx.Component:
             font_weight="800",
             margin_bottom="3",
         ),
-        controls_bar,
         season_slider_control,
         map_and_stats_section,
         # Hidden input & script for direct map clicking
