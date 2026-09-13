@@ -49,7 +49,7 @@ DRIVER_LOCATIONS = {
         },
     },
     "Jairo": {"current": ("New York", "NY", "Northeast"), "seasons": {}},
-    "Marcus": {"current": ("New York", "NY", "Northeast"), "seasons": {}},
+    "Marcus": {"current": ("Orlando", "FL", "The South"), "seasons": {}},
     "Boz": {"current": ("New York", "NY", "Northeast"), "seasons": {}},
     "Eddie": {
         "current": ("Rochester", "NY", "Northeast"),
@@ -66,12 +66,12 @@ DRIVER_LOCATIONS = {
     "Josh": {"current": ("Los Angeles", "CA", "Mountain West"), "seasons": {}},
     "Travis": {"current": ("Austin", "TX", "Great Plains"), "seasons": {}},
     "David": {"current": ("New York", "NY", "Northeast"), "seasons": {}},
-    "Yeti": {"current": ("New York", "NY", "Northeast"), "seasons": {}},
+    "Yeti": {"current": ("Richmond", "VA", "The South"), "seasons": {}},
     "Matthew": {"current": ("Charlotte", "NC", "The South"), "seasons": {}},
     "Leo": {"current": ("New York", "NY", "Northeast"), "seasons": {}},
     "Gary": {"current": ("New York", "NY", "Northeast"), "seasons": {}},
     "Randy": {"current": ("New York", "NY", "Northeast"), "seasons": {}},
-    "Josh L": {"current": ("New York", "NY", "Northeast"), "seasons": {}},
+    "Josh L": {"current": ("Austin", "TX", "Great Plains"), "seasons": {}},
     "Evelo": {"current": ("New York", "NY", "Northeast"), "seasons": {}},
     "Josh C.": {"current": ("Denver", "CO", "Mountain West"), "seasons": {}},
     "Grayson": {"current": ("Houston", "TX", "Great Plains"), "seasons": {}},
@@ -119,6 +119,8 @@ METRO_COORDS = {
     "Detroit": {"x": 672, "y": 195, "state": "MI", "region": "Midwest", "label": "Detroit, MI"},
     "Los Angeles": {"x": 105, "y": 350, "state": "CA", "region": "Mountain West", "label": "Los Angeles, CA"},
     "Charlotte": {"x": 740, "y": 340, "state": "NC", "region": "The South", "label": "Charlotte, NC"},
+    "Orlando": {"x": 725, "y": 490, "state": "FL", "region": "The South", "label": "Orlando, FL"},
+    "Richmond": {"x": 780, "y": 282, "state": "VA", "region": "The South", "label": "Richmond, VA"},
 }
 
 # ── Centroid Coordinates for Centered Driver Count Badges ─────────────────────
@@ -569,15 +571,20 @@ class StatsMapState(rx.State):
 
     @rx.var
     def available_groups(self) -> list[str]:
+        ds = precompute_all_map_data().get(self.current_dataset_key, {})
         if self.grouping == "region":
             return list(REGION_COLORS.keys())
         elif self.grouping == "metro":
+            by_metro = ds.get("by_metro", {})
+            if self.active_only:
+                return [m for m in METRO_COORDS.keys() if by_metro.get(m, {}).get("driver_count", 0) > 0]
             return list(METRO_COORDS.keys())
         else:
             # Sort states with drivers first, then alphabetically
-            ds = precompute_all_map_data().get(self.current_dataset_key, {})
             by_st = ds.get("by_state", {})
             st_with_drivers = [st for st, v in by_st.items() if v.get("driver_count", 0) > 0]
+            if self.active_only:
+                return sorted(st_with_drivers)
             st_others = [st for st in by_st.keys() if st not in st_with_drivers]
             return sorted(st_with_drivers) + sorted(st_others)
 
@@ -709,12 +716,19 @@ class StatsMapState(rx.State):
                 stroke_color = "rgba(255,255,255,0.25)"
                 stroke_width = "0.9"
 
+            state_onclick = f"window.taf1SelectMapGroup('{code}')"
+            state_cursor = "pointer"
+            state_title = f"{name} ({code}) - {region} (Click to inspect)"
+            if self.grouping == "state" and self.active_only and not has_drivers:
+                state_cursor = "default"
+                state_title = f"{name} ({code}) - No active drivers"
+
             states_svg.append(
                 f'<path id="st-{code}" class="state-path" d="{d}" fill="{fill_color}" '
                 f'fill-opacity="{fill_opacity}" stroke="{stroke_color}" stroke-width="{stroke_width}" '
-                f'onclick="window.taf1SelectMapGroup(\'{code}\')" '
-                f'style="transition: all 0.25s ease; cursor: pointer;">'
-                f'<title>{name} ({code}) - {region} (Click to inspect)</title></path>'
+                f'onclick="{state_onclick}" '
+                f'style="transition: all 0.25s ease; cursor: {state_cursor};">'
+                f'<title>{state_title}</title></path>'
             )
 
         # Separator line around AK/HI
@@ -728,6 +742,8 @@ class StatsMapState(rx.State):
                 cx, cy = coord["x"], coord["y"]
                 m_stats = by_metro.get(m_name, {})
                 m_cnt = m_stats.get("driver_count", 0)
+                if self.active_only and m_cnt == 0:
+                    continue
                 m_region = coord["region"]
                 m_color = REGION_COLORS.get(m_region, "#00b4da")
 
@@ -791,6 +807,8 @@ class StatsMapState(rx.State):
             for code, (cx, cy) in STATE_CENTROIDS.items():
                 st_stats = by_state.get(code, {})
                 cnt = st_stats.get("driver_count", 0)
+                if self.active_only and cnt == 0:
+                    continue
                 is_st_selected = (selected == code)
                 region = STATE_TO_REGION.get(code, "Unknown")
                 reg_color = REGION_COLORS.get(region, "#00b4da")
@@ -876,15 +894,45 @@ class StatsMapState(rx.State):
 
     def set_active_only(self, active_only: bool):
         self.active_only = active_only
+        if active_only and self.selected_group not in ("_all_map_", "all_map", "all", "United States"):
+            ds = precompute_all_map_data().get(self.current_dataset_key, {})
+            if self.grouping == "state":
+                by_st = ds.get("by_state", {})
+                if by_st.get(self.selected_group, {}).get("driver_count", 0) == 0:
+                    self.selected_group = "_all_map_"
+            elif self.grouping == "metro":
+                by_m = ds.get("by_metro", {})
+                if by_m.get(self.selected_group, {}).get("driver_count", 0) == 0:
+                    self.selected_group = "_all_map_"
 
     def set_season_slider(self, val: list[int] | int | float | list[float]):
         if isinstance(val, (list, tuple)):
             self.season_slider = int(val[0]) if val else 6
         else:
             self.season_slider = int(val)
+        if self.active_only and self.selected_group not in ("_all_map_", "all_map", "all", "United States"):
+            ds = precompute_all_map_data().get(self.current_dataset_key, {})
+            if self.grouping == "state":
+                by_st = ds.get("by_state", {})
+                if by_st.get(self.selected_group, {}).get("driver_count", 0) == 0:
+                    self.selected_group = "_all_map_"
+            elif self.grouping == "metro":
+                by_m = ds.get("by_metro", {})
+                if by_m.get(self.selected_group, {}).get("driver_count", 0) == 0:
+                    self.selected_group = "_all_map_"
 
     def set_single_season_only(self, single: bool):
         self.single_season_only = single
+        if self.active_only and self.selected_group not in ("_all_map_", "all_map", "all", "United States"):
+            ds = precompute_all_map_data().get(self.current_dataset_key, {})
+            if self.grouping == "state":
+                by_st = ds.get("by_state", {})
+                if by_st.get(self.selected_group, {}).get("driver_count", 0) == 0:
+                    self.selected_group = "_all_map_"
+            elif self.grouping == "metro":
+                by_m = ds.get("by_metro", {})
+                if by_m.get(self.selected_group, {}).get("driver_count", 0) == 0:
+                    self.selected_group = "_all_map_"
 
     def select_group(self, group_id: str | list[str]):
         if isinstance(group_id, list):
@@ -897,6 +945,8 @@ class StatsMapState(rx.State):
             self.selected_group = "_all_map_"
             return
 
+        ds = precompute_all_map_data().get(self.current_dataset_key, {})
+
         if self.grouping == "region":
             # Map clicked state code to region if a state was clicked
             region = STATE_TO_REGION.get(group_id, group_id)
@@ -905,14 +955,23 @@ class StatsMapState(rx.State):
             else:
                 self.selected_group = group_id
         elif self.grouping == "state":
+            if self.active_only:
+                by_st = ds.get("by_state", {})
+                if by_st.get(group_id, {}).get("driver_count", 0) == 0:
+                    return
             self.selected_group = group_id
         elif self.grouping == "metro":
+            by_m = ds.get("by_metro", {})
             if group_id in METRO_COORDS:
+                if self.active_only and by_m.get(group_id, {}).get("driver_count", 0) == 0:
+                    return
                 self.selected_group = group_id
             else:
                 # If a state was clicked, check if it has a known metro area
                 for m_name, m_info in METRO_COORDS.items():
                     if m_info.get("state") == group_id:
+                        if self.active_only and by_m.get(m_name, {}).get("driver_count", 0) == 0:
+                            continue
                         self.selected_group = m_name
                         break
 
