@@ -9,7 +9,8 @@
  *   3. Independent multi-chart support: All-Time Summary and Season Constructors
  *      maintain their own isolated selections without interference.
  *   4. Instant 0ms visual feedback (slice dimming/highlighting & center text updates).
- *   5. Gray area / background / center hole click to reset to default view.
+ *   5. Clean tap support on touch screens (no need to hold down).
+ *   6. Gray area / background / center hole click to reset to default view.
  */
 (function () {
   'use strict';
@@ -19,6 +20,9 @@
   // Persistent state per SVG: { svgId: { type, name, pts, meta, svgId } }
   var activeSelectionsBySvg = {};
   var lastHandledTouchTime = 0;
+  var touchStartX = 0;
+  var touchStartY = 0;
+  var touchMoved = false;
 
   // ── Dispatch to Reflex State (Strictly for All-Time Summary ONLY) ───────────
   function dispatchToReflex(payload, svgEl) {
@@ -255,14 +259,22 @@
 
   // ── Expose Globally for Inline SVG Handlers ────────────────────────────────
   window.taf1DonutEnter = function (el) {
+    if (Date.now() - lastHandledTouchTime < 600) return;
     handleSliceHover(el);
   };
 
   window.taf1DonutLeave = function (el) {
+    if (Date.now() - lastHandledTouchTime < 600) return;
     handleSliceLeave(el);
   };
 
   window.taf1DonutClick = function (el, event) {
+    // If click was synthesized right after touchend, ignore to prevent instant toggle-off
+    if (Date.now() - lastHandledTouchTime < 600) {
+      if (event && event.preventDefault) event.preventDefault();
+      if (event && event.stopPropagation) event.stopPropagation();
+      return;
+    }
     handleSliceClick(el, event);
   };
 
@@ -283,8 +295,13 @@
     }
   };
 
-  // ── Delegated Capture Listeners for High Reliability & Touch ───────────────
+  // ── Delegated Capture Listeners for Desktop Click & Clean Touch Tap ────────
   document.addEventListener('click', function (event) {
+    // Ignore synthetic click dispatched after a touch tap
+    if (Date.now() - lastHandledTouchTime < 600) {
+      return;
+    }
+
     var target = event.target;
     if (!target) return;
 
@@ -296,8 +313,6 @@
     // Check if clicked a donut slice
     var slice = target.closest ? target.closest('.donut-slice') : null;
     if (slice) {
-      var now = Date.now();
-      if (now - lastHandledTouchTime < 350) return;
       handleSliceClick(slice, event);
       return;
     }
@@ -317,10 +332,32 @@
     }
   }, true);
 
-  // Touch screen support
+  // Track single touch to distinguish clean taps from swipes/scrolling
+  document.addEventListener('touchstart', function (event) {
+    if (event.touches && event.touches.length === 1) {
+      touchStartX = event.touches[0].clientX;
+      touchStartY = event.touches[0].clientY;
+      touchMoved = false;
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchmove', function (event) {
+    if (event.touches && event.touches.length === 1) {
+      var dx = Math.abs(event.touches[0].clientX - touchStartX);
+      var dy = Math.abs(event.touches[0].clientY - touchStartY);
+      if (dx > 10 || dy > 10) {
+        touchMoved = true;
+      }
+    }
+  }, { passive: true });
+
+  // Clean tap selection on touch screens
   document.addEventListener('touchend', function (event) {
     var target = event.target;
     if (!target) return;
+
+    // If finger was dragged/scrolling, do not treat as tap
+    if (touchMoved) return;
 
     if (target.closest && target.closest('button')) {
       return;
@@ -333,6 +370,15 @@
       return;
     }
 
+    // Center hole tap
+    if (target.classList.contains('donut-center-hole') || (target.closest && target.closest('.donut-center-hole')) || (target.id && target.id.indexOf('donut-center-hole') !== -1)) {
+      lastHandledTouchTime = Date.now();
+      var svgHole = target.closest ? target.closest('svg') : null;
+      handleResetAll(event, svgHole);
+      return;
+    }
+
+    // Background card area tap
     var card = target.closest ? target.closest('.donut-chart-card, [id*="donut-chart-card"], [id*="donut-download-container"], .donut-svg, svg[id*="donut-svg"], .donut-center-hole, [id*="donut-center-hole"]') : null;
     if (card) {
       lastHandledTouchTime = Date.now();

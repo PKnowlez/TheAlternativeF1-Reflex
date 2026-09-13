@@ -3319,7 +3319,7 @@ app = rx.App(
         rx.el.script(src="/carousel.js"),
         rx.el.script(src="/power_rankings_chart.js?v=20260911_01"),
         rx.el.script(src="/stats_map.js"),
-        rx.el.script(src="/donut_chart.js?v=20260912_05"),
+        rx.el.script(src="/donut_chart.js?v=20260912_06"),
         rx.el.script(src="/zoomable_chart.js?v=20260912_05"),
     ],
 )

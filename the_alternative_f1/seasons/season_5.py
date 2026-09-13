@@ -19,6 +19,7 @@ from the_alternative_f1.articles.Season5.Preseason.HungaryRecap import article a
 from the_alternative_f1.articles.Season5.TrophyReveal.TrophyReveal import article as TrophyReveal_Article
 from the_alternative_f1.articles.Season5.Race_Week.australia_race_week import article as Australia_Race_Week_Article
 from the_alternative_f1.articles.Season5.Race_Recap.australia_race_recap import article as Australia_Race_Recap_Article
+from the_alternative_f1.articles.Season5.Race_Week.imola_race_week import article as Imola_Race_Week_Article
 
 season = {
     "season_number": 5,
@@ -28,7 +29,7 @@ season = {
     # Rookies: drivers not present in Season 4
     "rookies": {"Grayson", "Josh C.", "Randy", "Evelo"},
 
-    "articles": [Australia_Race_Recap_Article, Australia_Race_Week_Article, 
+    "articles": [Imola_Race_Week_Article, Australia_Race_Recap_Article, Australia_Race_Week_Article, 
     TrophyReveal_Article, Hungary_Recap_Article, TrophyTeaser_Article, 
     Vegas_Recap_Article, Mexico_Recap_Article, Preseason_Article, 
     TheGrid_Article, Mercedes_Article, Audi_Article,
