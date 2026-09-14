@@ -237,7 +237,14 @@ def _build_manual_race_item(race: dict, idx: int, prefix: str, bg_color: str = "
     )
 
 
-def Tab2(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only=None) -> rx.Component:
+def Tab2(
+    data: dict,
+    season_data: dict,
+    sprint_only_var=None,
+    toggle_sprint_only=None,
+    show_previews_var=None,
+    toggle_show_previews=None,
+) -> rx.Component:
     """Render the Race Results tab.
 
     Parameters
@@ -603,6 +610,12 @@ def Tab2(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
             padding="3",
         )
 
+        preview_component = (
+            rx.cond(show_previews_var, preview_table, rx.fragment())
+            if show_previews_var is not None
+            else preview_table
+        )
+
         bg_color = "#1E1E24" if item_idx % 2 == 0 else "#131316"
         regular_items.append(
             rx.accordion.item(
@@ -610,7 +623,7 @@ def Tab2(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
                     rx.vstack(
                         rx.text(race_name, color="white", font_weight="600"),
                         rx.text(f"Winner: {winner}", color="#00b4da", font_size="10px", font_weight="bold"),
-                        preview_table,
+                        preview_component,
                         align_items="start",
                         spacing="0",
                         width="100%",
@@ -646,19 +659,38 @@ def Tab2(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
                     font_weight="900",
                 ),
                 rx.spacer(),
-                rx.cond(
-                    has_sprint & (sprint_only_var is not None),
-                    rx.hstack(
-                        rx.text("Sprint Championship", color="white", font_size="sm", font_weight="600"),
-                        rx.switch(
-                            checked=sprint_only_var,
-                            on_change=toggle_sprint_only,
-                            color_scheme="cyan",
+                rx.hstack(
+                    rx.cond(
+                        has_sprint & (sprint_only_var is not None),
+                        rx.hstack(
+                            rx.text("Sprint Championship", color="white", font_size="sm", font_weight="600"),
+                            rx.switch(
+                                checked=sprint_only_var,
+                                on_change=toggle_sprint_only,
+                                color_scheme="cyan",
+                            ),
+                            spacing="2",
+                            align="center",
                         ),
-                        spacing="2",
-                        align="center",
+                        rx.fragment(),
                     ),
-                    rx.fragment()
+                    rx.cond(
+                        show_previews_var is not None,
+                        rx.hstack(
+                            rx.text("Previews?", color="white", font_size="sm", font_weight="600"),
+                            rx.switch(
+                                checked=show_previews_var,
+                                on_change=toggle_show_previews,
+                                color_scheme="cyan",
+                            ),
+                            spacing="2",
+                            align="center",
+                        ),
+                        rx.fragment(),
+                    ),
+                    spacing="4",
+                    align="center",
+                    wrap="wrap",
                 ),
                 width="100%",
                 direction=rx.breakpoints(initial="column", sm="row"),
@@ -681,19 +713,38 @@ def Tab2(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
                 font_weight="900",
             ),
             rx.spacer(),
-            rx.cond(
-                has_sprint & (sprint_only_var is not None),
-                rx.hstack(
-                    rx.text("Sprint Championship", color="white", font_size="sm", font_weight="600"),
-                    rx.switch(
-                        checked=sprint_only_var,
-                        on_change=toggle_sprint_only,
-                        color_scheme="cyan",
+            rx.hstack(
+                rx.cond(
+                    has_sprint & (sprint_only_var is not None),
+                    rx.hstack(
+                        rx.text("Sprint Championship", color="white", font_size="sm", font_weight="600"),
+                        rx.switch(
+                            checked=sprint_only_var,
+                            on_change=toggle_sprint_only,
+                            color_scheme="cyan",
+                        ),
+                        spacing="2",
+                        align="center",
                     ),
-                    spacing="2",
-                    align="center",
+                    rx.fragment(),
                 ),
-                rx.fragment()
+                rx.cond(
+                    show_previews_var is not None,
+                    rx.hstack(
+                        rx.text("Previews?", color="white", font_size="sm", font_weight="600"),
+                        rx.switch(
+                            checked=show_previews_var,
+                            on_change=toggle_show_previews,
+                            color_scheme="cyan",
+                        ),
+                        spacing="2",
+                        align="center",
+                    ),
+                    rx.fragment(),
+                ),
+                spacing="4",
+                align="center",
+                wrap="wrap",
             ),
             width="100%",
             direction=rx.breakpoints(initial="column", sm="row"),

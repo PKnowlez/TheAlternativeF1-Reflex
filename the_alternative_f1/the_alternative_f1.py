@@ -259,6 +259,8 @@ class State(rx.State):
     season_picker_open: bool = False
     rookies_only: bool = False
     sprint_only: bool = False
+    show_race_previews: bool = True
+
 
     # ── Power Rankings State ─────────────────────────────────────────────
     show_power_rankings_header: bool = True
@@ -839,6 +841,13 @@ class State(rx.State):
 
     def toggle_sprint_only(self, value: bool):
         self.sprint_only = value
+
+    def toggle_race_previews(self, value: bool = None):
+        if value is None:
+            self.show_race_previews = not self.show_race_previews
+        else:
+            self.show_race_previews = value
+
 
     def go_home(self):
         in_article = self.selected_article_title != ""
@@ -2645,6 +2654,8 @@ def _build_season_content(season_idx: int, tab: str, rookies_only: bool, sprint_
             season_data,
             sprint_only_var=State.sprint_only,
             toggle_sprint_only=State.toggle_sprint_only,
+            show_previews_var=State.show_race_previews,
+            toggle_show_previews=State.toggle_race_previews,
         )
     elif tab == "constructor_stats":
         return Tab3(

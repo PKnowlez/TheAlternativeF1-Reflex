@@ -184,7 +184,7 @@ def Tab1(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
     team_names = list(team_colors.keys())
     # Filter to only teams present in the data
     teams_in_data = [t for t in constructor_totals["Team"]]
-    pos_team_line = get_download_position(team_line_data, "race")
+    pos_team_line = "top_right"
 
     constructor_line_chart = zoomable_chart(
         lambda h: rx.recharts.line_chart(
@@ -228,7 +228,7 @@ def Tab1(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
 
     # ── Driver line chart ────────────────────────────────────────────────
     drivers_in_data = list(driver_totals["Driver"])
-    pos_driver_line = get_download_position(driver_line_data, "race")
+    pos_driver_line = "top_right"
 
     driver_line_chart = zoomable_chart(
         lambda h: rx.recharts.line_chart(

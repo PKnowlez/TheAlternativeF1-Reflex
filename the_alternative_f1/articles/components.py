@@ -299,9 +299,110 @@ class DownloadState(rx.State):
                     if (document.fonts && document.fonts.ready) {{
                         await document.fonts.ready;
                     }}
+
+                    // Check if chart has an associated key
+                    let keyData = null;
+                    const keyElement = document.querySelector("[data-key-for-chart='{chart_id}']") ||
+                                       (container.parentElement ? container.parentElement.querySelector('.taf1-chart-key-container') : null);
+
+                    if (keyElement && window.getComputedStyle(keyElement).display !== 'none') {{
+                        let titleText = "Key";
+                        let hintText = "";
+                        const firstRow = keyElement.firstElementChild;
+                        if (firstRow) {{
+                            const textElements = firstRow.querySelectorAll('p, span, div');
+                            if (textElements.length >= 1) {{
+                                titleText = textElements[0].innerText.trim();
+                            }}
+                            if (textElements.length >= 2) {{
+                                hintText = " " + textElements[1].innerText.trim();
+                            }}
+                        }}
+
+                        const pillElements = keyElement.querySelectorAll('.taf1-chart-key-item');
+                        const pills = [];
+                        pillElements.forEach(pel => {{
+                            const name = pel.getAttribute('data-name') || (pel.querySelector('.taf1-key-text') || pel).innerText.trim();
+                            const color = pel.getAttribute('data-color') || '#555555';
+                            const computed = window.getComputedStyle(pel);
+                            const opacity = parseFloat(computed.opacity);
+                            const isDimmed = !isNaN(opacity) && opacity < 0.7;
+                            const isHighlighted = !isDimmed && (computed.borderColor.includes('180') || pel.style.borderColor === '#00b4da' || (computed.boxShadow && computed.boxShadow !== 'none'));
+                            pills.push({{
+                                name,
+                                color,
+                                opacity: isDimmed ? 0.4 : 1.0,
+                                isHighlighted
+                            }});
+                        }});
+
+                        if (pills.length > 0) {{
+                            keyData = {{ titleText, hintText, pills }};
+                        }}
+                    }}
+
+                    const sideMargin = 12 * scaleFactor;
+                    const keyTopSpacing = 14 * scaleFactor;
+                    const keyBottomPadding = 16 * scaleFactor;
+                    const keyInnerPadX = 14 * scaleFactor;
+                    const keyInnerPadY = 10 * scaleFactor;
+
+                    let keyBoxHeight = 0;
+                    let pillLayoutRows = [];
+
+                    if (keyData) {{
+                        const tempCanvas = document.createElement('canvas');
+                        const tempCtx = tempCanvas.getContext('2d');
+                        tempCtx.font = `bold ${{Math.round(12 * scaleFactor)}}px Outfit, sans-serif`;
+
+                        const availableWidth = (width * scaleFactor) - (2 * sideMargin) - (2 * keyInnerPadX);
+                        const pillPadX = 8 * scaleFactor;
+                        const pillHeight = 24 * scaleFactor;
+                        const dotSize = 8 * scaleFactor;
+                        const dotGap = 6 * scaleFactor;
+                        const pillGapX = 6 * scaleFactor;
+                        const pillGapY = 6 * scaleFactor;
+
+                        let currentRow = [];
+                        let currentX = 0;
+
+                        keyData.pills.forEach(pill => {{
+                            const textWidth = tempCtx.measureText(pill.name).width;
+                            const pillWidth = (pillPadX * 2) + dotSize + dotGap + textWidth;
+
+                            if (currentRow.length > 0 && (currentX + pillWidth > availableWidth)) {{
+                                pillLayoutRows.push(currentRow);
+                                currentRow = [];
+                                currentX = 0;
+                            }}
+
+                            currentRow.push({{
+                                ...pill,
+                                width: pillWidth,
+                                height: pillHeight,
+                                textWidth: textWidth
+                            }});
+                            currentX += pillWidth + pillGapX;
+                        }});
+
+                        if (currentRow.length > 0) {{
+                            pillLayoutRows.push(currentRow);
+                        }}
+
+                        const headerHeight = 16 * scaleFactor;
+                        const headerBottomGap = 8 * scaleFactor;
+                        const totalPillRowsHeight = pillLayoutRows.length * pillHeight + Math.max(0, pillLayoutRows.length - 1) * pillGapY;
+                        keyBoxHeight = keyInnerPadY + headerHeight + headerBottomGap + totalPillRowsHeight + keyInnerPadY;
+                    }}
+
                     const canvas = document.createElement('canvas');
                     canvas.width = width * scaleFactor;
-                    canvas.height = (height + titleSpace) * scaleFactor;
+
+                    let totalHeight = (height + titleSpace) * scaleFactor;
+                    if (keyData && keyBoxHeight > 0) {{
+                        totalHeight += keyTopSpacing + keyBoxHeight + keyBottomPadding;
+                    }}
+                    canvas.height = totalHeight;
                     const context = canvas.getContext('2d');
                     
                     const computedColor = '#15151A';
@@ -420,6 +521,118 @@ class DownloadState(rx.State):
                         context.restore();
                     }}
                     
+                    // Draw the key if present
+                    if (keyData && keyBoxHeight > 0) {{
+                        const boxX = sideMargin;
+                        const boxY = (titleSpace + height) * scaleFactor + keyTopSpacing;
+                        const boxWidth = canvas.width - (2 * sideMargin);
+                        const boxRadius = 10 * scaleFactor;
+
+                        // 1. Container box
+                        context.save();
+                        context.beginPath();
+                        if (context.roundRect) {{
+                            context.roundRect(boxX, boxY, boxWidth, keyBoxHeight, boxRadius);
+                        }} else {{
+                            const r = boxRadius;
+                            context.moveTo(boxX + r, boxY);
+                            context.lineTo(boxX + boxWidth - r, boxY);
+                            context.arcTo(boxX + boxWidth, boxY, boxX + boxWidth, boxY + r, r);
+                            context.lineTo(boxX + boxWidth, boxY + keyBoxHeight - r);
+                            context.arcTo(boxX + boxWidth, boxY + keyBoxHeight, boxX + boxWidth - r, boxY + keyBoxHeight, r);
+                            context.lineTo(boxX + r, boxY + keyBoxHeight);
+                            context.arcTo(boxX, boxY + keyBoxHeight, boxX, boxY + keyBoxHeight - r, r);
+                            context.lineTo(boxX, boxY + r);
+                            context.arcTo(boxX, boxY, boxX + r, boxY, r);
+                        }}
+                        context.closePath();
+                        context.fillStyle = '#141418';
+                        context.fill();
+                        context.strokeStyle = '#28282E';
+                        context.lineWidth = 1 * scaleFactor;
+                        context.stroke();
+                        context.restore();
+
+                        // 2. Title & Hint
+                        context.save();
+                        context.textBaseline = 'top';
+                        const textStartY = boxY + keyInnerPadY;
+                        let titleDrawX = boxX + keyInnerPadX;
+
+                        context.fillStyle = '#00b4da';
+                        context.font = `bold ${{Math.round(12 * scaleFactor)}}px Outfit, sans-serif`;
+                        context.fillText(keyData.titleText, titleDrawX, textStartY);
+                        titleDrawX += context.measureText(keyData.titleText).width;
+
+                        if (keyData.hintText) {{
+                            context.fillStyle = '#8E8E98';
+                            context.font = `${{Math.round(11 * scaleFactor)}}px Outfit, sans-serif`;
+                            context.fillText(keyData.hintText, titleDrawX, textStartY + (1 * scaleFactor));
+                        }}
+                        context.restore();
+
+                        // 3. Pill items
+                        const headerOffset = (16 + 8) * scaleFactor;
+                        let pillRowY = boxY + keyInnerPadY + headerOffset;
+                        const pillHeight = 24 * scaleFactor;
+                        const pillRadius = 6 * scaleFactor;
+                        const dotSize = 8 * scaleFactor;
+                        const dotRadius = dotSize / 2;
+                        const pillPadX = 8 * scaleFactor;
+                        const dotGap = 6 * scaleFactor;
+                        const pillGapX = 6 * scaleFactor;
+                        const pillGapY = 6 * scaleFactor;
+
+                        pillLayoutRows.forEach(row => {{
+                            let pillX = boxX + keyInnerPadX;
+                            row.forEach(p => {{
+                                context.save();
+                                context.globalAlpha = p.opacity;
+
+                                // Pill background & border
+                                context.beginPath();
+                                if (context.roundRect) {{
+                                    context.roundRect(pillX, pillRowY, p.width, pillHeight, pillRadius);
+                                }} else {{
+                                    const r = pillRadius;
+                                    context.moveTo(pillX + r, pillRowY);
+                                    context.lineTo(pillX + p.width - r, pillRowY);
+                                    context.arcTo(pillX + p.width, pillRowY, pillX + p.width, pillRowY + r, r);
+                                    context.lineTo(pillX + p.width, pillRowY + pillHeight - r);
+                                    context.arcTo(pillX + p.width, pillRowY + pillHeight, pillX + p.width - r, pillRowY + pillHeight, r);
+                                    context.lineTo(pillX + r, pillRowY + pillHeight);
+                                    context.arcTo(pillX, pillRowY + pillHeight, pillX, pillRowY + pillHeight - r, r);
+                                    context.lineTo(pillX, pillRowY + r);
+                                    context.arcTo(pillX, pillRowY, pillX + r, pillRowY, r);
+                                }}
+                                context.closePath();
+                                context.fillStyle = p.isHighlighted ? '#252532' : '#1B1B22';
+                                context.fill();
+                                context.strokeStyle = p.isHighlighted ? '#00b4da' : '#2A2A34';
+                                context.lineWidth = (p.isHighlighted ? 1.5 : 1) * scaleFactor;
+                                context.stroke();
+
+                                // Dot
+                                const dotCenterX = pillX + pillPadX + dotRadius;
+                                const dotCenterY = pillRowY + (pillHeight / 2);
+                                context.beginPath();
+                                context.arc(dotCenterX, dotCenterY, dotRadius, 0, Math.PI * 2);
+                                context.fillStyle = p.color;
+                                context.fill();
+
+                                // Text
+                                context.fillStyle = p.isHighlighted ? '#00b4da' : '#FFFFFF';
+                                context.font = `bold ${{Math.round(12 * scaleFactor)}}px Outfit, sans-serif`;
+                                context.textBaseline = 'middle';
+                                context.fillText(p.name, pillX + pillPadX + dotSize + dotGap, pillRowY + (pillHeight / 2));
+
+                                context.restore();
+                                pillX += p.width + pillGapX;
+                            }});
+                            pillRowY += pillHeight + pillGapY;
+                        }});
+                    }}
+
                     const pngURL = canvas.toDataURL('image/png');
                     triggerFileDownload(pngURL, targetFilename);
                     URL.revokeObjectURL(blobUrl);
