@@ -287,7 +287,7 @@ def Tab4(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
         # Calculate dynamic x-axis height for placement_chart
         max_place_len = max([len(str(item.get("place", ""))) for item in placement_data] or [0])
         place_axis_height = max(40, max_place_len * 5 + 15)
-        pos_plc = get_download_position(placement_data, "place")
+        pos_plc = "top_right"
 
         placement_chart = zoomable_chart(
             lambda h: rx.recharts.bar_chart(
