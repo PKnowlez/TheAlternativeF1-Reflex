@@ -8,8 +8,9 @@ import pandas as pd
 import numpy as np
 import reflex as rx
 
-from the_alternative_f1.all_time_stats.Functions import get_excel_sheet, CalculateAllTime, file as excel_file
-from the_alternative_f1.articles.components import zoomable_chart
+from the_alternative_f1.all_time_stats.Functions import get_excel_sheet, CalculateAllTime, PointTotals, file as excel_file
+from the_alternative_f1.constructor_colors import get_constructor_color
+from the_alternative_f1.articles.components import zoomable_chart, DownloadState, chart_header
 from the_alternative_f1.race_metrics import get_race_metrics
 
 _detailed_cache = {}
@@ -52,6 +53,217 @@ def _extract_track_name(race_str: str) -> str:
     res = res.replace(" Reverse", "").replace(" (R)", "")
     res = res.replace(" Sprint", "").replace(" (S)", "")
     return res.strip()
+
+
+def _build_arc_path(
+    cx: float, cy: float,
+    r_in: float, r_out: float,
+    start_deg: float, end_deg: float,
+) -> str:
+    """Generate SVG path string for a donut arc segment."""
+    span = end_deg - start_deg
+    if span >= 359.999:
+        span = 359.999
+        end_deg = start_deg + span
+
+    rad1 = math.radians(start_deg)
+    rad2 = math.radians(end_deg)
+
+    x_out1 = cx + r_out * math.cos(rad1)
+    y_out1 = cy + r_out * math.sin(rad1)
+    x_out2 = cx + r_out * math.cos(rad2)
+    y_out2 = cy + r_out * math.sin(rad2)
+
+    x_in1 = cx + r_in * math.cos(rad1)
+    y_in1 = cy + r_in * math.sin(rad1)
+    x_in2 = cx + r_in * math.cos(rad2)
+    y_in2 = cy + r_in * math.sin(rad2)
+
+    large_arc = 1 if span > 180 else 0
+
+    return (
+        f"M {x_out1:.2f} {y_out1:.2f} "
+        f"A {r_out:.2f} {r_out:.2f} 0 {large_arc} 1 {x_out2:.2f} {y_out2:.2f} "
+        f"L {x_in2:.2f} {y_in2:.2f} "
+        f"A {r_in:.2f} {r_in:.2f} 0 {large_arc} 0 {x_in1:.2f} {y_in1:.2f} Z"
+    )
+
+
+_champion_constructors_cache = {}
+
+
+def get_season_champion_constructor(season: int) -> str:
+    """Return the winning constructor name for a season (TAF1APP-SDDREQ-116)."""
+    curr_mtime = _get_mtime()
+    if season in _champion_constructors_cache and _champion_constructors_cache[season][0] == curr_mtime:
+        return _champion_constructors_cache[season][1]
+
+    champ = ""
+    try:
+        _, _, _, c_totals, _, _ = PointTotals(season)
+        if c_totals is not None and not c_totals.empty and "Team" in c_totals.columns:
+            champ = str(c_totals.iloc[0]["Team"]).strip()
+    except Exception:
+        champ = ""
+
+    _champion_constructors_cache[season] = (curr_mtime, champ)
+    return champ
+
+
+def build_detailed_donut_svg(df_races: pd.DataFrame, entity_name: str, num_seasons: int = 5) -> str:
+    """Build high-precision interactive SVG for the Detailed Points Distribution Donut Chart (TAF1APP-SDDREQ-116).
+
+    Outer Ring: Total points in each season, colored by that season's winning constructor.
+    Inner Ring: Points per race in race order, colored matching the All Time Points Per Race chart.
+    """
+    total_pts = float(df_races["pts"].sum()) if not df_races.empty else 0.0
+
+    cx, cy = 260.0, 260.0
+    r_out_in, r_out_out = 174.0, 242.0
+    r_in_in, r_in_out = 104.0, 170.0
+
+    clean_name = "".join(c for c in entity_name if c.isalnum()) or "default"
+    svg_id = f"detailed-donut-svg-{clean_name}"
+    shadow_id = f"detailed-donut-shadow-{clean_name}"
+    hole_id = f"detailed-donut-center-hole-{clean_name}"
+
+    if total_pts <= 0:
+        return f"""
+        <svg id="{svg_id}" class="donut-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 520" width="100%" height="100%"
+             data-default-points="0"
+             data-default-type="{entity_name.upper()}"
+             data-default-meta="CAREER POINTS"
+             style="display: block; max-width: 440px; max-height: 440px; margin: 0 auto; user-select: none;">
+            <circle cx="{cx}" cy="{cy}" r="208" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="68" />
+            <circle cx="{cx}" cy="{cy}" r="137" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="66" />
+            <circle id="{hole_id}" class="donut-center-hole" cx="{cx}" cy="{cy}" r="98"
+                    fill="#15151A" stroke="rgba(255,255,255,0.08)" stroke-width="1.5" />
+            <g class="donut-svg-center-group" pointer-events="none" text-anchor="middle" font-family="'Outfit', sans-serif" style="user-select: none;">
+                <text class="donut-center-type" x="{cx}" y="230" dominant-baseline="middle"
+                      fill="#8E8E93" font-size="11" font-weight="700" letter-spacing="1">{entity_name.upper()}</text>
+                <text class="donut-center-value" x="{cx}" y="260" dominant-baseline="middle"
+                      fill="#FFFFFF" font-size="24" font-weight="900">0</text>
+                <text class="donut-center-meta" x="{cx}" y="285" dominant-baseline="middle"
+                      fill="#00b4da" font-size="10.5" font-weight="700" letter-spacing="0.5">CAREER POINTS</text>
+            </g>
+        </svg>
+        """
+
+    curr_angle = -90.0  # 12 o'clock
+    outer_paths = []
+    inner_paths = []
+
+    for s in range(1, num_seasons + 1):
+        s_races = df_races[df_races["season"] == s] if not df_races.empty else pd.DataFrame()
+        s_pts = float(s_races["pts"].sum()) if not s_races.empty else 0.0
+        if s_pts <= 0:
+            continue
+
+        s_span = (s_pts / total_pts) * 360.0
+        s_start = curr_angle
+        s_end = curr_angle + s_span
+        s_pct = (s_pts / total_pts) * 100.0
+
+        champ_team = get_season_champion_constructor(s)
+        champ_color = get_constructor_color(champ_team) if champ_team else "#00b4da"
+
+        path_d_outer = _build_arc_path(cx, cy, r_out_in, r_out_out, s_start, s_end)
+        outer_paths.append(f"""
+        <path class="donut-slice donut-season" d="{path_d_outer}" fill="{champ_color}" stroke="#15151A" stroke-width="2"
+              style="cursor: pointer; transition: opacity 0.15s ease;"
+              data-type="Season"
+              data-name="Season {s}"
+              data-pts="{s_pts:,.1f}"
+              data-meta="{s_pct:.1f}% of Career"
+              onmouseenter="window.taf1DonutEnter && window.taf1DonutEnter(this)"
+              onmouseleave="window.taf1DonutLeave && window.taf1DonutLeave(this)"
+              onclick="window.taf1DonutClick && window.taf1DonutClick(this, event)">
+            <title>Season {s}: {s_pts:,.1f} pts ({s_pct:.1f}% of Career)</title>
+        </path>
+        """)
+
+        # Inner ring: in-season races with points > 0 in race order
+        curr_race_angle = s_start
+        pos_races = s_races[s_races["pts"] > 0]
+        for _, r_row in pos_races.iterrows():
+            r_pts = float(r_row["pts"])
+            r_name = str(r_row["race"])
+            s_race_idx = int(r_row["season_race_idx"])
+            r_color = RACE_COLORS[s_race_idx % len(RACE_COLORS)]
+
+            r_span = s_span * (r_pts / s_pts)
+            r_start = curr_race_angle
+            r_end = curr_race_angle + r_span
+            curr_race_angle = r_end
+
+            r_pct_s = (r_pts / s_pts) * 100.0
+            path_d_inner = _build_arc_path(cx, cy, r_in_in, r_in_out, r_start, r_end)
+            inner_paths.append(f"""
+            <path class="donut-slice donut-race" d="{path_d_inner}" fill="{r_color}" stroke="#15151A" stroke-width="1.8"
+                  style="cursor: pointer; transition: opacity 0.15s ease;"
+                  data-type="Race"
+                  data-name="S{s} {r_name}"
+                  data-pts="{r_pts:,.1f}"
+                  data-meta="{r_pct_s:.1f}% of Season {s}"
+                  onmouseenter="window.taf1DonutEnter && window.taf1DonutEnter(this)"
+                  onmouseleave="window.taf1DonutLeave && window.taf1DonutLeave(this)"
+                  onclick="window.taf1DonutClick && window.taf1DonutClick(this, event)">
+                <title>S{s} {r_name}: {r_pts:,.1f} pts ({r_pct_s:.1f}% of Season {s})</title>
+            </path>
+            """)
+
+        curr_angle = s_end
+
+    return f"""
+    <svg id="{svg_id}" class="donut-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 520" width="100%" height="100%"
+         data-default-points="{total_pts:,.0f}"
+         data-default-type="{entity_name.upper()}"
+         data-default-meta="CAREER POINTS"
+         style="display: block; max-width: 440px; max-height: 440px; margin: 0 auto; user-select: none;"
+         onclick="window.taf1DonutBgClick && window.taf1DonutBgClick(event)">
+        <defs>
+            <filter id="{shadow_id}" x="-10%" y="-10%" width="120%" height="120%">
+                <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.5"/>
+            </filter>
+        </defs>
+
+        <!-- Outer Ring: Seasons (colored by season winning constructor) -->
+        <g id="detailed-donut-outer-ring-{clean_name}" filter="url(#{shadow_id})">
+            {''.join(outer_paths)}
+        </g>
+
+        <!-- Inner Ring: Races in Race Order (colored matching All Time Points Per Race chart) -->
+        <g id="detailed-donut-inner-ring-{clean_name}" filter="url(#{shadow_id})">
+            {''.join(inner_paths)}
+        </g>
+
+        <!-- Donut center hole (clickable to reset) -->
+        <circle id="{hole_id}" class="donut-center-hole" cx="{cx}" cy="{cy}" r="98"
+                fill="#15151A" stroke="rgba(255,255,255,0.08)" stroke-width="1.5"
+                style="cursor: pointer;"
+                onclick="window.taf1DonutReset && window.taf1DonutReset(event)" />
+
+        <!-- Center Information Display -->
+        <g class="donut-svg-center-group" pointer-events="none" text-anchor="middle" font-family="'Outfit', sans-serif" style="user-select: none;">
+            <text class="donut-center-type" x="{cx}" y="230" dominant-baseline="middle"
+                  fill="#8E8E93" font-size="11" font-weight="700" letter-spacing="1">{entity_name.upper()}</text>
+            <text class="donut-center-value" x="{cx}" y="260" dominant-baseline="middle"
+                  fill="#FFFFFF" font-size="24" font-weight="900">{total_pts:,.0f}</text>
+            <text class="donut-center-meta" x="{cx}" y="285" dominant-baseline="middle"
+                  fill="#00b4da" font-size="10.5" font-weight="700" letter-spacing="0.5">CAREER POINTS</text>
+        </g>
+    </svg>
+    """
+
+
+@rx.memo
+def memoized_detailed_donut_chart(*, html_content: rx.Var[str]) -> rx.Component:
+    """Memoized SVG container preventing React re-renders from ticker loops or unrelated state (Requirement 116)."""
+    return rx.box(
+        rx.html(html_content),
+        width="100%",
+        max_width="480px",
+    )
 
 
 def get_entity_lists(num_seasons: int = 5):
@@ -630,6 +842,8 @@ class DetailedStatsState(rx.State):
                 else:
                     item["fill"] = "#00b4da"
 
+        donut_svg = build_detailed_donut_svg(df_races, active_name, num_seasons)
+
         return {
             "badges": badges,
             "all_pos_change_data": all_pos_change_data,
@@ -641,6 +855,7 @@ class DetailedStatsState(rx.State):
             "track_pos_change_data": track_pos_change_data,
             "track_score_data": track_score_data,
             "season_start_races": season_start_races,
+            "donut_svg_markup": donut_svg,
         }
 
     @rx.var(auto_deps=False, deps=["entity_type", "selected_driver", "selected_constructor"])
@@ -683,21 +898,38 @@ class DetailedStatsState(rx.State):
     def season_start_races(self) -> list[str]:
         return self.calculated_data["season_start_races"]
 
+    @rx.var(auto_deps=False, deps=["entity_type", "selected_driver", "selected_constructor"])
+    def donut_svg_markup(self) -> str:
+        return self.calculated_data.get("donut_svg_markup", "")
 
-def chart_card(title: str, chart_component: rx.Component) -> rx.Component:
-    """Helper to wrap each chart with a prominent heading title on the main page (Requirement 79)."""
-    return rx.vstack(
-        rx.heading(
-            title,
-            size="4",
-            color="white",
-            font_weight="700",
-            margin_bottom="1",
+
+def chart_card(
+    title: str,
+    chart_component: rx.Component,
+    chart_id: str = None,
+    download_position: str = "top_right",
+) -> rx.Component:
+    """Helper to wrap each chart in a dark gray card with header and dynamic download button (Requirement 79)."""
+    header = chart_header(
+        title=title,
+        chart_id=chart_id,
+        download_position=download_position,
+    )
+    return rx.box(
+        rx.vstack(
+            header,
+            chart_component,
+            width="100%",
+            align_items="start",
+            spacing="3",
         ),
-        chart_component,
+        bg="#15151A",
+        border="1px solid #2C2C32",
+        border_radius="2xl",
+        padding=["16px", "20px", "24px"],
+        box_shadow="0 8px 24px rgba(0,0,0,0.4)",
         width="100%",
-        align_items="start",
-        spacing="2",
+        box_sizing="border-box",
         margin_bottom="8",
     )
 
@@ -727,12 +959,103 @@ def detailed_stats_view(num_seasons: int = 5) -> rx.Component:
         margin_bottom="6",
     )
 
+    # 1b. Points Distribution Donut Chart (TAF1APP-SDDREQ-116)
+    donut_download_id = "detailed-donut-download-container"
+    donut_chart_card = rx.box(
+        rx.vstack(
+            rx.hstack(
+                rx.hstack(
+                    rx.icon("pie-chart", size=18, color="#00b4da"),
+                    rx.text(
+                        "Points Distribution",
+                        font_family="Outfit",
+                        font_weight="800",
+                        font_size="16px",
+                        color="white",
+                    ),
+                    spacing="2",
+                    align="center",
+                ),
+                rx.spacer(),
+                rx.badge(
+                    f"{DetailedStatsState.active_name} Career Points",
+                    bg="rgba(0, 180, 218, 0.15)",
+                    color="#00b4da",
+                    border="1px solid rgba(0, 180, 218, 0.4)",
+                    border_radius="full",
+                    font_size="11px",
+                    font_weight="700",
+                    padding_x="8px",
+                    padding_y="3px",
+                ),
+                width="100%",
+                align="center",
+                flex_wrap="wrap",
+                gap="2",
+            ),
+            rx.text(
+                "Outer Ring: Total Points by Season (colored by season winning constructor) | Inner Ring: Points Per Race in race order (colored to match All Time Points Per Race chart). Click or hover any slice to inspect.",
+                font_size="12px",
+                color="#8E8E93",
+                margin_bottom="2",
+                white_space="normal",
+                word_break="break-word",
+                width="100%",
+                padding_x="1",
+            ),
+            # Donut SVG with native center information & download button
+            rx.box(
+                rx.center(
+                    memoized_detailed_donut_chart(html_content=DetailedStatsState.donut_svg_markup),
+                    width="100%",
+                ),
+                rx.button(
+                    rx.icon("download", size=14),
+                    on_click=lambda: DownloadState.download_chart(
+                        donut_download_id, f"{DetailedStatsState.active_name} Points Distribution"
+                    ),
+                    position="absolute",
+                    bottom="8px",
+                    right="8px",
+                    bg="rgba(0,180,218,0.15)",
+                    color="#00b4da",
+                    border="1px solid rgba(0,180,218,0.4)",
+                    border_radius="full",
+                    padding_x="10px",
+                    padding_y="6px",
+                    font_size="11px",
+                    cursor="pointer",
+                    _hover={"bg": "rgba(0,180,218,0.3)"},
+                ),
+                id=donut_download_id,
+                position="relative",
+                width="100%",
+            ),
+            width="100%",
+            spacing="3",
+        ),
+        id="detailed-donut-chart-card",
+        class_name="donut-chart-card",
+        bg="#15151A",
+        border="1px solid #2C2C32",
+        border_radius="2xl",
+        padding=["16px", "20px", "24px"],
+        box_shadow="0 8px 24px rgba(0,0,0,0.4)",
+        width="100%",
+        margin_bottom="8",
+    )
+
+    donut_chart_card = rx.fragment(
+        rx.el.script(src="/donut_chart.js?v=20260912_06"),
+        donut_chart_card,
+    )
+
     # 2. Average Positions Gained/Lost All Time (Requirement 69 & 79)
     pos_change_chart = chart_card(
         "Average Positions Gained/Lost All Time",
         zoomable_chart(
             lambda h: rx.recharts.bar_chart(
-                rx.recharts.cartesian_grid(vertical=False, stroke="rgba(255, 255, 255, 0.1)"),
+                rx.recharts.cartesian_grid(vertical=False, stroke="rgba(255, 255, 255, 0.2)"),
                 rx.recharts.reference_line(y=0, stroke="#666666", custom_attrs={"isFront": False}),
                 rx.recharts.bar(
                     rx.foreach(
@@ -752,7 +1075,10 @@ def detailed_stats_view(num_seasons: int = 5) -> rx.Component:
             chart_id="detailed_avg_pos_change",
             height=280,
             large_height=400,
-        )
+            download_position="top_right",
+        ),
+        chart_id="detailed_avg_pos_change",
+        download_position="top_right",
     )
 
     # 3. All Time Points Per Race (Requirement 71 & 79) - Dashed vertical lines behind bars at new seasons
@@ -760,7 +1086,7 @@ def detailed_stats_view(num_seasons: int = 5) -> rx.Component:
         "All Time Points Per Race",
         zoomable_chart(
             lambda h: rx.recharts.bar_chart(
-                rx.recharts.cartesian_grid(vertical=False, stroke="rgba(255, 255, 255, 0.1)"),
+                rx.recharts.cartesian_grid(vertical=False, stroke="rgba(255, 255, 255, 0.2)"),
                 rx.foreach(
                     DetailedStatsState.season_start_races,
                     lambda r_label: rx.recharts.reference_line(
@@ -787,7 +1113,10 @@ def detailed_stats_view(num_seasons: int = 5) -> rx.Component:
             chart_id="detailed_pts_per_race",
             height=280,
             large_height=400,
-        )
+            download_position="top_right",
+        ),
+        chart_id="detailed_pts_per_race",
+        download_position="top_right",
     )
 
     # 4. Placements Summary (Requirement 73 & 79)
@@ -795,7 +1124,7 @@ def detailed_stats_view(num_seasons: int = 5) -> rx.Component:
         "Placements Summary",
         zoomable_chart(
             lambda h: rx.recharts.bar_chart(
-                rx.recharts.cartesian_grid(vertical=False, stroke="rgba(255, 255, 255, 0.1)"),
+                rx.recharts.cartesian_grid(vertical=False, stroke="rgba(255, 255, 255, 0.2)"),
                 rx.recharts.bar(data_key="count", fill="#00b4da"),
                 rx.recharts.x_axis(data_key="placement", font_size=10, stroke="white"),
                 rx.recharts.y_axis(stroke="white", width=35, tick={"fill": "white", "fontSize": 10}),
@@ -808,7 +1137,10 @@ def detailed_stats_view(num_seasons: int = 5) -> rx.Component:
             chart_id="detailed_placements",
             height=250,
             large_height=360,
-        )
+            download_position="top_right",
+        ),
+        chart_id="detailed_placements",
+        download_position="top_right",
     )
 
     # 5. Positions Gained/Lost Individual (Requirement 74 & 79) - Dashed vertical lines behind bars at new seasons
@@ -816,7 +1148,7 @@ def detailed_stats_view(num_seasons: int = 5) -> rx.Component:
         "Positions Gained/Lost Individual",
         zoomable_chart(
             lambda h: rx.recharts.bar_chart(
-                rx.recharts.cartesian_grid(vertical=False, stroke="rgba(255, 255, 255, 0.1)"),
+                rx.recharts.cartesian_grid(vertical=False, stroke="rgba(255, 255, 255, 0.2)"),
                 rx.recharts.reference_line(y=0, stroke="#666666", custom_attrs={"isFront": False}),
                 rx.foreach(
                     DetailedStatsState.season_start_races,
@@ -844,7 +1176,10 @@ def detailed_stats_view(num_seasons: int = 5) -> rx.Component:
             chart_id="detailed_indiv_pos_change",
             height=280,
             large_height=400,
-        )
+            download_position="top_right",
+        ),
+        chart_id="detailed_indiv_pos_change",
+        download_position="top_right",
     )
 
     # 6. Per Track Statistics (Requirement 76 & 79) - Horizontal Bar Charts (tracks on Y-axis)
@@ -852,7 +1187,7 @@ def detailed_stats_view(num_seasons: int = 5) -> rx.Component:
         "Per Track Total Points Scored",
         zoomable_chart(
             lambda h: rx.recharts.bar_chart(
-                rx.recharts.cartesian_grid(horizontal=False, stroke="rgba(255, 255, 255, 0.1)"),
+                rx.recharts.cartesian_grid(stroke="rgba(255, 255, 255, 0.2)"),
                 rx.recharts.bar(data_key="total_points", fill="#00b4da"),
                 rx.recharts.x_axis(type_="number", stroke="white", font_size=10),
                 rx.recharts.y_axis(data_key="track", type_="category", stroke="white", font_size=9, width=110, interval=0),
@@ -866,14 +1201,17 @@ def detailed_stats_view(num_seasons: int = 5) -> rx.Component:
             chart_id="detailed_track_tot_pts",
             height=320,
             large_height=450,
-        )
+            download_position="top_right",
+        ),
+        chart_id="detailed_track_tot_pts",
+        download_position="top_right",
     )
 
     track_avg_chart = chart_card(
         "Per Track Average Points Scored",
         zoomable_chart(
             lambda h: rx.recharts.bar_chart(
-                rx.recharts.cartesian_grid(horizontal=False, stroke="rgba(255, 255, 255, 0.1)"),
+                rx.recharts.cartesian_grid(stroke="rgba(255, 255, 255, 0.2)"),
                 rx.recharts.bar(data_key="avg_points", fill="#00b4da"),
                 rx.recharts.x_axis(type_="number", stroke="white", font_size=10),
                 rx.recharts.y_axis(data_key="track", type_="category", stroke="white", font_size=9, width=110, interval=0),
@@ -887,14 +1225,17 @@ def detailed_stats_view(num_seasons: int = 5) -> rx.Component:
             chart_id="detailed_track_avg_pts",
             height=320,
             large_height=450,
-        )
+            download_position="top_right",
+        ),
+        chart_id="detailed_track_avg_pts",
+        download_position="top_right",
     )
 
     track_pos_chart = chart_card(
         "Per Track Positions Gained/Lost",
         zoomable_chart(
             lambda h: rx.recharts.bar_chart(
-                rx.recharts.cartesian_grid(horizontal=False, stroke="rgba(255, 255, 255, 0.1)"),
+                rx.recharts.cartesian_grid(stroke="rgba(255, 255, 255, 0.2)"),
                 rx.recharts.reference_line(x=0, stroke="#666666", custom_attrs={"isFront": False}),
                 rx.recharts.bar(
                     rx.foreach(
@@ -915,14 +1256,17 @@ def detailed_stats_view(num_seasons: int = 5) -> rx.Component:
             chart_id="detailed_track_pos_change",
             height=320,
             large_height=450,
-        )
+            download_position="top_right",
+        ),
+        chart_id="detailed_track_pos_change",
+        download_position="top_right",
     )
 
     track_score_chart = chart_card(
         "Statistical Track Rating Score (Best to Worst)",
         zoomable_chart(
             lambda h: rx.recharts.bar_chart(
-                rx.recharts.cartesian_grid(horizontal=False, stroke="rgba(255, 255, 255, 0.1)"),
+                rx.recharts.cartesian_grid(stroke="rgba(255, 255, 255, 0.2)"),
                 rx.recharts.bar(
                     rx.foreach(
                         DetailedStatsState.track_score_data,
@@ -942,7 +1286,10 @@ def detailed_stats_view(num_seasons: int = 5) -> rx.Component:
             chart_id="detailed_track_score",
             height=340,
             large_height=480,
-        )
+            download_position="top_right",
+        ),
+        chart_id="detailed_track_score",
+        download_position="top_right",
     )
 
     # Selection Controls (Requirement 78)
@@ -1028,6 +1375,7 @@ def detailed_stats_view(num_seasons: int = 5) -> rx.Component:
             margin_bottom="2",
         ),
         bubbles_component,
+        donut_chart_card,
         pos_change_chart,
         pts_per_race_chart,
         placements_chart,

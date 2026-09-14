@@ -322,3 +322,55 @@
 .map-segmented-control .rt-SegmentedControlItemSeparator {
     background-color: rgba(255, 255, 255, 0.15) !important;
 }
+
+/* All Time Races Cascading Columns (Responsive Shift between Cascaded and Side-by-Side) */
+.cascading-table-container {
+    container-type: inline-size;
+}
+
+.cascading-season-col {
+    margin-left: var(--cascaded-margin, 0px) !important;
+    transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s ease, border-color 0.25s ease, background-color 0.25s ease !important;
+}
+
+.cascading-season-col-1 {
+    margin-left: 0px !important;
+}
+
+/* When all columns can be seen at the same time: shift next to each other */
+@container (min-width: 820px) {
+    .cascading-season-col {
+        margin-left: 8px !important;
+    }
+    .cascading-season-col-1 {
+        margin-left: 0px !important;
+    }
+}
+
+@media (min-width: 1024px) {
+    .cascading-season-col {
+        margin-left: 8px !important;
+    }
+    .cascading-season-col-1 {
+        margin-left: 0px !important;
+    }
+}
+
+/* Bar Charts: clickable cursor and visible overflow for tag bubbles */
+.recharts-wrapper {
+    overflow: visible !important;
+}
+
+.recharts-responsive-container {
+    overflow: visible !important;
+}
+
+.recharts-bar-rectangle,
+.recharts-bar-rectangles path,
+.recharts-bar-rectangles rect,
+.recharts-rectangle {
+    cursor: pointer !important;
+}
+
+
+

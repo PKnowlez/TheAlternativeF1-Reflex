@@ -9,7 +9,14 @@ import math
 import numpy as np
 import pandas as pd
 import reflex as rx
-from the_alternative_f1.articles.components import zoomable_chart, interactive_line_chart_key
+from the_alternative_f1.articles.components import (
+    zoomable_chart,
+    interactive_line_chart_key,
+    chart_card,
+    get_download_position,
+)
+from the_alternative_f1.race_metrics import parse_status
+
 
 
 def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only_var = None, toggle_rookies_only = None, sprint_only_var = None, toggle_sprint_only = None) -> rx.Component:
@@ -39,6 +46,7 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
 
     # ── Build full data ──────────────────────────────────────────────────
     index_a = int(index_x + 0.5)
+    max_drivers = len(new_df)
     average_changed = []
     average_qualifying = []
     average_place = []
@@ -60,8 +68,53 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
         if new_df_PosChange is not None and len(new_df_PosChange.columns) > 1:
             dchg = new_df_PosChange.iloc[i, 1:index_a + 1].tolist()
 
-        valid_q = [float(q) for q in dq if q is not None and not pd.isnull(q) and q > 0]
-        valid_p = [float(p) for p in dp if p is not None and not pd.isnull(p) and p > 0]
+        raw_places = new_df_Place.iloc[i, 1:index_a + 1].tolist() if len(new_df_Place.columns) > 1 else []
+        raw_quals = new_df_Q.iloc[i, 1:index_a + 1].tolist() if len(new_df_Q.columns) > 1 else []
+
+        valid_q = []
+        valid_p = []
+
+        for j in range(index_a):
+            raw_p = raw_places[j] if j < len(raw_places) else None
+            status_p = parse_status(raw_p, season_num)
+
+            raw_q = raw_quals[j] if j < len(raw_quals) else None
+            status_q = parse_status(raw_q, season_num)
+
+            # Qualifying
+            if status_q == "DNS" or status_p == "DNS":
+                eff_q = dq[j] if j < len(dq) else None
+                if eff_q is not None and not pd.isnull(eff_q) and eff_q > 0 and status_p != "DNS":
+                    valid_q.append(float(eff_q))
+                else:
+                    valid_q.append(float(max_drivers))
+            elif status_q != "EMPTY":
+                val_q = dq[j] if j < len(dq) else None
+                if val_q is not None and not pd.isnull(val_q) and val_q > 0:
+                    valid_q.append(float(val_q))
+                elif raw_q is not None and not pd.isnull(raw_q):
+                    try:
+                        q_num = float(raw_q)
+                        if q_num > 0:
+                            valid_q.append(q_num)
+                    except (ValueError, TypeError):
+                        pass
+
+            # Place
+            if status_p == "DNS":
+                valid_p.append(float(max_drivers))
+            elif status_p != "EMPTY":
+                val_p = dp[j] if j < len(dp) else None
+                if val_p is not None and not pd.isnull(val_p) and val_p > 0:
+                    valid_p.append(float(val_p))
+                elif raw_p is not None and not pd.isnull(raw_p):
+                    try:
+                        p_num = float(raw_p)
+                        if p_num > 0:
+                            valid_p.append(p_num)
+                    except (ValueError, TypeError):
+                        pass
+
         valid_chg = [float(c) for c in dchg if c is not None and not pd.isnull(c)]
 
         avg_q = sum(valid_q) / len(valid_q) if valid_q else 0.0
@@ -99,6 +152,7 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
 
     max_pos_change_driver_len = max([len(str(item.get("driver", ""))) for item in pos_change_data] or [0])
     pos_change_driver_axis_height = max(40, max_pos_change_driver_len * 5 + 15)
+    pos_chg = get_download_position(pos_change_data, "driver")
 
     pos_change_chart = zoomable_chart(
         lambda h: rx.recharts.bar_chart(
@@ -116,18 +170,18 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
                 width=35,
                 tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
             ),
-            rx.recharts.cartesian_grid(vertical=False, stroke="rgba(0, 0, 0, 0.25)"),
+            rx.recharts.cartesian_grid(vertical=False, stroke="rgba(255, 255, 255, 0.2)"),
             rx.recharts.reference_line(y=0, stroke="#555555"),
             data=pos_change_data,
             margin={"top": 10, "right": 20, "left": 35, "bottom": 40},
-            margin_left="-10px",
             width="100%",
             height=h,
         ),
         title="Average Positions Changed",
         chart_id="pos_change_chart",
         height=300,
-        large_height=400
+        large_height=400,
+        download_position=pos_chg,
     )
 
     # ── Points Per Driver ────────────────────────────────────────────────
@@ -146,6 +200,7 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
 
     max_pts_driver_len = max([len(str(item.get("driver", ""))) for item in pts_data] or [0])
     pts_driver_axis_height = max(40, max_pts_driver_len * 5 + 15)
+    pos_pts = get_download_position(pts_data, "driver")
 
     pts_chart = zoomable_chart(
         lambda h: rx.recharts.bar_chart(
@@ -163,17 +218,17 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
                 width=35,
                 tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
             ),
-            rx.recharts.cartesian_grid(vertical=False, stroke="rgba(0, 0, 0, 0.25)"),
+            rx.recharts.cartesian_grid(vertical=False, stroke="rgba(255, 255, 255, 0.2)"),
             data=pts_data,
             margin={"top": 10, "right": 20, "left": 35, "bottom": 40},
-            margin_left="-10px",
             width="100%",
             height=h,
         ),
         title="Points Per Driver",
         chart_id="pts_chart",
         height=300,
-        large_height=400
+        large_height=400,
+        download_position=pos_pts,
     )
 
     # ── Average Qualifying Position ──────────────────────────────────────
@@ -187,6 +242,8 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
             "qualifying": round(row["average_qualifying"], 1),
             "fill": fill,
         })
+
+    pos_qual = get_download_position(is_vertical_layout=True)
 
     qual_chart = zoomable_chart(
         lambda h: rx.recharts.bar_chart(
@@ -214,17 +271,18 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
                 stroke="white",
                 style={"fontFamily": "Outfit"},
             ),
+            rx.recharts.cartesian_grid(stroke="rgba(255, 255, 255, 0.2)", stroke_dasharray="3 3"),
             data=qual_data,
             width="100%",
             height=h,
             layout="vertical",
             margin={"left": 60, "right": 25, "top": 10, "bottom": 10},
-            margin_left="-10px",
         ),
         title="Average Qualifying Position",
         chart_id="qual_chart",
         height=300,
-        large_height=400
+        large_height=400,
+        download_position=pos_qual,
     )
 
     # ── Average Place ────────────────────────────────────────────────────
@@ -237,6 +295,8 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
             "place": round(row["average_place"], 1),
             "fill": fill,
         })
+
+    pos_plc = get_download_position(is_vertical_layout=True)
 
     place_chart = zoomable_chart(
         lambda h: rx.recharts.bar_chart(
@@ -264,17 +324,18 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
                 stroke="white",
                 style={"fontFamily": "Outfit"},
             ),
+            rx.recharts.cartesian_grid(stroke="rgba(255, 255, 255, 0.2)", stroke_dasharray="3 3"),
             data=place_data,
             width="100%",
             height=h,
             layout="vertical",
             margin={"left": 60, "right": 25, "top": 10, "bottom": 10},
-            margin_left="-10px",
         ),
         title="Average Place",
         chart_id="place_chart",
         height=300,
-        large_height=400
+        large_height=400,
+        download_position=pos_plc,
     )
 
     # ── Leader badges ────────────────────────────────────────────────────
@@ -301,6 +362,7 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
         max_rookie_race_len = max([len(str(item.get("race", ""))) for item in rookie_line_data] or [0])
         rookie_race_axis_height = max(40, max_rookie_race_len * 5 + 15)
         rookie_legend_margin = max(15, rookie_race_axis_height - 30)
+        pos_rookie = get_download_position(rookie_line_data, "race")
 
         rookie_chart = zoomable_chart(
             lambda h: rx.recharts.line_chart(
@@ -321,32 +383,30 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
                     width=35,
                     tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
                 ),
-                rx.recharts.cartesian_grid(vertical=False, stroke="rgba(0, 0, 0, 0.25)"),
+                rx.recharts.cartesian_grid(vertical=False, stroke="rgba(255, 255, 255, 0.2)"),
                 data=rookie_line_data,
                 margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
-                margin_left="-10px",
                 width="100%",
                 height=h,
             ),
             title="Rookie of the Year",
             chart_id="rookie_chart",
             height=300,
-            large_height=400
+            large_height=400,
+            download_position=pos_rookie,
         )
 
-        rookie_chart_component = rx.vstack(
-            rx.text("Rookie of the Year", color="white", font_weight="700", font_size="sm"),
-            rookie_chart,
-            interactive_line_chart_key(
+        rookie_chart_component = chart_card(
+            title="Rookie of the Year",
+            chart_component=rookie_chart,
+            chart_id="rookie_chart",
+            download_position=pos_rookie,
+            extra_content=interactive_line_chart_key(
                 chart_id="rookie_chart",
                 items=[(r, driver_colors.get(r, "#555555")) for r in rookie_names],
                 title="Key (Rookies)",
                 hint="Click rookie to highlight",
             ),
-            width="100%",
-            bg="transparent",
-            padding="4",
-            border_radius="xl",
         )
 
     has_sprint = data.get("has_sprint", False)
@@ -429,28 +489,24 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
 
         # Comparison charts: 2 columns on wide, stacked on narrow
         rx.grid(
-            rx.vstack(
-                rx.text("Points Per Driver", color="white", font_weight="700", font_size="sm"),
-                pts_chart,
-                width="100%",
-                spacing="2",
-                bg="transparent",
-                padding="4",
-                border_radius="xl",
+            chart_card(
+                title="Points Per Driver",
+                chart_component=pts_chart,
+                chart_id="pts_chart",
+                download_position=pos_pts,
             ),
-            rx.vstack(
-                rx.text("Avg Positions Gained/Lost", color="white", font_weight="700", font_size="sm"),
-                pos_change_chart,
-                width="100%",
-                spacing="2",
-                bg="transparent",
-                padding="4",
-                border_radius="xl",
+            chart_card(
+                title="Avg Positions Gained/Lost",
+                chart_component=pos_change_chart,
+                chart_id="pos_change_chart",
+                download_position=pos_chg,
             ),
-            rx.vstack(
-                rx.text("Average Qualifying Position", color="white", font_weight="700", font_size="sm"),
-                qual_chart,
-                rx.text(
+            chart_card(
+                title="Average Qualifying Position",
+                chart_component=qual_chart,
+                chart_id="qual_chart",
+                download_position=pos_qual,
+                extra_content=rx.text(
                     "Qualifying Position",
                     color="white",
                     font_size="11px",
@@ -460,16 +516,13 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
                     margin_left="40px",
                     align_self="center",
                 ),
-                width="100%",
-                spacing="2",
-                bg="transparent",
-                padding="4",
-                border_radius="xl",
             ),
-            rx.vstack(
-                rx.text("Average Place", color="white", font_weight="700", font_size="sm"),
-                place_chart,
-                rx.text(
+            chart_card(
+                title="Average Place",
+                chart_component=place_chart,
+                chart_id="place_chart",
+                download_position=pos_plc,
+                extra_content=rx.text(
                     "Place",
                     color="white",
                     font_size="11px",
@@ -479,11 +532,6 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
                     margin_left="40px",
                     align_self="center",
                 ),
-                width="100%",
-                spacing="2",
-                bg="transparent",
-                padding="4",
-                border_radius="xl",
             ),
             columns=rx.breakpoints(initial="1", md="2"),
             spacing="5",

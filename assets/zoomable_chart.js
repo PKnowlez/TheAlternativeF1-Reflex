@@ -11,16 +11,37 @@
         'maxWidth', 'margin', 'top', 'left', 'bottom', 'right', 'z', 'zIndex'
     ]);
 
+    let lastChartClickTime = 0;
+
     function handleChartClick(ev) {
-        const container = ev.target ? ev.target.closest('.zoomable-chart-popout-container, [role="dialog"]') : null;
+        if (ev.target && ev.target.closest('button, [data-html2canvas-ignore="true"], .rt-Button, a, input, select, textarea')) {
+            return;
+        }
+
+        const container = ev.target ? ev.target.closest('.recharts-wrapper, .zoomable-chart-popout-container, [role="dialog"]') : null;
 
         const removeExisting = () => {
             document.querySelectorAll('.bar-value-tag-box').forEach(t => t.remove());
             document.querySelectorAll('.selected-bar-highlight').forEach(el => {
                 el.classList.remove('selected-bar-highlight');
-                if (el.dataset.origStroke !== undefined) el.style.stroke = el.dataset.origStroke;
-                if (el.dataset.origStrokeWidth !== undefined) el.style.strokeWidth = el.dataset.origStrokeWidth;
-                if (el.dataset.origFilter !== undefined) el.style.filter = el.dataset.origFilter;
+                if (el.dataset.origStroke !== undefined) {
+                    if (el.dataset.origStroke) el.style.stroke = el.dataset.origStroke;
+                    else el.style.removeProperty('stroke');
+                }
+                if (el.dataset.origStrokeWidth !== undefined) {
+                    if (el.dataset.origStrokeWidth) el.style.strokeWidth = el.dataset.origStrokeWidth;
+                    else el.style.removeProperty('stroke-width');
+                }
+                if (el.dataset.origFilter !== undefined) {
+                    if (el.dataset.origFilter) el.style.filter = el.dataset.origFilter;
+                    else el.style.removeProperty('filter');
+                }
+            });
+            document.querySelectorAll('.recharts-cartesian-grid-bg, .recharts-background, .recharts-bar-background').forEach(el => {
+                el.classList.remove('selected-bar-highlight');
+                el.style.removeProperty('stroke');
+                el.style.removeProperty('stroke-width');
+                el.style.removeProperty('filter');
             });
         };
 
@@ -53,6 +74,16 @@
             const r = ev.target.getBoundingClientRect();
             if (r.width > 0 && r.height > 0 && container.contains(ev.target)) {
                 selectedBar = ev.target;
+            }
+        }
+
+        if (!selectedBar && ev.target) {
+            const candidate = ev.target.closest('.recharts-bar-rectangle, .recharts-rectangle, .recharts-bar rect, .recharts-bar path');
+            if (candidate && container.contains(candidate)) {
+                const r = candidate.getBoundingClientRect();
+                if (r.width > 0 && r.height > 0) {
+                    selectedBar = candidate;
+                }
             }
         }
 
@@ -97,7 +128,11 @@
             return;
         }
 
+        const wasSelected = selectedBar.classList.contains('selected-bar-highlight');
         removeExisting();
+        if (wasSelected) {
+            return;
+        }
 
         selectedBar.classList.add('selected-bar-highlight');
         selectedBar.dataset.origStroke = selectedBar.style.stroke || '';
@@ -107,7 +142,6 @@
         selectedBar.style.strokeWidth = '2px';
         selectedBar.style.filter = 'drop-shadow(0px 0px 6px rgba(255, 255, 255, 0.95))';
 
-        let val = null;
         let nodeFiber = null;
         let elForFiber = selectedBar;
         while (!nodeFiber && elForFiber && elForFiber !== container) {
@@ -124,44 +158,53 @@
         let barDataKey = null;
         let chartData = null;
         let detectedLayout = 'horizontal';
+        let fiberValue = null;
+        let fiberPayload = null;
 
         while (currFiber) {
             const props = currFiber.memoizedProps || currFiber.pendingProps;
             if (props) {
-                if (props.layout) detectedLayout = props.layout;
-                if (props.dataKey && typeof props.dataKey === 'string') barDataKey = props.dataKey;
-                if (props.data && Array.isArray(props.data)) chartData = props.data;
+                if (props.layout && typeof props.layout === 'string') detectedLayout = props.layout;
+                if (props.dataKey && typeof props.dataKey === 'string' && !barDataKey) barDataKey = props.dataKey;
+                if (props.data && Array.isArray(props.data) && !chartData) chartData = props.data;
 
-                if (val === null) {
-                    if (props.value !== undefined && props.value !== null) {
-                        if (typeof props.value === 'number') {
-                            val = props.value;
-                        } else if (Array.isArray(props.value)) {
-                            val = props.value.length >= 2 ? (props.value[1] - props.value[0]) : props.value[0];
-                        } else if (typeof props.value === 'string' && !isNaN(parseFloat(props.value))) {
-                            val = parseFloat(props.value);
-                        }
-                    }
+                if (fiberValue === null && props.value !== undefined && props.value !== null) {
+                    fiberValue = props.value;
                 }
 
-                if (val === null && props.payload && typeof props.payload === 'object') {
-                    if (barDataKey && props.payload[barDataKey] !== undefined && props.payload[barDataKey] !== null) {
-                        let p = parseFloat(props.payload[barDataKey]);
-                        val = !isNaN(p) ? p : props.payload[barDataKey];
-                    } else {
-                        for (let key in props.payload) {
-                            if (!IGNORED_KEYS.has(key) && key !== 'name' && key !== 'driver' && key !== 'team' && key !== 'race' && key !== 'track' && key !== 'placement' && key !== 'place' && key !== 'fill') {
-                                let v = props.payload[key];
-                                if (typeof v === 'number' && !isNaN(v)) {
-                                    val = v;
-                                    break;
-                                }
-                            }
+                if (fiberPayload === null && props.payload && typeof props.payload === 'object') {
+                    fiberPayload = props.payload;
+                }
+            }
+            currFiber = currFiber.return;
+        }
+
+        let val = null;
+        if (fiberValue !== null) {
+            if (typeof fiberValue === 'number') {
+                val = fiberValue;
+            } else if (Array.isArray(fiberValue)) {
+                val = fiberValue.length >= 2 ? (fiberValue[1] - fiberValue[0]) : fiberValue[0];
+            } else if (typeof fiberValue === 'string' && !isNaN(parseFloat(fiberValue))) {
+                val = parseFloat(fiberValue);
+            }
+        }
+
+        if (val === null && fiberPayload) {
+            if (barDataKey && fiberPayload[barDataKey] !== undefined && fiberPayload[barDataKey] !== null) {
+                let p = parseFloat(fiberPayload[barDataKey]);
+                val = !isNaN(p) ? p : fiberPayload[barDataKey];
+            } else {
+                for (let key in fiberPayload) {
+                    if (!IGNORED_KEYS.has(key) && key !== 'name' && key !== 'driver' && key !== 'team' && key !== 'race' && key !== 'track' && key !== 'placement' && key !== 'place' && key !== 'fill') {
+                        let v = fiberPayload[key];
+                        if (typeof v === 'number' && !isNaN(v)) {
+                            val = v;
+                            break;
                         }
                     }
                 }
             }
-            currFiber = currFiber.return;
         }
 
         if (val === null && chartData) {
@@ -197,11 +240,27 @@
         }
 
         if (val === null || val === undefined) {
+            const vAttr = selectedBar.getAttribute('value') || selectedBar.getAttribute('data-value');
+            if (vAttr !== null && !isNaN(parseFloat(vAttr))) {
+                val = parseFloat(vAttr);
+            }
+        }
+
+        if (val === null || val === undefined) {
             val = 0;
         }
 
         let numVal = typeof val === 'number' ? val : parseFloat(val);
-        let displayVal = !isNaN(numVal) ? (Number.isInteger(numVal) ? numVal.toString() : numVal.toFixed(1)) : String(val);
+        let displayVal;
+        if (!isNaN(numVal)) {
+            if (Number.isInteger(numVal)) {
+                displayVal = numVal.toString();
+            } else {
+                displayVal = parseFloat(numVal.toFixed(2)).toString();
+            }
+        } else {
+            displayVal = String(val);
+        }
 
         const containerRect = container.getBoundingClientRect();
         const barRect = selectedBar.getBoundingClientRect();
@@ -209,29 +268,42 @@
         const tag = document.createElement('div');
         tag.className = 'bar-value-tag-box';
         tag.innerText = displayVal;
+        tag.dataset.value = displayVal;
 
-        const isHorizontalBarChart = detectedLayout === 'vertical';
-        let tagTop, tagLeft;
+        const isHorizontalBarChart = (detectedLayout === 'vertical') || (barRect.width > barRect.height * 1.5);
+        let tagTop, tagLeft, tagTransform, arrowDir;
+
+        const isNegative = !isNaN(numVal) && numVal < 0;
 
         if (isHorizontalBarChart) {
-            const isNegative = !isNaN(numVal) && numVal < 0;
             tagTop = (barRect.top - containerRect.top + (barRect.height / 2)) + 'px';
-            tagLeft = isNegative
-                ? (barRect.left - containerRect.left - 12) + 'px'
-                : (barRect.right - containerRect.left + 12) + 'px';
+            if (isNegative) {
+                tagLeft = (barRect.left - containerRect.left - 12) + 'px';
+                tagTransform = 'translate(-100%, -50%)';
+                arrowDir = 'right';
+            } else {
+                tagLeft = (barRect.right - containerRect.left + 12) + 'px';
+                tagTransform = 'translate(0%, -50%)';
+                arrowDir = 'left';
+            }
         } else {
-            const isNegative = !isNaN(numVal) && numVal < 0;
-            tagTop = isNegative 
-                ? (barRect.bottom - containerRect.top + 8) + 'px'
-                : Math.max(0, barRect.top - containerRect.top - 38) + 'px';
             tagLeft = (barRect.left - containerRect.left + (barRect.width / 2)) + 'px';
+            tagTransform = 'translateX(-50%)';
+            if (isNegative) {
+                tagTop = (barRect.bottom - containerRect.top + 10) + 'px';
+                arrowDir = 'up';
+            } else {
+                tagTop = (barRect.top - containerRect.top - 38) + 'px';
+                arrowDir = 'down';
+            }
         }
+        tag.dataset.arrowDir = arrowDir;
 
         Object.assign(tag.style, {
             position: 'absolute',
             top: tagTop,
             left: tagLeft,
-            transform: isHorizontalBarChart ? 'translateY(-50%)' : 'translateX(-50%)',
+            transform: tagTransform,
             backgroundColor: '#FFFFFF',
             color: '#111115',
             fontSize: '13px',
@@ -243,62 +315,65 @@
             zIndex: '10000',
             whiteSpace: 'nowrap',
             fontFamily: 'Outfit, sans-serif',
-            border: '2px solid #00b4da'
+            border: '2px solid #00b4da',
+            lineHeight: '1.2'
         });
 
         const arrow = document.createElement('div');
         if (!isHorizontalBarChart) {
-            const isNegative = !isNaN(numVal) && numVal < 0;
             if (isNegative) {
                 Object.assign(arrow.style, {
                     position: 'absolute',
-                    top: '-7px',
+                    top: '-5px',
                     left: '50%',
-                    transform: 'translateX(-50%)',
-                    width: '0',
-                    height: '0',
-                    borderLeft: '6px solid transparent',
-                    borderRight: '6px solid transparent',
-                    borderBottom: '7px solid #FFFFFF'
+                    width: '8px',
+                    height: '8px',
+                    backgroundColor: '#FFFFFF',
+                    borderLeft: '2px solid #00b4da',
+                    borderTop: '2px solid #00b4da',
+                    transform: 'translateX(-50%) rotate(45deg)',
+                    zIndex: '10001'
                 });
             } else {
                 Object.assign(arrow.style, {
                     position: 'absolute',
-                    bottom: '-7px',
+                    bottom: '-5px',
                     left: '50%',
-                    transform: 'translateX(-50%)',
-                    width: '0',
-                    height: '0',
-                    borderLeft: '6px solid transparent',
-                    borderRight: '6px solid transparent',
-                    borderTop: '7px solid #FFFFFF'
+                    width: '8px',
+                    height: '8px',
+                    backgroundColor: '#FFFFFF',
+                    borderRight: '2px solid #00b4da',
+                    borderBottom: '2px solid #00b4da',
+                    transform: 'translateX(-50%) rotate(45deg)',
+                    zIndex: '10001'
                 });
             }
         } else {
-            const isNegative = !isNaN(numVal) && numVal < 0;
             if (isNegative) {
                 Object.assign(arrow.style, {
                     position: 'absolute',
-                    right: '-7px',
+                    right: '-5px',
                     top: '50%',
-                    transform: 'translateY(-50%)',
-                    width: '0',
-                    height: '0',
-                    borderTop: '6px solid transparent',
-                    borderBottom: '6px solid transparent',
-                    borderLeft: '7px solid #FFFFFF'
+                    width: '8px',
+                    height: '8px',
+                    backgroundColor: '#FFFFFF',
+                    borderRight: '2px solid #00b4da',
+                    borderTop: '2px solid #00b4da',
+                    transform: 'translateY(-50%) rotate(45deg)',
+                    zIndex: '10001'
                 });
             } else {
                 Object.assign(arrow.style, {
                     position: 'absolute',
-                    left: '-7px',
+                    left: '-5px',
                     top: '50%',
-                    transform: 'translateY(-50%)',
-                    width: '0',
-                    height: '0',
-                    borderTop: '6px solid transparent',
-                    borderBottom: '6px solid transparent',
-                    borderRight: '7px solid #FFFFFF'
+                    width: '8px',
+                    height: '8px',
+                    backgroundColor: '#FFFFFF',
+                    borderLeft: '2px solid #00b4da',
+                    borderBottom: '2px solid #00b4da',
+                    transform: 'translateY(-50%) rotate(45deg)',
+                    zIndex: '10001'
                 });
             }
         }
@@ -307,13 +382,39 @@
         container.appendChild(tag);
     }
 
+    function safeChartClickHandler(ev) {
+        if (Date.now() - lastChartClickTime < 50) return;
+        lastChartClickTime = Date.now();
+        handleChartClick(ev);
+    }
+
     if (window.__zoomableChartHandler) {
         document.removeEventListener('click', window.__zoomableChartHandler, true);
-        document.removeEventListener('pointerdown', window.__zoomableChartHandler, true);
+        if (window.__zoomableChartResizeHandler) {
+            window.removeEventListener('resize', window.__zoomableChartResizeHandler);
+        }
     }
-    window.__zoomableChartHandler = handleChartClick;
-    document.addEventListener('click', handleChartClick, true);
-    document.addEventListener('pointerdown', handleChartClick, true);
+    window.__zoomableChartHandler = safeChartClickHandler;
+    window.__zoomableChartResizeHandler = () => {
+        document.querySelectorAll('.bar-value-tag-box').forEach(t => t.remove());
+        document.querySelectorAll('.selected-bar-highlight').forEach(el => {
+            el.classList.remove('selected-bar-highlight');
+            if (el.dataset.origStroke) el.style.stroke = el.dataset.origStroke;
+            else el.style.removeProperty('stroke');
+            if (el.dataset.origStrokeWidth) el.style.strokeWidth = el.dataset.origStrokeWidth;
+            else el.style.removeProperty('stroke-width');
+            if (el.dataset.origFilter) el.style.filter = el.dataset.origFilter;
+            else el.style.removeProperty('filter');
+        });
+        document.querySelectorAll('.recharts-cartesian-grid-bg, .recharts-background, .recharts-bar-background').forEach(el => {
+            el.classList.remove('selected-bar-highlight');
+            el.style.removeProperty('stroke');
+            el.style.removeProperty('stroke-width');
+            el.style.removeProperty('filter');
+        });
+    };
+    document.addEventListener('click', safeChartClickHandler, true);
+    window.addEventListener('resize', window.__zoomableChartResizeHandler);
 
     // ── Interactive Line Chart Highlighting (Animated Power Rankings Style) ─────
     const LINE_HIGHLIGHT_STORE = (window.__TAF1_LINE_STORE = window.__TAF1_LINE_STORE || {});

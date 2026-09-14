@@ -3,6 +3,7 @@ import os
 import httpx
 import json
 import html
+from typing import Any
 
 R2_CUSTOM_DOMAIN = os.getenv("R2_CUSTOM_DOMAIN", "https://pknowlez.com").rstrip("/")
 
@@ -156,6 +157,41 @@ class DownloadState(rx.State):
             const height = bbox.height || 450;
             const scaleFactor = 3.125; // 300 DPI / 96 DPI
             const titleSpace = 50;
+
+            // Capture any active selected value tag bubble for this chart
+            let tagData = null;
+            let tagEl = container.querySelector('.bar-value-tag-box');
+            if (!tagEl) {{
+                const allTags = document.querySelectorAll('.bar-value-tag-box');
+                for (const t of allTags) {{
+                    const tr = t.getBoundingClientRect();
+                    if (tr.right >= bbox.left - 60 && tr.left <= bbox.right + 60 && tr.bottom >= bbox.top - 60 && tr.top <= bbox.bottom + 60) {{
+                        tagEl = t;
+                        break;
+                    }}
+                }}
+            }}
+            if (tagEl) {{
+                const tr = tagEl.getBoundingClientRect();
+                let arrowDir = tagEl.dataset.arrowDir;
+                if (!arrowDir) {{
+                    const arrowChild = tagEl.querySelector('div');
+                    if (arrowChild) {{
+                        if (arrowChild.style.left === '-5px') arrowDir = 'left';
+                        else if (arrowChild.style.right === '-5px') arrowDir = 'right';
+                        else if (arrowChild.style.top === '-5px') arrowDir = 'up';
+                        else if (arrowChild.style.bottom === '-5px') arrowDir = 'down';
+                    }}
+                }}
+                tagData = {{
+                    relX: tr.left - bbox.left,
+                    relY: tr.top - bbox.top,
+                    width: tr.width,
+                    height: tr.height,
+                    valText: (tagEl.dataset.value || tagEl.innerText || '').trim(),
+                    arrowDir: arrowDir || 'down'
+                }};
+            }}
             
             const triggerFileDownload = (href, downloadFilename) => {{
                 const downloadLink = document.createElement('a');
@@ -177,7 +213,7 @@ class DownloadState(rx.State):
             const fallbackPngExport = async () => {{
                 try {{
                     const html2canvas = await loadHtml2Canvas();
-                    const computedBg = getComputedStyle(document.documentElement).getPropertyValue('--main-bg-color').trim() || '#47474c';
+                    const computedBg = '#15151A';
                     const chartCanvas = await html2canvas(container, {{
                         scale: scaleFactor,
                         backgroundColor: computedBg,
@@ -195,7 +231,7 @@ class DownloadState(rx.State):
             // Try to fetch, convert and inline Outfit font from Google Fonts dynamically
             let fontCss = "";
             try {{
-                const cssResponse = await fetch("https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap");
+                const cssResponse = await fetch("https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap");
                 let cssText = await cssResponse.text();
                 const urlRegex = /url\\(['"]?(https:\\/\\/fonts\\.gstatic\\.com\\/[^'")\\s]+)['"]?\\)/g;
                 let match;
@@ -231,6 +267,15 @@ class DownloadState(rx.State):
             if (!clonedSvg.getAttribute('viewBox')) {{
                 clonedSvg.setAttribute('viewBox', `0 0 ${{width}} ${{height}}`);
             }}
+
+            // Ensure highlighted selected bar is visible with crisp white border
+            const selectedInClone = clonedSvg.querySelector('.selected-bar-highlight');
+            if (selectedInClone) {{
+                selectedInClone.setAttribute('stroke', '#FFFFFF');
+                selectedInClone.setAttribute('stroke-width', '2.5');
+                selectedInClone.setAttribute('stroke-linecap', 'round');
+                selectedInClone.setAttribute('stroke-linejoin', 'round');
+            }}
             
             const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
             style.type = 'text/css';
@@ -249,14 +294,17 @@ class DownloadState(rx.State):
             const image = new Image();
             image.crossOrigin = 'anonymous';
 
-            image.onload = () => {{
+            image.onload = async () => {{
                 try {{
+                    if (document.fonts && document.fonts.ready) {{
+                        await document.fonts.ready;
+                    }}
                     const canvas = document.createElement('canvas');
                     canvas.width = width * scaleFactor;
                     canvas.height = (height + titleSpace) * scaleFactor;
                     const context = canvas.getContext('2d');
                     
-                    const computedColor = getComputedStyle(document.documentElement).getPropertyValue('--main-bg-color').trim() || '#47474c';
+                    const computedColor = '#15151A';
                     
                     context.fillStyle = computedColor;
                     context.fillRect(0, 0, canvas.width, canvas.height);
@@ -267,6 +315,110 @@ class DownloadState(rx.State):
                     context.fillText("{title}", 20 * scaleFactor, (titleSpace / 2) * scaleFactor);
                     
                     context.drawImage(image, 0, titleSpace * scaleFactor, width * scaleFactor, height * scaleFactor);
+
+                    // Draw the selected bar value tag bubble if present
+                    if (tagData && tagData.valText) {{
+                        const x = tagData.relX * scaleFactor;
+                        const y = (titleSpace + tagData.relY) * scaleFactor;
+                        const w = tagData.width * scaleFactor;
+                        const h = tagData.height * scaleFactor;
+                        const r = Math.min(6 * scaleFactor, h / 2);
+                        const arrowSize = 5 * scaleFactor;
+                        const arrowDepth = 5 * scaleFactor;
+                        const dir = tagData.arrowDir;
+
+                        context.beginPath();
+                        if (dir === 'down') {{
+                            context.moveTo(x + r, y);
+                            context.lineTo(x + w - r, y);
+                            context.arcTo(x + w, y, x + w, y + r, r);
+                            context.lineTo(x + w, y + h - r);
+                            context.arcTo(x + w, y + h, x + w - r, y + h, r);
+                            context.lineTo(x + w / 2 + arrowSize, y + h);
+                            context.lineTo(x + w / 2, y + h + arrowDepth);
+                            context.lineTo(x + w / 2 - arrowSize, y + h);
+                            context.lineTo(x + r, y + h);
+                            context.arcTo(x, y + h, x, y + h - r, r);
+                            context.lineTo(x, y + r);
+                            context.arcTo(x, y, x + r, y, r);
+                        }} else if (dir === 'up') {{
+                            context.moveTo(x + r, y);
+                            context.lineTo(x + w / 2 - arrowSize, y);
+                            context.lineTo(x + w / 2, y - arrowDepth);
+                            context.lineTo(x + w / 2 + arrowSize, y);
+                            context.lineTo(x + w - r, y);
+                            context.arcTo(x + w, y, x + w, y + r, r);
+                            context.lineTo(x + w, y + h - r);
+                            context.arcTo(x + w, y + h, x + w - r, y + h, r);
+                            context.lineTo(x + r, y + h);
+                            context.arcTo(x, y + h, x, y + h - r, r);
+                            context.lineTo(x, y + r);
+                            context.arcTo(x, y, x + r, y, r);
+                        }} else if (dir === 'left') {{
+                            context.moveTo(x + r, y);
+                            context.lineTo(x + w - r, y);
+                            context.arcTo(x + w, y, x + w, y + r, r);
+                            context.lineTo(x + w, y + h - r);
+                            context.arcTo(x + w, y + h, x + w - r, y + h, r);
+                            context.lineTo(x + r, y + h);
+                            context.arcTo(x, y + h, x, y + h - r, r);
+                            context.lineTo(x, y + h / 2 + arrowSize);
+                            context.lineTo(x - arrowDepth, y + h / 2);
+                            context.lineTo(x, y + h / 2 - arrowSize);
+                            context.lineTo(x, y + r);
+                            context.arcTo(x, y, x + r, y, r);
+                        }} else if (dir === 'right') {{
+                            context.moveTo(x + r, y);
+                            context.lineTo(x + w - r, y);
+                            context.arcTo(x + w, y, x + w, y + r, r);
+                            context.lineTo(x + w, y + h / 2 - arrowSize);
+                            context.lineTo(x + w + arrowDepth, y + h / 2);
+                            context.lineTo(x + w, y + h / 2 + arrowSize);
+                            context.lineTo(x + w, y + h - r);
+                            context.arcTo(x + w, y + h, x + w - r, y + h, r);
+                            context.lineTo(x + r, y + h);
+                            context.arcTo(x, y + h, x, y + h - r, r);
+                            context.lineTo(x, y + r);
+                            context.arcTo(x, y, x + r, y, r);
+                        }} else {{
+                            context.moveTo(x + r, y);
+                            context.lineTo(x + w - r, y);
+                            context.arcTo(x + w, y, x + w, y + r, r);
+                            context.lineTo(x + w, y + h - r);
+                            context.arcTo(x + w, y + h, x + w - r, y + h, r);
+                            context.lineTo(x + r, y + h);
+                            context.arcTo(x, y + h, x, y + h - r, r);
+                            context.lineTo(x, y + r);
+                            context.arcTo(x, y, x + r, y, r);
+                        }}
+                        context.closePath();
+
+                        // Fill with drop shadow
+                        context.save();
+                        context.shadowColor = 'rgba(0, 0, 0, 0.6)';
+                        context.shadowBlur = 10 * scaleFactor;
+                        context.shadowOffsetY = 3 * scaleFactor;
+                        context.fillStyle = '#FFFFFF';
+                        context.fill();
+                        context.restore();
+
+                        // Crisp teal border
+                        context.save();
+                        context.strokeStyle = '#00b4da';
+                        context.lineWidth = 2 * scaleFactor;
+                        context.lineJoin = 'round';
+                        context.stroke();
+                        context.restore();
+
+                        // Value text
+                        context.save();
+                        context.fillStyle = '#111115';
+                        context.font = `800 ${{Math.round(13 * scaleFactor)}}px Outfit, -apple-system, BlinkMacSystemFont, sans-serif`;
+                        context.textAlign = 'center';
+                        context.textBaseline = 'middle';
+                        context.fillText(tagData.valText, x + w / 2, y + h / 2);
+                        context.restore();
+                    }}
                     
                     const pngURL = canvas.toDataURL('image/png');
                     triggerFileDownload(pngURL, targetFilename);
@@ -383,75 +535,164 @@ def zoomable_chart_script() -> rx.Component:
     return rx.fragment()
 
 
-def zoomable_chart(chart_factory, title: str, chart_id: str, height: int = 350, large_height: int = 450) -> rx.Component:
-    """Wraps a chart component to make it expandable in a modal dialog with a dynamic background download PNG button."""
-    
-    small_chart_trigger = rx.box(
-        chart_factory(height),
-        id=f"card-{chart_id}",
-        custom_attrs={"data-chart-id": chart_id},
-        class_name="zoomable-chart-small-container",
-        cursor="pointer",
-        width="100%",
-        border_radius="md",
-        transition="transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out",
-        _hover={
-            "transform": "scale(1.005)",
-            "box_shadow": "0 4px 20px rgba(0,0,0,0.15)",
-        },
+def chart_download_button(chart_id: str, title: str, **kwargs) -> rx.Component:
+    """Download PNG button for charts with consistent styling and html2canvas ignore tag."""
+    styles = {
+        "bg": "rgba(0,180,218,0.15)",
+        "color": "#00b4da",
+        "border": "1px solid rgba(0,180,218,0.4)",
+        "border_radius": "full",
+        "padding_x": "10px",
+        "padding_y": "6px",
+        "font_size": "11px",
+        "cursor": "pointer",
+        "_hover": {"bg": "rgba(0,180,218,0.3)"},
+        "custom_attrs": {"data-html2canvas-ignore": "true"},
+    }
+    styles.update(kwargs)
+    return rx.button(
+        rx.icon("download", size=14),
+        on_click=lambda: DownloadState.download_chart(chart_id, title),
+        **styles,
     )
+
+
+def get_download_position(
+    data: Any = None,
+    x_key: str = "race",
+    threshold: int = 5,
+    is_vertical_layout: bool = False,
+    default: str = "bottom_right",
+) -> str:
+    """Determine whether the download button should be in the 'top_right' or 'bottom_right'.
     
-    return rx.dialog.root(
-            rx.dialog.trigger(small_chart_trigger),
-            rx.dialog.content(
-                # Close button (X) in the top-right corner
-                rx.dialog.close(
-                    rx.button(
-                        rx.icon("x", size=16),
-                        variant="ghost",
-                        color="white",
-                        position="absolute",
-                        top="12px",
-                        right="12px",
-                        _hover={"bg": "#00b4da"},
-                        cursor="pointer",
-                    ),
-                ),
-                # Modal layout (Large chart + Title + Download button)
-                rx.vstack(
-                    rx.text(title, color="white", font_weight="700", font_size="md", align_self="start", margin_bottom="2"),
-                    rx.box(
-                        chart_factory(large_height),
-                        id=chart_id,
-                        class_name="zoomable-chart-popout-container",
-                        width="100%",
-                        position="relative",
-                        outline="none",
-                        style={"outline": "none", "boxShadow": "none"},
-                    ),
-                    rx.button(
-                        rx.hstack(
-                            rx.icon("download", size=16),
-                            rx.text("Download PNG"),
-                            spacing="2",
-                        ),
-                        on_click=lambda: DownloadState.download_chart(chart_id, title),
-                        bg="#00b4da",
-                        color="white",
-                        _hover={"bg": "#009bbd"},
-                        cursor="pointer",
-                        margin_top="4",
-                    ),
-                    align="center",
-                    width="100%",
-                    spacing="4",
-                ),
-                bg="var(--main-bg-color)",
-                border="1px solid #5a5a60",
-                max_width="90vw",
-                width=["100%", "90vw", "800px"],
-            ),
+    If the furthest x-axis point has a label length > threshold (default 5 letters)
+    or the chart uses vertical layout (horizontal bars where bottom-right overlaps x-ticks),
+    returns 'top_right' so the button is placed in line with the title in the top right.
+    Otherwise returns 'bottom_right'.
+    """
+    if is_vertical_layout:
+        return "top_right"
+    if isinstance(data, list) and len(data) > 0:
+        last_item = data[-1]
+        if isinstance(last_item, dict):
+            last_val = str(last_item.get(x_key, ""))
+            if len(last_val) > threshold:
+                return "top_right"
+            return "bottom_right"
+    return default
+
+
+def chart_header(
+    title: str,
+    chart_id: str = None,
+    download_position: str = "bottom_right",
+    icon: str = None,
+    font_size: str = "16px",
+) -> rx.Component:
+    """Chart card header row.
+    
+    If download_position is 'top_right', places the download button in the top right
+    in line with the title.
+    """
+    title_element = rx.hstack(
+        rx.icon(icon, size=18, color="#00b4da") if icon else rx.fragment(),
+        rx.text(title, color="white", font_weight="800", font_family="Outfit", font_size=font_size),
+        spacing="2",
+        align="center",
+    )
+    if download_position == "top_right" and chart_id:
+        return rx.hstack(
+            title_element,
+            rx.spacer(),
+            chart_download_button(chart_id, title),
+            width="100%",
+            align="center",
         )
+    return title_element
+
+
+def zoomable_chart(
+    chart_factory,
+    title: str,
+    chart_id: str,
+    height: int = 350,
+    large_height: int = 450,
+    download_position: str = "bottom_right",
+) -> rx.Component:
+    """Wraps a chart component with an optional bottom-right download PNG button.
+    
+    If download_position == 'bottom_right', renders the button at the bottom right.
+    If download_position == 'top_right', the button is rendered in the card header
+    in line with the title.
+    """
+    children = [chart_factory(height)]
+    if download_position == "bottom_right":
+        children.append(
+            chart_download_button(
+                chart_id,
+                title,
+                position="absolute",
+                bottom="8px",
+                right="8px",
+            )
+        )
+    return rx.box(
+        *children,
+        id=chart_id,
+        position="relative",
+        width="100%",
+    )
+
+
+def chart_card(
+    title: str,
+    chart_component: rx.Component,
+    chart_id: str = None,
+    download_position: str = "bottom_right",
+    icon: str = None,
+    extra_content: rx.Component = None,
+    card_id: str = None,
+    padding: list = None,
+    border_radius: str = "2xl",
+    box_shadow: str = "0 8px 24px rgba(0,0,0,0.4)",
+    margin_bottom: str = None,
+    font_size: str = "16px",
+) -> rx.Component:
+    """Unified dark gray card container for charts with consistent padding, border, and header."""
+    header = chart_header(
+        title=title,
+        chart_id=chart_id,
+        download_position=download_position,
+        icon=icon,
+        font_size=font_size,
+    )
+    vstack_children = [header, chart_component]
+    if extra_content is not None:
+        vstack_children.append(extra_content)
+
+    box_kwargs = {
+        "bg": "#15151A",
+        "border": "1px solid #2C2C32",
+        "border_radius": border_radius,
+        "padding": padding or ["16px", "20px", "24px"],
+        "box_shadow": box_shadow,
+        "width": "100%",
+        "box_sizing": "border-box",
+    }
+    if card_id:
+        box_kwargs["id"] = card_id
+    if margin_bottom:
+        box_kwargs["margin_bottom"] = margin_bottom
+
+    return rx.box(
+        rx.vstack(
+            *vstack_children,
+            width="100%",
+            spacing="3",
+        ),
+        **box_kwargs,
+    )
 
 
 def interactive_line_chart_key(

@@ -18,7 +18,13 @@ import reflex as rx
 
 from the_alternative_f1.all_time_stats.Functions import get_excel_sheet, file as excel_file_path
 from the_alternative_f1.constructor_colors import CONSTRUCTOR_COLORS, get_constructor_color
-from the_alternative_f1.articles.components import zoomable_chart, DownloadState, interactive_line_chart_key
+from the_alternative_f1.articles.components import (
+    zoomable_chart,
+    DownloadState,
+    interactive_line_chart_key,
+    chart_card,
+    get_download_position,
+)
 
 # Comprehensive Driver Colors across all 24 drivers
 ALL_TIME_DRIVER_COLORS = {
@@ -185,6 +191,38 @@ def precompute_summary_data(num_seasons: int = 5) -> dict:
                 if drv not in driver_debut:
                     driver_debut[drv] = race_idx
 
+    # Track competing constructors and drivers per season (from each season's Excel sheet)
+    season_constructors = defaultdict(set)
+    season_drivers = defaultdict(set)
+
+    for s, df_s in season_dfs.items():
+        if df_s is None or df_s.empty:
+            continue
+        for _, row in df_s.iterrows():
+            drv = str(row.get("Driver", "")).strip()
+            team = str(row.get("Team", "")).strip()
+            if drv and drv.lower() not in ("nan", "none", "—", "", "-"):
+                season_drivers[s].add(drv)
+            if team and team.lower() not in ("nan", "none", "—", "", "-"):
+                season_constructors[s].add(team)
+
+    # Determine the last race index where each constructor and driver is actively competing
+    constructor_last_competing_race = {}
+    for team in constructor_debut:
+        r_indices = [
+            idx for idx, (s, _, _) in enumerate(all_races)
+            if team in season_constructors.get(s, set())
+        ]
+        constructor_last_competing_race[team] = max(r_indices) if r_indices else constructor_debut[team]
+
+    driver_last_competing_race = {}
+    for drv in driver_debut:
+        r_indices = [
+            idx for idx, (s, _, _) in enumerate(all_races)
+            if drv in season_drivers.get(s, set())
+        ]
+        driver_last_competing_race[drv] = max(r_indices) if r_indices else driver_debut[drv]
+
     # Build chronological running cumulative points
     team_line_data = []
     driver_line_data = []
@@ -235,19 +273,22 @@ def precompute_summary_data(num_seasons: int = 5) -> dict:
                     driver_totals[drv] += pts
                     constructor_driver_breakdown[team][drv] += pts
 
-        # Record snapshot for Constructor Line Chart (omitting leading zeroes before debut)
+        # Record snapshot for Constructor Line Chart (omitting before debut and after retirement)
         c_point = {"race": label}
         for team, debut_idx in constructor_debut.items():
-            if race_idx >= debut_idx:
+            last_idx = constructor_last_competing_race.get(team, debut_idx)
+            if debut_idx <= race_idx <= last_idx:
                 c_point[team] = round(running_team_pts[team], 1)
         team_line_data.append(c_point)
 
-        # Record snapshot for Driver Line Chart (omitting leading zeroes before debut)
+        # Record snapshot for Driver Line Chart (omitting before debut and after retirement)
         d_point = {"race": label}
         for drv, debut_idx in driver_debut.items():
-            if race_idx >= debut_idx:
+            last_idx = driver_last_competing_race.get(drv, debut_idx)
+            if debut_idx <= race_idx <= last_idx:
                 d_point[drv] = round(running_driver_pts[drv], 1)
-                # Record team for stint tracking
+            # Record team for stint tracking
+            if race_idx >= debut_idx:
                 driver_team_per_race[drv].append(race_driver_team.get(drv, ""))
             else:
                 driver_team_per_race[drv].append("")  # not yet debuted
@@ -276,23 +317,27 @@ def precompute_summary_data(num_seasons: int = 5) -> dict:
 
     for drv in sorted_drivers:
         debut_idx = driver_debut.get(drv, 0)
+        last_race_idx = driver_last_competing_race.get(drv, debut_idx)
         teams_per_race = driver_team_per_race.get(drv, [])
         stints: list[dict] = []
         current_team = ""
-        stint_start = debut_idx
 
-        for r_idx in range(debut_idx, num_races):
+        for r_idx in range(debut_idx, last_race_idx + 1):
             team_at_r = teams_per_race[r_idx] if r_idx < len(teams_per_race) else ""
             if team_at_r and team_at_r != current_team:
                 if current_team and stints:
                     # Close current stint at previous race
                     stints[-1]["end_race_idx"] = r_idx - 1
                 current_team = team_at_r
-                stints.append({"team": current_team, "start_race_idx": r_idx, "end_race_idx": num_races - 1})
+                stints.append({"team": current_team, "start_race_idx": r_idx, "end_race_idx": last_race_idx})
 
         if not stints and current_team == "":
             # Driver had no team info recorded — fall back to single stint with unknown team
-            stints.append({"team": "", "start_race_idx": debut_idx, "end_race_idx": num_races - 1})
+            stints.append({"team": "", "start_race_idx": debut_idx, "end_race_idx": last_race_idx})
+
+        if stints:
+            # Ensure the final stint ends at the driver's last competing race
+            stints[-1]["end_race_idx"] = last_race_idx
 
         driver_stints[drv] = stints
         # Last team = last stint's team (may be empty if tracking failed)
@@ -754,9 +799,11 @@ def summary_all_time_view(num_seasons: int = 5) -> rx.Component:
     )
 
     # ── 2. Left Second Row: Constructor Line Chart (SDDREQ-110, SDDREQ-112) ───
+    pos_team_line = get_download_position(team_line_data, "race")
+
     constructor_line_chart = zoomable_chart(
         lambda h: rx.recharts.line_chart(
-            rx.recharts.cartesian_grid(vertical=False, stroke="rgba(255, 255, 255, 0.08)"),
+            rx.recharts.cartesian_grid(vertical=False, stroke="rgba(255, 255, 255, 0.2)"),
             *[
                 rx.recharts.reference_line(
                     x=r_label,
@@ -770,7 +817,7 @@ def summary_all_time_view(num_seasons: int = 5) -> rx.Component:
                     data_key=team,
                     stroke=get_constructor_color(team),
                     stroke_width=2,
-                    dot={"fill": get_constructor_color(team), "stroke": get_constructor_color(team), "r": 1.5},
+                    dot=False,
                     name=team,
                     type_="monotone",
                 )
@@ -793,7 +840,6 @@ def summary_all_time_view(num_seasons: int = 5) -> rx.Component:
             ),
             data=team_line_data,
             margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
-            margin_left="-10px",
             width="100%",
             height=h,
         ),
@@ -801,6 +847,7 @@ def summary_all_time_view(num_seasons: int = 5) -> rx.Component:
         chart_id="constructor_all_time_line_chart",
         height=360,
         large_height=480,
+        download_position=pos_team_line,
     )
 
     # ── Constructor interactive key ──────────────────────────────────────
@@ -818,6 +865,7 @@ def summary_all_time_view(num_seasons: int = 5) -> rx.Component:
     driver_stint_line_data = ds["driver_stint_line_data"]
     driver_stints = ds["driver_stints"]
     driver_last_team = ds["driver_last_team"]
+    pos_driver_line = get_download_position(driver_stint_line_data, "race")
 
     # Build one Line component per driver-stint
     driver_stint_lines = []
@@ -835,11 +883,7 @@ def summary_all_time_view(num_seasons: int = 5) -> rx.Component:
                     data_key=stint_key,
                     stroke=stint_color,
                     stroke_width=2,
-                    dot={
-                        "fill": stint_color,
-                        "stroke": stint_color,
-                        "r": 1.5,
-                    },
+                    dot=False,
                     # All stints for the same driver share the same `name` so the
                     # key highlight logic matches all of them together.
                     name=drv,
@@ -850,7 +894,7 @@ def summary_all_time_view(num_seasons: int = 5) -> rx.Component:
 
     driver_line_chart = zoomable_chart(
         lambda h: rx.recharts.line_chart(
-            rx.recharts.cartesian_grid(vertical=False, stroke="rgba(255, 255, 255, 0.08)"),
+            rx.recharts.cartesian_grid(vertical=False, stroke="rgba(255, 255, 255, 0.2)"),
             *[
                 rx.recharts.reference_line(
                     x=r_label,
@@ -877,7 +921,6 @@ def summary_all_time_view(num_seasons: int = 5) -> rx.Component:
             ),
             data=driver_stint_line_data,
             margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
-            margin_left="-10px",
             width="100%",
             height=h,
         ),
@@ -885,6 +928,7 @@ def summary_all_time_view(num_seasons: int = 5) -> rx.Component:
         chart_id="driver_all_time_line_chart",
         height=360,
         large_height=480,
+        download_position=pos_driver_line,
     )
 
     # ── Driver interactive key ───────────────────────────────────────────
@@ -903,19 +947,25 @@ def summary_all_time_view(num_seasons: int = 5) -> rx.Component:
         hint="Click driver to highlight",
     )
 
-    # Assemble line chart cards
-    constructor_card = rx.vstack(
-        constructor_line_chart,
-        constructor_legend_expander,
-        width="100%",
-        spacing="2",
+    # Assemble line chart cards sharing the same dark gray card with their keys
+    constructor_card = chart_card(
+        title="Constructor All Time Points Progression",
+        chart_component=constructor_line_chart,
+        chart_id="constructor_all_time_line_chart",
+        download_position=pos_team_line,
+        icon="trending-up",
+        extra_content=constructor_legend_expander,
+        card_id="constructor-all-time-line-card",
     )
 
-    driver_card = rx.vstack(
-        driver_line_chart,
-        driver_legend_expander,
-        width="100%",
-        spacing="2",
+    driver_card = chart_card(
+        title="Driver All Time Points Progression",
+        chart_component=driver_line_chart,
+        chart_id="driver_all_time_line_chart",
+        download_position=pos_driver_line,
+        icon="trending-up",
+        extra_content=driver_legend_expander,
+        card_id="driver-all-time-line-card",
     )
 
     second_row = rx.grid(

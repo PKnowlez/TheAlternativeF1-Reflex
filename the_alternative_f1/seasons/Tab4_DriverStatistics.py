@@ -9,7 +9,11 @@ import math
 import numpy as np
 import pandas as pd
 import reflex as rx
-from the_alternative_f1.articles.components import zoomable_chart
+from the_alternative_f1.articles.components import (
+    zoomable_chart,
+    chart_card,
+    get_download_position,
+)
 
 
 def is_truthy(val) -> bool:
@@ -217,6 +221,7 @@ def Tab4(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
         # Calculate dynamic x-axis height for pts_chart
         max_race_len = max([len(str(item.get("race", ""))) for item in pts_bar_data] or [0])
         race_axis_height = max(40, max_race_len * 5 + 15)
+        pos_pts = get_download_position(pts_bar_data, "race")
 
         pts_chart = zoomable_chart(
             lambda h: rx.recharts.bar_chart(
@@ -227,17 +232,17 @@ def Tab4(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
                     width=35,
                     tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
                 ),
-                rx.recharts.cartesian_grid(vertical=False, stroke="rgba(0, 0, 0, 0.25)"),
+                rx.recharts.cartesian_grid(vertical=False, stroke="rgba(255, 255, 255, 0.2)"),
                 data=pts_bar_data,
                 margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
-                margin_left="-10px",
                 width="100%",
                 height=h,
             ),
             title=f"{driver_name} - Points Per Race",
             chart_id=f"pts_chart_{i}",
             height=220,
-            large_height=350
+            large_height=350,
+            download_position=pos_pts,
         )
 
         # ── Best finish ──────────────────────────────────────────────────
@@ -282,6 +287,7 @@ def Tab4(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
         # Calculate dynamic x-axis height for placement_chart
         max_place_len = max([len(str(item.get("place", ""))) for item in placement_data] or [0])
         place_axis_height = max(40, max_place_len * 5 + 15)
+        pos_plc = get_download_position(placement_data, "place")
 
         placement_chart = zoomable_chart(
             lambda h: rx.recharts.bar_chart(
@@ -292,17 +298,17 @@ def Tab4(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
                     width=35,
                     tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
                 ),
-                rx.recharts.cartesian_grid(vertical=False, stroke="rgba(0, 0, 0, 0.25)"),
+                rx.recharts.cartesian_grid(vertical=False, stroke="rgba(255, 255, 255, 0.2)"),
                 data=placement_data,
                 margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
-                margin_left="-10px",
                 width="100%",
                 height=h,
             ),
             title=f"{driver_name} - Placements Summary",
             chart_id=f"placement_chart_{i}",
             height=220,
-            large_height=350
+            large_height=350,
+            download_position=pos_plc,
         )
 
         # ── Fastest laps ────────────────────────────────────────────────
@@ -352,6 +358,7 @@ def Tab4(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
         # Calculate dynamic x-axis height for pos_chart
         max_pos_race_len = max([len(str(item.get("race", ""))) for item in pos_change_data] or [0])
         pos_race_axis_height = max(40, max_pos_race_len * 5 + 15)
+        pos_gained = get_download_position(pos_change_data, "race")
 
         pos_chart = zoomable_chart(
             lambda h: rx.recharts.bar_chart(
@@ -362,18 +369,18 @@ def Tab4(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
                     width=35,
                     tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
                 ),
-                rx.recharts.cartesian_grid(vertical=False, stroke="rgba(0, 0, 0, 0.25)"),
+                rx.recharts.cartesian_grid(vertical=False, stroke="rgba(255, 255, 255, 0.2)"),
                 rx.recharts.reference_line(y=0, stroke="#555555"),
                 data=pos_change_data,
                 margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
-                margin_left="-10px",
                 width="100%",
                 height=h,
             ),
             title=f"{driver_name} - Positions Gained/Lost",
             chart_id=f"pos_chart_{i}",
             height=220,
-            large_height=350
+            large_height=350,
+            download_position=pos_gained,
         )
 
         # ── Averages (only across races actually competed) ──────────────
@@ -518,23 +525,35 @@ def Tab4(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
                         ),
                         # Charts
                         rx.grid(
-                            rx.vstack(
-                                rx.text("Points Per Race", color="#AAAAAA", font_size="xs"),
-                                pts_chart,
-                                width="100%",
-                                spacing="1",
+                            chart_card(
+                                title="Points Per Race",
+                                chart_component=pts_chart,
+                                chart_id=f"pts_chart_{i}",
+                                download_position=pos_pts,
+                                border_radius="xl",
+                                padding=["12px", "16px", "16px"],
+                                box_shadow="0 4px 16px rgba(0,0,0,0.3)",
+                                font_size="13px",
                             ),
-                            rx.vstack(
-                                rx.text("Placements Summary", color="#AAAAAA", font_size="xs"),
-                                placement_chart,
-                                width="100%",
-                                spacing="1",
+                            chart_card(
+                                title="Placements Summary",
+                                chart_component=placement_chart,
+                                chart_id=f"placement_chart_{i}",
+                                download_position=pos_plc,
+                                border_radius="xl",
+                                padding=["12px", "16px", "16px"],
+                                box_shadow="0 4px 16px rgba(0,0,0,0.3)",
+                                font_size="13px",
                             ),
-                            rx.vstack(
-                                rx.text("Positions Gained/Lost", color="#AAAAAA", font_size="xs"),
-                                pos_chart,
-                                width="100%",
-                                spacing="1",
+                            chart_card(
+                                title="Positions Gained/Lost",
+                                chart_component=pos_chart,
+                                chart_id=f"pos_chart_{i}",
+                                download_position=pos_gained,
+                                border_radius="xl",
+                                padding=["12px", "16px", "16px"],
+                                box_shadow="0 4px 16px rgba(0,0,0,0.3)",
+                                font_size="13px",
                             ),
                             columns=rx.breakpoints(initial="1", md="3"),
                             spacing="4",

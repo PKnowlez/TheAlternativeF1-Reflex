@@ -7,7 +7,12 @@ with per-race bar charts and callout stats.
 import math
 import reflex as rx
 import pandas as pd
-from the_alternative_f1.articles.components import zoomable_chart, DownloadState
+from the_alternative_f1.articles.components import (
+    zoomable_chart,
+    DownloadState,
+    chart_card,
+    get_download_position,
+)
 def Tab3(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only=None) -> rx.Component:
     """Render the Constructor Statistics tab."""
     team_df = data["team_df"]
@@ -81,6 +86,8 @@ def Tab3(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
             )
         )
 
+    pos_stacked = get_download_position(is_vertical_layout=True)
+
     stacked_chart = zoomable_chart(
         lambda h: rx.recharts.bar_chart(
             *bar_components,
@@ -93,19 +100,19 @@ def Tab3(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
                 tick={"textAnchor": "start", "dx": -65, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
             ),
             rx.recharts.x_axis(type_="number", font_size=8, stroke="white"),
-            rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
+            rx.recharts.cartesian_grid(stroke="rgba(255, 255, 255, 0.2)", stroke_dasharray="3 3"),
             data=stacked_data,
             width="100%",
             height=h,
             layout="vertical",
             bar_gap=0,
             margin={"left": 75, "right": 10, "top": 10, "bottom": 10},
-            margin_left="-10px",
         ),
         title="Stacked Constructor Points",
         chart_id="stacked_chart",
         height=max(300, len(sorted_teams) * 45),
-        large_height=max(450, len(sorted_teams) * 55)
+        large_height=max(450, len(sorted_teams) * 55),
+        download_position=pos_stacked,
     )
 
     # ── Individual constructor accordions ────────────────────────────────
@@ -152,6 +159,7 @@ def Tab3(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
         # Calculate dynamic x-axis height
         max_race_len = max([len(str(item.get("race", ""))) for item in bar_data] or [0])
         race_axis_height = max(40, max_race_len * 5 + 15)
+        pos_team_chart = get_download_position(bar_data, "race")
 
         team_chart = zoomable_chart(
             lambda h: rx.recharts.bar_chart(
@@ -162,17 +170,17 @@ def Tab3(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
                     width=35,
                     tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
                 ),
-                rx.recharts.cartesian_grid(vertical=False, stroke="rgba(0, 0, 0, 0.25)"),
+                rx.recharts.cartesian_grid(vertical=False, stroke="rgba(255, 255, 255, 0.2)"),
                 data=bar_data,
                 margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
-                margin_left="-10px",
                 width="100%",
                 height=h,
             ),
             title=f"{team_name} Race Results",
             chart_id=f"team_chart_{idx}",
             height=250,
-            large_height=350
+            large_height=350,
+            download_position=pos_team_chart,
         )
 
         bg_color = "#525259" if idx % 2 == 0 else "#3C3C41"
@@ -234,7 +242,16 @@ def Tab3(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
                             align="center",
                             width="100%",
                         ),
-                        team_chart,
+                        chart_card(
+                            title=f"{team_name} Race Results",
+                            chart_component=team_chart,
+                            chart_id=f"team_chart_{idx}",
+                            download_position=pos_team_chart,
+                            border_radius="xl",
+                            padding=["12px", "16px", "20px"],
+                            box_shadow="0 4px 16px rgba(0,0,0,0.3)",
+                            font_size="13px",
+                        ),
                         width="100%",
                         spacing="3",
                     ),
@@ -281,23 +298,15 @@ def Tab3(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
         ),
         rx.grid(
             # Left: Stacked chart
-            rx.vstack(
-                rx.text(
-                    "Stacked Constructor Points",
-                    color="white",
-                    font_weight="700",
-                    font_size="sm",
-                ),
-                rx.box(
+            chart_card(
+                title="Stacked Constructor Points",
+                chart_component=rx.box(
                     stacked_chart,
                     width="100%",
                     overflow_x="auto",
                 ),
-                width="100%",
-                spacing="3",
-                bg="transparent",
-                padding="4",
-                border_radius="xl",
+                chart_id="stacked_chart",
+                download_position=pos_stacked,
             ),
             # Right: Individual constructors
             rx.vstack(

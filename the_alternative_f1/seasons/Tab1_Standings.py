@@ -6,7 +6,13 @@ scrollable modal popups for full standings tables.
 
 import pandas as pd
 import reflex as rx
-from the_alternative_f1.articles.components import zoomable_chart, DownloadState, interactive_line_chart_key
+from the_alternative_f1.articles.components import (
+    zoomable_chart,
+    DownloadState,
+    interactive_line_chart_key,
+    chart_card,
+    get_download_position,
+)
 from the_alternative_f1.constructor_colors import get_constructor_color
 from the_alternative_f1.all_time_stats.SummaryAllTime import _build_arc_path, _get_driver_shade
 
@@ -178,6 +184,7 @@ def Tab1(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
     team_names = list(team_colors.keys())
     # Filter to only teams present in the data
     teams_in_data = [t for t in constructor_totals["Team"]]
+    pos_team_line = get_download_position(team_line_data, "race")
 
     constructor_line_chart = zoomable_chart(
         lambda h: rx.recharts.line_chart(
@@ -198,17 +205,17 @@ def Tab1(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
                 width=35,
                 tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
             ),
-            rx.recharts.cartesian_grid(vertical=False, stroke="rgba(0, 0, 0, 0.25)"),
+            rx.recharts.cartesian_grid(vertical=False, stroke="rgba(255, 255, 255, 0.2)"),
             data=team_line_data,
             margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
-            margin_left="-10px",
             width="100%",
             height=h,
         ),
         title="Constructor's Championship",
         chart_id="constructor_line_chart",
         height=350,
-        large_height=450
+        large_height=450,
+        download_position=pos_team_line,
     )
 
     # ── Constructor interactive key ──────────────────────────────────────
@@ -221,6 +228,7 @@ def Tab1(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
 
     # ── Driver line chart ────────────────────────────────────────────────
     drivers_in_data = list(driver_totals["Driver"])
+    pos_driver_line = get_download_position(driver_line_data, "race")
 
     driver_line_chart = zoomable_chart(
         lambda h: rx.recharts.line_chart(
@@ -241,17 +249,17 @@ def Tab1(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
                 width=35,
                 tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
             ),
-            rx.recharts.cartesian_grid(vertical=False, stroke="rgba(0, 0, 0, 0.25)"),
+            rx.recharts.cartesian_grid(vertical=False, stroke="rgba(255, 255, 255, 0.2)"),
             data=driver_line_data,
             margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
-            margin_left="-10px",
             width="100%",
             height=h,
         ),
         title="Driver's Championship",
         chart_id="driver_line_chart",
         height=350,
-        large_height=450
+        large_height=450,
+        download_position=pos_driver_line,
     )
 
     # ── Driver interactive key ───────────────────────────────────────────
@@ -270,6 +278,7 @@ def Tab1(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
 
     max_team_len = max([len(str(item.get("team", ""))) for item in constructor_bar_data] or [0])
     team_axis_height = max(40, max_team_len * 5 + 15)
+    pos_team_bar = get_download_position(constructor_bar_data, "team")
 
     constructor_bar_chart = zoomable_chart(
         lambda h: rx.recharts.bar_chart(
@@ -283,17 +292,17 @@ def Tab1(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
                 width=35,
                 tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
             ),
-            rx.recharts.cartesian_grid(vertical=False, stroke="rgba(0, 0, 0, 0.25)"),
+            rx.recharts.cartesian_grid(vertical=False, stroke="rgba(255, 255, 255, 0.2)"),
             data=constructor_bar_data,
             margin={"top": 10, "right": 20, "left": 35, "bottom": 40},
-            margin_left="-10px",
             width="100%",
             height=h,
         ),
         title="Constructor Points",
         chart_id="constructor_bar_chart",
         height=300,
-        large_height=400
+        large_height=400,
+        download_position=pos_team_bar,
     )
 
     # ── Driver points bar chart data ─────────────────────────────────────
@@ -304,6 +313,7 @@ def Tab1(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
 
     max_driver_len = max([len(str(item.get("driver", ""))) for item in driver_bar_data] or [0])
     driver_axis_height = max(40, max_driver_len * 5 + 15)
+    pos_driver_bar = get_download_position(driver_bar_data, "driver")
 
     driver_bar_chart = zoomable_chart(
         lambda h: rx.recharts.bar_chart(
@@ -317,17 +327,17 @@ def Tab1(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
                 width=35,
                 tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
             ),
-            rx.recharts.cartesian_grid(vertical=False, stroke="rgba(0, 0, 0, 0.25)"),
+            rx.recharts.cartesian_grid(vertical=False, stroke="rgba(255, 255, 255, 0.2)"),
             data=driver_bar_data,
             margin={"top": 10, "right": 20, "left": 35, "bottom": 40},
-            margin_left="-10px",
             width="100%",
             height=h,
         ),
         title="Driver Points",
         chart_id="driver_bar_chart",
         height=300,
-        large_height=400
+        large_height=400,
+        download_position=pos_driver_bar,
     )
 
     # ── Full standings table helper ──────────────────────────────────────
@@ -715,28 +725,38 @@ def Tab1(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
         # Charts: 2 columns on wide, stacked on narrow
         rx.grid(
             rx.vstack(
-                rx.text("Constructor's Championship", color="white", font_weight="700", font_size="sm"),
-                constructor_line_chart,
-                constructor_legend_expander,
-                rx.text("Constructor Points", color="white", font_weight="700", font_size="sm"),
-                constructor_bar_chart,
+                chart_card(
+                    title="Constructor's Championship",
+                    chart_component=constructor_line_chart,
+                    chart_id="constructor_line_chart",
+                    download_position=pos_team_line,
+                    extra_content=constructor_legend_expander,
+                ),
+                chart_card(
+                    title="Constructor Points",
+                    chart_component=constructor_bar_chart,
+                    chart_id="constructor_bar_chart",
+                    download_position=pos_team_bar,
+                ),
                 width="100%",
-                spacing="4",
-                bg="transparent",
-                padding="4",
-                border_radius="xl",
+                spacing="5",
             ),
             rx.vstack(
-                rx.text("Driver's Championship", color="white", font_weight="700", font_size="sm"),
-                driver_line_chart,
-                driver_legend_expander,
-                rx.text("Driver Points", color="white", font_weight="700", font_size="sm"),
-                driver_bar_chart,
+                chart_card(
+                    title="Driver's Championship",
+                    chart_component=driver_line_chart,
+                    chart_id="driver_line_chart",
+                    download_position=pos_driver_line,
+                    extra_content=driver_legend_expander,
+                ),
+                chart_card(
+                    title="Driver Points",
+                    chart_component=driver_bar_chart,
+                    chart_id="driver_bar_chart",
+                    download_position=pos_driver_bar,
+                ),
                 width="100%",
-                spacing="4",
-                bg="transparent",
-                padding="4",
-                border_radius="xl",
+                spacing="5",
             ),
             columns=rx.breakpoints(initial="1", md="2"),
             spacing="5",

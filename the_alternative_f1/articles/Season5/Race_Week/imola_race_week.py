@@ -58,7 +58,7 @@ article = {
             ),
             rx.text(
                 "Though, what we do know about Imola is that it is a punishing track when it comes to track limits. Margins are razor thin, passing must be \
-                    incredibly precise, and mistakes can add up quickly over the course of a race distance. Sector 1 kicks off within an incredible run to the \
+                    incredibly precise, and mistakes can add up quickly over the course of a race distance. Sector 1 kicks off with an incredible run to the \
                         first turn. The slight bend in the run up allows for a couple unique lines to be gambled with throughout the race, but probably not \
                             during the first lap for those seriously trying to win. \
                                 After the first chicane, drivers will have a moment to get on the throttle early and challenge their rivals early into the next higher speed chicane. \

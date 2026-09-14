@@ -193,7 +193,8 @@ def races_all_time_view(num_seasons: int) -> rx.Component:
                 width=f"{col_w}px",
                 min_width=f"{col_w}px",
                 max_width=f"{col_w}px",
-                margin_left=margin_l,
+                class_name=f"cascading-season-col cascading-season-col-{s}",
+                style={"--cascaded-margin": margin_l},
                 position="relative",
                 z_index=rx.cond(is_active, 20, s),
                 bg=rx.cond(is_active, "#1A1A26", "#121218"),
@@ -204,7 +205,6 @@ def races_all_time_view(num_seasons: int) -> rx.Component:
                     "0 8px 24px rgba(0, 180, 218, 0.35), 0 4px 12px rgba(0,0,0,0.8)",
                     "0 3px 10px rgba(0,0,0,0.5)",
                 ),
-                transition="all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
                 cursor="pointer",
                 on_click=select_fn(s),
                 flex_shrink="0",
@@ -244,6 +244,7 @@ def races_all_time_view(num_seasons: int) -> rx.Component:
                     spacing="2",
                     align_items="stretch",
                 ),
+                class_name="cascading-table-container",
                 overflow_x="auto",
                 width="100%",
                 padding="3",
@@ -267,8 +268,8 @@ def races_all_time_view(num_seasons: int) -> rx.Component:
             ),
             rx.text(
                 f"Podium finishers for every race across Season 1 – Season {num_seasons}. "
-                "Season columns feature a cascading ~70% overlap with Season 5 as the default top layer on the far right. "
-                "Click any season column or tab to flip that column to the top layer.",
+                "Season columns display side-by-side on wide screens and smoothly cascade with a ~70% overlap on narrower screens. "
+                "Click any season column or tab to inspect or flip that column to the top layer.",
                 color="#AAAAAA",
                 font_size="sm",
                 padding_x="2%",

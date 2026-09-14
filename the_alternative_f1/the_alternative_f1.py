@@ -3013,18 +3013,52 @@ def memoized_power_rankings_chart(*, html_content: rx.Var[str]) -> rx.Component:
 
 def power_rankings_trajectory_graph() -> rx.Component:
     """The interactive animated bump chart showing power ranking trajectories."""
-    return rx.vstack(
-        rx.text(
-            "Ranking Trajectory",
-            color="white",
-            font_size="lg",
-            font_weight="bold",
-            margin_bottom="2",
-            padding_left="2.5%",
-            padding_top="2.5%",
+    return rx.box(
+        rx.vstack(
+            rx.text(
+                "Ranking Trajectory",
+                color="white",
+                font_family="Outfit",
+                font_size="16px",
+                font_weight="800",
+                margin_bottom="2",
+            ),
+            rx.box(
+                memoized_power_rankings_chart(html_content=State.power_rankings_chart_html),
+                rx.button(
+                    rx.icon("download", size=14),
+                    on_click=lambda: DownloadState.download_chart(
+                        "power_rankings_chart_container",
+                        f"Season_{State.selected_season}_Power_Rankings_Trajectory",
+                    ),
+                    position="absolute",
+                    bottom="8px",
+                    right="8px",
+                    bg="rgba(0,180,218,0.15)",
+                    color="#00b4da",
+                    border="1px solid rgba(0,180,218,0.4)",
+                    border_radius="full",
+                    padding_x="10px",
+                    padding_y="6px",
+                    font_size="11px",
+                    cursor="pointer",
+                    _hover={"bg": "rgba(0,180,218,0.3)"},
+                    custom_attrs={"data-html2canvas-ignore": "true"},
+                ),
+                id="power_rankings_chart_container",
+                position="relative",
+                width="100%",
+            ),
+            width="100%",
+            spacing="2",
         ),
-        memoized_power_rankings_chart(html_content=State.power_rankings_chart_html),
         width="100%",
+        bg="#15151A",
+        border="1px solid #2C2C32",
+        border_radius="2xl",
+        padding=["16px", "20px", "24px"],
+        box_shadow="0 8px 24px rgba(0,0,0,0.4)",
+        box_sizing="border-box",
     )
 
 
@@ -3184,14 +3218,7 @@ def power_rankings_view() -> rx.Component:
             margin_bottom="4",
         ),
         # Trajectory Graph Container
-        rx.box(
-            power_rankings_trajectory_graph(),
-            width="100%",
-            bg="#18181C",
-            border="1px solid #2C2C32",
-            padding="4",
-            border_radius="xl",
-        ),
+        power_rankings_trajectory_graph(),
         width="100%",
         spacing="4",
     )
@@ -3320,7 +3347,7 @@ app = rx.App(
         rx.el.script(src="/power_rankings_chart.js?v=20260911_01"),
         rx.el.script(src="/stats_map.js"),
         rx.el.script(src="/donut_chart.js?v=20260912_06"),
-        rx.el.script(src="/zoomable_chart.js?v=20260912_05"),
+        rx.el.script(src="/zoomable_chart.js?v=20260913_06"),
     ],
 )
 app.add_page(index)

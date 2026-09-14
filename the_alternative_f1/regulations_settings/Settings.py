@@ -34,7 +34,7 @@ def Settings() -> rx.Component:
         ("Rules & Flags", "On"),
         ("Corner Cutting Stringency", "Strict*"),
         ("Parc Ferme Rules", "On"),
-        ("Pit Stop Experience", "Immersive"),
+        ("Pit Stop Experience", "Broadcast"),
         ("Safety Car", "Increased"),
         ("Safety Car Experience", "Immersive"),
         ("Formation Lap", "Off"),
