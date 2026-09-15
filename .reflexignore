@@ -1,0 +1,29 @@
+# Build artifacts and zips
+*.zip
+backend.zip
+frontend.zip
+
+# Large design files & media sources
+photoshop_sources/
+*.mp4
+*.mov
+*.psd
+
+# Virtual environment & development caches
+.venv/
+venv/
+ENV/
+.web/
+.states/
+reflex.lock/
+__pycache__/
+*.py[cod]
+*$py.class
+scratch/
+
+# Database and secrets
+*.db
+*.sqlite
+.env
+r2_credentials.env
+comments.json
