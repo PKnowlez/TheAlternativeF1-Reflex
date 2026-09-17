@@ -76,6 +76,7 @@ from the_alternative_f1.all_time_stats.RacesAllTime import races_all_time_view
 from the_alternative_f1.all_time_stats.DetailedAllTime import detailed_stats_view
 from the_alternative_f1.all_time_stats.SummaryAllTime import summary_all_time_view
 from the_alternative_f1.all_time_stats.MapAllTime import stats_map_view
+from the_alternative_f1.all_time_stats.TeammateNetwork import teammate_network_view
 from the_alternative_f1.seasons import seasons, LATEST_SEASON
 from the_alternative_f1.seasons.Calculations import Calculations
 from the_alternative_f1.seasons.Tab0_LeagueNews import Tab0
@@ -2378,10 +2379,10 @@ def _stats_tab_button(label: str, tab_key: str) -> rx.Component:
         label,
         bg=rx.cond(State.selected_stats_tab == tab_key, "#00b4da", "#18181C"),
         color="white",
-        font_size=["7px", "8px", "9px"],
+        font_size=["6.5px", "7.5px", "8.5px"],
         font_weight="bold",
         width="26px",
-        style={"writingMode": "vertical-rl"},
+        style={"writingMode": "vertical-rl", "whiteSpace": "nowrap"},
         border_radius="0px 8px 8px 0px",
         border="1px solid #2D2D32",
         border_left="none",
@@ -2395,7 +2396,7 @@ def _stats_tab_button(label: str, tab_key: str) -> rx.Component:
 
 
 def stats_view() -> rx.Component:
-    """All Time Stats view with sidebar tabs for Constructors, Drivers, Races, Detailed, and Map."""
+    """All Time Stats view with sidebar tabs for Constructors, Drivers, Races, Detailed, Map, and Teammate Network."""
     stats_tabs = [
         ("SUMMARY", "summary"),
         ("CONSTRUCTORS", "constructors"),
@@ -2403,6 +2404,7 @@ def stats_view() -> rx.Component:
         ("RACES", "races"),
         ("DETAILED", "detailed"),
         ("MAP", "map"),
+        ("NETWORK", "network"),
     ]
 
     return rx.hstack(
@@ -2443,7 +2445,15 @@ def stats_view() -> rx.Component:
                             rx.cond(
                                 State.selected_stats_tab == "detailed",
                                 detailed_stats_view(NUM_SEASONS),
-                                stats_map_view(),
+                                rx.cond(
+                                    State.selected_stats_tab == "map",
+                                    stats_map_view(),
+                                    rx.cond(
+                                        State.selected_stats_tab == "network",
+                                        teammate_network_view(),
+                                        rx.box(),
+                                    ),
+                                ),
                             ),
                         ),
                     ),
@@ -3359,6 +3369,8 @@ app = rx.App(
         rx.el.script(src="/stats_map.js"),
         rx.el.script(src="/donut_chart.js?v=20260912_06"),
         rx.el.script(src="/zoomable_chart.js?v=20260913_06"),
+        rx.el.script(src="/teammate_network.js?v=20260915_02"),
+        rx.el.script(src="/circuit_replay.js?v=20260915_06"),
     ],
 )
 app.add_page(index)

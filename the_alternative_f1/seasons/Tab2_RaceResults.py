@@ -4,10 +4,111 @@ Accordion of completed races showing full race results tables.
 Dynamically scales with the number of races in the season.
 """
 
+import json
 import math
+import re
+from pathlib import Path
 
 import pandas as pd
 import reflex as rx
+
+
+# Load precomputed circuit spline geometries at module load
+_CIRCUIT_TRACKS = {}
+try:
+    _tracks_path = Path(__file__).resolve().parent.parent.parent / "assets" / "circuit_tracks.json"
+    if not _tracks_path.exists():
+        _tracks_path = Path("assets/circuit_tracks.json")
+    if _tracks_path.exists():
+        with open(_tracks_path, "r", encoding="utf-8") as _f:
+            _CIRCUIT_TRACKS = json.load(_f)
+except Exception as _e:
+    print("Warning: could not load circuit_tracks.json:", _e)
+
+
+def _get_track_data(race_name: str) -> dict:
+    if not _CIRCUIT_TRACKS or not race_name:
+        return {}
+    if race_name in _CIRCUIT_TRACKS:
+        return _CIRCUIT_TRACKS[race_name]
+
+    # 1. Extract track name after colon and space (e.g. "Post-Season: Monaco", "Pre-Season: Mexico")
+    clean = race_name
+    if ":" in clean:
+        clean = clean.split(":", 1)[1].strip()
+    elif clean.lower().startswith("pre-season") or clean.lower().startswith("post-season"):
+        clean = re.sub(r"^(pre-season|post-season)[\s:-]+(test\s+)?", "", clean, flags=re.IGNORECASE).strip()
+
+    if clean in _CIRCUIT_TRACKS:
+        return _CIRCUIT_TRACKS[clean]
+
+    # 2. Known track aliases
+    aliases = {
+        "vegas": "Las Vegas",
+        "barcelona": "Spain",
+        "sakhir": "Bahrain",
+    }
+    if clean.lower() in aliases and aliases[clean.lower()] in _CIRCUIT_TRACKS:
+        return _CIRCUIT_TRACKS[aliases[clean.lower()]]
+
+    # 3. Strip sprint / reverse suffixes
+    stripped = clean.replace(" Sprint", "").replace(" (S)", "").replace(" Reverse", "").strip()
+    if stripped in _CIRCUIT_TRACKS:
+        return _CIRCUIT_TRACKS[stripped]
+    if stripped.lower() in aliases and aliases[stripped.lower()] in _CIRCUIT_TRACKS:
+        return _CIRCUIT_TRACKS[aliases[stripped.lower()]]
+
+    # 4. Case-insensitive search
+    for k, v in _CIRCUIT_TRACKS.items():
+        if k.lower() in (race_name.lower(), clean.lower(), stripped.lower()):
+            return v
+    return {}
+
+
+def _build_circuit_replay_box(race_name: str, drivers_payload: list, track_data: dict = None) -> rx.Component:
+    """Build the interactive Mini-Map Circuit Replay component for an expanded race (TAF1APP-SDDFEAT-15)."""
+    payload_str = json.dumps(drivers_payload)
+    track_str = json.dumps(track_data) if track_data else "{}"
+
+    return rx.box(
+        rx.el.canvas(
+            custom_attrs={"width": "1920", "height": "920"},
+            style={
+                "width": "100%",
+                "height": "100%",
+                "display": "block",
+                "background": "transparent",
+                "backgroundColor": "transparent",
+                "border": "none",
+                "boxShadow": "none",
+            },
+        ),
+        class_name="taf1-circuit-replay",
+        data_race_name=race_name,
+        data_drivers=payload_str,
+        data_track_data=track_str,
+        bg="transparent",
+        background="transparent",
+        border="none",
+        box_shadow="none",
+        style={
+            "background": "transparent !important",
+            "backgroundColor": "transparent !important",
+            "border": "none !important",
+            "boxShadow": "none !important",
+            "outline": "none !important",
+        },
+        overflow="visible",
+        width=["100%", "240px", "260px", "275px"],
+        aspect_ratio="1920 / 920",
+        max_width="100%",
+        flex_shrink="0",
+        margin_top=["0px", "-60px", "-70px", "-75px"],
+        position="relative",
+        z_index="10",
+        cursor="pointer",
+        title="Click to pause/play replay",
+    )
 
 
 def is_truthy(val) -> bool:
@@ -18,7 +119,7 @@ def is_truthy(val) -> bool:
     return str(val).strip().upper() in ("Y", "YES", "TRUE", "1")
 
 
-def _build_manual_race_item(race: dict, idx: int, prefix: str, bg_color: str = "transparent", team_colors: dict = None) -> rx.Component:
+def _build_manual_race_item(race: dict, idx: int, prefix: str, bg_color: str = "transparent", team_colors: dict = None, driver_colors: dict = None) -> rx.Component:
     """Helper to build an accordion item for a custom manual pre-season or post-season race."""
     race_name = race.get("name", "Manual Race")
     results = race.get("results", [])
@@ -192,12 +293,60 @@ def _build_manual_race_item(race: dict, idx: int, prefix: str, bg_color: str = "
         padding_top="0",
     )
 
+    # Prepare manual replay payload (TAF1APP-SDDFEAT-15)
+    manual_replay_drivers = []
+    for r in sorted_results:
+        d_name = str(r.get("driver", "—"))
+        d_team = str(r.get("team", "—"))
+        d_color = (driver_colors.get(d_name) if driver_colors else None) or (team_colors.get(d_team, "#00b4da") if team_colors else "#00b4da")
+        p_val = r.get("place", 99)
+        try:
+            p_num = int(float(p_val))
+        except (ValueError, TypeError):
+            p_num = 99
+        q_val = r.get("qualifying", r.get("starting", 99))
+        try:
+            q_num = int(float(q_val))
+        except (ValueError, TypeError):
+            q_num = 99
+        is_dnf = str(p_val).upper() in ("DNF", "DNS", "DSQ") or p_num >= 21
+        manual_replay_drivers.append({
+            "name": d_name,
+            "team": d_team,
+            "color": d_color,
+            "grid_pos": q_num,
+            "finish_pos": p_num,
+            "is_dnf": is_dnf,
+        })
+    manual_by_grid = sorted(manual_replay_drivers, key=lambda x: (x["grid_pos"], x["finish_pos"]))
+    for gr, rd in enumerate(manual_by_grid, 1):
+        rd["grid_pos"] = gr
+    manual_by_finish = sorted(manual_replay_drivers, key=lambda x: (x["is_dnf"], x["finish_pos"]))
+    for fr, rd in enumerate(manual_by_finish, 1):
+        rd["finish_pos"] = fr
+
+    manual_track_data = _get_track_data(race_name)
+    manual_replay_component = _build_circuit_replay_box(race_name, manual_replay_drivers, manual_track_data)
+
     race_content = rx.vstack(
-        rx.text(
-            f"Winner: {winner} — {constructor}",
-            color="#00b4da",
-            font_weight="700",
-            font_size="md",
+        rx.flex(
+            rx.vstack(
+                rx.text(
+                    f"Winner: {winner} — {constructor}",
+                    color="#00b4da",
+                    font_weight="700",
+                    font_size="md",
+                ),
+                align_items="start",
+                justify="start",
+                flex="1",
+            ),
+            manual_replay_component,
+            justify="between",
+            align="start",
+            width="100%",
+            wrap="wrap",
+            gap="3",
         ),
         rx.box(
             rx.table.root(
@@ -228,12 +377,13 @@ def _build_manual_race_item(race: dict, idx: int, prefix: str, bg_color: str = "
             ),
             width="100%",
         ),
-        rx.accordion.content(race_content),
+        rx.accordion.content(race_content, style={"overflow": "visible"}),
         value=f"{prefix}_{idx}",
         bg=bg_color,
         border_radius="md",
         padding_x="3",
         margin_y="1",
+        style={"overflow": "visible"},
     )
 
 
@@ -261,6 +411,7 @@ def Tab2(
     has_dotd_mot_cd = data["has_dotd_mot_cd"]
     season_num = season_data["season_number"]
     team_colors = data.get("team_colors", {})
+    driver_colors = data.get("driver_colors", {})
     has_sprint = data.get("has_sprint", False)
 
     preseason_items = []
@@ -272,7 +423,7 @@ def Tab2(
         for idx, pr in enumerate(preseason_races):
             inner_bg = "#16161A" if idx % 2 == 0 else "#101013"
             nested_preseason_items.append(
-                _build_manual_race_item(pr, idx, "preseason", inner_bg, team_colors)
+                _build_manual_race_item(pr, idx, "preseason", inner_bg, team_colors, driver_colors)
             )
 
         summary_names = [
@@ -330,7 +481,7 @@ def Tab2(
     elif len(preseason_races) == 1:
         pr = preseason_races[0]
         bg_color = "#1E1E24" if item_idx % 2 == 0 else "#131316"
-        preseason_items.append(_build_manual_race_item(pr, 0, "preseason", bg_color, team_colors))
+        preseason_items.append(_build_manual_race_item(pr, 0, "preseason", bg_color, team_colors, driver_colors))
         item_idx += 1
 
     regular_items = []
@@ -586,12 +737,80 @@ def Tab2(
         if show_cd:
             header_cells.append(rx.table.column_header_cell("Cleanest Driver", color="#00b4da"))
 
+        # Prepare driver payload for Circuit Replay (TAF1APP-SDDFEAT-15)
+        replay_drivers = []
+        for _, row in df_sorted.iterrows():
+            d_name = str(row["Driver"])
+            d_team = str(row["Team"])
+            d_color = driver_colors.get(d_name, team_colors.get(d_team, "#00b4da"))
+            p_val = row[place_col]
+            try:
+                p_num = int(float(p_val))
+            except (ValueError, TypeError):
+                p_num = 99
+            q_num = 99
+            if qualifying_col in df.columns:
+                qv = row.get(qualifying_col)
+                try:
+                    q_num = int(float(qv))
+                except (ValueError, TypeError):
+                    pass
+            if season_num >= 5 and starting_col and starting_col in df.columns:
+                sv = row.get(starting_col)
+                try:
+                    q_num = int(float(sv))
+                except (ValueError, TypeError):
+                    pass
+
+            is_dnf = False
+            if season_num <= 4:
+                if p_num >= 21:
+                    is_dnf = True
+            else:
+                if p_num >= 23:
+                    is_dnf = True
+
+            replay_drivers.append({
+                "name": d_name,
+                "team": d_team,
+                "color": d_color,
+                "grid_pos": q_num,
+                "finish_pos": p_num,
+                "is_dnf": is_dnf,
+            })
+
+        # Normalize grid_pos strictly to 1..N
+        replay_drivers_by_grid = sorted(replay_drivers, key=lambda x: (x["grid_pos"], x["finish_pos"]))
+        for grid_rank, rd in enumerate(replay_drivers_by_grid, 1):
+            rd["grid_pos"] = grid_rank
+
+        # Normalize finish_pos strictly to 1..N
+        replay_drivers_by_finish = sorted(replay_drivers, key=lambda x: (x["is_dnf"], x["finish_pos"]))
+        for finish_rank, rd in enumerate(replay_drivers_by_finish, 1):
+            rd["finish_pos"] = finish_rank
+
+        track_data = _get_track_data(race_name)
+        replay_component = _build_circuit_replay_box(race_name, replay_drivers, track_data)
+
         race_content = rx.vstack(
-            rx.text(
-                f"Winner: {winner} — {constructor}",
-                color="#00b4da",
-                font_weight="700",
-                font_size="md",
+            rx.flex(
+                rx.vstack(
+                    rx.text(
+                        f"Winner: {winner} — {constructor}",
+                        color="#00b4da",
+                        font_weight="700",
+                        font_size="md",
+                    ),
+                    align_items="start",
+                    justify="start",
+                    flex="1",
+                ),
+                replay_component,
+                justify="between",
+                align="start",
+                width="100%",
+                wrap="wrap",
+                gap="3",
             ),
             rx.box(
                 rx.table.root(
@@ -630,12 +849,13 @@ def Tab2(
                     ),
                     width="100%",
                 ),
-                rx.accordion.content(race_content),
+                rx.accordion.content(race_content, style={"overflow": "visible"}),
                 value=f"race_{i}",
                 bg=bg_color,
                 border_radius="md",
                 padding_x="3",
                 margin_y="1",
+                style={"overflow": "visible"},
             )
         )
         item_idx += 1
@@ -644,7 +864,7 @@ def Tab2(
     postseason_races = season_data.get("postseason_races", [])
     for idx, pr in enumerate(postseason_races):
         bg_color = "#1E1E24" if item_idx % 2 == 0 else "#131316"
-        postseason_items.append(_build_manual_race_item(pr, idx, "postseason", bg_color, team_colors))
+        postseason_items.append(_build_manual_race_item(pr, idx, "postseason", bg_color, team_colors, driver_colors))
         item_idx += 1
 
     accordion_items = preseason_items + regular_items + postseason_items
@@ -775,6 +995,7 @@ def Tab2(
             border_radius="xl",
             border="1px solid #2C2C32",
         ),
+        rx.el.script(src="/circuit_replay.js?v=20260915_06"),
         width="100%",
         align_items="start",
         spacing="4",
