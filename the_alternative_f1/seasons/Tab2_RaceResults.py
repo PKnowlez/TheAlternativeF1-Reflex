@@ -175,11 +175,12 @@ def _build_manual_race_item(race: dict, idx: int, prefix: str, bg_color: str = "
         team_val = r.get("team", "-")
         qualifying_val = r.get("qualifying", "-")
         starting_val = r.get("starting")
-        if starting_val is not None and str(qualifying_val).upper() in ("DNF", "DNS", "DSQ"):
+        if starting_val is not None and str(starting_val).strip() not in ("", "-", "NONE", "NAN", "NULL") and str(qualifying_val).upper() in ("DNF", "DNS", "DSQ"):
+            prefix = "DNQ" if str(qualifying_val).upper() == "DNS" else qualifying_val
             try:
-                qualifying_val = f"{qualifying_val} ({int(float(starting_val))})"
+                qualifying_val = f"{prefix} ({int(float(starting_val))})"
             except (ValueError, TypeError):
-                qualifying_val = f"{qualifying_val} ({starting_val})"
+                qualifying_val = f"{prefix} ({starting_val})"
         points_val = r.get("points", 0)
 
         cells = [
@@ -576,7 +577,13 @@ def Tab2(
             qualifying_val = "-"
             if qualifying_col in df.columns:
                 qv = row.get(qualifying_col, "-")
-                qualifying_val = str(int(qv)) if not pd.isnull(qv) and qv != "-" else "-"
+                if not pd.isnull(qv) and str(qv).strip() not in ("", "-"):
+                    try:
+                        qualifying_val = str(int(float(qv)))
+                    except (ValueError, TypeError):
+                        qualifying_val = str(qv).strip()
+                else:
+                    qualifying_val = "-"
                 if season_num <= 4:
                     if qualifying_val == "21":
                         qualifying_val = "DNF"
@@ -598,8 +605,9 @@ def Tab2(
                 if not pd.isnull(sv) and str(sv).strip() not in ("", "-", "NONE", "NAN", "NULL"):
                     try:
                         sv_int = int(float(sv))
-                        if qualifying_val in ("DNF", "DNS", "DSQ"):
-                            qualifying_val = f"{qualifying_val} ({sv_int})"
+                        if str(qualifying_val).upper() in ("DNF", "DNS", "DSQ"):
+                            prefix = "DNQ" if str(qualifying_val).upper() == "DNS" else qualifying_val
+                            qualifying_val = f"{prefix} ({sv_int})"
                     except (ValueError, TypeError):
                         pass
 
@@ -995,7 +1003,7 @@ def Tab2(
             border_radius="xl",
             border="1px solid #2C2C32",
         ),
-        rx.el.script(src="/circuit_replay.js?v=20260915_06"),
+        rx.el.script(src="/circuit_replay.js?v=20260916_07"),
         width="100%",
         align_items="start",
         spacing="4",

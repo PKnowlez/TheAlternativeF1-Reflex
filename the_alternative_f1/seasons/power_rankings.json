@@ -621,7 +621,8 @@
     "races": [
       "Preseason",
       "Final Preseason",
-      "Australia"
+      "Australia",
+      "Imola"
     ],
     "rankings": {
       "Preseason": [
@@ -653,6 +654,16 @@
         "Haas",
         "Williams",
         "Audi"
+      ],
+      "Imola": [
+        "Cadillac",
+        "McLaren",
+        "Red Bull",
+        "Ferrari",
+        "Haas",
+        "Mercedes",
+        "Audi",
+        "Williams"
       ]
     }
   }

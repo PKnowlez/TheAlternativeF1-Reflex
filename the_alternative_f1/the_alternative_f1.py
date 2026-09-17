@@ -3036,25 +3036,21 @@ def power_rankings_trajectory_graph() -> rx.Component:
     """The interactive animated bump chart showing power ranking trajectories."""
     return rx.box(
         rx.vstack(
-            rx.text(
-                "Ranking Trajectory",
-                color="white",
-                font_family="Outfit",
-                font_size="16px",
-                font_weight="800",
-                margin_bottom="2",
-            ),
-            rx.box(
-                memoized_power_rankings_chart(html_content=State.power_rankings_chart_html),
+            rx.hstack(
+                rx.text(
+                    "Ranking Trajectory",
+                    color="white",
+                    font_family="Outfit",
+                    font_size="16px",
+                    font_weight="800",
+                ),
+                rx.spacer(),
                 rx.button(
                     rx.icon("download", size=14),
                     on_click=lambda: DownloadState.download_chart(
                         "power_rankings_chart_container",
-                        f"Season_{State.selected_season}_Power_Rankings_Trajectory",
+                        f"Season {State.selected_season} Power Rankings Trajectory",
                     ),
-                    position="absolute",
-                    bottom="8px",
-                    right="8px",
                     bg="rgba(0,180,218,0.15)",
                     color="#00b4da",
                     border="1px solid rgba(0,180,218,0.4)",
@@ -3066,6 +3062,12 @@ def power_rankings_trajectory_graph() -> rx.Component:
                     _hover={"bg": "rgba(0,180,218,0.3)"},
                     custom_attrs={"data-html2canvas-ignore": "true"},
                 ),
+                width="100%",
+                align="center",
+                margin_bottom="2",
+            ),
+            rx.box(
+                memoized_power_rankings_chart(html_content=State.power_rankings_chart_html),
                 id="power_rankings_chart_container",
                 position="relative",
                 width="100%",
@@ -3370,7 +3372,7 @@ app = rx.App(
         rx.el.script(src="/donut_chart.js?v=20260912_06"),
         rx.el.script(src="/zoomable_chart.js?v=20260913_06"),
         rx.el.script(src="/teammate_network.js?v=20260915_02"),
-        rx.el.script(src="/circuit_replay.js?v=20260915_06"),
+        rx.el.script(src="/circuit_replay.js?v=20260916_07"),
     ],
 )
 app.add_page(index)

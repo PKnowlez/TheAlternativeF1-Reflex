@@ -109,6 +109,16 @@
         }
       }
 
+      // Ensure active drivers have sequential finish_pos from 1 to numActive
+      const activeList = this.drivers.filter(d => !d.is_dnf).sort((a, b) => (a.finish_pos || 0) - (b.finish_pos || 0));
+      activeList.forEach((d, i) => {
+        d.finish_pos = i + 1;
+      });
+      const dnfList = this.drivers.filter(d => !!d.is_dnf).sort((a, b) => (a.finish_pos || 0) - (b.finish_pos || 0));
+      dnfList.forEach((d, i) => {
+        d.finish_pos = activeList.length + i + 1;
+      });
+
       this.trackData = null;
       this.trackImg = null;
       this.imgLoaded = false;
@@ -364,10 +374,15 @@
       const totalRaceTime = this.totalLaps * this.lapDurationSec;
       const raceProgress = Math.min(1.0, this.simTime / totalRaceTime);
 
+      const numActive = this.drivers.filter(d => !d.is_dnf).length || this.drivers.length || 1;
+
       // Track length & spacing fractions
       const trackLengthPx = this.trackData.track_length_px || 4000;
-      const gridSpacingFrac = this.gridOverlapSpacing / trackLengthPx;
-      const racingSpacingFrac = this.racingSpacing / trackLengthPx;
+      // Cap maximum spacing so that all active cars fit sequentially within 80% of the circuit loop without wrapping
+      const maxAllowedSpacingFrac = 0.80 / Math.max(1, numActive - 1);
+      const gridSpacingFrac = Math.min(this.gridOverlapSpacing / trackLengthPx, maxAllowedSpacingFrac);
+      const desiredRacingSpacingFrac = this.racingSpacing / trackLengthPx;
+      const racingSpacingFrac = Math.min(desiredRacingSpacingFrac, maxAllowedSpacingFrac);
 
       // Transition from compact 50% overlapping starting grid into racing spacing
       const launchDuration = 1.2; // 1.2s grid launch
@@ -377,6 +392,11 @@
 
       // Leader progression across 5 laps
       const leaderLapsProgress = (this.simTime / this.lapDurationSec);
+
+      // Overtakes occur strictly within laps 1-4 (simTime: 0 -> 4 * lapDurationSec).
+      // By the beginning of lap 5 for the front runner (leaderLapsProgress = 4.0), overtakeProgress reaches 1.0!
+      const overtakeDuration = 4.0 * this.lapDurationSec;
+      const overtakeProgress = Math.min(1.0, this.simTime / overtakeDuration);
 
       // Compute positions of all drivers
       const activeCars = [];
@@ -388,16 +408,24 @@
 
         // Pseudo-random deterministic seed for passing timing
         const seed = ((gridPos * 37 + finishPos * 17) % 100) / 100.0;
-        const passTiming = 0.2 + seed * 0.5; // Overtake happens between 20% and 70% of race
+        // Overtakes begin between 15% and 55% of the first 4 laps
+        const passStart = 0.15 + seed * 0.40;
+        // Overtakes strictly complete between 60% and 95% of the first 4 laps (prior to lap 5!)
+        const passEnd = Math.min(0.96, passStart + 0.25 + seed * 0.16);
 
         let currentRank;
-        if (raceProgress < passTiming) {
-          const p = raceProgress / passTiming;
-          currentRank = gridPos + (finishPos - gridPos) * (0.3 * Math.sin(p * Math.PI / 2));
+        if (overtakeProgress <= 0) {
+          currentRank = gridPos;
+        } else if (overtakeProgress >= passEnd) {
+          // By the beginning of lap 5 (and throughout lap 5), car is locked into exact finish position
+          currentRank = finishPos;
+        } else if (overtakeProgress < passStart) {
+          const p = overtakeProgress / passStart;
+          currentRank = gridPos + (finishPos - gridPos) * (0.25 * Math.sin(p * Math.PI / 2));
         } else {
-          const p = (raceProgress - passTiming) / (1.0 - passTiming);
+          const p = (overtakeProgress - passStart) / (passEnd - passStart);
           const easeP = p * p * (3 - 2 * p); // smoothstep
-          currentRank = gridPos + (finishPos - gridPos) * (0.3 + 0.7 * easeP);
+          currentRank = gridPos + (finishPos - gridPos) * (0.25 + 0.75 * easeP);
         }
 
         // SDDREQ-126: DNF drivers come to a stop at the end of the second lap (simTime = 2 * lapDurationSec)
@@ -429,11 +457,12 @@
         // Lateral lane offset for overtaking maneuvers (SDDREQ-127)
         let laneOffset = dnfLateralOffset;
         if (!dnfStopped && Math.abs(finishPos - gridPos) > 0) {
-          const passCycle = Math.sin(this.simTime * 2.0 + seed * Math.PI * 2);
-          const isPassingNow = (raceProgress > 0.15 && raceProgress < 0.85);
-          if (isPassingNow && Math.abs(passCycle) > 0.3) {
+          // Passing lane offset only while actively overtaking before lap 5
+          if (overtakeProgress > passStart && overtakeProgress < passEnd) {
+            const passP = (overtakeProgress - passStart) / (passEnd - passStart);
+            const passCycle = Math.sin(passP * Math.PI);
             const side = (gridPos % 2 === 0) ? 1 : -1;
-            laneOffset = side * 28 * Math.sin(passCycle * Math.PI / 2);
+            laneOffset = side * 28 * passCycle;
           }
         }
 

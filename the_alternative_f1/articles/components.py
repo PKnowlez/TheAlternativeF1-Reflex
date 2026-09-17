@@ -146,9 +146,47 @@ class DownloadState(rx.State):
                 console.error('Chart container {chart_id} not found');
                 return;
             }}
-            const svgElement = container.querySelector('svg');
+            let svgElement = null;
+            let shadowHost = null;
+
+            // Search for chart SVG, checking Shadow DOM custom elements first (e.g. <power-rankings-chart>)
+            const searchForSvg = (root) => {{
+                if (!root) return null;
+                if (root.shadowRoot) {{
+                    const s = root.shadowRoot.getElementById('chart-svg') || 
+                              root.shadowRoot.querySelector('.prc-svg-wrapper svg') ||
+                              root.shadowRoot.querySelector('svg:not(.prc-btn svg)');
+                    if (s) {{
+                        shadowHost = root;
+                        return s;
+                    }}
+                }}
+                const descendants = root.querySelectorAll('*');
+                for (const d of descendants) {{
+                    if (d.shadowRoot) {{
+                        const s = d.shadowRoot.getElementById('chart-svg') || 
+                                  d.shadowRoot.querySelector('.prc-svg-wrapper svg') ||
+                                  d.shadowRoot.querySelector('svg:not(.prc-btn svg)');
+                        if (s) {{
+                            shadowHost = d;
+                            return s;
+                        }}
+                    }}
+                }}
+                // Search light DOM, explicitly ignoring UI buttons, download/close icons, and html2canvas-ignore elements
+                const lightSvgs = root.querySelectorAll('svg');
+                for (const s of lightSvgs) {{
+                    if (s.closest('button') || s.closest('[data-html2canvas-ignore="true"]') || s.classList.contains('lucide')) {{
+                        continue;
+                    }}
+                    return s;
+                }}
+                return null;
+            }};
+
+            svgElement = searchForSvg(container);
             if (!svgElement) {{
-                console.error('SVG not found inside container {chart_id}');
+                console.error('Chart SVG not found inside container {chart_id}');
                 return;
             }}
             
@@ -202,7 +240,17 @@ class DownloadState(rx.State):
                 document.body.removeChild(downloadLink);
             }};
 
-            const cleanTitle = "{title}".replace(/[^a-zA-Z0-9' \\(\\)\\-_]/g, '').trim();
+            let chartTitle = "{title}".replace(/_/g, ' ');
+            if (shadowHost && shadowHost.shadowRoot) {{
+                const stageEl = shadowHost.shadowRoot.getElementById('stage-name');
+                if (stageEl) {{
+                    const stageText = stageEl.innerText.replace(/\\s+/g, ' ').trim();
+                    if (stageText) {{
+                        chartTitle += " (" + stageText + ")";
+                    }}
+                }}
+            }}
+            const cleanTitle = chartTitle.replace(/[^a-zA-Z0-9' \\(\\)\\-_]/g, '').trim();
             const localDate = new Date();
             const year = localDate.getFullYear();
             const month = String(localDate.getMonth() + 1).padStart(2, '0');
@@ -268,6 +316,15 @@ class DownloadState(rx.State):
                 clonedSvg.setAttribute('viewBox', `0 0 ${{width}} ${{height}}`);
             }}
 
+            // Extract Shadow DOM CSS rules if svg is from a Web Component
+            let shadowStyleText = "";
+            if (shadowHost && shadowHost.shadowRoot) {{
+                const styleEls = shadowHost.shadowRoot.querySelectorAll('style');
+                styleEls.forEach(st => {{
+                    shadowStyleText += st.textContent + "\\n";
+                }});
+            }}
+
             // Ensure highlighted selected bar is visible with crisp white border
             const selectedInClone = clonedSvg.querySelector('.selected-bar-highlight');
             if (selectedInClone) {{
@@ -276,10 +333,41 @@ class DownloadState(rx.State):
                 selectedInClone.setAttribute('stroke-linecap', 'round');
                 selectedInClone.setAttribute('stroke-linejoin', 'round');
             }}
+
+            // Inline external images (e.g. car icons) as base64 data URLs
+            const imageElements = clonedSvg.querySelectorAll('image');
+            for (const imgEl of imageElements) {{
+                const href = imgEl.getAttribute('href') || imgEl.getAttribute('xlink:href');
+                if (href && !href.startsWith('data:')) {{
+                    try {{
+                        const imgResp = await fetch(href, {{ mode: 'cors' }});
+                        if (imgResp.ok) {{
+                            const blob = await imgResp.blob();
+                            const base64 = await new Promise((res) => {{
+                                const reader = new FileReader();
+                                reader.onloadend = () => res(reader.result);
+                                reader.readAsDataURL(blob);
+                            }});
+                            imgEl.setAttribute('href', base64);
+                            imgEl.removeAttribute('xlink:href');
+                        }} else {{
+                            throw new Error('Image fetch failed');
+                        }}
+                    }} catch (e) {{
+                        // Fallback: hide image and show circle fallback if available
+                        imgEl.setAttribute('display', 'none');
+                        const parentG = imgEl.closest('g');
+                        if (parentG && parentG.parentElement) {{
+                            const fallbackCircles = parentG.parentElement.querySelectorAll('circle');
+                            fallbackCircles.forEach(c => c.removeAttribute('style'));
+                        }}
+                    }}
+                }}
+            }}
             
             const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
             style.type = 'text/css';
-            style.textContent = fontCss + `
+            style.textContent = fontCss + "\\n" + shadowStyleText + `
                 text {{
                     font-family: 'Outfit', sans-serif !important;
                 }}
@@ -413,7 +501,7 @@ class DownloadState(rx.State):
                     context.fillStyle = '#FFFFFF';
                     context.font = `bold ${{Math.round(16 * scaleFactor)}}px Outfit, sans-serif`;
                     context.textBaseline = 'middle';
-                    context.fillText("{title}", 20 * scaleFactor, (titleSpace / 2) * scaleFactor);
+                    context.fillText(chartTitle, 20 * scaleFactor, (titleSpace / 2) * scaleFactor);
                     
                     context.drawImage(image, 0, titleSpace * scaleFactor, width * scaleFactor, height * scaleFactor);
 

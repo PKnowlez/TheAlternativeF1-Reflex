@@ -11,7 +11,6 @@ from the_alternative_f1.articles.components import (
     DownloadState,
     interactive_line_chart_key,
     chart_card,
-    get_download_position,
 )
 from the_alternative_f1.constructor_colors import get_constructor_color
 from the_alternative_f1.all_time_stats.SummaryAllTime import _build_arc_path, _get_driver_shade
@@ -278,7 +277,7 @@ def Tab1(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
 
     max_team_len = max([len(str(item.get("team", ""))) for item in constructor_bar_data] or [0])
     team_axis_height = max(40, max_team_len * 5 + 15)
-    pos_team_bar = get_download_position(constructor_bar_data, "team")
+    pos_team_bar = "top_right"
 
     constructor_bar_chart = zoomable_chart(
         lambda h: rx.recharts.bar_chart(
@@ -313,7 +312,7 @@ def Tab1(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
 
     max_driver_len = max([len(str(item.get("driver", ""))) for item in driver_bar_data] or [0])
     driver_axis_height = max(40, max_driver_len * 5 + 15)
-    pos_driver_bar = get_download_position(driver_bar_data, "driver")
+    pos_driver_bar = "top_right"
 
     driver_bar_chart = zoomable_chart(
         lambda h: rx.recharts.bar_chart(
