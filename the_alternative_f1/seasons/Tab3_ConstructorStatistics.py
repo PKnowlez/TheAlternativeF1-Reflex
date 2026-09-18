@@ -11,7 +11,6 @@ from the_alternative_f1.articles.components import (
     zoomable_chart,
     DownloadState,
     chart_card,
-    get_download_position,
 )
 def Tab3(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only=None) -> rx.Component:
     """Render the Constructor Statistics tab."""
@@ -86,7 +85,7 @@ def Tab3(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
             )
         )
 
-    pos_stacked = get_download_position(is_vertical_layout=True)
+    pos_stacked = "top_right"
 
     stacked_chart = zoomable_chart(
         lambda h: rx.recharts.bar_chart(
@@ -159,7 +158,7 @@ def Tab3(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
         # Calculate dynamic x-axis height
         max_race_len = max([len(str(item.get("race", ""))) for item in bar_data] or [0])
         race_axis_height = max(40, max_race_len * 5 + 15)
-        pos_team_chart = get_download_position(bar_data, "race")
+        pos_team_chart = "top_right"
 
         team_chart = zoomable_chart(
             lambda h: rx.recharts.bar_chart(

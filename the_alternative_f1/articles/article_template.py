@@ -3,7 +3,7 @@ from the_alternative_f1.articles.components import zoomable_image, image_carouse
 
 article = {
     "title": "Article Template & Sample Rich Card",
-    "blurb": "A showcase of dynamic content, images, carousels, subheaders, quotes, white boxes, gifs, and video elements.",
+    "blurb": "A showcase of dynamic content, images, image grids, carousels, subheaders, bulleted lists, quotes, white boxes, gifs, and video elements.",
     "content": [
         # Two paragraphs with bold, italics, underline, and highlighted text throughout
         rx.text(
@@ -55,6 +55,35 @@ article = {
             margin_bottom="3", 
             font_family="Outfit"
         ),
+
+        # A bulleted list of highlights or key takeaways
+        rx.unordered_list(
+            rx.list_item(
+                rx.text("Eddie in Q3: ", as_="span", font_weight="bold", color="white"),
+                "Logs on and doesn't even realize he made it into Q3 until the timer is halfway down.",
+                margin_bottom="2",
+            ),
+            rx.list_item(
+                rx.text("Tire Gamble Gone Wrong: ", as_="span", font_weight="bold", color="white"),
+                "Attempting wet weather tires on a dry track in hopes of saving softs for the race.",
+                margin_bottom="2",
+            ),
+            rx.list_item(
+                rx.text("Front Wing Casualties: ", as_="span", font_weight="bold", color="white"),
+                "A first-lap incident at the chicane that completely destroyed race strategy.",
+                margin_bottom="2",
+            ),
+            rx.list_item(
+                rx.text("Podium Finishers: ", as_="span", font_weight="bold", color="white"),
+                "Joshua and Nick battling to the line with less than two-tenths separating them.",
+            ),
+            list_style_type="disc",
+            color="#E0E0E0",
+            font_size="md",
+            line_height="1.7",
+            padding_left="24px",
+            margin_bottom="4",
+        ),
         
         # A paragraph with a white background and black text in its own box within the article
         rx.box(
@@ -100,6 +129,58 @@ article = {
             align_items="center",
             width="100%",
             margin_y="4",
+        ),
+
+        # A grid of images (e.g. memes, track photos, or event gallery)
+        rx.heading(
+            "Multi-Image Gallery Grid", 
+            size="4", 
+            color="#00b4da", 
+            margin_top="6", 
+            margin_bottom="3", 
+            font_family="Outfit"
+        ),
+        rx.grid(
+            zoomable_image(
+                src="/thealternativef1-cloudflare/Season5/Race_Recap/Australia/a1.png", 
+                width="100%",
+                height="auto",
+                object_fit="contain",
+                display="block",
+                border_radius="md",
+                box_shadow="0 4px 12px rgba(0,0,0,0.3)"
+            ),
+            zoomable_image(
+                src="/thealternativef1-cloudflare/Season5/Race_Recap/Australia/a2.png", 
+                width="100%",
+                height="auto",
+                object_fit="contain",
+                display="block",
+                border_radius="md",
+                box_shadow="0 4px 12px rgba(0,0,0,0.3)"
+            ),
+            zoomable_image(
+                src="/thealternativef1-cloudflare/Season5/Race_Recap/Australia/a3.png", 
+                width="100%",
+                height="auto",
+                object_fit="contain",
+                display="block",
+                border_radius="md",
+                box_shadow="0 4px 12px rgba(0,0,0,0.3)"
+            ),
+            zoomable_image(
+                src="/thealternativef1-cloudflare/Season5/Race_Recap/Australia/a4.gif", 
+                width="100%",
+                height="auto",
+                object_fit="contain",
+                display="block",
+                border_radius="md",
+                box_shadow="0 4px 12px rgba(0,0,0,0.3)"
+            ),
+            columns="2",
+            spacing="3",
+            width="100%",
+            margin_bottom="4",
         ),
 
         # An interactive carousel of images and gifs with swipe, side-click navigation, and 5-second auto progression

@@ -94,6 +94,11 @@
         console.error('[CircuitReplay] Failed to parse drivers payload for', this.raceName, e);
       }
 
+      // Filter out any drivers who did not start the race (DNS)
+      if (Array.isArray(this.drivers)) {
+        this.drivers = this.drivers.filter(d => !d.is_dns && d.status !== 'DNS' && d.status !== 'EMPTY' && String(d.finish_pos).toUpperCase() !== 'DNS');
+      }
+
       // Fallback if drivers array is empty
       if (!this.drivers || this.drivers.length === 0) {
         const defaultColors = ['#E8002D', '#FF8000', '#00D2BE', '#0600EF', '#0090FF', '#229971', '#52E252', '#B6BABD', '#C92D4B', '#5E8FAA'];

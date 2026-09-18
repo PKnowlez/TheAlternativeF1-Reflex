@@ -3372,7 +3372,7 @@ app = rx.App(
         rx.el.script(src="/donut_chart.js?v=20260912_06"),
         rx.el.script(src="/zoomable_chart.js?v=20260913_06"),
         rx.el.script(src="/teammate_network.js?v=20260915_02"),
-        rx.el.script(src="/circuit_replay.js?v=20260916_07"),
+        rx.el.script(src="/circuit_replay.js?v=20260917_01"),
     ],
 )
 app.add_page(index)

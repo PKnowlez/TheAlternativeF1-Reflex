@@ -12,7 +12,6 @@ import reflex as rx
 from the_alternative_f1.articles.components import (
     zoomable_chart,
     chart_card,
-    get_download_position,
 )
 
 
@@ -221,7 +220,7 @@ def Tab4(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
         # Calculate dynamic x-axis height for pts_chart
         max_race_len = max([len(str(item.get("race", ""))) for item in pts_bar_data] or [0])
         race_axis_height = max(40, max_race_len * 5 + 15)
-        pos_pts = get_download_position(pts_bar_data, "race")
+        pos_pts = "top_right"
 
         pts_chart = zoomable_chart(
             lambda h: rx.recharts.bar_chart(
@@ -358,7 +357,7 @@ def Tab4(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
         # Calculate dynamic x-axis height for pos_chart
         max_pos_race_len = max([len(str(item.get("race", ""))) for item in pos_change_data] or [0])
         pos_race_axis_height = max(40, max_pos_race_len * 5 + 15)
-        pos_gained = get_download_position(pos_change_data, "race")
+        pos_gained = "top_right"
 
         pos_chart = zoomable_chart(
             lambda h: rx.recharts.bar_chart(

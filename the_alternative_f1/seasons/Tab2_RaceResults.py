@@ -12,6 +12,8 @@ from pathlib import Path
 import pandas as pd
 import reflex as rx
 
+from the_alternative_f1.race_metrics import parse_status
+
 
 # Load precomputed circuit spline geometries at module load
 _CIRCUIT_TRACKS = {}
@@ -119,7 +121,7 @@ def is_truthy(val) -> bool:
     return str(val).strip().upper() in ("Y", "YES", "TRUE", "1")
 
 
-def _build_manual_race_item(race: dict, idx: int, prefix: str, bg_color: str = "transparent", team_colors: dict = None, driver_colors: dict = None) -> rx.Component:
+def _build_manual_race_item(race: dict, idx: int, prefix: str, bg_color: str = "transparent", team_colors: dict = None, driver_colors: dict = None, season_num: int = 1) -> rx.Component:
     """Helper to build an accordion item for a custom manual pre-season or post-season race."""
     race_name = race.get("name", "Manual Race")
     results = race.get("results", [])
@@ -301,6 +303,10 @@ def _build_manual_race_item(race: dict, idx: int, prefix: str, bg_color: str = "
         d_team = str(r.get("team", "—"))
         d_color = (driver_colors.get(d_name) if driver_colors else None) or (team_colors.get(d_team, "#00b4da") if team_colors else "#00b4da")
         p_val = r.get("place", 99)
+        status = parse_status(p_val, season_num)
+        # Exclude drivers who did not start the race from the track map animation
+        if status in ("DNS", "EMPTY"):
+            continue
         try:
             p_num = int(float(p_val))
         except (ValueError, TypeError):
@@ -310,7 +316,7 @@ def _build_manual_race_item(race: dict, idx: int, prefix: str, bg_color: str = "
             q_num = int(float(q_val))
         except (ValueError, TypeError):
             q_num = 99
-        is_dnf = str(p_val).upper() in ("DNF", "DNS", "DSQ") or p_num >= 21
+        is_dnf = (status in ("DNF", "DSQ")) or str(p_val).upper() in ("DNF", "DSQ") or p_num >= 21
         manual_replay_drivers.append({
             "name": d_name,
             "team": d_team,
@@ -424,7 +430,7 @@ def Tab2(
         for idx, pr in enumerate(preseason_races):
             inner_bg = "#16161A" if idx % 2 == 0 else "#101013"
             nested_preseason_items.append(
-                _build_manual_race_item(pr, idx, "preseason", inner_bg, team_colors, driver_colors)
+                _build_manual_race_item(pr, idx, "preseason", inner_bg, team_colors, driver_colors, season_num)
             )
 
         summary_names = [
@@ -482,7 +488,7 @@ def Tab2(
     elif len(preseason_races) == 1:
         pr = preseason_races[0]
         bg_color = "#1E1E24" if item_idx % 2 == 0 else "#131316"
-        preseason_items.append(_build_manual_race_item(pr, 0, "preseason", bg_color, team_colors, driver_colors))
+        preseason_items.append(_build_manual_race_item(pr, 0, "preseason", bg_color, team_colors, driver_colors, season_num))
         item_idx += 1
 
     regular_items = []
@@ -752,6 +758,11 @@ def Tab2(
             d_team = str(row["Team"])
             d_color = driver_colors.get(d_name, team_colors.get(d_team, "#00b4da"))
             p_val = row[place_col]
+            status = parse_status(p_val, season_num)
+            # Exclude drivers who did not start the race from the track map animation
+            if status in ("DNS", "EMPTY"):
+                continue
+
             try:
                 p_num = int(float(p_val))
             except (ValueError, TypeError):
@@ -770,13 +781,14 @@ def Tab2(
                 except (ValueError, TypeError):
                     pass
 
-            is_dnf = False
-            if season_num <= 4:
-                if p_num >= 21:
-                    is_dnf = True
-            else:
-                if p_num >= 23:
-                    is_dnf = True
+            is_dnf = (status in ("DNF", "DSQ"))
+            if not is_dnf:
+                if season_num <= 4:
+                    if p_num >= 21:
+                        is_dnf = True
+                else:
+                    if p_num >= 23:
+                        is_dnf = True
 
             replay_drivers.append({
                 "name": d_name,
@@ -872,7 +884,7 @@ def Tab2(
     postseason_races = season_data.get("postseason_races", [])
     for idx, pr in enumerate(postseason_races):
         bg_color = "#1E1E24" if item_idx % 2 == 0 else "#131316"
-        postseason_items.append(_build_manual_race_item(pr, idx, "postseason", bg_color, team_colors, driver_colors))
+        postseason_items.append(_build_manual_race_item(pr, idx, "postseason", bg_color, team_colors, driver_colors, season_num))
         item_idx += 1
 
     accordion_items = preseason_items + regular_items + postseason_items
@@ -1003,7 +1015,7 @@ def Tab2(
             border_radius="xl",
             border="1px solid #2C2C32",
         ),
-        rx.el.script(src="/circuit_replay.js?v=20260916_07"),
+        rx.el.script(src="/circuit_replay.js?v=20260917_01"),
         width="100%",
         align_items="start",
         spacing="4",

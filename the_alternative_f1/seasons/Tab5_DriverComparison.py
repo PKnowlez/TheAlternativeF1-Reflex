@@ -13,7 +13,6 @@ from the_alternative_f1.articles.components import (
     zoomable_chart,
     interactive_line_chart_key,
     chart_card,
-    get_download_position,
 )
 from the_alternative_f1.race_metrics import parse_status
 
@@ -152,7 +151,7 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
 
     max_pos_change_driver_len = max([len(str(item.get("driver", ""))) for item in pos_change_data] or [0])
     pos_change_driver_axis_height = max(40, max_pos_change_driver_len * 5 + 15)
-    pos_chg = get_download_position(pos_change_data, "driver")
+    pos_chg = "top_right"
 
     pos_change_chart = zoomable_chart(
         lambda h: rx.recharts.bar_chart(
@@ -200,7 +199,7 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
 
     max_pts_driver_len = max([len(str(item.get("driver", ""))) for item in pts_data] or [0])
     pts_driver_axis_height = max(40, max_pts_driver_len * 5 + 15)
-    pos_pts = get_download_position(pts_data, "driver")
+    pos_pts = "top_right"
 
     pts_chart = zoomable_chart(
         lambda h: rx.recharts.bar_chart(
@@ -243,7 +242,7 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
             "fill": fill,
         })
 
-    pos_qual = get_download_position(is_vertical_layout=True)
+    pos_qual = "top_right"
 
     qual_chart = zoomable_chart(
         lambda h: rx.recharts.bar_chart(
@@ -296,7 +295,7 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
             "fill": fill,
         })
 
-    pos_plc = get_download_position(is_vertical_layout=True)
+    pos_plc = "top_right"
 
     place_chart = zoomable_chart(
         lambda h: rx.recharts.bar_chart(
@@ -362,7 +361,7 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
         max_rookie_race_len = max([len(str(item.get("race", ""))) for item in rookie_line_data] or [0])
         rookie_race_axis_height = max(40, max_rookie_race_len * 5 + 15)
         rookie_legend_margin = max(15, rookie_race_axis_height - 30)
-        pos_rookie = get_download_position(rookie_line_data, "race")
+        pos_rookie = "top_right"
 
         rookie_chart = zoomable_chart(
             lambda h: rx.recharts.line_chart(

@@ -999,7 +999,7 @@ def teammate_network_controls() -> rx.Component:
     """Top controls bar for switching modes and selecting drivers."""
     return rx.box(
         rx.vstack(
-            rx.hstack(
+            rx.flex(
                 # Segmented Control for Mode ordered: Default Web, Single Driver, Two Drivers
                 rx.segmented_control.root(
                     rx.segmented_control.item("Default Web", value="default"),
@@ -1010,8 +1010,9 @@ def teammate_network_controls() -> rx.Component:
                     radius="large",
                     size={"initial": "1", "sm": "2"},
                     class_name="map-segmented-control",
+                    max_width="100%",
+                    flex_shrink="0",
                 ),
-                rx.spacer(),
                 rx.button(
                     rx.hstack(
                         rx.icon("rotate-ccw", size=14),
@@ -1024,10 +1025,14 @@ def teammate_network_controls() -> rx.Component:
                     color_scheme="gray",
                     size="2",
                     cursor="pointer",
+                    margin_left="auto",
+                    flex_shrink="0",
                 ),
                 width="100%",
                 align="center",
-                spacing="2",
+                justify="between",
+                wrap="wrap",
+                gap="2",
             ),
             rx.cond(
                 TeammateNetworkState.mode == "two_drivers",
@@ -1105,7 +1110,7 @@ def teammate_network_controls() -> rx.Component:
         bg="#18181C",
         border="1px solid #2C2C32",
         border_radius="xl",
-        padding="10px 14px",
+        padding={"initial": "10px", "sm": "10px 14px"},
         margin_bottom="3",
     )
 
