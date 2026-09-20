@@ -88,7 +88,7 @@ from the_alternative_f1.seasons.Tab5_DriverComparison import Tab5
 from the_alternative_f1.seasons.Tab6_RaceSchedule import Tab6
 from the_alternative_f1.seasons.projections import projections_tab_view
 from the_alternative_f1.seasons.predictions_market import predictions_market_tab_view, PredictionsMarketState
-from the_alternative_f1.seasons.leaderboard import alternative_points_leaderboard_view
+from the_alternative_f1.seasons.leaderboard import alternative_points_leaderboard_view, LeaderboardState
 
 # ── Dynamically derived from seasons __init__.py ─────────────────────────────
 NUM_SEASONS: int = LATEST_SEASON
@@ -303,8 +303,20 @@ class State(rx.State):
     def expand_season_articles(self):
         self.season_articles_expanded = True
 
-    def set_power_rankings_tab(self, tab: str):
+    async def set_power_rankings_tab(self, tab: str):
         self.selected_power_rankings_tab = tab
+        if tab == "predictions_market":
+            try:
+                p_state = await self.get_state(PredictionsMarketState)
+                p_state.refresh_trigger += 1
+            except Exception:
+                pass
+        elif tab == "leaderboard":
+            try:
+                lb_state = await self.get_state(LeaderboardState)
+                lb_state.refresh()
+            except Exception:
+                pass
 
     def set_discord_username(self, username: str):
         self.discord_username = username
@@ -418,13 +430,23 @@ class State(rx.State):
         if self.active_nav == "login":
             self.active_nav = "home"
         self.load_comments()
-        p_state = await self.get_state(PredictionsMarketState)
-        p_state.discord_username = self.discord_username
+        try:
+            p_state = await self.get_state(PredictionsMarketState)
+            p_state.discord_username = self.discord_username
+            p_state.refresh_trigger += 1
+        except Exception:
+            pass
+        try:
+            lb_state = await self.get_state(LeaderboardState)
+            lb_state.refresh()
+        except Exception:
+            pass
 
     async def logout(self):
         self.discord_username = ""
         self.discord_avatar = ""
-        self.active_nav = "home"
+        if self.active_nav == "login":
+            self.active_nav = "home"
         p_state = await self.get_state(PredictionsMarketState)
         p_state.discord_username = ""
 

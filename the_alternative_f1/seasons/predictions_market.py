@@ -25,6 +25,7 @@ from the_alternative_f1.seasons.projections import compute_season_projections
 from the_alternative_f1.constructor_colors import get_constructor_color
 
 USER_POINTS_JSON = Path(__file__).parent / "user_points.json"
+PREDICTIONS_JSON = Path(__file__).parent / "predictions.json"
 
 
 def _get_supabase():
@@ -36,7 +37,7 @@ def _get_supabase():
         return None
 
 
-# ── Local File Persistence Fallbacks for Total Points ─────────────────────────
+# ── Local File Persistence Fallbacks for Total Points & Predictions ───────────
 def _load_local_user_points() -> dict:
     if USER_POINTS_JSON.exists():
         try:
@@ -53,6 +54,24 @@ def _save_local_user_points(data: dict):
             json.dump(data, f, indent=2)
     except Exception as e:
         print(f"Error saving user_points.json: {e}")
+
+
+def _load_local_predictions() -> list[dict]:
+    if PREDICTIONS_JSON.exists():
+        try:
+            with open(PREDICTIONS_JSON, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return []
+
+
+def _save_local_predictions(data: list[dict]):
+    try:
+        with open(PREDICTIONS_JSON, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
+    except Exception as e:
+        print(f"Error saving predictions.json: {e}")
 
 
 # ── Lockout Calculation (1 Hour Pre-Race) ──────────────────────────────────────
@@ -113,14 +132,26 @@ def get_user_total_points(username: str) -> int:
     if not username:
         return 0
 
+    local_data = _load_local_user_points()
+    if username not in local_data:
+        local_data[username] = {
+            "points": 100,
+            "all_time_points": 100,
+            "season_points": {"5": 100},
+        }
+        _save_local_user_points(local_data)
+
     sb = _get_supabase()
     if sb:
         try:
             res = sb.table("user_prediction_points").select("points").eq("username", username).execute()
             if res.data and len(res.data) > 0:
-                return int(res.data[0]["points"])
+                pts = int(res.data[0]["points"])
+                local_data[username]["points"] = pts
+                local_data[username]["all_time_points"] = pts
+                _save_local_user_points(local_data)
+                return pts
             else:
-                # Insert initial 100 points
                 payload = {
                     "username": username,
                     "points": 100,
@@ -132,16 +163,6 @@ def get_user_total_points(username: str) -> int:
         except Exception as e:
             print(f"Supabase user_prediction_points error: {e}")
 
-    # Local fallback
-    local_data = _load_local_user_points()
-    if username not in local_data:
-        local_data[username] = {
-            "points": 100,
-            "all_time_points": 100,
-            "season_points": {"5": 100},
-        }
-        _save_local_user_points(local_data)
-        return 100
     return int(local_data[username].get("points", 100))
 
 
@@ -296,21 +317,32 @@ def settle_completed_predictions(season_num: int = 5):
 
 
 def get_all_predictions(season_num: int = 5) -> list[dict]:
-    """Retrieves all predictions for the season exclusively from the database, auto-settling completed races."""
+    """Retrieves all predictions for the season, auto-settling completed races."""
     settle_completed_predictions(season_num)
     sb = _get_supabase()
     if sb:
         try:
             res = sb.table("predictions").select("*").eq("season", season_num).order("created_at", desc=True).execute()
-            if res.data:
-                return res.data
+            if res.data is not None:
+                local_preds = _load_local_predictions()
+                sb_ids = {str(p.get("id")) for p in res.data}
+                combined = list(res.data)
+                for lp in local_preds:
+                    if str(lp.get("id")) not in sb_ids and int(lp.get("season", 5)) == season_num:
+                        combined.append(lp)
+                return combined
         except Exception as e:
             print(f"Supabase get_all_predictions error: {e}")
-    return []
+    local_preds = _load_local_predictions()
+    return [p for p in local_preds if int(p.get("season", 5)) == season_num]
 
 
 def insert_prediction(pred: dict) -> bool:
-    """Inserts a new prediction record exclusively into the database."""
+    """Inserts a new prediction record into database and local storage."""
+    local_preds = _load_local_predictions()
+    local_preds.insert(0, pred)
+    _save_local_predictions(local_preds)
+
     sb = _get_supabase()
     if sb:
         try:
@@ -318,31 +350,38 @@ def insert_prediction(pred: dict) -> bool:
             return True
         except Exception as e:
             print(f"Supabase insert_prediction error: {e}")
-    return False
+    return True
 
 
 def remove_prediction(pred_id: str | int, username: str) -> bool:
-    """Removes a prediction and refunds points exclusively via the database."""
+    """Removes a prediction and refunds points."""
+    refund_points = 0
+    local_preds = _load_local_predictions()
+    updated = []
+    for p in local_preds:
+        if str(p.get("id")) == str(pred_id) and p.get("username") == username:
+            refund_points = int(p.get("points", 0))
+        else:
+            updated.append(p)
+    _save_local_predictions(updated)
+
     sb = _get_supabase()
     if sb:
         try:
-            # First fetch to confirm ownership and refund amount
             res = sb.table("predictions").select("points").eq("id", pred_id).eq("username", username).execute()
             if res.data and len(res.data) > 0:
                 refund_points = int(res.data[0]["points"])
                 sb.table("predictions").delete().eq("id", pred_id).eq("username", username).execute()
-                if refund_points > 0:
-                    curr = get_user_total_points(username)
-                    update_user_points(username, curr + refund_points)
-                return True
         except Exception as e:
             print(f"Supabase remove_prediction error: {e}")
-    return False
+
+    return True
 
 
 class PredictionsMarketState(rx.State):
     """Reflex state for the Predictions Market Tab."""
     discord_username: str = rx.LocalStorage("", name="discord_username", sync=True)
+    refresh_trigger: int = 0
     modal_open: bool = False
     selected_category: str = "Expected Race Winner"
     selected_target: str = ""
@@ -350,20 +389,30 @@ class PredictionsMarketState(rx.State):
     wager_amount: int = 10
     feedback_message: str = ""
 
-    def login_with_discord(self):
+    @rx.var
+    def discord_auth_url(self) -> str:
         from the_alternative_f1.oauth_discord import load_env
         load_env()
         client_id = os.getenv("DISCORD_CLIENT_ID", "").strip()
         redirect_uri = os.getenv("DISCORD_REDIRECT_URI", "").strip()
         if not client_id or not redirect_uri:
-            return rx.window_alert("Discord login is not configured on this server. Please set DISCORD_CLIENT_ID and DISCORD_REDIRECT_URI.")
+            return ""
         import urllib.parse
         encoded_redirect = urllib.parse.quote(redirect_uri, safe="")
-        auth_url = f"https://discord.com/oauth2/authorize?client_id={client_id}&redirect_uri={encoded_redirect}&response_type=code&scope=identify"
-        return rx.call_script(f"window.open('{auth_url}', 'Discord Login', 'width=500,height=600')")
+        return f"https://discord.com/oauth2/authorize?client_id={client_id}&redirect_uri={encoded_redirect}&response_type=code&scope=identify"
 
     def sync_user(self, username: str):
         self.discord_username = username
+
+    async def logout(self):
+        self.discord_username = ""
+        try:
+            from the_alternative_f1.the_alternative_f1 import State
+            main_state = await self.get_state(State)
+            main_state.discord_username = ""
+            main_state.discord_avatar = ""
+        except Exception:
+            pass
 
     def open_modal(self):
         self.modal_open = True
@@ -437,6 +486,7 @@ class PredictionsMarketState(rx.State):
 
     @rx.var
     def user_remaining_points(self) -> int:
+        _ = self.refresh_trigger
         username = self.current_user
         if not username:
             return 0
@@ -462,6 +512,7 @@ class PredictionsMarketState(rx.State):
 
     @rx.var
     def all_predictions_list(self) -> list[dict]:
+        _ = self.refresh_trigger
         preds = get_all_predictions(5)
         res = []
         for p in preds:
@@ -471,12 +522,25 @@ class PredictionsMarketState(rx.State):
             item["team_color"] = get_constructor_color(str(p.get("target", "")))
             stance = str(p.get("stance", "FOR")).upper()
             item["is_positive"] = bool("FOR" in stance or "OVER" in stance)
-            item["status_upper"] = str(p.get("status", "open")).upper()
+            status_val = str(p.get("status", "open")).lower()
+            item["status_upper"] = status_val.upper()
+            if status_val == "correct":
+                item["status_color"] = "#00b4da"
+                item["status_bg"] = "rgba(0, 180, 218, 0.18)"
+                item["status_border"] = "1px solid rgba(0, 180, 218, 0.4)"
+            elif status_val == "incorrect":
+                item["status_color"] = "#FF8C00"
+                item["status_bg"] = "rgba(255, 140, 0, 0.18)"
+                item["status_border"] = "1px solid rgba(255, 140, 0, 0.4)"
+            else:
+                item["status_color"] = "#D0D0D5"
+                item["status_bg"] = "rgba(255, 255, 255, 0.08)"
+                item["status_border"] = "1px solid rgba(255, 255, 255, 0.15)"
             item["points_display"] = f"{p.get('points', 0)} pts"
             res.append(item)
         return res
 
-    def submit_prediction(self):
+    async def submit_prediction(self):
         username = self.current_user
         if not username:
             self.feedback_message = "Please log in with Discord first."
@@ -516,12 +580,26 @@ class PredictionsMarketState(rx.State):
 
         insert_prediction(new_pred)
         self.modal_open = False
+        self.refresh_trigger += 1
+        try:
+            from the_alternative_f1.seasons.leaderboard import LeaderboardState
+            lb_state = await self.get_state(LeaderboardState)
+            lb_state.refresh()
+        except Exception:
+            pass
 
-    def delete_prediction(self, pred_id: str | int):
+    async def delete_prediction(self, pred_id: str | int):
         username = self.current_user
         if not username or self.is_locked:
             return
         remove_prediction(pred_id, username)
+        self.refresh_trigger += 1
+        try:
+            from the_alternative_f1.seasons.leaderboard import LeaderboardState
+            lb_state = await self.get_state(LeaderboardState)
+            lb_state.refresh()
+        except Exception:
+            pass
 
 
 # ── UI Components ─────────────────────────────────────────────────────────────
@@ -675,16 +753,20 @@ def predictions_market_tab_view() -> rx.Component:
                     align_items="start",
                 ),
                 rx.spacer(),
-                rx.button(
-                    rx.hstack(rx.icon("message-square", size=14), rx.text("Login with Discord")),
-                    bg="#5865F2",
-                    color="white",
-                    font_weight="700",
-                    font_size="xs",
-                    _hover={"bg": "#4752C4"},
-                    cursor="pointer",
-                    padding_x="4",
-                    on_click=PredictionsMarketState.login_with_discord,
+                rx.link(
+                    rx.button(
+                        rx.hstack(rx.icon("message-square", size=14), rx.text("Login with Discord")),
+                        bg="#5865F2",
+                        color="white",
+                        font_weight="700",
+                        font_size="xs",
+                        _hover={"bg": "#4752C4"},
+                        cursor="pointer",
+                        padding_x="4",
+                    ),
+                    href=PredictionsMarketState.discord_auth_url,
+                    is_external=True,
+                    text_decoration="none",
                 ),
                 width="100%",
                 align="center",
@@ -747,6 +829,27 @@ def predictions_market_tab_view() -> rx.Component:
                     height="38px",
                     border_radius="lg",
                     on_click=PredictionsMarketState.open_modal,
+                ),
+                rx.fragment(),
+            ),
+            # Logout Button (visible when logged in)
+            rx.cond(
+                PredictionsMarketState.current_user != "",
+                rx.button(
+                    rx.hstack(
+                        rx.icon("log-out", size=16),
+                        rx.text("Logout", font_weight="700"),
+                        spacing="2",
+                        align="center",
+                    ),
+                    bg="#FF4B4B",
+                    color="white",
+                    _hover={"bg": "#E04040", "transform": "scale(1.02)"},
+                    cursor="pointer",
+                    padding_x="4",
+                    height="38px",
+                    border_radius="lg",
+                    on_click=PredictionsMarketState.logout,
                 ),
                 rx.fragment(),
             ),
@@ -820,10 +923,14 @@ def predictions_market_tab_view() -> rx.Component:
                             rx.table.cell(
                                 rx.badge(
                                     p["status_upper"],
-                                    bg="rgba(255, 255, 255, 0.08)",
-                                    color="#D0D0D5",
+                                    bg=p["status_bg"],
+                                    color=p["status_color"],
+                                    border=p["status_border"],
                                     font_size="10px",
-                                    font_weight="700",
+                                    font_weight="800",
+                                    padding_x="2.5",
+                                    padding_y="0.5",
+                                    border_radius="md",
                                 )
                             ),
                             rx.table.cell(
@@ -861,50 +968,29 @@ def predictions_market_tab_view() -> rx.Component:
         overflow_x="auto",
     )
 
-    construction_warning_banner = rx.box(
+    warning_banner = rx.box(
         rx.hstack(
-            rx.icon("triangle-alert", size=24, color="#FF4B4B", flex_shrink="0"),
-            rx.vstack(
-                rx.hstack(
-                    rx.text(
-                        "WARNING: UNDER CONSTRUCTION",
-                        font_size="13px",
-                        font_weight="900",
-                        color="#FF4B4B",
-                        letter_spacing="0.06em",
-                        text_transform="uppercase",
-                    ),
-                    rx.badge("TEST ENVIRONMENT", bg="rgba(255, 75, 75, 0.25)", color="#FF4B4B", border="1px solid rgba(255, 75, 75, 0.4)", font_size="10px", font_weight="800"),
-                    spacing="2",
-                    align="center",
-                ),
-                rx.text(
-                    "Currently under construction. All wagers submitted while this banner is up will be deleted and will not count.",
-                    font_size=["12px", "13px"],
-                    font_weight="700",
-                    color="#FFFFFF",
-                    line_height="1.4",
-                ),
-                spacing="1",
-                align_items="start",
+            rx.icon("triangle-alert", size=20, color="#FF8C00", flex_shrink="0"),
+            rx.text(
+                "Alternative Points hold no monetary value. Wagers are purely for entertainment purposes.",
+                font_size=["12px", "13px"],
+                font_weight="700",
+                color="#FFFFFF",
             ),
-            rx.spacer(),
-            rx.icon("triangle-alert", size=24, color="#FF4B4B", flex_shrink="0"),
-            width="100%",
-            align="center",
             spacing="3",
+            align="center",
+            width="100%",
         ),
-        bg="rgba(255, 75, 75, 0.12)",
-        border="2px solid rgba(255, 75, 75, 0.6)",
+        bg="rgba(255, 140, 0, 0.12)",
+        border="1px solid rgba(255, 140, 0, 0.35)",
         border_radius="xl",
-        padding="14px 18px",
-        box_shadow="0 0 20px rgba(255, 75, 75, 0.25)",
+        padding="12px 18px",
         width="100%",
         margin_bottom="2",
     )
 
     return rx.vstack(
-        construction_warning_banner,
+        warning_banner,
         rx.heading(
             "Predictions Market",
             size="6",
