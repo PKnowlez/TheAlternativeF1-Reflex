@@ -279,6 +279,8 @@ class State(rx.State):
     # ── Discord Login State ──────────────────────────────────────────────
     discord_username: str = rx.LocalStorage("", name="discord_username", sync=True)
     discord_avatar: str = rx.LocalStorage("", name="discord_avatar", sync=True)
+    discord_id: str = rx.LocalStorage("", name="discord_id", sync=True)
+    discord_handle: str = rx.LocalStorage("", name="discord_handle", sync=True)
 
     # ── Comments State ───────────────────────────────────────────────────
     comments_list: list[CommentData] = []
@@ -433,6 +435,9 @@ class State(rx.State):
         try:
             p_state = await self.get_state(PredictionsMarketState)
             p_state.discord_username = self.discord_username
+            p_state.discord_id = self.discord_id
+            p_state.discord_handle = self.discord_handle
+            p_state.sync_account()
             p_state.refresh_trigger += 1
         except Exception:
             pass
@@ -445,10 +450,14 @@ class State(rx.State):
     async def logout(self):
         self.discord_username = ""
         self.discord_avatar = ""
+        self.discord_id = ""
+        self.discord_handle = ""
         if self.active_nav == "login":
             self.active_nav = "home"
         p_state = await self.get_state(PredictionsMarketState)
         p_state.discord_username = ""
+        p_state.discord_id = ""
+        p_state.discord_handle = ""
 
     def load_comments(self):
         try:

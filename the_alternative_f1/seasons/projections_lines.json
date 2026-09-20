@@ -10,17 +10,17 @@
       "expected_highest_score_pts": 54,
       "expected_podium": [
         "McLaren",
-        "Red Bull",
-        "Cadillac"
+        "Cadillac",
+        "Red Bull"
       ],
       "expected_points_lines": {
         "Audi": 1.5,
-        "Cadillac": 21.5,
+        "Cadillac": 38.5,
         "Ferrari": 11.5,
         "Haas": 7.5,
         "McLaren": 53.5,
         "Mercedes": 1.5,
-        "Red Bull": 38.5,
+        "Red Bull": 21.5,
         "Williams": 1.5
       }
     },

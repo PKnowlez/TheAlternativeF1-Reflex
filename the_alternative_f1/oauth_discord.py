@@ -24,6 +24,8 @@ load_env()
 class OauthState(rx.State):
     discord_username: str = rx.LocalStorage("", name="discord_username", sync=True)
     discord_avatar: str = rx.LocalStorage("", name="discord_avatar", sync=True)
+    discord_id: str = rx.LocalStorage("", name="discord_id", sync=True)
+    discord_handle: str = rx.LocalStorage("", name="discord_handle", sync=True)
     error_message: str = ""
 
     @rx.var
@@ -93,17 +95,20 @@ class OauthState(rx.State):
             with urllib.request.urlopen(req_user, timeout=10) as response:
                 user_info = json.loads(response.read().decode('utf-8'))
 
-            username = user_info.get('global_name') or user_info.get('username', 'Unknown')
-            user_id = user_info.get('id')
+            display_name = user_info.get('global_name') or user_info.get('username', 'Unknown')
+            user_id = str(user_info.get('id', ''))
+            handle = str(user_info.get('username', ''))
             avatar_hash = user_info.get('avatar')
 
             if avatar_hash:
                 avatar_url = f"https://cdn.discordapp.com/avatars/{user_id}/{avatar_hash}.png"
             else:
-                avatar_url = f"https://api.dicebear.com/7.x/avataaars/svg?seed={username}"
+                avatar_url = f"https://api.dicebear.com/7.x/avataaars/svg?seed={display_name}"
 
-            self.discord_username = username
+            self.discord_username = display_name
             self.discord_avatar = avatar_url
+            self.discord_id = user_id
+            self.discord_handle = handle
 
             return rx.call_script(
                 "if (window.opener) { "

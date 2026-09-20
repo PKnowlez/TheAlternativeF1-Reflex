@@ -187,6 +187,8 @@ def compute_season_projections(season_num: int = 5) -> dict:
             "highest_expected_points": champion_pts,
             "expected_podium": podium_teams,
             "team_expected_lines": team_final_lines,
+            "team_points_calc": {t: int(cum_totals.get(t, 0)) for t in sorted_teams},
+            "team_total_projections": {t: (1.0 if t == champion_team else 0.0) for t in sorted_teams},
             "line_chart_data": line_chart_data,
             "lines_record": {},
         }
@@ -394,6 +396,7 @@ def compute_season_projections(season_num: int = 5) -> dict:
         "expected_winner_score": expected_winner_score,
         "expected_highest_score_team": highest_scoring_team,
         "highest_expected_points": highest_expected_points,
+        "team_points_calc": team_points_calc,
         "expected_podium": expected_podium_teams,
         "team_expected_lines": team_expected_lines,
         "line_chart_data": line_chart_data,
@@ -454,21 +457,262 @@ class ProjectionsState(rx.State):
         data = self.projections_data
         return data.get("teams", [])
 
+    # Full list popout dialog state (SDDREQ-157)
+    popout_open: bool = False
+    popout_type: str = ""
+    popout_title: str = ""
 
-# ── UI Components (SDDREQ-152) ────────────────────────────────────────────────
-def _stat_box(title: str, value_content: rx.Component | str, subtext: str, badge_color: str, icon_name: str) -> rx.Component:
+    def set_popout_open(self, val: bool):
+        self.popout_open = val
+
+    def open_popout(self, popout_type: str, season_num: int = 5):
+        self.active_season = season_num
+        self.popout_type = popout_type
+        if popout_type == "winner":
+            self.popout_title = "Full Expected Winner Probabilities"
+        elif popout_type == "highest_score":
+            self.popout_title = "Full Highest Scoring Team Projections"
+        elif popout_type == "podium":
+            self.popout_title = "Full Expected Podium Projections"
+        else:
+            self.popout_title = "Full Category Projections"
+        self.popout_open = True
+
+    def close_popout(self):
+        self.popout_open = False
+
+    @rx.var
+    def popout_rows(self) -> list[dict]:
+        proj = compute_season_projections(self.active_season)
+        is_complete = proj.get("is_complete", False)
+        teams = proj.get("teams", [])
+        team_total_projections = proj.get("team_total_projections", {})
+        team_points_calc = proj.get("team_points_calc", {})
+        sorted_teams = proj.get("sorted_teams", teams)
+
+        rows = []
+        if self.popout_type == "winner":
+            if is_complete:
+                champion = proj.get("champion_team", "")
+                for idx, team in enumerate(sorted_teams):
+                    pct = 100.0 if team == champion else 0.0
+                    rows.append({
+                        "rank": str(idx + 1),
+                        "team": team,
+                        "team_color": get_constructor_color(team),
+                        "metric_label": "Championship Winner",
+                        "metric_val": f"{pct:.1f}%",
+                        "badge_color": "#FFD700" if idx == 0 else "#00b4da",
+                    })
+            else:
+                sorted_by_win = sorted(teams, key=lambda t: team_total_projections.get(t, 0.0), reverse=True)
+                for idx, team in enumerate(sorted_by_win):
+                    score = team_total_projections.get(team, 0.0)
+                    pct = round(score * 100, 1)
+                    rows.append({
+                        "rank": str(idx + 1),
+                        "team": team,
+                        "team_color": get_constructor_color(team),
+                        "metric_label": "Win Expectation",
+                        "metric_val": f"{pct:.1f}%",
+                        "badge_color": "#FFD700" if idx == 0 else "#00b4da",
+                    })
+        elif self.popout_type == "highest_score":
+            sort_source = sorted_teams if is_complete else teams
+            sorted_by_pts = sorted(sort_source, key=lambda t: (team_points_calc.get(t, 0), team_total_projections.get(t, 0.0)), reverse=True)
+            for idx, team in enumerate(sorted_by_pts):
+                pts = team_points_calc.get(team, 0)
+                rows.append({
+                    "rank": str(idx + 1),
+                    "team": team,
+                    "team_color": get_constructor_color(team),
+                    "metric_label": "Final Points" if is_complete else "Expected Points",
+                    "metric_val": f"{pts} pts",
+                    "badge_color": "#FFD700" if idx == 0 else "#00b4da",
+                })
+        elif self.popout_type == "podium":
+            if is_complete:
+                podium_set = set(proj.get("expected_podium", []))
+                for idx, team in enumerate(sorted_teams):
+                    prob_pct = 100.0 if team in podium_set else 0.0
+                    rows.append({
+                        "rank": str(idx + 1),
+                        "team": team,
+                        "team_color": get_constructor_color(team),
+                        "metric_label": "Podium Finish",
+                        "metric_val": f"{prob_pct:.1f}%",
+                        "badge_color": "#FFD700" if idx == 0 else ("#C0C0C0" if idx == 1 else ("#CD7F32" if idx == 2 else "#666666")),
+                    })
+            else:
+                total_score = sum(team_total_projections.values()) if team_total_projections else 1.0
+                podium_probs = {t: 0.0 for t in teams}
+                if total_score > 0:
+                    for t1 in teams:
+                        s1 = team_total_projections.get(t1, 0.0)
+                        p1 = s1 / total_score
+                        podium_probs[t1] += p1
+                        rem1 = total_score - s1
+                        if rem1 <= 0:
+                            continue
+                        for t2 in teams:
+                            if t2 == t1:
+                                continue
+                            s2 = team_total_projections.get(t2, 0.0)
+                            p2 = p1 * (s2 / rem1)
+                            podium_probs[t2] += p2
+                            rem2 = rem1 - s2
+                            if rem2 <= 0:
+                                continue
+                            for t3 in teams:
+                                if t3 == t1 or t3 == t2:
+                                    continue
+                                s3 = team_total_projections.get(t3, 0.0)
+                                p3 = p2 * (s3 / rem2)
+                                podium_probs[t3] += p3
+
+                sorted_by_podium = sorted(teams, key=lambda t: (podium_probs.get(t, 0.0), team_total_projections.get(t, 0.0)), reverse=True)
+                for idx, team in enumerate(sorted_by_podium):
+                    prob_pct = round(podium_probs.get(team, 0.0) * 100, 1)
+                    rows.append({
+                        "rank": str(idx + 1),
+                        "team": team,
+                        "team_color": get_constructor_color(team),
+                        "metric_label": "Podium Probability",
+                        "metric_val": f"{prob_pct:.1f}%",
+                        "badge_color": "#FFD700" if idx == 0 else ("#C0C0C0" if idx == 1 else ("#CD7F32" if idx == 2 else "#666666")),
+                    })
+        return rows
+
+
+# ── UI Components (SDDREQ-152, SDDREQ-157) ────────────────────────────────────
+def _full_list_popout_dialog() -> rx.Component:
+    """Dialog displaying the full calculated list for next race (SDDREQ-157)."""
+    return rx.dialog.root(
+        rx.dialog.content(
+            rx.dialog.close(
+                rx.button(
+                    rx.icon("x", size=16),
+                    variant="ghost",
+                    color="#AAAAAA",
+                    position="absolute",
+                    top="14px",
+                    right="14px",
+                    _hover={"bg": "rgba(255,255,255,0.1)", "color": "white"},
+                    cursor="pointer",
+                    on_click=ProjectionsState.close_popout,
+                ),
+            ),
+            rx.dialog.title(ProjectionsState.popout_title, font_family="Outfit", font_weight="800", color="white", padding_right="28px"),
+            rx.dialog.description(
+                "Full ranked constructor projection scores and metrics calculated for ",
+                rx.text(ProjectionsState.next_race_name, as_="span", color="#00b4da", font_weight="700"),
+                ".",
+                color="#A0A0AA",
+                font_size="xs",
+                margin_bottom="3",
+            ),
+            rx.box(
+                rx.table.root(
+                    rx.table.header(
+                        rx.table.row(
+                            rx.table.column_header_cell("RANK", color="#00b4da", font_size="10px", font_weight="800"),
+                            rx.table.column_header_cell("CONSTRUCTOR", color="#00b4da", font_size="10px", font_weight="800"),
+                            rx.table.column_header_cell("SCORE / METRIC", color="#00b4da", font_size="10px", font_weight="800"),
+                        )
+                    ),
+                    rx.table.body(
+                        rx.foreach(
+                            ProjectionsState.popout_rows,
+                            lambda r: rx.table.row(
+                                rx.table.cell(
+                                    rx.badge(
+                                        r["rank"],
+                                        bg="rgba(0,180,218,0.15)",
+                                        color=r["badge_color"],
+                                        border="1px solid rgba(255,255,255,0.1)",
+                                        font_size="10px",
+                                        font_weight="800",
+                                        width="20px",
+                                        justify="center",
+                                    )
+                                ),
+                                rx.table.cell(
+                                    rx.hstack(
+                                        rx.box(width="4px", height="16px", bg=r["team_color"], border_radius="full"),
+                                        rx.text(r["team"], color="white", font_weight="700", font_size="xs"),
+                                        spacing="2",
+                                        align="center",
+                                    )
+                                ),
+                                rx.table.cell(
+                                    rx.badge(
+                                        r["metric_val"],
+                                        bg="rgba(255,255,255,0.06)",
+                                        color="white",
+                                        font_weight="800",
+                                        font_size="xs",
+                                    )
+                                ),
+                                _hover={"bg": "#1F1F29"},
+                            )
+                        )
+                    ),
+                    variant="ghost",
+                    width="100%",
+                ),
+                max_height="360px",
+                overflow_y="auto",
+                margin_y="2",
+            ),
+            position="relative",
+            bg="#15151A",
+            border="1px solid #2C2C32",
+            border_radius="2xl",
+            box_shadow="0 8px 24px rgba(0,0,0,0.4)",
+            padding=["16px", "20px", "24px"],
+            max_width="480px",
+        ),
+        open=ProjectionsState.popout_open,
+        on_open_change=ProjectionsState.set_popout_open,
+    )
+
+
+def _stat_box(title: str, value_content: rx.Component | str, subtext: str, badge_color: str, icon_name: str, popout_type: str = "", season_num: int = 5) -> rx.Component:
     """Card layout matching the Map feature right-hand panel styling."""
     val_node = (
         value_content
         if isinstance(value_content, rx.Component)
         else rx.text(str(value_content), font_size=["18px", "20px"], font_weight="900", color="white", font_family="Outfit")
     )
+    popout_btn = rx.cond(
+        popout_type != "",
+        rx.button(
+            rx.hstack(
+                rx.icon("maximize-2", size=11),
+                rx.text("Full List", font_size="10px", font_weight="700"),
+                spacing="1",
+                align="center",
+            ),
+            size="1",
+            variant="surface",
+            color_scheme="cyan",
+            cursor="pointer",
+            on_click=lambda: ProjectionsState.open_popout(popout_type, season_num),
+        ),
+        rx.fragment(),
+    )
     return rx.box(
         rx.vstack(
             rx.hstack(
-                rx.icon(icon_name, size=16, color=badge_color),
-                rx.text(title, font_size="11px", color="#A0A0AA", font_weight="700", letter_spacing="0.05em", text_transform="uppercase"),
-                spacing="2",
+                rx.hstack(
+                    rx.icon(icon_name, size=16, color=badge_color),
+                    rx.text(title, font_size="11px", color="#A0A0AA", font_weight="700", letter_spacing="0.05em", text_transform="uppercase"),
+                    spacing="2",
+                    align="center",
+                ),
+                rx.spacer(),
+                popout_btn,
+                width="100%",
                 align="center",
             ),
             val_node,
@@ -506,7 +750,7 @@ def projections_tab_view(season_num: int = 5) -> rx.Component:
     max_label_len = max([len(str(p.get("race", ""))) for p in chart_data] or [4])
     axis_height = max(40, max_label_len * 5 + 15)
 
-    # 1. Metric Boxes Row (SDDREQ-136, 138, 139, 140, 152)
+    # 1. Metric Boxes Row (SDDREQ-136, 138, 139, 140, 152, SDDREQ-157)
     podium_teams = data.get("expected_podium", ["—", "—", "—"])
 
     def _team_pill(team: str, font_size: str = "18px") -> rx.Component:
@@ -554,9 +798,9 @@ def projections_tab_view(season_num: int = 5) -> rx.Component:
 
     if is_complete:
         stat_cards_row = rx.flex(
-            _stat_box("Season Champion", winner_node, f"Constructors Champion ({champion_driver} WDC)" if champion_driver else "Constructors Champion", "#FFD700", "trophy"),
-            _stat_box("Highest Scoring Team", highest_node, f"Final Score: {highest_pts} pts", "#00b4da", "award"),
-            _stat_box("Final Podium", podium_content, "Final Championship Standings", "#CD7F32", "flag"),
+            _stat_box("Season Champion", winner_node, f"Constructors Champion ({champion_driver} WDC)" if champion_driver else "Constructors Champion", "#FFD700", "trophy", popout_type="winner", season_num=season_num),
+            _stat_box("Highest Scoring Team", highest_node, f"Final Score: {highest_pts} pts", "#00b4da", "award", popout_type="highest_score", season_num=season_num),
+            _stat_box("Final Podium", podium_content, "Final Championship Standings", "#CD7F32", "flag", popout_type="podium", season_num=season_num),
             direction={"initial": "column", "sm": "row"},
             width="100%",
             spacing="3",
@@ -564,9 +808,9 @@ def projections_tab_view(season_num: int = 5) -> rx.Component:
         )
     else:
         stat_cards_row = rx.flex(
-            _stat_box("Expected Winner", winner_node, f"Projection Factor: {winner_prob:.1f}%", "#FFD700", "trophy"),
-            _stat_box("Highest Scoring Team", highest_node, f"Expected Score: {highest_pts} pts", "#00b4da", "award"),
-            _stat_box("Expected Podium", podium_content, f"For {data.get('next_main_race', 'Upcoming Race')}", "#CD7F32", "flag"),
+            _stat_box("Expected Winner", winner_node, f"Projection Factor: {winner_prob:.1f}%", "#FFD700", "trophy", popout_type="winner", season_num=season_num),
+            _stat_box("Highest Scoring Team", highest_node, f"Expected Score: {highest_pts} pts", "#00b4da", "award", popout_type="highest_score", season_num=season_num),
+            _stat_box("Expected Podium", podium_content, f"For {data.get('next_main_race', 'Upcoming Race')}", "#CD7F32", "flag", popout_type="podium", season_num=season_num),
             direction={"initial": "column", "sm": "row"},
             width="100%",
             spacing="3",
@@ -723,6 +967,7 @@ def projections_tab_view(season_num: int = 5) -> rx.Component:
             box_shadow="0 6px 18px rgba(0,0,0,0.35)",
             margin_bottom="2",
         ),
+        _full_list_popout_dialog(),
         width="100%",
         spacing="3",
         align_items="start",

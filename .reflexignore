@@ -25,5 +25,6 @@ scratch/
 *.db
 *.sqlite
 .env
+.agents/
 r2_credentials.env
 comments.json
