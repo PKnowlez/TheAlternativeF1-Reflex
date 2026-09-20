@@ -3,8 +3,8 @@ Implements TAF1APP-SDDFEAT-17 and approved downstream SDD requirements:
 - SDDREQ-153: User Ranking (Ranked by all-time remaining Alternative Points, sets sort)
 - SDDREQ-154: Table Format (Frozen columns: User Name, All Time Points; Cascading columns starting with Season 5)
 - SDDREQ-165: User Wagers Correct/Incorrect Stacked Bar Chart (Horizontal stacked bar: x=points, y=users, correct=#00b4da, incorrect=#FF8C00)
-- SDDREQ-166: All Time Points Growth Chart (Line chart: x=races, y=points, dashed vertical line at Season 5 boundary, season slider starting at Season 5)
-- SDDREQ-167: Leaderboard Tab Layout (Top-to-bottom: All-time table in expander, followed side-by-side by User Wagers stacked bar chart and Points Growth chart)
+- SDDREQ-166: All Time Points Growth Chart (Line chart: x=races, y=points, interactive data point tooltip popup, dashed vertical line at Season 5 boundary, season slider starting at Season 5)
+- SDDREQ-167: Leaderboard Tab Layout (Top-to-bottom: All-time standings table in expander defaulted to closed reflecting dynamic remaining points balance, followed side-by-side by Points Growth chart and User Wagers stacked bar chart)
 """
 
 import reflex as rx
@@ -155,7 +155,7 @@ class LeaderboardState(rx.State):
     """Reflex state managing Leaderboard table, stacked bar chart, and growth chart."""
     selected_season: int = 5
     selected_season_col: str = "s5"
-    table_expander_open: bool = True
+    table_expander_open: bool = False
     season_slider: int = 5
     single_season_only: bool = True
     refresh_counter: int = 0
@@ -221,6 +221,8 @@ class LeaderboardState(rx.State):
 
             chart_data.append({
                 "user": u,
+                "correct": correct_pts,
+                "incorrect": incorrect_pts,
                 "correct_pts": correct_pts,
                 "incorrect_pts": incorrect_pts,
                 "open_pts": open_pts,
@@ -228,6 +230,36 @@ class LeaderboardState(rx.State):
             })
 
         return chart_data
+
+    @rx.var
+    def user_wagers_font_size(self) -> int:
+        """Dynamically scales font size so usernames never get clipped on the Y-axis."""
+        rows = self.leaderboard_rows
+        if not rows:
+            return 9
+        max_len = max([len(str(r.get("user", ""))) for r in rows] or [0])
+        if max_len >= 16:
+            return 7
+        elif max_len >= 13:
+            return 8
+        elif max_len >= 10:
+            return 9
+        return 10
+
+    @rx.var
+    def user_wagers_yaxis_width(self) -> int:
+        """Dynamically allocates width for Y-axis category labels."""
+        rows = self.leaderboard_rows
+        if not rows:
+            return 115
+        max_len = max([len(str(r.get("user", ""))) for r in rows] or [0])
+        if max_len >= 16:
+            return 125
+        elif max_len >= 13:
+            return 115
+        elif max_len >= 10:
+            return 105
+        return 95
 
     @rx.var
     def user_names_list(self) -> list[str]:
@@ -529,13 +561,21 @@ def alternative_points_leaderboard_view() -> rx.Component:
             LeaderboardState.has_rows,
             rx.recharts.bar_chart(
                 rx.recharts.x_axis(type_="number", stroke="#888888", font_size=10),
-                rx.recharts.y_axis(data_key="user", type_="category", stroke="#FFFFFF", font_size=10, width=95),
+                rx.recharts.y_axis(
+                    data_key="user",
+                    type_="category",
+                    stroke="#FFFFFF",
+                    font_size=LeaderboardState.user_wagers_font_size,
+                    width=LeaderboardState.user_wagers_yaxis_width,
+                    interval=0,
+                ),
                 rx.recharts.cartesian_grid(horizontal=False, stroke="rgba(255, 255, 255, 0.1)"),
                 rx.recharts.bar(data_key="correct", stack_id="a", fill="#00b4da", name="Correct Points"),
                 rx.recharts.bar(data_key="incorrect", stack_id="a", fill="#FF8C00", name="Incorrect Points"),
                 rx.recharts.graphing_tooltip(),
                 data=LeaderboardState.user_wagers_stacked_data,
                 layout="vertical",
+                margin={"top": 5, "right": 20, "left": 15, "bottom": 5},
                 width="100%",
                 height=h,
             ),
@@ -656,8 +696,8 @@ def alternative_points_leaderboard_view() -> rx.Component:
     )
 
     side_by_side_grid = rx.grid(
-        stacked_bar_card,
         growth_chart_card,
+        stacked_bar_card,
         columns=rx.breakpoints(initial="1", md="2"),
         spacing="5",
         width="100%",

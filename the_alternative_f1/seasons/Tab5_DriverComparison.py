@@ -383,6 +383,7 @@ def Tab5(data: dict, season_data: dict, rookies_only: bool = False, rookies_only
                     tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
                 ),
                 rx.recharts.cartesian_grid(vertical=False, stroke="rgba(255, 255, 255, 0.2)"),
+                rx.recharts.graphing_tooltip(),
                 data=rookie_line_data,
                 margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
                 width="100%",

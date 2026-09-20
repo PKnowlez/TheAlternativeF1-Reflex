@@ -913,6 +913,7 @@ def projections_tab_view(season_num: int = 5) -> rx.Component:
                 tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
             ),
             rx.recharts.cartesian_grid(vertical=False, stroke="rgba(255, 255, 255, 0.15)"),
+            rx.recharts.graphing_tooltip(),
             data=chart_data,
             margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
             width="100%",

@@ -10,16 +10,16 @@ Implements TAF1APP-SDDFEAT-16 and approved downstream SDD requirements:
 - SDDREQ-149: Incorrect Predictions (0 returned)
 - SDDREQ-150: Prediction Finalization (auto-settles upon race upload; grace for revisions)
 - SDDREQ-151: Previous Lines storage (.json storage)
-- SDDREQ-155: Active Race Predictions Pool - Expander (summary of count & total wagered points when collapsed)
+- SDDREQ-155: Submitted Predictions - Expander (default closed, summary of count & total wagered points when collapsed, retains season prediction history)
 - SDDREQ-156: Prediction Target (all active constructors in target dropdown selector)
 - SDDREQ-157: Full List Popouts (interactive popouts for Expected Winner, Highest Scoring Team, and Expected Podium)
 - SDDREQ-158: Additional Stat Categories (Fastest Lap, Driver of the Day, Most Overtakes, Cleanest Driver)
-- SDDREQ-159: Display Current Predictions - Expected Points (Interactive donut chart: outer teams, inner Over/Under)
-- SDDREQ-160: Display Current Predictions - Expected Winner (Interactive donut chart: outer teams, inner For/Against)
-- SDDREQ-161: Display Current Predictions - Expected Podium (Interactive donut chart: outer teams, inner For/Against)
-- SDDREQ-162: Display Current Predictions - Highest Scoring Team (Interactive donut chart: outer teams, inner For/Against)
-- SDDREQ-163: User Predictions Metric (Interactive donut chart: outer users, inner positive/negative split)
-- SDDREQ-164: Predictions Tab Layout (Ordered top-to-bottom layout)
+- SDDREQ-159: Display Current Predictions - Expected Points (Interactive 3-ring donut chart: outer teams, middle Over/Under, center-most Correct/Incorrect/Open)
+- SDDREQ-160: Display Current Predictions - Expected Winner (Interactive 3-ring donut chart: outer teams, middle For/Against, center-most Correct/Incorrect/Open)
+- SDDREQ-161: Display Current Predictions - Expected Podium (Interactive 3-ring donut chart: outer teams, middle For/Against, center-most Correct/Incorrect/Open)
+- SDDREQ-162: Display Current Predictions - Highest Scoring Team (Interactive 3-ring donut chart: outer teams, middle For/Against, center-most Correct/Incorrect/Open)
+- SDDREQ-163: User Predictions Metric (Interactive 3-ring donut chart: outer users, middle positive/negative split, center-most Correct/Incorrect/Open)
+- SDDREQ-164: Predictions Tab Layout (Ordered top-to-bottom layout with default closed Submitted Predictions expander and 3-ring donut charts without keys)
 - SDDREQ-168: User Account Consistency (persistent account ID across display name changes)
 """
 
@@ -474,16 +474,23 @@ def build_category_donut_svg(
     svg_id: str,
     default_type: str,
 ) -> str:
-    """Build high-precision interactive two-ring SVG donut chart for category wagers (SDDREQ-159 to SDDREQ-162)."""
+    """Build high-precision interactive three-ring SVG donut chart for category wagers (SDDREQ-159 to SDDREQ-162).
+    - Ring 1 (Outer): Constructor / Target
+    - Ring 2 (Middle): Stance (For/Over vs. Against/Under)
+    - Ring 3 (Center-most): Outcome (Correct vs. Incorrect)
+    """
     cx, cy = 260.0, 260.0
-    r_out_in, r_out_out = 174.0, 242.0
-    r_in_in, r_in_out = 104.0, 170.0
+    r1_in, r1_out = 192.0, 244.0   # Ring 1 (Outer): Constructor / Team
+    r2_in, r2_out = 138.0, 188.0   # Ring 2 (Middle): Stance
+    r3_in, r3_out = 88.0, 134.0    # Ring 3 (Center-most): Outcome (Correct/Incorrect)
+    center_hole_r = 84.0           # Center hole circle
 
     total_pts = sum(int(p.get("points", 0)) for p in cat_preds)
 
     if total_pts <= 0:
-        empty_path = _build_arc_path(cx, cy, r_out_in, r_out_out, 0, 359.99)
-        inner_empty = _build_arc_path(cx, cy, r_in_in, r_in_out, 0, 359.99)
+        empty_r1 = _build_arc_path(cx, cy, r1_in, r1_out, 0, 359.99)
+        empty_r2 = _build_arc_path(cx, cy, r2_in, r2_out, 0, 359.99)
+        empty_r3 = _build_arc_path(cx, cy, r3_in, r3_out, 0, 359.99)
         return f"""
         <svg id="{svg_id}" class="donut-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 520" width="100%" height="100%"
              data-default-points="0 PTS"
@@ -497,20 +504,21 @@ def build_category_donut_svg(
                 </filter>
             </defs>
             <g filter="url(#donut-shadow-{svg_id})">
-                <path class="donut-slice" d="{empty_path}" fill="#22222A" stroke="#15151A" stroke-width="2" />
-                <path class="donut-slice" d="{inner_empty}" fill="#1B1B22" stroke="#15151A" stroke-width="1.8" />
+                <path class="donut-slice" d="{empty_r1}" fill="#22222A" stroke="#15151A" stroke-width="2" />
+                <path class="donut-slice" d="{empty_r2}" fill="#1B1B22" stroke="#15151A" stroke-width="1.8" />
+                <path class="donut-slice" d="{empty_r3}" fill="#16161D" stroke="#15151A" stroke-width="1.8" />
             </g>
-            <circle class="donut-center-hole" cx="{cx}" cy="{cy}" r="98"
+            <circle class="donut-center-hole" cx="{cx}" cy="{cy}" r="{center_hole_r}"
                     fill="#15151A" stroke="rgba(255,255,255,0.08)" stroke-width="1.5"
                     style="cursor: pointer;"
                     onclick="window.taf1DonutReset && window.taf1DonutReset(event)" />
             <g class="donut-svg-center-group" pointer-events="none" text-anchor="middle" font-family="'Outfit', sans-serif" style="user-select: none;">
-                <text class="donut-center-type" x="{cx}" y="230" dominant-baseline="middle"
-                      fill="#8E8E93" font-size="11" font-weight="700" letter-spacing="1">{default_type.upper()}</text>
+                <text class="donut-center-type" x="{cx}" y="232" dominant-baseline="middle"
+                      fill="#8E8E93" font-size="10.5" font-weight="700" letter-spacing="1">{default_type.upper()}</text>
                 <text class="donut-center-value" x="{cx}" y="260" dominant-baseline="middle"
-                      fill="#FFFFFF" font-size="22" font-weight="900">0 PTS</text>
-                <text class="donut-center-meta" x="{cx}" y="285" dominant-baseline="middle"
-                      fill="#00b4da" font-size="10.5" font-weight="700" letter-spacing="0.5">OPEN POOL</text>
+                      fill="#FFFFFF" font-size="20" font-weight="900">0 PTS</text>
+                <text class="donut-center-meta" x="{cx}" y="284" dominant-baseline="middle"
+                      fill="#00b4da" font-size="9.5" font-weight="700" letter-spacing="0.5">OPEN POOL</text>
             </g>
         </svg>
         """
@@ -520,22 +528,42 @@ def build_category_donut_svg(
         t = str(p.get("target", "Unknown"))
         pts = int(p.get("points", 0))
         stance = str(p.get("stance", "")).upper()
+        status = str(p.get("status", "open")).lower()
+        if status not in ("correct", "incorrect"):
+            status = "open"
+        is_pos = ("FOR" in stance or "OVER" in stance)
+        stance_key = "pos" if is_pos else "neg"
+
         if t not in teams:
-            teams[t] = {"total": 0, "pos": 0, "neg": 0}
+            teams[t] = {
+                "total": 0,
+                "pos": {"total": 0, "correct": 0, "incorrect": 0, "open": 0},
+                "neg": {"total": 0, "correct": 0, "incorrect": 0, "open": 0},
+            }
         teams[t]["total"] += pts
-        if "FOR" in stance or "OVER" in stance:
-            teams[t]["pos"] += pts
-        else:
-            teams[t]["neg"] += pts
+        teams[t][stance_key]["total"] += pts
+        teams[t][stance_key][status] += pts
 
     sorted_teams = sorted(teams.items(), key=lambda x: -x[1]["total"])
 
     curr_angle = -90.0  # 12 o'clock
     outer_paths = []
-    inner_paths = []
+    middle_paths = []
+    outcome_paths = []
 
     pos_label = "Over" if category_name == "Expected Points" else "For"
     neg_label = "Under" if category_name == "Expected Points" else "Against"
+
+    outcome_colors = {
+        "correct": "#00b4da",
+        "incorrect": "#FF8C00",
+        "open": "#D0D0D5",
+    }
+    outcome_labels = {
+        "correct": "Correct",
+        "incorrect": "Incorrect",
+        "open": "Open",
+    }
 
     for team, data in sorted_teams:
         c_pts = data["total"]
@@ -547,7 +575,8 @@ def build_category_donut_svg(
         c_pct = (c_pts / total_pts) * 100.0
         c_color = get_constructor_color(team)
 
-        c_path_d = _build_arc_path(cx, cy, r_out_in, r_out_out, c_start_angle, c_end_angle)
+        # Ring 1: Team / Constructor
+        c_path_d = _build_arc_path(cx, cy, r1_in, r1_out, c_start_angle, c_end_angle)
         outer_paths.append(f"""
         <path class="donut-slice donut-constructor" d="{c_path_d}" fill="{c_color}" stroke="#15151A" stroke-width="2"
               style="cursor: pointer; transition: opacity 0.15s ease;"
@@ -562,48 +591,63 @@ def build_category_donut_svg(
         </path>
         """)
 
-        pos_pts = data["pos"]
-        neg_pts = data["neg"]
-
+        # Ring 2 & 3: Stance and Outcomes
         curr_stance_angle = c_start_angle
-        if pos_pts > 0:
-            pos_span = c_angle_span * (pos_pts / c_pts)
-            pos_end = curr_stance_angle + pos_span
-            pos_pct = (pos_pts / c_pts) * 100.0
-            pos_path_d = _build_arc_path(cx, cy, r_in_in, r_in_out, curr_stance_angle, pos_end)
-            inner_paths.append(f"""
-            <path class="donut-slice donut-driver" d="{pos_path_d}" fill="#3cb44b" stroke="#15151A" stroke-width="1.8"
-                  style="cursor: pointer; transition: opacity 0.15s ease;"
-                  data-type="Stance"
-                  data-name="{team} ({pos_label})"
-                  data-pts="{pos_pts:,.0f}"
-                  data-meta="{team} • {pos_pct:.1f}% of Team"
-                  onmouseenter="window.taf1DonutEnter && window.taf1DonutEnter(this)"
-                  onmouseleave="window.taf1DonutLeave && window.taf1DonutLeave(this)"
-                  onclick="window.taf1DonutClick && window.taf1DonutClick(this, event)">
-                <title>{team} ({pos_label}): {pos_pts:,.0f} pts ({pos_pct:.1f}%)</title>
-            </path>
-            """)
-            curr_stance_angle = pos_end
+        for stance_key, s_label, s_color in [("pos", pos_label, "#3cb44b"), ("neg", neg_label, "#FF4B4B")]:
+            s_data = data[stance_key]
+            s_pts = s_data["total"]
+            if s_pts <= 0:
+                continue
 
-        if neg_pts > 0:
-            neg_span = c_angle_span * (neg_pts / c_pts)
-            neg_end = curr_stance_angle + neg_span
-            neg_pct = (neg_pts / c_pts) * 100.0
-            neg_path_d = _build_arc_path(cx, cy, r_in_in, r_in_out, curr_stance_angle, neg_end)
-            inner_paths.append(f"""
-            <path class="donut-slice donut-driver" d="{neg_path_d}" fill="#FF4B4B" stroke="#15151A" stroke-width="1.8"
+            s_span = c_angle_span * (s_pts / c_pts)
+            s_end = curr_stance_angle + s_span
+            s_pct = (s_pts / c_pts) * 100.0
+
+            # Ring 2 (Middle): Stance Slice
+            s_path_d = _build_arc_path(cx, cy, r2_in, r2_out, curr_stance_angle, s_end)
+            middle_paths.append(f"""
+            <path class="donut-slice donut-driver" d="{s_path_d}" fill="{s_color}" stroke="#15151A" stroke-width="1.8"
                   style="cursor: pointer; transition: opacity 0.15s ease;"
                   data-type="Stance"
-                  data-name="{team} ({neg_label})"
-                  data-pts="{neg_pts:,.0f}"
-                  data-meta="{team} • {neg_pct:.1f}% of Team"
+                  data-name="{team} ({s_label})"
+                  data-pts="{s_pts:,.0f}"
+                  data-meta="{team} • {s_pct:.1f}% of Team"
                   onmouseenter="window.taf1DonutEnter && window.taf1DonutEnter(this)"
                   onmouseleave="window.taf1DonutLeave && window.taf1DonutLeave(this)"
                   onclick="window.taf1DonutClick && window.taf1DonutClick(this, event)">
-                <title>{team} ({neg_label}): {neg_pts:,.0f} pts ({neg_pct:.1f}%)</title>
+                <title>{team} ({s_label}): {s_pts:,.0f} pts ({s_pct:.1f}%)</title>
             </path>
             """)
+
+            # Ring 3 (Center-most): Outcomes inside this Stance
+            curr_outcome_angle = curr_stance_angle
+            for out_status in ["correct", "incorrect", "open"]:
+                o_pts = s_data[out_status]
+                if o_pts <= 0:
+                    continue
+                o_span = s_span * (o_pts / s_pts)
+                o_end = curr_outcome_angle + o_span
+                o_pct = (o_pts / s_pts) * 100.0
+                o_color = outcome_colors[out_status]
+                o_label = outcome_labels[out_status]
+
+                o_path_d = _build_arc_path(cx, cy, r3_in, r3_out, curr_outcome_angle, o_end)
+                outcome_paths.append(f"""
+                <path class="donut-slice donut-outcome" d="{o_path_d}" fill="{o_color}" stroke="#15151A" stroke-width="1.8"
+                      style="cursor: pointer; transition: opacity 0.15s ease;"
+                      data-type="Outcome"
+                      data-name="{team} ({s_label} - {o_label})"
+                      data-pts="{o_pts:,.0f}"
+                      data-meta="{team} • {s_label} • {o_pct:.1f}% {o_label}"
+                      onmouseenter="window.taf1DonutEnter && window.taf1DonutEnter(this)"
+                      onmouseleave="window.taf1DonutLeave && window.taf1DonutLeave(this)"
+                      onclick="window.taf1DonutClick && window.taf1DonutClick(this, event)">
+                    <title>{team} ({s_label} - {o_label}): {o_pts:,.0f} pts ({o_pct:.1f}%)</title>
+                </path>
+                """)
+                curr_outcome_angle = o_end
+
+            curr_stance_angle = s_end
 
         curr_angle = c_end_angle
 
@@ -620,46 +664,58 @@ def build_category_donut_svg(
             </filter>
         </defs>
 
-        <!-- Outer Ring: Constructors -->
+        <!-- Outer Ring: Ring 1 (Constructors) -->
         <g id="donut-outer-ring-{svg_id}" filter="url(#donut-shadow-{svg_id})">
             {''.join(outer_paths)}
         </g>
 
-        <!-- Inner Ring: Stance Split -->
-        <g id="donut-inner-ring-{svg_id}" filter="url(#donut-shadow-{svg_id})">
-            {''.join(inner_paths)}
+        <!-- Middle Ring: Ring 2 (Stance Split) -->
+        <g id="donut-middle-ring-{svg_id}" filter="url(#donut-shadow-{svg_id})">
+            {''.join(middle_paths)}
+        </g>
+
+        <!-- Center-most Ring: Ring 3 (Outcome: Correct / Incorrect / Open) -->
+        <g id="donut-outcome-ring-{svg_id}" filter="url(#donut-shadow-{svg_id})">
+            {''.join(outcome_paths)}
         </g>
 
         <!-- Donut center hole (clickable to reset) -->
-        <circle id="donut-center-hole-{svg_id}" class="donut-center-hole" cx="{cx}" cy="{cy}" r="98"
+        <circle id="donut-center-hole-{svg_id}" class="donut-center-hole" cx="{cx}" cy="{cy}" r="{center_hole_r}"
                 fill="#15151A" stroke="rgba(255,255,255,0.08)" stroke-width="1.5"
                 style="cursor: pointer;"
                 onclick="window.taf1DonutReset && window.taf1DonutReset(event)" />
 
         <!-- Center Information Display -->
         <g class="donut-svg-center-group" pointer-events="none" text-anchor="middle" font-family="'Outfit', sans-serif" style="user-select: none;">
-            <text class="donut-center-type" x="{cx}" y="230" dominant-baseline="middle"
-                  fill="#8E8E93" font-size="11" font-weight="700" letter-spacing="1">{default_type.upper()}</text>
+            <text class="donut-center-type" x="{cx}" y="232" dominant-baseline="middle"
+                  fill="#8E8E93" font-size="10.5" font-weight="700" letter-spacing="1">{default_type.upper()}</text>
             <text class="donut-center-value" x="{cx}" y="260" dominant-baseline="middle"
-                  fill="#FFFFFF" font-size="24" font-weight="900">{total_pts:,.0f} PTS</text>
-            <text class="donut-center-meta" x="{cx}" y="285" dominant-baseline="middle"
-                  fill="#00b4da" font-size="10.5" font-weight="700" letter-spacing="0.5">TOTAL WAGERED</text>
+                  fill="#FFFFFF" font-size="20" font-weight="900">{total_pts:,.0f} PTS</text>
+            <text class="donut-center-meta" x="{cx}" y="284" dominant-baseline="middle"
+                  fill="#00b4da" font-size="9.5" font-weight="700" letter-spacing="0.5">TOTAL WAGERED</text>
         </g>
     </svg>
     """
 
 
 def build_user_metrics_donut_svg(preds: list[dict], svg_id: str = "user-metrics-donut-svg") -> str:
-    """Build high-precision interactive two-ring SVG donut chart for user prediction metrics (SDDREQ-163)."""
+    """Build high-precision interactive three-ring SVG donut chart for user prediction metrics (SDDREQ-163).
+    - Ring 1 (Outer): Predictors / Users
+    - Ring 2 (Middle): Stance (Positive: For/Over vs. Negative: Against/Under)
+    - Ring 3 (Center-most): Outcome (Correct vs. Incorrect)
+    """
     cx, cy = 260.0, 260.0
-    r_out_in, r_out_out = 174.0, 242.0
-    r_in_in, r_in_out = 104.0, 170.0
+    r1_in, r1_out = 192.0, 244.0   # Ring 1 (Outer): Users / Predictors
+    r2_in, r2_out = 138.0, 188.0   # Ring 2 (Middle): Stance
+    r3_in, r3_out = 88.0, 134.0    # Ring 3 (Center-most): Outcome (Correct/Incorrect)
+    center_hole_r = 84.0           # Center hole circle
 
     total_pts = sum(int(p.get("points", 0)) for p in preds)
 
     if total_pts <= 0:
-        empty_path = _build_arc_path(cx, cy, r_out_in, r_out_out, 0, 359.99)
-        inner_empty = _build_arc_path(cx, cy, r_in_in, r_in_out, 0, 359.99)
+        empty_r1 = _build_arc_path(cx, cy, r1_in, r1_out, 0, 359.99)
+        empty_r2 = _build_arc_path(cx, cy, r2_in, r2_out, 0, 359.99)
+        empty_r3 = _build_arc_path(cx, cy, r3_in, r3_out, 0, 359.99)
         return f"""
         <svg id="{svg_id}" class="donut-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 520" width="100%" height="100%"
              data-default-points="0 PTS"
@@ -673,20 +729,21 @@ def build_user_metrics_donut_svg(preds: list[dict], svg_id: str = "user-metrics-
                 </filter>
             </defs>
             <g filter="url(#donut-shadow-{svg_id})">
-                <path class="donut-slice" d="{empty_path}" fill="#22222A" stroke="#15151A" stroke-width="2" />
-                <path class="donut-slice" d="{inner_empty}" fill="#1B1B22" stroke="#15151A" stroke-width="1.8" />
+                <path class="donut-slice" d="{empty_r1}" fill="#22222A" stroke="#15151A" stroke-width="2" />
+                <path class="donut-slice" d="{empty_r2}" fill="#1B1B22" stroke="#15151A" stroke-width="1.8" />
+                <path class="donut-slice" d="{empty_r3}" fill="#16161D" stroke="#15151A" stroke-width="1.8" />
             </g>
-            <circle class="donut-center-hole" cx="{cx}" cy="{cy}" r="98"
+            <circle class="donut-center-hole" cx="{cx}" cy="{cy}" r="{center_hole_r}"
                     fill="#15151A" stroke="rgba(255,255,255,0.08)" stroke-width="1.5"
                     style="cursor: pointer;"
                     onclick="window.taf1DonutReset && window.taf1DonutReset(event)" />
             <g class="donut-svg-center-group" pointer-events="none" text-anchor="middle" font-family="'Outfit', sans-serif" style="user-select: none;">
-                <text class="donut-center-type" x="{cx}" y="230" dominant-baseline="middle"
-                      fill="#8E8E93" font-size="11" font-weight="700" letter-spacing="1">PREDICTOR METRIC</text>
+                <text class="donut-center-type" x="{cx}" y="232" dominant-baseline="middle"
+                      fill="#8E8E93" font-size="10.5" font-weight="700" letter-spacing="1">PREDICTOR METRIC</text>
                 <text class="donut-center-value" x="{cx}" y="260" dominant-baseline="middle"
-                      fill="#FFFFFF" font-size="22" font-weight="900">0 PTS</text>
-                <text class="donut-center-meta" x="{cx}" y="285" dominant-baseline="middle"
-                      fill="#00b4da" font-size="10.5" font-weight="700" letter-spacing="0.5">TOTAL WAGERED</text>
+                      fill="#FFFFFF" font-size="20" font-weight="900">0 PTS</text>
+                <text class="donut-center-meta" x="{cx}" y="284" dominant-baseline="middle"
+                      fill="#00b4da" font-size="9.5" font-weight="700" letter-spacing="0.5">TOTAL WAGERED</text>
             </g>
         </svg>
         """
@@ -698,19 +755,39 @@ def build_user_metrics_donut_svg(preds: list[dict], svg_id: str = "user-metrics-
         u = str(p.get("username", "Unknown"))
         pts = int(p.get("points", 0))
         stance = str(p.get("stance", "")).upper()
+        status = str(p.get("status", "open")).lower()
+        if status not in ("correct", "incorrect"):
+            status = "open"
+        is_pos = ("FOR" in stance or "OVER" in stance)
+        stance_key = "pos" if is_pos else "neg"
+
         if u not in users:
-            users[u] = {"total": 0, "pos": 0, "neg": 0}
+            users[u] = {
+                "total": 0,
+                "pos": {"total": 0, "correct": 0, "incorrect": 0, "open": 0},
+                "neg": {"total": 0, "correct": 0, "incorrect": 0, "open": 0},
+            }
         users[u]["total"] += pts
-        if "FOR" in stance or "OVER" in stance:
-            users[u]["pos"] += pts
-        else:
-            users[u]["neg"] += pts
+        users[u][stance_key]["total"] += pts
+        users[u][stance_key][status] += pts
 
     sorted_users = sorted(users.items(), key=lambda x: -x[1]["total"])
 
     curr_angle = -90.0
     outer_paths = []
-    inner_paths = []
+    middle_paths = []
+    outcome_paths = []
+
+    outcome_colors = {
+        "correct": "#00b4da",
+        "incorrect": "#FF8C00",
+        "open": "#D0D0D5",
+    }
+    outcome_labels = {
+        "correct": "Correct",
+        "incorrect": "Incorrect",
+        "open": "Open",
+    }
 
     for idx, (u, data) in enumerate(sorted_users):
         u_pts = data["total"]
@@ -722,7 +799,8 @@ def build_user_metrics_donut_svg(preds: list[dict], svg_id: str = "user-metrics-
         u_pct = (u_pts / total_pts) * 100.0
         u_color = palette[idx % len(palette)]
 
-        u_path_d = _build_arc_path(cx, cy, r_out_in, r_out_out, u_start_angle, u_end_angle)
+        # Ring 1: Predictor
+        u_path_d = _build_arc_path(cx, cy, r1_in, r1_out, u_start_angle, u_end_angle)
         outer_paths.append(f"""
         <path class="donut-slice donut-constructor" d="{u_path_d}" fill="{u_color}" stroke="#15151A" stroke-width="2"
               style="cursor: pointer; transition: opacity 0.15s ease;"
@@ -737,48 +815,66 @@ def build_user_metrics_donut_svg(preds: list[dict], svg_id: str = "user-metrics-
         </path>
         """)
 
-        pos_pts = data["pos"]
-        neg_pts = data["neg"]
-
+        # Ring 2 & 3: Stance and Outcomes
         curr_stance_angle = u_start_angle
-        if pos_pts > 0:
-            pos_span = u_angle_span * (pos_pts / u_pts)
-            pos_end = curr_stance_angle + pos_span
-            pos_pct = (pos_pts / u_pts) * 100.0
-            pos_path_d = _build_arc_path(cx, cy, r_in_in, r_in_out, curr_stance_angle, pos_end)
-            inner_paths.append(f"""
-            <path class="donut-slice donut-driver" d="{pos_path_d}" fill="#3cb44b" stroke="#15151A" stroke-width="1.8"
-                  style="cursor: pointer; transition: opacity 0.15s ease;"
-                  data-type="Stance"
-                  data-name="{u} (Positive)"
-                  data-pts="{pos_pts:,.0f}"
-                  data-meta="{u} • {pos_pct:.1f}% For/Over"
-                  onmouseenter="window.taf1DonutEnter && window.taf1DonutEnter(this)"
-                  onmouseleave="window.taf1DonutLeave && window.taf1DonutLeave(this)"
-                  onclick="window.taf1DonutClick && window.taf1DonutClick(this, event)">
-                <title>{u} (Positive): {pos_pts:,.0f} pts ({pos_pct:.1f}%)</title>
-            </path>
-            """)
-            curr_stance_angle = pos_end
+        for stance_key, s_label, s_desc, s_color in [
+            ("pos", "Positive", "For/Over", "#3cb44b"),
+            ("neg", "Negative", "Against/Under", "#FF4B4B"),
+        ]:
+            s_data = data[stance_key]
+            s_pts = s_data["total"]
+            if s_pts <= 0:
+                continue
 
-        if neg_pts > 0:
-            neg_span = u_angle_span * (neg_pts / u_pts)
-            neg_end = curr_stance_angle + neg_span
-            neg_pct = (neg_pts / u_pts) * 100.0
-            neg_path_d = _build_arc_path(cx, cy, r_in_in, r_in_out, curr_stance_angle, neg_end)
-            inner_paths.append(f"""
-            <path class="donut-slice donut-driver" d="{neg_path_d}" fill="#FF4B4B" stroke="#15151A" stroke-width="1.8"
+            s_span = u_angle_span * (s_pts / u_pts)
+            s_end = curr_stance_angle + s_span
+            s_pct = (s_pts / u_pts) * 100.0
+
+            # Ring 2 (Middle): Stance Slice
+            s_path_d = _build_arc_path(cx, cy, r2_in, r2_out, curr_stance_angle, s_end)
+            middle_paths.append(f"""
+            <path class="donut-slice donut-driver" d="{s_path_d}" fill="{s_color}" stroke="#15151A" stroke-width="1.8"
                   style="cursor: pointer; transition: opacity 0.15s ease;"
                   data-type="Stance"
-                  data-name="{u} (Negative)"
-                  data-pts="{neg_pts:,.0f}"
-                  data-meta="{u} • {neg_pct:.1f}% Against/Under"
+                  data-name="{u} ({s_label})"
+                  data-pts="{s_pts:,.0f}"
+                  data-meta="{u} • {s_pct:.1f}% {s_desc}"
                   onmouseenter="window.taf1DonutEnter && window.taf1DonutEnter(this)"
                   onmouseleave="window.taf1DonutLeave && window.taf1DonutLeave(this)"
                   onclick="window.taf1DonutClick && window.taf1DonutClick(this, event)">
-                <title>{u} (Negative): {neg_pts:,.0f} pts ({neg_pct:.1f}%)</title>
+                <title>{u} ({s_label}): {s_pts:,.0f} pts ({s_pct:.1f}%)</title>
             </path>
             """)
+
+            # Ring 3 (Center-most): Outcomes inside this Stance
+            curr_outcome_angle = curr_stance_angle
+            for out_status in ["correct", "incorrect", "open"]:
+                o_pts = s_data[out_status]
+                if o_pts <= 0:
+                    continue
+                o_span = s_span * (o_pts / s_pts)
+                o_end = curr_outcome_angle + o_span
+                o_pct = (o_pts / s_pts) * 100.0
+                o_color = outcome_colors[out_status]
+                o_label = outcome_labels[out_status]
+
+                o_path_d = _build_arc_path(cx, cy, r3_in, r3_out, curr_outcome_angle, o_end)
+                outcome_paths.append(f"""
+                <path class="donut-slice donut-outcome" d="{o_path_d}" fill="{o_color}" stroke="#15151A" stroke-width="1.8"
+                      style="cursor: pointer; transition: opacity 0.15s ease;"
+                      data-type="Outcome"
+                      data-name="{u} ({s_label} - {o_label})"
+                      data-pts="{o_pts:,.0f}"
+                      data-meta="{u} • {s_desc} • {o_pct:.1f}% {o_label}"
+                      onmouseenter="window.taf1DonutEnter && window.taf1DonutEnter(this)"
+                      onmouseleave="window.taf1DonutLeave && window.taf1DonutLeave(this)"
+                      onclick="window.taf1DonutClick && window.taf1DonutClick(this, event)">
+                    <title>{u} ({s_label} - {o_label}): {o_pts:,.0f} pts ({o_pct:.1f}%)</title>
+                </path>
+                """)
+                curr_outcome_angle = o_end
+
+            curr_stance_angle = s_end
 
         curr_angle = u_end_angle
 
@@ -795,30 +891,35 @@ def build_user_metrics_donut_svg(preds: list[dict], svg_id: str = "user-metrics-
             </filter>
         </defs>
 
-        <!-- Outer Ring: Users -->
+        <!-- Outer Ring: Ring 1 (Users / Predictors) -->
         <g id="donut-outer-ring-{svg_id}" filter="url(#donut-shadow-{svg_id})">
             {''.join(outer_paths)}
         </g>
 
-        <!-- Inner Ring: Positive / Negative Stance Breakdown -->
-        <g id="donut-inner-ring-{svg_id}" filter="url(#donut-shadow-{svg_id})">
-            {''.join(inner_paths)}
+        <!-- Middle Ring: Ring 2 (Positive / Negative Stance Breakdown) -->
+        <g id="donut-middle-ring-{svg_id}" filter="url(#donut-shadow-{svg_id})">
+            {''.join(middle_paths)}
+        </g>
+
+        <!-- Center-most Ring: Ring 3 (Outcome: Correct / Incorrect / Open) -->
+        <g id="donut-outcome-ring-{svg_id}" filter="url(#donut-shadow-{svg_id})">
+            {''.join(outcome_paths)}
         </g>
 
         <!-- Donut center hole (clickable to reset) -->
-        <circle id="donut-center-hole-{svg_id}" class="donut-center-hole" cx="{cx}" cy="{cy}" r="98"
+        <circle id="donut-center-hole-{svg_id}" class="donut-center-hole" cx="{cx}" cy="{cy}" r="{center_hole_r}"
                 fill="#15151A" stroke="rgba(255,255,255,0.08)" stroke-width="1.5"
                 style="cursor: pointer;"
                 onclick="window.taf1DonutReset && window.taf1DonutReset(event)" />
 
         <!-- Center Information Display -->
         <g class="donut-svg-center-group" pointer-events="none" text-anchor="middle" font-family="'Outfit', sans-serif" style="user-select: none;">
-            <text class="donut-center-type" x="{cx}" y="230" dominant-baseline="middle"
-                  fill="#8E8E93" font-size="11" font-weight="700" letter-spacing="1">PREDICTOR METRIC</text>
+            <text class="donut-center-type" x="{cx}" y="232" dominant-baseline="middle"
+                  fill="#8E8E93" font-size="10.5" font-weight="700" letter-spacing="1">PREDICTOR METRIC</text>
             <text class="donut-center-value" x="{cx}" y="260" dominant-baseline="middle"
-                  fill="#FFFFFF" font-size="24" font-weight="900">{total_pts:,.0f} PTS</text>
-            <text class="donut-center-meta" x="{cx}" y="285" dominant-baseline="middle"
-                  fill="#00b4da" font-size="10.5" font-weight="700" letter-spacing="0.5">TOTAL WAGERED</text>
+                  fill="#FFFFFF" font-size="20" font-weight="900">{total_pts:,.0f} PTS</text>
+            <text class="donut-center-meta" x="{cx}" y="284" dominant-baseline="middle"
+                  fill="#00b4da" font-size="9.5" font-weight="700" letter-spacing="0.5">TOTAL WAGERED</text>
         </g>
     </svg>
     """
@@ -852,7 +953,7 @@ class PredictionsMarketState(rx.State):
     feedback_message: str = ""
 
     # Pool expander state (SDDREQ-155)
-    pool_expander_open: bool = True
+    pool_expander_open: bool = False
     table_filters: list[str] = []
 
     def toggle_pool_expander(self):
@@ -1565,7 +1666,7 @@ def _donut_chart_card(
 
 
 def _active_race_table_key() -> rx.Component:
-    """Interactive filter key for the Active Race Predictions Table."""
+    """Interactive filter key for the Submitted Predictions Table."""
     key_options = [
         ("For / Over", "#3cb44b"),
         ("Against / Under", "#FF4B4B"),
@@ -1837,12 +1938,12 @@ def predictions_market_tab_view() -> rx.Component:
         box_sizing="border-box",
     )
 
-    # 4. Active Race Predictions Table Expander (SDDREQ-155, SDDREQ-164)
+    # 4. Submitted Predictions Table Expander (SDDREQ-155, SDDREQ-164)
     expander_header = rx.box(
         rx.hstack(
             rx.hstack(
                 rx.icon("table", size=18, color="#00b4da", flex_shrink="0"),
-                rx.text("Active Race Predictions Pool", font_size=["14px", "15px", "16px"], font_weight="800", color="white", font_family="Outfit"),
+                rx.text("Submitted Predictions", font_size=["14px", "15px", "16px"], font_weight="800", color="white", font_family="Outfit"),
                 spacing="2",
                 align="center",
             ),
