@@ -419,74 +419,140 @@
     // ── Interactive Line Chart Highlighting (Animated Power Rankings Style) ─────
     const LINE_HIGHLIGHT_STORE = (window.__TAF1_LINE_STORE = window.__TAF1_LINE_STORE || {});
 
+    const NAMED_COLORS = {
+        'darkblue': '#00008b',
+        'blue': '#0000ff',
+        'red': '#ff0000',
+        'white': '#ffffff',
+        'black': '#000000',
+        'yellow': '#ffff00',
+        'green': '#008000',
+        'gray': '#808080',
+        'grey': '#808080',
+        'pink': '#ffc0cb',
+        'orange': '#ffa500',
+        'purple': '#800080'
+    };
+
+    let _colorCanvasCtx = null;
+    function normalizeColor(c) {
+        if (!c || typeof c !== 'string') return '';
+        c = c.trim().toLowerCase();
+        if (c === 'none' || c === 'transparent') return '';
+        if (NAMED_COLORS[c]) return NAMED_COLORS[c];
+        if (c.startsWith('#')) {
+            let h = c.slice(1);
+            if (h.length === 3) h = h.split('').map(x => x + x).join('');
+            if (h.length === 6) return '#' + h;
+        }
+        if (c.startsWith('rgb')) {
+            const m = c.match(/\d+/g);
+            if (m && m.length >= 3) {
+                const r = parseInt(m[0], 10).toString(16).padStart(2, '0');
+                const g = parseInt(m[1], 10).toString(16).padStart(2, '0');
+                const b = parseInt(m[2], 10).toString(16).padStart(2, '0');
+                return `#${r}${g}${b}`;
+            }
+        }
+        if (!_colorCanvasCtx) {
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = 1;
+                canvas.height = 1;
+                _colorCanvasCtx = canvas.getContext('2d');
+            } catch(e) {}
+        }
+        if (_colorCanvasCtx) {
+            try {
+                _colorCanvasCtx.fillStyle = '#000000';
+                _colorCanvasCtx.fillStyle = c;
+                return _colorCanvasCtx.fillStyle.toLowerCase();
+            } catch(e) {}
+        }
+        return c;
+    }
+
     function colorsMatch(c1, c2) {
         if (!c1 || !c2) return false;
-        c1 = c1.trim().toLowerCase();
-        c2 = c2.trim().toLowerCase();
-        if (c1 === c2) return true;
-        const toRgb = (c) => {
-            if (c.startsWith('#')) {
-                let h = c.slice(1);
-                if (h.length === 3) h = h.split('').map(x => x + x).join('');
-                return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
-            }
-            const m = c.match(/\d+/g);
-            return m ? m.slice(0, 3).map(Number) : null;
-        };
-        const r1 = toRgb(c1);
-        const r2 = toRgb(c2);
-        return !!(r1 && r2 && r1[0] === r2[0] && r1[1] === r2[1] && r1[2] === r2[2]);
+        const n1 = normalizeColor(c1);
+        const n2 = normalizeColor(c2);
+        return Boolean(n1 && n2 && n1 === n2);
+    }
+
+    function extractEntityName(str) {
+        if (!str || typeof str !== 'string') return '';
+        return str
+            .replace(/\s*\((actual|projected)\)/i, '')
+            .replace(/_(actual|projected)$/i, '')
+            .trim()
+            .toLowerCase();
     }
 
     function getRechartsLineName(el) {
         if (!el) return null;
-        try {
-            const key = Object.keys(el).find(k => k.startsWith('__reactFiber') || k.startsWith('__reactInternalInstance'));
-            let fiber = el[key];
-            while (fiber) {
-                const p = fiber.memoizedProps;
-                if (p) {
-                    if (p.name && typeof p.name === 'string') return p.name.trim();
-                    if (p.dataKey && typeof p.dataKey === 'string') return p.dataKey.trim();
+        const targets = [el];
+        if (el.querySelector) {
+            const p = el.querySelector('.recharts-line-curve, path');
+            if (p) targets.push(p);
+            const c = el.querySelector('circle, .recharts-dot');
+            if (c) targets.push(c);
+        }
+        for (const target of targets) {
+            try {
+                const key = Object.keys(target).find(k => k.startsWith('__reactFiber') || k.startsWith('__reactInternalInstance'));
+                if (!key) continue;
+                let fiber = target[key];
+                let depth = 0;
+                while (fiber && depth < 25) {
+                    depth++;
+                    const p = fiber.memoizedProps;
+                    if (p) {
+                        if (typeof p.name === 'string' && p.name.trim()) return p.name.trim();
+                        if (typeof p.dataKey === 'string' && p.dataKey.trim()) return p.dataKey.trim();
+                    }
+                    fiber = fiber.return;
                 }
-                fiber = fiber.return;
-            }
-        } catch(e) {}
+            } catch(e) {}
+        }
         return null;
     }
 
     function toggleLineHighlight(chartId, targetName, targetColor, targetIdx) {
         if (!chartId) return;
         const current = LINE_HIGHLIGHT_STORE[chartId];
-        const isCurrentActive = current && (
-            (targetName && current.name === targetName) ||
-            (targetIdx !== undefined && targetIdx !== null && current.idx === targetIdx)
-        );
+        const cleanTarget = extractEntityName(targetName);
+        const cleanCurrent = current && current.name ? extractEntityName(current.name) : '';
+        const isCurrentActive = Boolean(cleanCurrent && cleanTarget && cleanCurrent === cleanTarget);
+
         const newTarget = isCurrentActive ? null : { name: targetName, color: targetColor, idx: targetIdx };
         LINE_HIGHLIGHT_STORE[chartId] = newTarget;
         applyLineHighlight(chartId, newTarget ? newTarget.name : null, newTarget ? newTarget.color : null, newTarget ? newTarget.idx : null);
     }
 
     function applyLineHighlight(chartId, activeName, activeColor, activeIdx) {
+        const cleanActive = extractEntityName(activeName);
+        const normActiveColor = normalizeColor(activeColor);
+
         // 1. Update Key Badges
         const keyContainers = document.querySelectorAll(`[data-key-for-chart="${chartId}"]`);
         keyContainers.forEach(container => {
             const items = container.querySelectorAll('.taf1-chart-key-item');
             items.forEach(item => {
-                const iName = item.getAttribute('data-name');
-                const iIdxStr = item.getAttribute('data-idx');
-                const iIdx = iIdxStr !== null ? parseInt(iIdxStr, 10) : null;
+                const iName = extractEntityName(item.getAttribute('data-name'));
+                const iColor = normalizeColor(item.getAttribute('data-color'));
                 const textEl = item.querySelector('.taf1-key-text') || item;
 
-                if (!activeName) {
+                if (!cleanActive) {
                     item.style.opacity = '1.0';
                     item.style.borderColor = '#2A2A34';
                     item.style.background = '#1B1B22';
                     item.style.boxShadow = 'none';
                     if (textEl) textEl.style.color = '#FFFFFF';
                 } else {
-                    const isKeyMatch = (activeIdx !== undefined && activeIdx !== null && iIdx === activeIdx) ||
-                                       (iName && activeName && iName.trim().toLowerCase() === activeName.trim().toLowerCase());
+                    const isKeyMatch = Boolean(
+                        (cleanActive && iName && iName === cleanActive) ||
+                        (normActiveColor && iColor && iColor === normActiveColor)
+                    );
                     if (isKeyMatch) {
                         item.style.opacity = '1.0';
                         item.style.borderColor = '#00b4da';
@@ -511,74 +577,83 @@
 
         chartContainers.forEach(chartContainer => {
             const lineGroups = chartContainer.querySelectorAll('.recharts-line');
-            let matchedGroup = null;
+            const matchedGroups = [];
 
-            lineGroups.forEach((g, idx) => {
+            lineGroups.forEach((g) => {
                 const path = g.querySelector('.recharts-line-curve, path');
                 const dotsGroup = g.querySelector('.recharts-line-dots');
+                const circles = g.querySelectorAll('circle, .recharts-dot');
                 if (!path) return;
 
                 if (path.dataset.origStrokeWidth === undefined) {
                     path.dataset.origStrokeWidth = path.getAttribute('stroke-width') || '2';
                 }
 
-                if (!activeName) {
+                if (!cleanActive) {
                     g.style.opacity = '1.0';
                     g.style.transition = 'opacity 0.2s ease';
                     path.style.opacity = '1.0';
                     path.style.strokeWidth = path.dataset.origStrokeWidth + 'px';
                     path.style.filter = '';
-                    g.querySelectorAll('circle, .recharts-dot').forEach(c => {
+                    circles.forEach(c => {
+                        if (c.dataset.origR) c.setAttribute('r', c.dataset.origR);
                         c.style.opacity = '1.0';
                         c.style.fillOpacity = '1.0';
                         c.style.strokeOpacity = '1.0';
+                        c.style.filter = '';
                     });
                     if (dotsGroup) {
                         dotsGroup.style.opacity = '1.0';
                     }
                 } else {
                     const strokeVal = path.getAttribute('stroke') || path.style.stroke;
-                    const lineName = getRechartsLineName(g);
+                    const normStroke = normalizeColor(strokeVal);
+                    const rawLineName = getRechartsLineName(g);
+                    const cleanLine = extractEntityName(rawLineName);
 
-                    // Strict, exclusive matching:
-                    // 1. First by fiber line name (if available)
-                    // 2. Otherwise by sequential index activeIdx (1:1 with key item)
-                    // 3. ONLY if both fail, fallback to color
+                    // Strict matching:
+                    // If name is resolved from fiber, match entity name strictly.
+                    // If name is not found, match by normalized stroke color.
+                    // NEVER fallback to index because multi-series charts (actual + projected)
+                    // have more lines than items in the key!
                     let isMatch = false;
-                    if (activeName && lineName) {
-                        isMatch = (lineName.trim().toLowerCase() === activeName.trim().toLowerCase());
-                    } else if (activeIdx !== undefined && activeIdx !== null && activeIdx >= 0) {
-                        isMatch = (idx === activeIdx);
-                    } else if (activeColor) {
-                        isMatch = colorsMatch(strokeVal, activeColor);
+                    if (cleanActive && cleanLine) {
+                        isMatch = (cleanLine === cleanActive);
+                    } else if (normActiveColor && normStroke) {
+                        isMatch = (normStroke === normActiveColor);
                     }
 
                     if (isMatch) {
-                        matchedGroup = g;
+                        matchedGroups.push(g);
                         g.style.opacity = '1.0';
                         g.style.transition = 'opacity 0.2s ease';
                         path.style.opacity = '1.0';
                         path.style.strokeWidth = '4.5px';
                         path.style.filter = `drop-shadow(0 0 7px ${activeColor || strokeVal})`;
-                        g.querySelectorAll('circle, .recharts-dot').forEach(c => {
+                        circles.forEach(c => {
+                            if (!c.dataset.origR) c.dataset.origR = c.getAttribute('r') || '3';
+                            c.setAttribute('r', (parseFloat(c.dataset.origR) + 1).toString());
                             c.style.opacity = '1.0';
                             c.style.fillOpacity = '1.0';
                             c.style.strokeOpacity = '1.0';
+                            c.style.filter = `drop-shadow(0 0 4px ${activeColor || strokeVal})`;
                         });
                         if (dotsGroup) {
                             dotsGroup.style.opacity = '1.0';
                         }
                     } else {
-                        // User request: non-selected points and lines at 40% opacity from original
+                        // Dim unselected lines and their dots to 40% opacity
                         g.style.opacity = '0.40';
                         g.style.transition = 'opacity 0.2s ease';
                         path.style.opacity = '0.40';
                         path.style.strokeWidth = path.dataset.origStrokeWidth + 'px';
                         path.style.filter = '';
-                        g.querySelectorAll('circle, .recharts-dot').forEach(c => {
+                        circles.forEach(c => {
+                            if (c.dataset.origR) c.setAttribute('r', c.dataset.origR);
                             c.style.opacity = '0.40';
                             c.style.fillOpacity = '0.40';
                             c.style.strokeOpacity = '0.40';
+                            c.style.filter = '';
                         });
                         if (dotsGroup) {
                             dotsGroup.style.opacity = '0.40';
@@ -589,51 +664,67 @@
 
             // Also check any standalone dots groups in the chart container
             const allDotsGroups = chartContainer.querySelectorAll('.recharts-line-dots');
-            allDotsGroups.forEach((dg, dIdx) => {
-                if (dg.closest('.recharts-line')) return;
+            allDotsGroups.forEach((dg) => {
+                if (dg.closest('.recharts-line')) return; // already processed inside recharts-line
 
-                if (!activeName) {
+                const circles = dg.querySelectorAll('circle, .recharts-dot');
+                if (!cleanActive) {
                     dg.style.opacity = '1.0';
-                    dg.querySelectorAll('circle, .recharts-dot').forEach(c => {
+                    circles.forEach(c => {
+                        if (c.dataset.origR) c.setAttribute('r', c.dataset.origR);
                         c.style.opacity = '1.0';
                         c.style.fillOpacity = '1.0';
                         c.style.strokeOpacity = '1.0';
+                        c.style.filter = '';
                     });
                 } else {
                     const dgName = getRechartsLineName(dg);
+                    const cleanDg = extractEntityName(dgName);
+                    const sampleCircle = dg.querySelector('circle');
+                    const fillVal = sampleCircle ? (sampleCircle.getAttribute('fill') || sampleCircle.getAttribute('stroke') || sampleCircle.style.fill) : null;
+                    const normFill = normalizeColor(fillVal);
+
                     let isDotsMatch = false;
-                    if (activeName && dgName) {
-                        isDotsMatch = (dgName.trim().toLowerCase() === activeName.trim().toLowerCase());
-                    } else if (activeIdx !== undefined && activeIdx !== null && activeIdx >= 0) {
-                        isDotsMatch = (dIdx === activeIdx);
-                    } else if (activeColor) {
-                        const sampleCircle = dg.querySelector('circle');
-                        const fillVal = sampleCircle ? (sampleCircle.getAttribute('fill') || sampleCircle.getAttribute('stroke')) : null;
-                        isDotsMatch = colorsMatch(fillVal, activeColor);
+                    if (cleanActive && cleanDg) {
+                        isDotsMatch = (cleanDg === cleanActive);
+                    } else if (normActiveColor && normFill) {
+                        isDotsMatch = (normFill === normActiveColor);
                     }
 
                     if (isDotsMatch) {
                         dg.style.opacity = '1.0';
-                        dg.querySelectorAll('circle, .recharts-dot').forEach(c => {
+                        dg.style.transition = 'opacity 0.2s ease';
+                        circles.forEach(c => {
+                            if (!c.dataset.origR) c.dataset.origR = c.getAttribute('r') || '3';
+                            c.setAttribute('r', (parseFloat(c.dataset.origR) + 1).toString());
                             c.style.opacity = '1.0';
                             c.style.fillOpacity = '1.0';
                             c.style.strokeOpacity = '1.0';
+                            c.style.filter = `drop-shadow(0 0 4px ${activeColor || fillVal})`;
                         });
+                        if (dg.parentElement) {
+                            dg.parentElement.appendChild(dg);
+                        }
                     } else {
                         dg.style.opacity = '0.40';
-                        dg.querySelectorAll('circle, .recharts-dot').forEach(c => {
+                        dg.style.transition = 'opacity 0.2s ease';
+                        circles.forEach(c => {
+                            if (c.dataset.origR) c.setAttribute('r', c.dataset.origR);
                             c.style.opacity = '0.40';
                             c.style.fillOpacity = '0.40';
                             c.style.strokeOpacity = '0.40';
+                            c.style.filter = '';
                         });
                     }
                 }
             });
 
             // Elevate the highlighted line group to the top layer in SVG
-            if (matchedGroup && matchedGroup.parentElement) {
-                matchedGroup.parentElement.appendChild(matchedGroup);
-            }
+            matchedGroups.forEach(mg => {
+                if (mg && mg.parentElement) {
+                    mg.parentElement.appendChild(mg);
+                }
+            });
         });
     }
 
@@ -654,24 +745,48 @@
             return;
         }
 
-        // B. Clicked a Line Curve in a Chart
-        const lineCurve = ev.target ? ev.target.closest('.recharts-line, .recharts-line-curve') : null;
+        // B. Clicked a Line Curve or Dot in a Chart
+        const lineCurve = ev.target ? ev.target.closest('.recharts-line, .recharts-line-curve, .recharts-dot, .recharts-line-dots') : null;
         if (lineCurve) {
             const chartContainer = lineCurve.closest('[data-chart-id], [id^="card-"], .zoomable-chart-popout-container');
             if (chartContainer) {
                 let chartId = chartContainer.getAttribute('data-chart-id') || chartContainer.id;
                 if (chartId && chartId.startsWith('card-')) chartId = chartId.replace('card-', '');
-                const g = lineCurve.closest('.recharts-line');
+                const g = lineCurve.closest('.recharts-line') || lineCurve.closest('.recharts-line-dots');
                 if (g && chartId) {
-                    const allLines = Array.from(g.parentElement ? g.parentElement.querySelectorAll('.recharts-line') : []);
-                    const idx = allLines.indexOf(g);
                     const path = g.querySelector('.recharts-line-curve, path');
                     const stroke = path ? (path.getAttribute('stroke') || path.style.stroke) : null;
-                    const lineName = getRechartsLineName(g);
-                    const keyItem = (lineName ? document.querySelector(`[data-key-for-chart="${chartId}"] .taf1-chart-key-item[data-name="${lineName}"]`) : null) ||
-                                    document.querySelector(`[data-key-for-chart="${chartId}"] .taf1-chart-key-item[data-idx="${idx}"]`);
-                    const name = keyItem ? keyItem.getAttribute('data-name') : (lineName || (stroke ? stroke : 'line-' + idx));
-                    toggleLineHighlight(chartId, name, stroke, idx);
+                    const sampleCircle = g.querySelector('circle');
+                    const dotColor = sampleCircle ? (sampleCircle.getAttribute('fill') || sampleCircle.getAttribute('stroke')) : null;
+                    const rawLineName = getRechartsLineName(g);
+                    const cleanLineName = extractEntityName(rawLineName);
+                    const normColor = normalizeColor(stroke || dotColor);
+
+                    // Find key item by strict entity name or exact normalized color
+                    const keyItems = Array.from(document.querySelectorAll(`[data-key-for-chart="${chartId}"] .taf1-chart-key-item`));
+                    let matchedKeyItem = null;
+                    for (const ki of keyItems) {
+                        const kiName = extractEntityName(ki.getAttribute('data-name'));
+                        const kiColor = normalizeColor(ki.getAttribute('data-color'));
+                        if (cleanLineName && kiName === cleanLineName) {
+                            matchedKeyItem = ki;
+                            break;
+                        }
+                        if (normColor && kiColor === normColor) {
+                            matchedKeyItem = ki;
+                            break;
+                        }
+                    }
+
+                    if (matchedKeyItem) {
+                        const name = matchedKeyItem.getAttribute('data-name');
+                        const color = matchedKeyItem.getAttribute('data-color');
+                        const idxStr = matchedKeyItem.getAttribute('data-idx');
+                        const idx = idxStr !== null ? parseInt(idxStr, 10) : null;
+                        toggleLineHighlight(chartId, name, color, idx);
+                    } else if (cleanLineName) {
+                        toggleLineHighlight(chartId, cleanLineName, stroke, null);
+                    }
                 }
             }
         }

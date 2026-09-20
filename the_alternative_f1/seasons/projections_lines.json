@@ -1,0 +1,125 @@
+{
+  "5": {
+    "Miami Sprint": {
+      "season": 5,
+      "next_race": "Miami Sprint",
+      "next_main_race": "Miami",
+      "expected_winner": "McLaren",
+      "expected_winner_prob": 49.5,
+      "expected_highest_score_team": "McLaren",
+      "expected_highest_score_pts": 54,
+      "expected_podium": [
+        "McLaren",
+        "Cadillac",
+        "Red Bull"
+      ],
+      "expected_points_lines": {
+        "Audi": 1.5,
+        "Cadillac": 38.5,
+        "Ferrari": 11.5,
+        "Haas": 7.5,
+        "McLaren": 53.5,
+        "Mercedes": 1.5,
+        "Red Bull": 21.5,
+        "Williams": 1.5
+      }
+    }
+  },
+  "4": {
+    "Monza": {
+      "season": 4,
+      "next_race": "Monza",
+      "next_main_race": "Monza",
+      "expected_winner": "Mercedes",
+      "expected_winner_prob": 83.1,
+      "expected_highest_score_team": "Mercedes",
+      "expected_highest_score_pts": 25,
+      "expected_podium": [
+        "Mercedes",
+        "VCARB",
+        "Alpine"
+      ],
+      "expected_points_lines": {
+        "Alpine": 18.5,
+        "Aston Martin": 7.5,
+        "Ferrari": 15.5,
+        "McLaren": 11.5,
+        "Mercedes": 24.5,
+        "Red Bull": 1.5,
+        "VCARB": 18.5
+      }
+    }
+  },
+  "3": {
+    "COTA": {
+      "season": 3,
+      "next_race": "COTA",
+      "next_main_race": "COTA",
+      "expected_winner": "Alpine",
+      "expected_winner_prob": 65.0,
+      "expected_highest_score_team": "Ferrari",
+      "expected_highest_score_pts": 40,
+      "expected_podium": [
+        "Alpine",
+        "Ferrari",
+        "VCARB"
+      ],
+      "expected_points_lines": {
+        "Alpine": 32.5,
+        "Aston Martin": 22.5,
+        "Ferrari": 39.5,
+        "McLaren": 18.5,
+        "Red Bull": 1.5,
+        "VCARB": 5.5
+      }
+    }
+  },
+  "2": {
+    "Austria": {
+      "season": 2,
+      "next_race": "Austria",
+      "next_main_race": "Austria",
+      "expected_winner": "McLaren",
+      "expected_winner_prob": 59.5,
+      "expected_highest_score_team": "Alpine",
+      "expected_highest_score_pts": 27,
+      "expected_podium": [
+        "McLaren",
+        "Alpine",
+        "Ferrari"
+      ],
+      "expected_points_lines": {
+        "Alfa Romeo": 5.5,
+        "AlphaTauri": 3.5,
+        "Alpine": 26.5,
+        "Ferrari": 11.5,
+        "McLaren": 14.5,
+        "Mercedes": 18.5,
+        "Red Bull": 17.5
+      }
+    }
+  },
+  "1": {
+    "Abu Dhabi": {
+      "season": 1,
+      "next_race": "Abu Dhabi",
+      "next_main_race": "Abu Dhabi",
+      "expected_winner": "Mercedes",
+      "expected_winner_prob": 65.7,
+      "expected_highest_score_team": "Mercedes",
+      "expected_highest_score_pts": 33,
+      "expected_podium": [
+        "Mercedes",
+        "McLaren",
+        "Ferrari"
+      ],
+      "expected_points_lines": {
+        "Aston Martin": 21.5,
+        "Ferrari": 3.5,
+        "McLaren": 30.5,
+        "Mercedes": 32.5,
+        "Red Bull": 9.5
+      }
+    }
+  }
+}

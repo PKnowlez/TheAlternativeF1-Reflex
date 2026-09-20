@@ -86,9 +86,16 @@ from the_alternative_f1.seasons.Tab3_ConstructorStatistics import Tab3
 from the_alternative_f1.seasons.Tab4_DriverStatistics import Tab4
 from the_alternative_f1.seasons.Tab5_DriverComparison import Tab5
 from the_alternative_f1.seasons.Tab6_RaceSchedule import Tab6
+from the_alternative_f1.seasons.projections import projections_tab_view
+from the_alternative_f1.seasons.predictions_market import predictions_market_tab_view
+from the_alternative_f1.seasons.leaderboard import alternative_points_leaderboard_view
 
 # ── Dynamically derived from seasons __init__.py ─────────────────────────────
 NUM_SEASONS: int = LATEST_SEASON
+try:
+    compute_season_projections(LATEST_SEASON)
+except Exception:
+    pass
 # ─────────────────────────────────────────────────────────────────────────────
 
 def find_upcoming_race(schedule_dataframe) -> tuple[str | None, str | None]:
@@ -264,6 +271,7 @@ class State(rx.State):
 
 
     # ── Power Rankings State ─────────────────────────────────────────────
+    selected_power_rankings_tab: str = "power_rankings"
     show_power_rankings_header: bool = True
     power_rankings_header_phase: str = "animating_in"
     header_loop_running: bool = False
@@ -294,6 +302,9 @@ class State(rx.State):
 
     def expand_season_articles(self):
         self.season_articles_expanded = True
+
+    def set_power_rankings_tab(self, tab: str):
+        self.selected_power_rankings_tab = tab
 
     def set_discord_username(self, username: str):
         self.discord_username = username
@@ -3176,8 +3187,30 @@ def power_rankings_full_view_dialog() -> rx.Component:
     )
 
 
+def _power_rankings_tab_button(label: str, tab_key: str) -> rx.Component:
+    """A single sidebar tab button for power rankings section."""
+    return rx.button(
+        label,
+        bg=rx.cond(State.selected_power_rankings_tab == tab_key, "#00b4da", "#18181C"),
+        color="white",
+        font_size=["7px", "8px", "9px"],
+        font_weight="bold",
+        width="26px",
+        style={"writingMode": "vertical-rl"},
+        border_radius="0px 8px 8px 0px",
+        border="1px solid #2D2D32",
+        border_left="none",
+        on_click=lambda: State.set_power_rankings_tab(tab_key),
+        _hover={"bg": "#00b4da", "transform": "scaleX(1.05)"},
+        cursor="pointer",
+        padding="0",
+        flex="1",
+        min_height=["22px", "26px", "30px"],
+    )
+
+
 def power_rankings_view() -> rx.Component:
-    """The Power Rankings page."""
+    """The Power Rankings page with 4 tabs: Power Rankings, Projections, Predictions Market, Leaderboard."""
     from the_alternative_f1.seasons import seasons
 
     # Season picker buttons (shown when expanded)
@@ -3190,7 +3223,14 @@ def power_rankings_view() -> rx.Component:
         rx.fragment(),
     )
 
-    # Sidebar for Season Selector
+    pr_tabs = [
+        ("POWER RANKINGS", "power_rankings"),
+        ("PROJECTIONS", "projections"),
+        ("PREDICTIONS", "predictions_market"),
+        ("LEADERBOARD", "leaderboard"),
+    ]
+
+    # Sidebar for Season Selector and Section Tabs
     sidebar = rx.vstack(
         # Season picker toggle
         rx.button(
@@ -3215,6 +3255,7 @@ def power_rankings_view() -> rx.Component:
             padding="0",
         ),
         season_picker_buttons,
+        *[_power_rankings_tab_button(label, key) for label, key in pr_tabs],
         spacing="1",
         align_items="start",
         padding_top="4",
@@ -3222,10 +3263,19 @@ def power_rankings_view() -> rx.Component:
         left="0",
         top="12vh",
         z_index="99",
+        height="calc(100vh - 12vh - 60px - 10px)",
+        style={
+            "overflow_y": "auto",
+            "scrollbar_width": "none",  # Firefox
+            "-ms-overflow-style": "none",  # IE/Edge
+            "&::-webkit-scrollbar": {  # Chrome/Safari/Opera
+                "display": "none",
+            },
+        },
     )
 
-    # Main content layout
-    content = rx.vstack(
+    # Power Rankings original view content
+    power_rankings_original_content = rx.vstack(
         # Title and Full View Action
         rx.hstack(
             rx.heading(
@@ -3244,6 +3294,31 @@ def power_rankings_view() -> rx.Component:
         power_rankings_trajectory_graph(),
         width="100%",
         spacing="4",
+    )
+
+    # Pre-render projections content per season to ensure compile-time data integrity
+    projections_content = projections_tab_view(5)
+    for s in reversed(seasons[:-1]):
+        s_num = s["season_number"]
+        projections_content = rx.cond(
+            State.selected_season == s_num,
+            projections_tab_view(s_num),
+            projections_content,
+        )
+
+    # Tab conditional rendering
+    content = rx.cond(
+        State.selected_power_rankings_tab == "power_rankings",
+        power_rankings_original_content,
+        rx.cond(
+            State.selected_power_rankings_tab == "projections",
+            projections_content,
+            rx.cond(
+                State.selected_power_rankings_tab == "predictions_market",
+                predictions_market_tab_view(),
+                alternative_points_leaderboard_view(),
+            ),
+        ),
     )
 
     return rx.hstack(
