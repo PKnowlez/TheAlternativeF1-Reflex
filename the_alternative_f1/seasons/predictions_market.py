@@ -113,10 +113,6 @@ def get_user_total_points(username: str) -> int:
     if not username:
         return 0
 
-    from the_alternative_f1.seasons.leaderboard import is_league_driver
-    if is_league_driver(username):
-        return 0
-
     sb = _get_supabase()
     if sb:
         try:
@@ -346,12 +342,28 @@ def remove_prediction(pred_id: str | int, username: str) -> bool:
 
 class PredictionsMarketState(rx.State):
     """Reflex state for the Predictions Market Tab."""
+    discord_username: str = rx.LocalStorage("", name="discord_username", sync=True)
     modal_open: bool = False
     selected_category: str = "Expected Race Winner"
     selected_target: str = ""
     selected_stance: str = "FOR"
     wager_amount: int = 10
     feedback_message: str = ""
+
+    def login_with_discord(self):
+        from the_alternative_f1.oauth_discord import load_env
+        load_env()
+        client_id = os.getenv("DISCORD_CLIENT_ID", "").strip()
+        redirect_uri = os.getenv("DISCORD_REDIRECT_URI", "").strip()
+        if not client_id or not redirect_uri:
+            return rx.window_alert("Discord login is not configured on this server. Please set DISCORD_CLIENT_ID and DISCORD_REDIRECT_URI.")
+        import urllib.parse
+        encoded_redirect = urllib.parse.quote(redirect_uri, safe="")
+        auth_url = f"https://discord.com/oauth2/authorize?client_id={client_id}&redirect_uri={encoded_redirect}&response_type=code&scope=identify"
+        return rx.call_script(f"window.open('{auth_url}', 'Discord Login', 'width=500,height=600')")
+
+    def sync_user(self, username: str):
+        self.discord_username = username
 
     def open_modal(self):
         self.modal_open = True
@@ -421,8 +433,7 @@ class PredictionsMarketState(rx.State):
 
     @rx.var
     def current_user(self) -> str:
-        # Access discord_username from parent State or root
-        return getattr(self, "discord_username", "")
+        return self.discord_username
 
     @rx.var
     def user_remaining_points(self) -> int:
@@ -673,7 +684,7 @@ def predictions_market_tab_view() -> rx.Component:
                     _hover={"bg": "#4752C4"},
                     cursor="pointer",
                     padding_x="4",
-                    on_click=rx.redirect("https://discord.com/api/oauth2/authorize?client_id=1520868279546282165&redirect_uri=https%3A%2F%2Fthealternativef1.reflex.run%2Foauth%2Fdiscord&response_type=code&scope=identify"),
+                    on_click=PredictionsMarketState.login_with_discord,
                 ),
                 width="100%",
                 align="center",
@@ -719,7 +730,7 @@ def predictions_market_tab_view() -> rx.Component:
             ),
             # Submit Prediction Button (SDDREQ-143: Blue button, visible if logged in and points > 0)
             rx.cond(
-                (PredictionsMarketState.current_user != "") & (PredictionsMarketState.user_remaining_points > 0) & (~PredictionsMarketState.is_locked),
+                (PredictionsMarketState.current_user != "") & (PredictionsMarketState.user_remaining_points > 0),
                 rx.button(
                     rx.hstack(
                         rx.icon("circle-plus", size=16),
@@ -727,10 +738,11 @@ def predictions_market_tab_view() -> rx.Component:
                         spacing="2",
                         align="center",
                     ),
-                    bg="#00b4da",
+                    bg=rx.cond(PredictionsMarketState.is_locked, "#444444", "#00b4da"),
                     color="white",
-                    _hover={"bg": "#009bbd", "transform": "scale(1.02)"},
-                    cursor="pointer",
+                    _hover=rx.cond(PredictionsMarketState.is_locked, {}, {"bg": "#009bbd", "transform": "scale(1.02)"}),
+                    cursor=rx.cond(PredictionsMarketState.is_locked, "not-allowed", "pointer"),
+                    disabled=PredictionsMarketState.is_locked,
                     padding_x="4",
                     height="38px",
                     border_radius="lg",
@@ -851,7 +863,7 @@ def predictions_market_tab_view() -> rx.Component:
 
     construction_warning_banner = rx.box(
         rx.hstack(
-            rx.icon("alert-triangle", size=24, color="#FF4B4B", flex_shrink="0"),
+            rx.icon("triangle-alert", size=24, color="#FF4B4B", flex_shrink="0"),
             rx.vstack(
                 rx.hstack(
                     rx.text(
@@ -877,7 +889,7 @@ def predictions_market_tab_view() -> rx.Component:
                 align_items="start",
             ),
             rx.spacer(),
-            rx.icon("alert-triangle", size=24, color="#FF4B4B", flex_shrink="0"),
+            rx.icon("triangle-alert", size=24, color="#FF4B4B", flex_shrink="0"),
             width="100%",
             align="center",
             spacing="3",

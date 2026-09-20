@@ -45,9 +45,8 @@ def is_league_driver(username: str) -> bool:
 
 def compute_leaderboard_data() -> list[dict]:
     """Compiles all-time and seasonal points for logged-in users who received points or placed predictions.
-    Excludes F1 league drivers; only displays logged-in Discord users.
+    Only displays users who have logged in and received their 100 points or placed predictions.
     """
-    league_drivers = _get_all_league_drivers()
     all_users = set()
 
     # Add any users from Supabase user_prediction_points or predictions tables
@@ -58,13 +57,7 @@ def compute_leaderboard_data() -> list[dict]:
             if res.data:
                 for r in res.data:
                     u = str(r.get("username", "")).strip()
-                    if u.lower() in league_drivers:
-                        # Purge accidentally seeded drivers from Supabase
-                        try:
-                            sb.table("user_prediction_points").delete().eq("username", u).execute()
-                        except Exception:
-                            pass
-                    elif u:
+                    if u:
                         all_users.add(u)
         except Exception:
             pass
@@ -74,31 +67,19 @@ def compute_leaderboard_data() -> list[dict]:
             if res_preds.data:
                 for r in res_preds.data:
                     u = str(r.get("username", "")).strip()
-                    if u and u.lower() not in league_drivers:
+                    if u:
                         all_users.add(u)
         except Exception:
             pass
 
     local_pts = _load_local_user_points()
-    cleaned_local = False
     for u in list(local_pts.keys()):
         u_clean = str(u).strip()
-        if u_clean.lower() in league_drivers:
-            del local_pts[u]
-            cleaned_local = True
-        elif u_clean:
+        if u_clean:
             all_users.add(u_clean)
-    if cleaned_local:
-        try:
-            from the_alternative_f1.seasons.predictions_market import _save_local_user_points
-            _save_local_user_points(local_pts)
-        except Exception:
-            pass
 
     rows = []
     for user in all_users:
-        if user.lower() in league_drivers:
-            continue
         curr_pts = get_user_total_points(user)
         rows.append({
             "driver": user,

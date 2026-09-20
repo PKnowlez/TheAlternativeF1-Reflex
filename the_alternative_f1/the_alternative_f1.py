@@ -87,7 +87,7 @@ from the_alternative_f1.seasons.Tab4_DriverStatistics import Tab4
 from the_alternative_f1.seasons.Tab5_DriverComparison import Tab5
 from the_alternative_f1.seasons.Tab6_RaceSchedule import Tab6
 from the_alternative_f1.seasons.projections import projections_tab_view
-from the_alternative_f1.seasons.predictions_market import predictions_market_tab_view
+from the_alternative_f1.seasons.predictions_market import predictions_market_tab_view, PredictionsMarketState
 from the_alternative_f1.seasons.leaderboard import alternative_points_leaderboard_view
 
 # ── Dynamically derived from seasons __init__.py ─────────────────────────────
@@ -414,15 +414,19 @@ class State(rx.State):
         auth_url = f"https://discord.com/oauth2/authorize?client_id={client_id}&redirect_uri={encoded_redirect}&response_type=code&scope=identify"
         return rx.call_script(f"window.open('{auth_url}', 'Discord Login', 'width=500,height=600')")
 
-    def complete_discord_login(self):
+    async def complete_discord_login(self):
         if self.active_nav == "login":
             self.active_nav = "home"
         self.load_comments()
+        p_state = await self.get_state(PredictionsMarketState)
+        p_state.discord_username = self.discord_username
 
-    def logout(self):
+    async def logout(self):
         self.discord_username = ""
         self.discord_avatar = ""
         self.active_nav = "home"
+        p_state = await self.get_state(PredictionsMarketState)
+        p_state.discord_username = ""
 
     def load_comments(self):
         try:
