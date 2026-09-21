@@ -313,8 +313,12 @@ def settle_completed_predictions(season_num: int = 5):
             if not race_preds:
                 continue
 
+            single_preds = [p for p in race_preds if p.get("stance") != "PARLAY" and not str(p.get("category", "")).startswith("Parlay")]
+            parlay_preds = [p for p in race_preds if p.get("stance") == "PARLAY" or str(p.get("category", "")).startswith("Parlay")]
+
+            # 1. Settle Single Predictions (TAF1APP-SDDREQ-148: Wager + 15% + Opposing Pool Split)
             pools = {}
-            for p in race_preds:
+            for p in single_preds:
                 k = (p["category"], p["target"])
                 pools.setdefault(k, []).append(p)
 
@@ -363,6 +367,64 @@ def settle_completed_predictions(season_num: int = 5):
                     update_user_points(u, curr_pts + total_payout)
 
                 for p in losers:
+                    sb.table("predictions").update({
+                        "status": "incorrect",
+                        "payout": 0,
+                    }).eq("id", p["id"]).execute()
+
+            # 2. Settle Parlay Predictions (TAF1APP-SDDREQ-170: All hit -> Wager + (Wager * (0.15 + (legs * 0.1))))
+            for p in parlay_preds:
+                try:
+                    legs = json.loads(p.get("target", "[]"))
+                except Exception:
+                    legs = []
+
+                if not legs:
+                    continue
+
+                all_hit = True
+                for leg in legs:
+                    l_cat = leg.get("category")
+                    l_target = str(leg.get("target", "")).strip()
+                    l_stance = str(leg.get("stance", "FOR")).upper()
+                    leg_hit = False
+
+                    if l_cat == "Expected Race Winner":
+                        matched = (winner_team == l_target)
+                        leg_hit = (matched if "FOR" in l_stance else not matched)
+                    elif l_cat == "Highest Scoring Team":
+                        matched = (highest_team == l_target)
+                        leg_hit = (matched if "FOR" in l_stance else not matched)
+                    elif l_cat == "Podium Teams":
+                        matched = (l_target in podium_teams)
+                        leg_hit = (matched if "FOR" in l_stance else not matched)
+                    elif l_cat == "Expected Points":
+                        line = float(leg.get("line_value", 0.0) or 0.0)
+                        actual = team_weekend_pts.get(l_target, 0.0)
+                        leg_hit = (actual > line) if "OVER" in l_stance else (actual < line)
+                    elif l_cat == "Fastest Lap" and fl_team:
+                        matched = (fl_team == l_target)
+                        leg_hit = (matched if "FOR" in l_stance else not matched)
+
+                    if not leg_hit:
+                        all_hit = False
+                        break
+
+                wager = int(p.get("points", 0))
+                num_legs = len(legs)
+                if all_hit:
+                    multiplier = 0.15 + (num_legs * 0.1)
+                    total_payout = wager + int(round(wager * multiplier))
+
+                    sb.table("predictions").update({
+                        "status": "correct",
+                        "payout": total_payout,
+                    }).eq("id", p["id"]).execute()
+
+                    u = p["username"]
+                    curr_pts = get_user_total_points(u)
+                    update_user_points(u, curr_pts + total_payout)
+                else:
                     sb.table("predictions").update({
                         "status": "incorrect",
                         "payout": 0,
@@ -946,11 +1008,16 @@ class PredictionsMarketState(rx.State):
 
     # Submit Prediction Modal state
     modal_open: bool = False
+    prediction_mode: str = "single"  # "single" or "parlay" (TAF1APP-SDDREQ-169)
     selected_category: str = "Expected Race Winner"
     selected_target: str = ""
     selected_stance: str = "FOR"
     wager_amount: int = 10
     feedback_message: str = ""
+
+    # Parlay state (TAF1APP-SDDREQ-169 & SDDREQ-170)
+    active_leg_index: int = 0
+    parlay_legs: list[dict[str, str]] = []
 
     # Pool expander state (SDDREQ-155)
     pool_expander_open: bool = False
@@ -1077,15 +1144,123 @@ class PredictionsMarketState(rx.State):
         self.modal_open = True
         self.feedback_message = ""
         self.wager_amount = 10
+        self.prediction_mode = "single"
         self.selected_category = "Expected Race Winner"
         self.selected_stance = "FOR"
         proj = compute_season_projections(5)
         teams = sorted(proj.get("teams", []))
-        self.selected_target = proj.get("expected_winner", teams[0] if teams else "")
+        default_team = teams[0] if teams else ""
+        winner_target = proj.get("expected_winner", default_team)
+        self.selected_target = winner_target
+        self.active_leg_index = 0
+        podiums = proj.get("expected_podium", [])
+        podium_target = podiums[0] if podiums else default_team
+        self.parlay_legs = [
+            {
+                "leg_num": "1",
+                "category": "Expected Race Winner",
+                "target": winner_target,
+                "stance": "FOR",
+            },
+            {
+                "leg_num": "2",
+                "category": "Podium Teams",
+                "target": podium_target,
+                "stance": "FOR",
+            },
+        ]
 
     def close_modal(self):
         self.modal_open = False
         self.feedback_message = ""
+
+    def set_prediction_mode(self, mode: str | list[str]):
+        if isinstance(mode, list):
+            self.prediction_mode = mode[0] if mode else "single"
+        else:
+            self.prediction_mode = str(mode)
+        self.feedback_message = ""
+
+    def select_leg(self, index: int):
+        if 0 <= index < len(self.parlay_legs):
+            self.active_leg_index = index
+            self.feedback_message = ""
+
+    def add_parlay_leg(self):
+        proj = compute_season_projections(5)
+        teams = sorted(proj.get("teams", []))
+        default_target = teams[0] if teams else ""
+        new_leg_num = str(len(self.parlay_legs) + 1)
+        new_leg = {
+            "leg_num": new_leg_num,
+            "category": "Expected Race Winner",
+            "target": proj.get("expected_winner", default_target),
+            "stance": "FOR",
+        }
+        legs = [dict(l) for l in self.parlay_legs]
+        legs.append(new_leg)
+        self.parlay_legs = legs
+        self.active_leg_index = len(legs) - 1
+        self.feedback_message = ""
+
+    def remove_parlay_leg(self, index: int):
+        if len(self.parlay_legs) <= 2:
+            self.feedback_message = "A parlay requires at least 2 mandatory legs."
+            return
+        legs = [dict(l) for l in self.parlay_legs]
+        if 0 <= index < len(legs):
+            legs.pop(index)
+            for i, l in enumerate(legs):
+                l["leg_num"] = str(i + 1)
+            self.parlay_legs = legs
+            if self.active_leg_index >= len(legs):
+                self.active_leg_index = len(legs) - 1
+            self.feedback_message = ""
+
+    def next_leg(self):
+        if self.active_leg_index < len(self.parlay_legs) - 1:
+            self.active_leg_index += 1
+            self.feedback_message = ""
+
+    def prev_leg(self):
+        if self.active_leg_index > 0:
+            self.active_leg_index -= 1
+            self.feedback_message = ""
+
+    def set_leg_category(self, cat: str):
+        if 0 <= self.active_leg_index < len(self.parlay_legs):
+            proj = compute_season_projections(5)
+            teams = sorted(proj.get("teams", []))
+            target = teams[0] if teams else ""
+            stance = "FOR"
+            if cat == "Expected Race Winner":
+                target = proj.get("expected_winner", target)
+            elif cat == "Highest Scoring Team":
+                target = proj.get("expected_highest_score_team", target)
+            elif cat == "Podium Teams":
+                podiums = proj.get("expected_podium", [])
+                target = podiums[0] if podiums else target
+            elif cat == "Expected Points":
+                stance = "OVER"
+
+            legs = [dict(l) for l in self.parlay_legs]
+            legs[self.active_leg_index]["category"] = cat
+            legs[self.active_leg_index]["target"] = target
+            legs[self.active_leg_index]["stance"] = stance
+            self.parlay_legs = legs
+
+    def set_leg_target(self, target: str):
+        if 0 <= self.active_leg_index < len(self.parlay_legs):
+            legs = [dict(l) for l in self.parlay_legs]
+            legs[self.active_leg_index]["target"] = target
+            self.parlay_legs = legs
+
+    def set_leg_stance(self, stance: str | list[str]):
+        if 0 <= self.active_leg_index < len(self.parlay_legs):
+            val = stance[0] if isinstance(stance, list) else str(stance)
+            legs = [dict(l) for l in self.parlay_legs]
+            legs[self.active_leg_index]["stance"] = val
+            self.parlay_legs = legs
 
     def set_category(self, cat: str):
         self.selected_category = cat
@@ -1105,7 +1280,6 @@ class PredictionsMarketState(rx.State):
             self.selected_target = teams[0] if teams else ""
             self.selected_stance = "OVER"
         else:
-            # Additional stat categories (Fastest Lap, Driver of the Day, Most Overtakes, Cleanest Driver)
             self.selected_target = teams[0] if teams else ""
             self.selected_stance = "FOR"
 
@@ -1123,6 +1297,60 @@ class PredictionsMarketState(rx.State):
             self.wager_amount = max(1, int(amount))
         except Exception:
             self.wager_amount = 1
+
+    @rx.var
+    def active_leg(self) -> dict[str, str]:
+        if 0 <= self.active_leg_index < len(self.parlay_legs):
+            return self.parlay_legs[self.active_leg_index]
+        if self.parlay_legs:
+            return self.parlay_legs[0]
+        return {"leg_num": "1", "category": "Expected Race Winner", "target": "", "stance": "FOR"}
+
+    @rx.var
+    def current_leg_category(self) -> str:
+        return self.active_leg.get("category", "Expected Race Winner")
+
+    @rx.var
+    def current_leg_target(self) -> str:
+        return self.active_leg.get("target", "")
+
+    @rx.var
+    def current_leg_stance(self) -> str:
+        return self.active_leg.get("stance", "FOR")
+
+    @rx.var
+    def is_final_leg(self) -> bool:
+        if not self.parlay_legs:
+            return True
+        return self.active_leg_index >= (len(self.parlay_legs) - 1)
+
+    @rx.var
+    def parlay_legs_count(self) -> int:
+        return len(self.parlay_legs)
+
+    @rx.var
+    def parlay_subtabs(self) -> list[dict]:
+        res = []
+        count = len(self.parlay_legs)
+        for idx in range(count):
+            res.append({
+                "index": idx,
+                "label": f"Leg {idx + 1}",
+                "is_active": (idx == self.active_leg_index),
+                "can_delete": (count > 2),
+            })
+        return res
+
+    @rx.var
+    def parlay_multiplier_pct(self) -> int:
+        num_legs = len(self.parlay_legs)
+        return int(round((0.15 + (num_legs * 0.1)) * 100))
+
+    @rx.var
+    def parlay_payout_preview(self) -> int:
+        num_legs = len(self.parlay_legs)
+        mult = 0.15 + (num_legs * 0.1)
+        return self.wager_amount + int(round(self.wager_amount * mult))
 
     @rx.var
     def category_options(self) -> list[str]:
@@ -1184,9 +1412,28 @@ class PredictionsMarketState(rx.State):
             item = dict(p)
             item["is_mine"] = (p.get("username") == self.current_user)
             item["can_delete"] = (p.get("username") == self.current_user and p.get("status") == "open" and not self.is_locked)
-            item["team_color"] = get_constructor_color(str(p.get("target", "")))
+            
             stance = str(p.get("stance", "FOR")).upper()
-            item["is_positive"] = bool("FOR" in stance or "OVER" in stance)
+            is_parlay = (stance == "PARLAY" or str(p.get("category", "")).startswith("Parlay"))
+            item["is_parlay"] = is_parlay
+
+            if is_parlay:
+                item["team_color"] = "#C084FC"  # Purple for Parlay
+                item["is_positive"] = True
+                item["line_display"] = "Multi-Leg"
+                try:
+                    legs = json.loads(p.get("target", "[]"))
+                    legs_summary = " + ".join([f"{l.get('target', '')} ({l.get('stance', '')})" for l in legs])
+                    item["target_display"] = legs_summary if legs_summary else str(p.get("target", ""))
+                except Exception:
+                    item["target_display"] = str(p.get("target", ""))
+            else:
+                item["team_color"] = get_constructor_color(str(p.get("target", "")))
+                item["is_positive"] = bool("FOR" in stance or "OVER" in stance)
+                item["target_display"] = str(p.get("target", ""))
+                lv = p.get("line_value")
+                item["line_display"] = f"{float(lv):.1f} pts" if lv is not None else "—"
+
             status_val = str(p.get("status", "open")).lower()
             item["status_upper"] = status_val.upper()
             if status_val == "correct":
@@ -1436,25 +1683,55 @@ class PredictionsMarketState(rx.State):
         proj = compute_season_projections(5)
         race_name = proj.get("next_main_race", proj.get("next_race", "Upcoming Race"))
         lines = proj.get("team_expected_lines", {})
-        line_val = lines.get(self.selected_target, 0.0) if self.selected_category == "Expected Points" else None
 
         import time
         pred_id = int(time.time() * 1000)
 
-        new_pred = {
-            "id": pred_id,
-            "username": username,
-            "season": 5,
-            "race": race_name,
-            "category": self.selected_category,
-            "target": self.selected_target,
-            "line_value": line_val,
-            "stance": self.selected_stance,
-            "points": self.wager_amount,
-            "status": "open",
-            "payout": 0,
-            "created_at": datetime.now(timezone.utc).isoformat(),
-        }
+        if self.prediction_mode == "parlay":
+            if len(self.parlay_legs) < 2:
+                self.feedback_message = "Parlay must contain at least 2 legs."
+                return
+
+            enriched_legs = []
+            for leg in self.parlay_legs:
+                leg_copy = dict(leg)
+                if leg_copy.get("category") == "Expected Points":
+                    leg_copy["line_value"] = lines.get(leg_copy.get("target"), 0.0)
+                else:
+                    leg_copy["line_value"] = None
+                enriched_legs.append(leg_copy)
+
+            num_legs = len(enriched_legs)
+            new_pred = {
+                "id": pred_id,
+                "username": username,
+                "season": 5,
+                "race": race_name,
+                "category": f"Parlay ({num_legs} Legs)",
+                "target": json.dumps(enriched_legs),
+                "line_value": None,
+                "stance": "PARLAY",
+                "points": self.wager_amount,
+                "status": "open",
+                "payout": 0,
+                "created_at": datetime.now(timezone.utc).isoformat(),
+            }
+        else:
+            line_val = lines.get(self.selected_target, 0.0) if self.selected_category == "Expected Points" else None
+            new_pred = {
+                "id": pred_id,
+                "username": username,
+                "season": 5,
+                "race": race_name,
+                "category": self.selected_category,
+                "target": self.selected_target,
+                "line_value": line_val,
+                "stance": self.selected_stance,
+                "points": self.wager_amount,
+                "status": "open",
+                "payout": 0,
+                "created_at": datetime.now(timezone.utc).isoformat(),
+            }
 
         insert_prediction(new_pred)
         self.modal_open = False
@@ -1482,129 +1759,373 @@ class PredictionsMarketState(rx.State):
 
 # ── UI Components ─────────────────────────────────────────────────────────────
 def _submit_prediction_modal() -> rx.Component:
-    """Modal dialog for placing a prediction (SDDREQ-143, SDDREQ-146, SDDREQ-156, SDDREQ-158)."""
+    """Modal dialog for placing a prediction (TAF1APP-SDDREQ-143, 146, 156, 158, 169, 170)."""
+
+    # Top mode selector (Single Prediction vs Parlay Prediction per SDDREQ-169)
+    mode_toggle = rx.segmented_control.root(
+        rx.segmented_control.item("Single Prediction", value="single"),
+        rx.segmented_control.item("Parlay Prediction", value="parlay"),
+        value=PredictionsMarketState.prediction_mode,
+        on_change=PredictionsMarketState.set_prediction_mode,
+        width="100%",
+        color_scheme="cyan",
+        margin_bottom="3",
+    )
+
+    # 1. Single Prediction View (Standard functionality)
+    single_view = rx.vstack(
+        # Category selector
+        rx.vstack(
+            rx.text("STAT CATEGORY", font_size="10px", font_weight="800", color="#00b4da", letter_spacing="0.05em"),
+            rx.select(
+                PredictionsMarketState.category_options,
+                value=PredictionsMarketState.selected_category,
+                on_change=PredictionsMarketState.set_category,
+                width="100%",
+                bg="#1F1F26",
+                color="white",
+                border="1px solid #33333E",
+            ),
+            spacing="1",
+            width="100%",
+            align_items="start",
+        ),
+        # Prediction target (All constructors per SDDREQ-156)
+        rx.vstack(
+            rx.text("PREDICTION TARGET (CONSTRUCTOR)", font_size="10px", font_weight="800", color="#00b4da", letter_spacing="0.05em"),
+            rx.select(
+                PredictionsMarketState.target_options,
+                value=PredictionsMarketState.selected_target,
+                on_change=PredictionsMarketState.set_target,
+                width="100%",
+                bg="#1F1F26",
+                color="white",
+                border="1px solid #33333E",
+            ),
+            spacing="1",
+            width="100%",
+            align_items="start",
+        ),
+        # Stance selector (FOR/AGAINST or OVER/UNDER)
+        rx.vstack(
+            rx.text("STANCE", font_size="10px", font_weight="800", color="#00b4da", letter_spacing="0.05em"),
+            rx.cond(
+                PredictionsMarketState.selected_category != "Expected Points",
+                rx.segmented_control.root(
+                    rx.segmented_control.item("FOR", value="FOR"),
+                    rx.segmented_control.item("AGAINST", value="AGAINST"),
+                    value=PredictionsMarketState.selected_stance,
+                    on_change=PredictionsMarketState.set_stance,
+                    width="100%",
+                    color_scheme="cyan",
+                ),
+                rx.segmented_control.root(
+                    rx.segmented_control.item("OVER", value="OVER"),
+                    rx.segmented_control.item("UNDER", value="UNDER"),
+                    value=PredictionsMarketState.selected_stance,
+                    on_change=PredictionsMarketState.set_stance,
+                    width="100%",
+                    color_scheme="cyan",
+                ),
+            ),
+            spacing="1",
+            width="100%",
+            align_items="start",
+        ),
+        # Points to wager
+        rx.vstack(
+            rx.hstack(
+                rx.text("POINTS TO WAGER", font_size="10px", font_weight="800", color="#00b4da", letter_spacing="0.05em"),
+                rx.spacer(),
+                rx.text(f"Available: {PredictionsMarketState.user_remaining_points} pts", font_size="10px", color="#888888"),
+                width="100%",
+                align="center",
+            ),
+            rx.input(
+                type="number",
+                min="1",
+                max=PredictionsMarketState.user_remaining_points,
+                value=PredictionsMarketState.wager_amount,
+                on_change=PredictionsMarketState.set_wager,
+                width="100%",
+                bg="#1F1F26",
+                color="white",
+                border="1px solid #33333E",
+            ),
+            spacing="1",
+            width="100%",
+            align_items="start",
+        ),
+        # Action buttons
+        rx.hstack(
+            rx.button("Cancel", variant="soft", color_scheme="gray", on_click=PredictionsMarketState.close_modal),
+            rx.spacer(),
+            rx.button(
+                "Submit Wager",
+                bg="#00b4da",
+                color="white",
+                font_weight="700",
+                _hover={"bg": "#009bbd"},
+                on_click=PredictionsMarketState.submit_prediction,
+            ),
+            width="100%",
+            align="center",
+            margin_top="3",
+        ),
+        spacing="3",
+        width="100%",
+    )
+
+    # 2. Parlay Prediction View (TAF1APP-SDDREQ-169 & SDDREQ-170)
+    parlay_view = rx.vstack(
+        # Sub-tabs for legs + "Add a Leg" button per SDDREQ-169
+        rx.hstack(
+            rx.foreach(
+                PredictionsMarketState.parlay_subtabs,
+                lambda tab: rx.box(
+                    rx.hstack(
+                        rx.text(tab["label"], font_size="11px", font_weight=rx.cond(tab["is_active"], "800", "600")),
+                        rx.cond(
+                            tab["can_delete"],
+                            rx.icon(
+                                "x",
+                                size=11,
+                                color="#FF4B4B",
+                                cursor="pointer",
+                                _hover={"color": "#FF8C00"},
+                                on_click=PredictionsMarketState.remove_parlay_leg(tab["index"]),
+                            ),
+                            rx.fragment(),
+                        ),
+                        spacing="1",
+                        align="center",
+                    ),
+                    padding="5px 11px",
+                    border_radius="md",
+                    cursor="pointer",
+                    bg=rx.cond(tab["is_active"], "rgba(0, 180, 218, 0.22)", "#1C1C22"),
+                    border=rx.cond(tab["is_active"], "1.5px solid #00b4da", "1px solid #33333E"),
+                    color=rx.cond(tab["is_active"], "#00b4da", "#AAAAAA"),
+                    on_click=PredictionsMarketState.select_leg(tab["index"]),
+                ),
+            ),
+            rx.button(
+                rx.hstack(rx.icon("plus", size=13), rx.text("Add a Leg", font_size="10px", font_weight="700"), spacing="1", align="center"),
+                size="1",
+                variant="outline",
+                color_scheme="cyan",
+                on_click=PredictionsMarketState.add_parlay_leg,
+                height="28px",
+                padding_x="2",
+            ),
+            spacing="2",
+            align="center",
+            wrap="wrap",
+            width="100%",
+            margin_bottom="1",
+        ),
+        # Leg Category selector
+        rx.vstack(
+            rx.hstack(
+                rx.text(
+                    f"LEG {PredictionsMarketState.active_leg_index + 1} — STAT CATEGORY",
+                    font_size="10px",
+                    font_weight="800",
+                    color="#00b4da",
+                    letter_spacing="0.05em",
+                ),
+                rx.spacer(),
+                rx.badge(
+                    f"Leg {PredictionsMarketState.active_leg_index + 1} of {PredictionsMarketState.parlay_legs_count}",
+                    bg="rgba(0,180,218,0.15)",
+                    color="#00b4da",
+                    font_size="9px",
+                    font_weight="800",
+                ),
+                width="100%",
+                align="center",
+            ),
+            rx.select(
+                PredictionsMarketState.category_options,
+                value=PredictionsMarketState.current_leg_category,
+                on_change=PredictionsMarketState.set_leg_category,
+                width="100%",
+                bg="#1F1F26",
+                color="white",
+                border="1px solid #33333E",
+            ),
+            spacing="1",
+            width="100%",
+            align_items="start",
+        ),
+        # Leg Target selector
+        rx.vstack(
+            rx.text("PREDICTION TARGET (CONSTRUCTOR)", font_size="10px", font_weight="800", color="#00b4da", letter_spacing="0.05em"),
+            rx.select(
+                PredictionsMarketState.target_options,
+                value=PredictionsMarketState.current_leg_target,
+                on_change=PredictionsMarketState.set_leg_target,
+                width="100%",
+                bg="#1F1F26",
+                color="white",
+                border="1px solid #33333E",
+            ),
+            spacing="1",
+            width="100%",
+            align_items="start",
+        ),
+        # Leg Stance selector
+        rx.vstack(
+            rx.text("STANCE", font_size="10px", font_weight="800", color="#00b4da", letter_spacing="0.05em"),
+            rx.cond(
+                PredictionsMarketState.current_leg_category != "Expected Points",
+                rx.segmented_control.root(
+                    rx.segmented_control.item("FOR", value="FOR"),
+                    rx.segmented_control.item("AGAINST", value="AGAINST"),
+                    value=PredictionsMarketState.current_leg_stance,
+                    on_change=PredictionsMarketState.set_leg_stance,
+                    width="100%",
+                    color_scheme="cyan",
+                ),
+                rx.segmented_control.root(
+                    rx.segmented_control.item("OVER", value="OVER"),
+                    rx.segmented_control.item("UNDER", value="UNDER"),
+                    value=PredictionsMarketState.current_leg_stance,
+                    on_change=PredictionsMarketState.set_leg_stance,
+                    width="100%",
+                    color_scheme="cyan",
+                ),
+            ),
+            spacing="1",
+            width="100%",
+            align_items="start",
+        ),
+        # Points to wager (grayed out until on final leg per SDDREQ-169)
+        rx.vstack(
+            rx.hstack(
+                rx.text(
+                    "POINTS TO WAGER",
+                    font_size="10px",
+                    font_weight="800",
+                    color=rx.cond(PredictionsMarketState.is_final_leg, "#00b4da", "#666670"),
+                    letter_spacing="0.05em",
+                ),
+                rx.spacer(),
+                rx.cond(
+                    PredictionsMarketState.is_final_leg,
+                    rx.text(f"Available: {PredictionsMarketState.user_remaining_points} pts", font_size="10px", color="#888888"),
+                    rx.text("(Grayed out until final leg)", font_size="10px", color="#777780", font_style="italic"),
+                ),
+                width="100%",
+                align="center",
+            ),
+            rx.input(
+                type="number",
+                min="1",
+                max=PredictionsMarketState.user_remaining_points,
+                value=PredictionsMarketState.wager_amount,
+                on_change=PredictionsMarketState.set_wager,
+                disabled=rx.cond(PredictionsMarketState.is_final_leg, False, True),
+                width="100%",
+                bg=rx.cond(PredictionsMarketState.is_final_leg, "#1F1F26", "#141418"),
+                color=rx.cond(PredictionsMarketState.is_final_leg, "white", "#666670"),
+                border=rx.cond(PredictionsMarketState.is_final_leg, "1px solid #33333E", "1px solid #222228"),
+            ),
+            spacing="1",
+            width="100%",
+            align_items="start",
+        ),
+        # Parlay payout boost preview badge (TAF1APP-SDDREQ-170)
+        rx.box(
+            rx.hstack(
+                rx.hstack(
+                    rx.icon("sparkles", size=14, color="#FFD700"),
+                    rx.text(f"Parlay Boost: +{PredictionsMarketState.parlay_multiplier_pct}%", font_size="11px", font_weight="800", color="#FFD700"),
+                    spacing="1",
+                    align="center",
+                ),
+                rx.spacer(),
+                rx.cond(
+                    PredictionsMarketState.is_final_leg,
+                    rx.text(f"Potential Win: {PredictionsMarketState.parlay_payout_preview} pts", font_size="11px", font_weight="800", color="#00b4da"),
+                    rx.fragment(),
+                ),
+                width="100%",
+                align="center",
+            ),
+            bg="rgba(255, 215, 0, 0.08)",
+            border="1px solid rgba(255, 215, 0, 0.25)",
+            border_radius="lg",
+            padding="6px 12px",
+            width="100%",
+        ),
+        # Parlay Navigation & Action buttons (Next until final leg, then Submit Parlay per SDDREQ-169)
+        rx.hstack(
+            rx.button("Cancel", variant="soft", color_scheme="gray", on_click=PredictionsMarketState.close_modal),
+            rx.cond(
+                PredictionsMarketState.active_leg_index > 0,
+                rx.button(
+                    rx.hstack(rx.icon("arrow-left", size=13), rx.text("Back", font_size="xs")),
+                    variant="soft",
+                    color_scheme="cyan",
+                    on_click=PredictionsMarketState.prev_leg,
+                ),
+                rx.fragment(),
+            ),
+            rx.spacer(),
+            rx.cond(
+                PredictionsMarketState.is_final_leg,
+                rx.button(
+                    rx.hstack(rx.icon("check-check", size=14), rx.text("Submit Parlay")),
+                    bg="#00b4da",
+                    color="white",
+                    font_weight="700",
+                    _hover={"bg": "#009bbd"},
+                    on_click=PredictionsMarketState.submit_prediction,
+                ),
+                rx.button(
+                    rx.hstack(rx.text("Next"), rx.icon("arrow-right", size=14)),
+                    bg="#00b4da",
+                    color="white",
+                    font_weight="700",
+                    _hover={"bg": "#009bbd"},
+                    on_click=PredictionsMarketState.next_leg,
+                ),
+            ),
+            width="100%",
+            align="center",
+            margin_top="3",
+        ),
+        spacing="3",
+        width="100%",
+    )
+
     return rx.dialog.root(
         rx.dialog.content(
             rx.dialog.title("Submit a Prediction", font_family="Outfit", font_weight="800", color="white"),
             rx.dialog.description(
-                "Wager your Alternative Points against constructor projection lines for the upcoming race.",
+                "Wager your Alternative Points against single lines or multi-leg parlays for the upcoming race.",
                 color="#A0A0AA",
                 font_size="xs",
-                margin_bottom="4",
+                margin_bottom="3",
             ),
-            rx.vstack(
-                # Category selector
-                rx.vstack(
-                    rx.text("STAT CATEGORY", font_size="10px", font_weight="800", color="#00b4da", letter_spacing="0.05em"),
-                    rx.select(
-                        PredictionsMarketState.category_options,
-                        value=PredictionsMarketState.selected_category,
-                        on_change=PredictionsMarketState.set_category,
-                        width="100%",
-                        bg="#1F1F26",
-                        color="white",
-                        border="1px solid #33333E",
-                    ),
-                    spacing="1",
-                    width="100%",
-                    align_items="start",
-                ),
-                # Prediction target (All constructors per SDDREQ-156)
-                rx.vstack(
-                    rx.text("PREDICTION TARGET (CONSTRUCTOR)", font_size="10px", font_weight="800", color="#00b4da", letter_spacing="0.05em"),
-                    rx.select(
-                        PredictionsMarketState.target_options,
-                        value=PredictionsMarketState.selected_target,
-                        on_change=PredictionsMarketState.set_target,
-                        width="100%",
-                        bg="#1F1F26",
-                        color="white",
-                        border="1px solid #33333E",
-                    ),
-                    spacing="1",
-                    width="100%",
-                    align_items="start",
-                ),
-                # Stance selector (FOR/AGAINST or OVER/UNDER)
-                rx.vstack(
-                    rx.text("STANCE", font_size="10px", font_weight="800", color="#00b4da", letter_spacing="0.05em"),
-                    rx.cond(
-                        PredictionsMarketState.selected_category != "Expected Points",
-                        rx.segmented_control.root(
-                            rx.segmented_control.item("FOR", value="FOR"),
-                            rx.segmented_control.item("AGAINST", value="AGAINST"),
-                            value=PredictionsMarketState.selected_stance,
-                            on_change=PredictionsMarketState.set_stance,
-                            width="100%",
-                            color_scheme="cyan",
-                        ),
-                        rx.segmented_control.root(
-                            rx.segmented_control.item("OVER", value="OVER"),
-                            rx.segmented_control.item("UNDER", value="UNDER"),
-                            value=PredictionsMarketState.selected_stance,
-                            on_change=PredictionsMarketState.set_stance,
-                            width="100%",
-                            color_scheme="cyan",
-                        ),
-                    ),
-                    spacing="1",
-                    width="100%",
-                    align_items="start",
-                ),
-                # Points to wager
-                rx.vstack(
-                    rx.hstack(
-                        rx.text("POINTS TO WAGER", font_size="10px", font_weight="800", color="#00b4da", letter_spacing="0.05em"),
-                        rx.spacer(),
-                        rx.text(f"Available: {PredictionsMarketState.user_remaining_points} pts", font_size="10px", color="#888888"),
-                        width="100%",
-                        align="center",
-                    ),
-                    rx.input(
-                        type="number",
-                        min="1",
-                        max=PredictionsMarketState.user_remaining_points,
-                        value=PredictionsMarketState.wager_amount,
-                        on_change=PredictionsMarketState.set_wager,
-                        width="100%",
-                        bg="#1F1F26",
-                        color="white",
-                        border="1px solid #33333E",
-                    ),
-                    spacing="1",
-                    width="100%",
-                    align_items="start",
-                ),
-                # Feedback error message if any
-                rx.cond(
-                    PredictionsMarketState.feedback_message != "",
-                    rx.text(PredictionsMarketState.feedback_message, color="#FF4B4B", font_size="xs", font_weight="600"),
-                    rx.fragment(),
-                ),
-                # Action buttons
-                rx.hstack(
-                    rx.button("Cancel", variant="soft", color_scheme="gray", on_click=PredictionsMarketState.close_modal),
-                    rx.spacer(),
-                    rx.button(
-                        "Submit Wager",
-                        bg="#00b4da",
-                        color="white",
-                        font_weight="700",
-                        _hover={"bg": "#009bbd"},
-                        on_click=PredictionsMarketState.submit_prediction,
-                    ),
-                    width="100%",
-                    align="center",
-                    margin_top="3",
-                ),
-                spacing="3",
-                width="100%",
+            mode_toggle,
+            rx.cond(
+                PredictionsMarketState.prediction_mode == "single",
+                single_view,
+                parlay_view,
+            ),
+            # Feedback error message if any
+            rx.cond(
+                PredictionsMarketState.feedback_message != "",
+                rx.text(PredictionsMarketState.feedback_message, color="#FF4B4B", font_size="xs", font_weight="600", margin_top="2"),
+                rx.fragment(),
             ),
             bg="#18181F",
             border="1px solid #2D2D38",
             border_radius="xl",
             padding="20px",
-            max_width="440px",
+            max_width="480px",
         ),
         open=PredictionsMarketState.modal_open,
         on_open_change=PredictionsMarketState.close_modal,
@@ -2043,7 +2564,7 @@ def predictions_market_tab_view() -> rx.Component:
                                 rx.table.cell(
                                     rx.hstack(
                                         rx.box(width="4px", height="16px", bg=p["team_color"], border_radius="full", flex_shrink="0"),
-                                        rx.text(p["target"], font_size="xs", font_weight="700", color="white"),
+                                        rx.text(p["target_display"], font_size="xs", font_weight="700", color="white"),
                                         spacing="2",
                                         align="center",
                                     )
@@ -2051,9 +2572,9 @@ def predictions_market_tab_view() -> rx.Component:
                                 rx.table.cell(
                                     rx.badge(
                                         p["stance"],
-                                        color=rx.cond(p["is_positive"], "#3cb44b", "#FF4B4B"),
-                                        bg=rx.cond(p["is_positive"], "rgba(60, 180, 75, 0.15)", "rgba(255, 75, 75, 0.15)"),
-                                        border=rx.cond(p["is_positive"], "1px solid rgba(60, 180, 75, 0.3)", "1px solid rgba(255, 75, 75, 0.3)"),
+                                        color=rx.cond(p["is_parlay"], "#C084FC", rx.cond(p["is_positive"], "#3cb44b", "#FF4B4B")),
+                                        bg=rx.cond(p["is_parlay"], "rgba(192, 132, 252, 0.15)", rx.cond(p["is_positive"], "rgba(60, 180, 75, 0.15)", "rgba(255, 75, 75, 0.15)")),
+                                        border=rx.cond(p["is_parlay"], "1px solid rgba(192, 132, 252, 0.4)", rx.cond(p["is_positive"], "1px solid rgba(60, 180, 75, 0.3)", "1px solid rgba(255, 75, 75, 0.3)")),
                                         font_size="10px",
                                         font_weight="800",
                                     )
