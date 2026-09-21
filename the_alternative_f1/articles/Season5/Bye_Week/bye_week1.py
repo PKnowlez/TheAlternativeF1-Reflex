@@ -92,7 +92,7 @@ article = {
         "Both Nick and Joshua are intriguing drivers to consider this season. Both having won championships. Both seeking another Cosntructor's Championship. \
             Interestingly, all-time league leader, Nick has bounced back mariginally with his start this season. Scoring a few more points thus far and standing on \
                 the second step of the podium already. Joshua, however, is trending in the other direction with only a third place podium thus far. Both drivers \
-                    are certainly worth following throughout the season."
+                    are certainly worth following throughout the season.",
 
         "With the top few drivers discussed, it is prudent to take a moment and note some of the bright moments further down into the midfield. An extremely notable \
             performance so far this season is the commanding first seat that Evelo has taken for Audi. Currently, Boz has found himself with a bum vehicle in both \
@@ -111,10 +111,10 @@ article = {
 
         "Speaking of Matthew, he has found himself in a rather even keel position compared to his rookie season. With his high-speed performance in Hungary, many \
             correspondents have begun expecting him to knock it out of the park in Miami under the same sprint format. Speaking of sprints in Miami, Leo finds \
-                himself faster, but not yet converting all that pace into points. He certainly hopes to overcome the chaos that occurred in last year's Miami weekend \
+                himself faster overall this season, but not yet converting all that pace into points. He certainly hopes to overcome the chaos that occurred in last year's Miami event \
                     by putting a statement race down into the records in a week's time.",
 
-        "Finally, the two rookies at Williams are left to discuss. Grayson and Josh C. are both neck and neck to be prove out who will be the team's lead driver. \
+        "Finally, the two rookies at Williams are left to discuss. Grayson and Josh C. are both neck and neck to prove who will be the team's lead driver. \
             Time will be the only indicator of who has what it takes between the two of them. As we wait on that, enjoy the week away, the new features, and time \
                 to pracitce the lovely hybrid circuit around Miami's Hard Rock Stadium. Until we meet again, cheers."
     ],
