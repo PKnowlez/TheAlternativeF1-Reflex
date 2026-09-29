@@ -7,6 +7,8 @@ Implements TAF1APP-SDDFEAT-17 and approved downstream SDD requirements:
 - SDDREQ-167: Leaderboard Tab Layout (Top-to-bottom: All-time standings table in expander defaulted to closed reflecting dynamic remaining points balance, followed side-by-side by Points Growth chart and User Wagers stacked bar chart)
 """
 
+import json
+from pathlib import Path
 import reflex as rx
 from the_alternative_f1.all_time_stats.Functions import get_excel_sheet
 from the_alternative_f1.articles.components import (
@@ -24,6 +26,18 @@ from the_alternative_f1.seasons.predictions_market import (
     get_all_predictions,
     normalize_username,
 )
+
+LEADERBOARD_JSON = Path(__file__).parent / "leaderboard.json"
+_LEADERBOARD_CACHE: list[dict] = []
+
+if LEADERBOARD_JSON.exists():
+    try:
+        with open(LEADERBOARD_JSON, "r", encoding="utf-8") as f:
+            _LEADERBOARD_CACHE = json.load(f)
+    except Exception as e:
+        print(f"Error loading leaderboard.json: {e}")
+        _LEADERBOARD_CACHE = []
+
 
 USER_COLORS_PALETTE = [
     "#00b4da", "#FFD700", "#FF4B4B", "#9B59B6", "#1ABC9C", "#E67E22", "#3498DB", "#2ECC71"
@@ -52,11 +66,15 @@ def get_predictor_key_items() -> list[tuple[str, str]]:
 PREDICTOR_KEY_ITEMS = get_predictor_key_items()
 
 
-def compute_leaderboard_data() -> list[dict]:
+def compute_leaderboard_data(force: bool = False) -> list[dict]:
     """Compiles all-time and seasonal points for logged-in users who received points or placed predictions.
     Only displays users who have logged in and received their 100 points or placed predictions (SDDREQ-153).
     Deduplicates accounts if a user has changed display names.
     """
+    global _LEADERBOARD_CACHE
+    if not force and _LEADERBOARD_CACHE:
+        return _LEADERBOARD_CACHE
+
     all_users = set()
 
     sb = _get_supabase()
@@ -148,7 +166,20 @@ def compute_leaderboard_data() -> list[dict]:
         r["pts_str"] = f"{r['all_time_pts']} pts"
         r["s5_str"] = f"{r['s5']} pts"
 
+    _LEADERBOARD_CACHE = rows
+    try:
+        with open(LEADERBOARD_JSON, "w", encoding="utf-8") as f:
+            json.dump(rows, f, indent=2)
+    except Exception as e:
+        print(f"Error persisting leaderboard.json: {e}")
+
     return rows
+
+
+def precompute_leaderboard_cache(force: bool = False) -> list[dict]:
+    """Pre-calculates and persists the leaderboard data to leaderboard.json."""
+    return compute_leaderboard_data(force=force)
+
 
 
 class LeaderboardState(rx.State):
@@ -193,9 +224,10 @@ class LeaderboardState(rx.State):
         self.single_season_only = val
 
     def refresh(self):
+        compute_leaderboard_data(force=True)
         self.refresh_counter += 1
 
-    @rx.var
+    @rx.var(auto_deps=False, deps=["refresh_counter"])
     def leaderboard_rows(self) -> list[dict]:
         _ = self.refresh_counter
         return compute_leaderboard_data()
@@ -204,7 +236,7 @@ class LeaderboardState(rx.State):
     def has_rows(self) -> bool:
         return len(self.leaderboard_rows) > 0
 
-    @rx.var
+    @rx.var(auto_deps=False, deps=["refresh_counter"])
     def user_wagers_stacked_data(self) -> list[dict]:
         """Data for User Wagers Correct/Incorrect Stacked Bar Chart (SDDREQ-165)."""
         _ = self.refresh_counter
@@ -231,7 +263,7 @@ class LeaderboardState(rx.State):
 
         return chart_data
 
-    @rx.var
+    @rx.var(auto_deps=False, deps=["refresh_counter"])
     def user_wagers_font_size(self) -> int:
         """Dynamically scales font size so usernames never get clipped on the Y-axis."""
         rows = self.leaderboard_rows
@@ -246,7 +278,7 @@ class LeaderboardState(rx.State):
             return 9
         return 10
 
-    @rx.var
+    @rx.var(auto_deps=False, deps=["refresh_counter"])
     def user_wagers_yaxis_width(self) -> int:
         """Dynamically allocates width for Y-axis category labels."""
         rows = self.leaderboard_rows
@@ -261,11 +293,11 @@ class LeaderboardState(rx.State):
             return 105
         return 95
 
-    @rx.var
+    @rx.var(auto_deps=False, deps=["refresh_counter"])
     def user_names_list(self) -> list[str]:
         return [r["user"] for r in self.leaderboard_rows]
 
-    @rx.var
+    @rx.var(auto_deps=False, deps=["refresh_counter"])
     def points_growth_chart_data(self) -> list[dict]:
         """Data for All Time Points Growth Chart across races (SDDREQ-166)."""
         _ = self.refresh_counter

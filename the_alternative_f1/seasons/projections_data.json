@@ -1,0 +1,1275 @@
+{
+  "season_1": {
+    "season": 1,
+    "is_complete": true,
+    "next_race": "Season 1 Final",
+    "next_main_race": "Season 1 Final",
+    "completed_races": [
+      "Bahrain",
+      "Jeddah",
+      "Australia",
+      "Miami",
+      "Spain",
+      "Canada",
+      "Austria",
+      "Silverstone",
+      "Spa",
+      "Zandvoort",
+      "Monza",
+      "Singapore",
+      "Suzuka",
+      "Qatar",
+      "COTA",
+      "Mexico",
+      "Brazil",
+      "Las Vegas",
+      "Abu Dhabi"
+    ],
+    "upcoming_races": [],
+    "teams": [
+      "Aston Martin",
+      "Ferrari",
+      "McLaren",
+      "Mercedes",
+      "Red Bull"
+    ],
+    "sorted_teams": [
+      "Mercedes",
+      "McLaren",
+      "Aston Martin",
+      "Red Bull",
+      "Ferrari"
+    ],
+    "champion_team": "Mercedes",
+    "champion_driver": "Nick",
+    "expected_winner": "Mercedes",
+    "expected_winner_score": 1.0,
+    "expected_highest_score_team": "Mercedes",
+    "highest_expected_points": 586,
+    "expected_podium": [
+      "Mercedes",
+      "McLaren",
+      "Aston Martin"
+    ],
+    "team_expected_lines": {
+      "Mercedes": 586.0,
+      "McLaren": 531.0,
+      "Aston Martin": 310.0,
+      "Red Bull": 157.0,
+      "Ferrari": 10.0
+    },
+    "team_points_calc": {
+      "Mercedes": 586,
+      "McLaren": 531,
+      "Aston Martin": 310,
+      "Red Bull": 157,
+      "Ferrari": 10
+    },
+    "team_total_projections": {
+      "Mercedes": 1.0,
+      "McLaren": 0.0,
+      "Aston Martin": 0.0,
+      "Red Bull": 0.0,
+      "Ferrari": 0.0
+    },
+    "line_chart_data": [
+      {
+        "race": "Start",
+        "Aston Martin_actual": 0.0,
+        "Ferrari_actual": 0.0,
+        "McLaren_actual": 0.0,
+        "Mercedes_actual": 0.0,
+        "Red Bull_actual": 0.0
+      },
+      {
+        "race": "Bahrain",
+        "Aston Martin_actual": 16.0,
+        "Ferrari_actual": 0.0,
+        "McLaren_actual": 30.0,
+        "Mercedes_actual": 9.0,
+        "Red Bull_actual": 3.0
+      },
+      {
+        "race": "Jeddah",
+        "Aston Martin_actual": 20.0,
+        "Ferrari_actual": 0.0,
+        "McLaren_actual": 61.0,
+        "Mercedes_actual": 49.0,
+        "Red Bull_actual": 3.0
+      },
+      {
+        "race": "Australia",
+        "Aston Martin_actual": 35.0,
+        "Ferrari_actual": 0.0,
+        "McLaren_actual": 87.0,
+        "Mercedes_actual": 93.0,
+        "Red Bull_actual": 3.0
+      },
+      {
+        "race": "Miami",
+        "Aston Martin_actual": 43.0,
+        "Ferrari_actual": 0.0,
+        "McLaren_actual": 122.0,
+        "Mercedes_actual": 131.0,
+        "Red Bull_actual": 15.0
+      },
+      {
+        "race": "Spain",
+        "Aston Martin_actual": 73.0,
+        "Ferrari_actual": 0.0,
+        "McLaren_actual": 151.0,
+        "Mercedes_actual": 168.0,
+        "Red Bull_actual": 16.0
+      },
+      {
+        "race": "Canada",
+        "Aston Martin_actual": 75.0,
+        "Ferrari_actual": 0.0,
+        "McLaren_actual": 154.0,
+        "Mercedes_actual": 203.0,
+        "Red Bull_actual": 17.0
+      },
+      {
+        "race": "Austria",
+        "Aston Martin_actual": 98.0,
+        "Ferrari_actual": 0.0,
+        "McLaren_actual": 193.0,
+        "Mercedes_actual": 235.0,
+        "Red Bull_actual": 27.0
+      },
+      {
+        "race": "Silverstone",
+        "Aston Martin_actual": 110.0,
+        "Ferrari_actual": 0.0,
+        "McLaren_actual": 235.0,
+        "Mercedes_actual": 269.0,
+        "Red Bull_actual": 39.0
+      },
+      {
+        "race": "Spa",
+        "Aston Martin_actual": 122.0,
+        "Ferrari_actual": 0.0,
+        "McLaren_actual": 283.0,
+        "Mercedes_actual": 296.0,
+        "Red Bull_actual": 40.0
+      },
+      {
+        "race": "Zandvoort",
+        "Aston Martin_actual": 128.0,
+        "Ferrari_actual": 0.0,
+        "McLaren_actual": 306.0,
+        "Mercedes_actual": 324.0,
+        "Red Bull_actual": 42.0
+      },
+      {
+        "race": "Monza",
+        "Aston Martin_actual": 158.0,
+        "Ferrari_actual": 1.0,
+        "McLaren_actual": 322.0,
+        "Mercedes_actual": 371.0,
+        "Red Bull_actual": 53.0
+      },
+      {
+        "race": "Singapore",
+        "Aston Martin_actual": 164.0,
+        "Ferrari_actual": 1.0,
+        "McLaren_actual": 327.0,
+        "Mercedes_actual": 402.0,
+        "Red Bull_actual": 54.0
+      },
+      {
+        "race": "Suzuka",
+        "Aston Martin_actual": 171.0,
+        "Ferrari_actual": 1.0,
+        "McLaren_actual": 360.0,
+        "Mercedes_actual": 425.0,
+        "Red Bull_actual": 55.0
+      },
+      {
+        "race": "Qatar",
+        "Aston Martin_actual": 202.0,
+        "Ferrari_actual": 1.0,
+        "McLaren_actual": 389.0,
+        "Mercedes_actual": 447.0,
+        "Red Bull_actual": 69.0
+      },
+      {
+        "race": "COTA",
+        "Aston Martin_actual": 241.0,
+        "Ferrari_actual": 2.0,
+        "McLaren_actual": 424.0,
+        "Mercedes_actual": 459.0,
+        "Red Bull_actual": 87.0
+      },
+      {
+        "race": "Mexico",
+        "Aston Martin_actual": 275.0,
+        "Ferrari_actual": 6.0,
+        "McLaren_actual": 450.0,
+        "Mercedes_actual": 484.0,
+        "Red Bull_actual": 106.0
+      },
+      {
+        "race": "Brazil",
+        "Aston Martin_actual": 295.0,
+        "Ferrari_actual": 6.0,
+        "McLaren_actual": 477.0,
+        "Mercedes_actual": 501.0,
+        "Red Bull_actual": 128.0
+      },
+      {
+        "race": "Las Vegas",
+        "Aston Martin_actual": 299.0,
+        "Ferrari_actual": 6.0,
+        "McLaren_actual": 500.0,
+        "Mercedes_actual": 547.0,
+        "Red Bull_actual": 142.0
+      },
+      {
+        "race": "Abu Dhabi",
+        "Aston Martin_actual": 310.0,
+        "Ferrari_actual": 10.0,
+        "McLaren_actual": 531.0,
+        "Mercedes_actual": 586.0,
+        "Red Bull_actual": 157.0
+      }
+    ],
+    "lines_record": {}
+  },
+  "season_2": {
+    "season": 2,
+    "is_complete": true,
+    "next_race": "Season 2 Final",
+    "next_main_race": "Season 2 Final",
+    "completed_races": [
+      "Suzuka",
+      "Monaco",
+      "Abu Dhabi",
+      "Monza",
+      "Zandvoort",
+      "Silverstone",
+      "China",
+      "COTA",
+      "Spa",
+      "Austria"
+    ],
+    "upcoming_races": [],
+    "teams": [
+      "Alfa Romeo",
+      "AlphaTauri",
+      "Alpine",
+      "Ferrari",
+      "McLaren",
+      "Mercedes",
+      "Red Bull"
+    ],
+    "sorted_teams": [
+      "McLaren",
+      "Ferrari",
+      "Alpine",
+      "Mercedes",
+      "Red Bull",
+      "Alfa Romeo",
+      "AlphaTauri"
+    ],
+    "champion_team": "McLaren",
+    "champion_driver": "Nick",
+    "expected_winner": "McLaren",
+    "expected_winner_score": 1.0,
+    "expected_highest_score_team": "McLaren",
+    "highest_expected_points": 258,
+    "expected_podium": [
+      "McLaren",
+      "Ferrari",
+      "Alpine"
+    ],
+    "team_expected_lines": {
+      "McLaren": 258.0,
+      "Ferrari": 234.0,
+      "Alpine": 226.0,
+      "Mercedes": 219.0,
+      "Red Bull": 138.0,
+      "Alfa Romeo": 66.0,
+      "AlphaTauri": 1.0
+    },
+    "team_points_calc": {
+      "McLaren": 258,
+      "Ferrari": 234,
+      "Alpine": 226,
+      "Mercedes": 219,
+      "Red Bull": 138,
+      "Alfa Romeo": 66,
+      "AlphaTauri": 1
+    },
+    "team_total_projections": {
+      "McLaren": 1.0,
+      "Ferrari": 0.0,
+      "Alpine": 0.0,
+      "Mercedes": 0.0,
+      "Red Bull": 0.0,
+      "Alfa Romeo": 0.0,
+      "AlphaTauri": 0.0
+    },
+    "line_chart_data": [
+      {
+        "race": "Start",
+        "Alfa Romeo_actual": 0.0,
+        "AlphaTauri_actual": 0.0,
+        "Alpine_actual": 0.0,
+        "Ferrari_actual": 0.0,
+        "McLaren_actual": 0.0,
+        "Mercedes_actual": 0.0,
+        "Red Bull_actual": 0.0
+      },
+      {
+        "race": "Suzuka",
+        "Alfa Romeo_actual": 0.0,
+        "AlphaTauri_actual": 0.0,
+        "Alpine_actual": 24.0,
+        "Ferrari_actual": 20.0,
+        "McLaren_actual": 30.0,
+        "Mercedes_actual": 30.0,
+        "Red Bull_actual": 7.0
+      },
+      {
+        "race": "Monaco",
+        "Alfa Romeo_actual": 4.0,
+        "AlphaTauri_actual": 0.0,
+        "Alpine_actual": 30.0,
+        "Ferrari_actual": 33.0,
+        "McLaren_actual": 36.0,
+        "Mercedes_actual": 40.0,
+        "Red Bull_actual": 14.0
+      },
+      {
+        "race": "Abu Dhabi",
+        "Alfa Romeo_actual": 12.0,
+        "AlphaTauri_actual": 0.0,
+        "Alpine_actual": 54.0,
+        "Ferrari_actual": 66.0,
+        "McLaren_actual": 71.0,
+        "Mercedes_actual": 47.0,
+        "Red Bull_actual": 47.0
+      },
+      {
+        "race": "Monza",
+        "Alfa Romeo_actual": 20.0,
+        "AlphaTauri_actual": 1.0,
+        "Alpine_actual": 91.0,
+        "Ferrari_actual": 92.0,
+        "McLaren_actual": 102.0,
+        "Mercedes_actual": 67.0,
+        "Red Bull_actual": 60.0
+      },
+      {
+        "race": "Zandvoort",
+        "Alfa Romeo_actual": 31.0,
+        "AlphaTauri_actual": 1.0,
+        "Alpine_actual": 117.0,
+        "Ferrari_actual": 128.0,
+        "McLaren_actual": 133.0,
+        "Mercedes_actual": 80.0,
+        "Red Bull_actual": 82.0
+      },
+      {
+        "race": "Silverstone",
+        "Alfa Romeo_actual": 37.0,
+        "AlphaTauri_actual": 1.0,
+        "Alpine_actual": 144.0,
+        "Ferrari_actual": 151.0,
+        "McLaren_actual": 154.0,
+        "Mercedes_actual": 112.0,
+        "Red Bull_actual": 87.0
+      },
+      {
+        "race": "China",
+        "Alfa Romeo_actual": 42.0,
+        "AlphaTauri_actual": 1.0,
+        "Alpine_actual": 165.0,
+        "Ferrari_actual": 161.0,
+        "McLaren_actual": 185.0,
+        "Mercedes_actual": 141.0,
+        "Red Bull_actual": 107.0
+      },
+      {
+        "race": "COTA",
+        "Alfa Romeo_actual": 48.0,
+        "AlphaTauri_actual": 1.0,
+        "Alpine_actual": 196.0,
+        "Ferrari_actual": 200.0,
+        "McLaren_actual": 209.0,
+        "Mercedes_actual": 167.0,
+        "Red Bull_actual": 122.0
+      },
+      {
+        "race": "Spa",
+        "Alfa Romeo_actual": 54.0,
+        "AlphaTauri_actual": 1.0,
+        "Alpine_actual": 211.0,
+        "Ferrari_actual": 234.0,
+        "McLaren_actual": 239.0,
+        "Mercedes_actual": 194.0,
+        "Red Bull_actual": 138.0
+      },
+      {
+        "race": "Austria",
+        "Alfa Romeo_actual": 66.0,
+        "AlphaTauri_actual": 1.0,
+        "Alpine_actual": 226.0,
+        "Ferrari_actual": 234.0,
+        "McLaren_actual": 258.0,
+        "Mercedes_actual": 219.0,
+        "Red Bull_actual": 138.0
+      }
+    ],
+    "lines_record": {}
+  },
+  "season_3": {
+    "season": 3,
+    "is_complete": true,
+    "next_race": "Season 3 Final",
+    "next_main_race": "Season 3 Final",
+    "completed_races": [
+      "Suzuka",
+      "Silverstone",
+      "Australia",
+      "Spa",
+      "Spain",
+      "China Sprint",
+      "China",
+      "Baku",
+      "Canada",
+      "Monza",
+      "Abu Dhabi",
+      "Austria Sprint",
+      "Austria",
+      "COTA Sprint",
+      "COTA"
+    ],
+    "upcoming_races": [],
+    "teams": [
+      "Alpine",
+      "Aston Martin",
+      "Ferrari",
+      "McLaren",
+      "Red Bull",
+      "VCARB"
+    ],
+    "sorted_teams": [
+      "Alpine",
+      "McLaren",
+      "VCARB",
+      "Ferrari",
+      "Aston Martin",
+      "Red Bull"
+    ],
+    "champion_team": "Alpine",
+    "champion_driver": "Nick",
+    "expected_winner": "Alpine",
+    "expected_winner_score": 1.0,
+    "expected_highest_score_team": "Alpine",
+    "highest_expected_points": 312,
+    "expected_podium": [
+      "Alpine",
+      "McLaren",
+      "VCARB"
+    ],
+    "team_expected_lines": {
+      "Alpine": 312.0,
+      "McLaren": 301.5,
+      "VCARB": 228.5,
+      "Ferrari": 217.0,
+      "Aston Martin": 81.0,
+      "Red Bull": 40.5
+    },
+    "team_points_calc": {
+      "Alpine": 312,
+      "McLaren": 301,
+      "VCARB": 228,
+      "Ferrari": 217,
+      "Aston Martin": 81,
+      "Red Bull": 40
+    },
+    "team_total_projections": {
+      "Alpine": 1.0,
+      "McLaren": 0.0,
+      "VCARB": 0.0,
+      "Ferrari": 0.0,
+      "Aston Martin": 0.0,
+      "Red Bull": 0.0
+    },
+    "line_chart_data": [
+      {
+        "race": "Start",
+        "Alpine_actual": 0.0,
+        "Aston Martin_actual": 0.0,
+        "Ferrari_actual": 0.0,
+        "McLaren_actual": 0.0,
+        "Red Bull_actual": 0.0,
+        "VCARB_actual": 0.0
+      },
+      {
+        "race": "Suzuka",
+        "Alpine_actual": 30.0,
+        "Aston Martin_actual": 16.0,
+        "Ferrari_actual": 18.0,
+        "McLaren_actual": 19.0,
+        "Red Bull_actual": 2.0,
+        "VCARB_actual": 11.0
+      },
+      {
+        "race": "Silverstone",
+        "Alpine_actual": 62.0,
+        "Aston Martin_actual": 17.0,
+        "Ferrari_actual": 43.0,
+        "McLaren_actual": 40.0,
+        "Red Bull_actual": 11.0,
+        "VCARB_actual": 27.0
+      },
+      {
+        "race": "Australia",
+        "Alpine_actual": 82.0,
+        "Aston Martin_actual": 18.0,
+        "Ferrari_actual": 59.0,
+        "McLaren_actual": 66.0,
+        "Red Bull_actual": 11.0,
+        "VCARB_actual": 49.0
+      },
+      {
+        "race": "Spa",
+        "Alpine_actual": 107.0,
+        "Aston Martin_actual": 33.0,
+        "Ferrari_actual": 67.0,
+        "McLaren_actual": 91.0,
+        "Red Bull_actual": 13.0,
+        "VCARB_actual": 71.0
+      },
+      {
+        "race": "Spain",
+        "Alpine_actual": 133.0,
+        "Aston Martin_actual": 37.0,
+        "Ferrari_actual": 82.0,
+        "McLaren_actual": 110.0,
+        "Red Bull_actual": 23.0,
+        "VCARB_actual": 92.0
+      },
+      {
+        "race": "China Sprint",
+        "Alpine_actual": 138.0,
+        "Aston Martin_actual": 37.0,
+        "Ferrari_actual": 89.0,
+        "McLaren_actual": 118.0,
+        "Red Bull_actual": 27.0,
+        "VCARB_actual": 98.5
+      },
+      {
+        "race": "China",
+        "Alpine_actual": 161.0,
+        "Aston Martin_actual": 37.0,
+        "Ferrari_actual": 107.0,
+        "McLaren_actual": 133.0,
+        "Red Bull_actual": 35.0,
+        "VCARB_actual": 129.5
+      },
+      {
+        "race": "Baku",
+        "Alpine_actual": 162.0,
+        "Aston Martin_actual": 37.0,
+        "Ferrari_actual": 107.0,
+        "McLaren_actual": 160.0,
+        "Red Bull_actual": 36.0,
+        "VCARB_actual": 148.5
+      },
+      {
+        "race": "Canada",
+        "Alpine_actual": 184.0,
+        "Aston Martin_actual": 62.0,
+        "Ferrari_actual": 119.0,
+        "McLaren_actual": 186.0,
+        "Red Bull_actual": 37.0,
+        "VCARB_actual": 162.5
+      },
+      {
+        "race": "Monza",
+        "Alpine_actual": 196.0,
+        "Aston Martin_actual": 81.0,
+        "Ferrari_actual": 129.0,
+        "McLaren_actual": 211.0,
+        "Red Bull_actual": 37.0,
+        "VCARB_actual": 177.5
+      },
+      {
+        "race": "Abu Dhabi",
+        "Alpine_actual": 226.0,
+        "Aston Martin_actual": 81.0,
+        "Ferrari_actual": 145.0,
+        "McLaren_actual": 244.0,
+        "Red Bull_actual": 39.0,
+        "VCARB_actual": 194.5
+      },
+      {
+        "race": "Austria Sprint",
+        "Alpine_actual": 236.0,
+        "Aston Martin_actual": 81.0,
+        "Ferrari_actual": 159.0,
+        "McLaren_actual": 251.5,
+        "Red Bull_actual": 39.0,
+        "VCARB_actual": 199.5
+      },
+      {
+        "race": "Austria",
+        "Alpine_actual": 262.0,
+        "Aston Martin_actual": 81.0,
+        "Ferrari_actual": 175.0,
+        "McLaren_actual": 277.5,
+        "Red Bull_actual": 39.0,
+        "VCARB_actual": 211.5
+      },
+      {
+        "race": "COTA Sprint",
+        "Alpine_actual": 276.0,
+        "Aston Martin_actual": 81.0,
+        "Ferrari_actual": 184.0,
+        "McLaren_actual": 287.5,
+        "Red Bull_actual": 39.5,
+        "VCARB_actual": 215.5
+      },
+      {
+        "race": "COTA",
+        "Alpine_actual": 312.0,
+        "Aston Martin_actual": 81.0,
+        "Ferrari_actual": 217.0,
+        "McLaren_actual": 301.5,
+        "Red Bull_actual": 40.5,
+        "VCARB_actual": 228.5
+      }
+    ],
+    "lines_record": {}
+  },
+  "season_4": {
+    "season": 4,
+    "is_complete": true,
+    "next_race": "Season 4 Final",
+    "next_main_race": "Season 4 Final",
+    "completed_races": [
+      "Bahrain",
+      "Miami Sprint",
+      "Miami",
+      "Spain",
+      "Mexico",
+      "Baku",
+      "Austria Reverse",
+      "Spa Sprint",
+      "Spa",
+      "Brazil Sprint",
+      "Brazil",
+      "Austria",
+      "Zandvoort",
+      "Jeddah",
+      "Las Vegas",
+      "Abu Dhabi",
+      "Monza"
+    ],
+    "upcoming_races": [],
+    "teams": [
+      "Alpine",
+      "Aston Martin",
+      "Ferrari",
+      "McLaren",
+      "Mercedes",
+      "Red Bull",
+      "VCARB"
+    ],
+    "sorted_teams": [
+      "Mercedes",
+      "VCARB",
+      "Alpine",
+      "McLaren",
+      "Ferrari",
+      "Red Bull",
+      "Aston Martin"
+    ],
+    "champion_team": "Mercedes",
+    "champion_driver": "Joshua",
+    "expected_winner": "Mercedes",
+    "expected_winner_score": 1.0,
+    "expected_highest_score_team": "Mercedes",
+    "highest_expected_points": 394,
+    "expected_podium": [
+      "Mercedes",
+      "VCARB",
+      "Alpine"
+    ],
+    "team_expected_lines": {
+      "Mercedes": 394.0,
+      "VCARB": 356.0,
+      "Alpine": 306.0,
+      "McLaren": 193.0,
+      "Ferrari": 133.0,
+      "Red Bull": 118.0,
+      "Aston Martin": 105.5
+    },
+    "team_points_calc": {
+      "Mercedes": 394,
+      "VCARB": 356,
+      "Alpine": 306,
+      "McLaren": 193,
+      "Ferrari": 133,
+      "Red Bull": 118,
+      "Aston Martin": 105
+    },
+    "team_total_projections": {
+      "Mercedes": 1.0,
+      "VCARB": 0.0,
+      "Alpine": 0.0,
+      "McLaren": 0.0,
+      "Ferrari": 0.0,
+      "Red Bull": 0.0,
+      "Aston Martin": 0.0
+    },
+    "line_chart_data": [
+      {
+        "race": "Start",
+        "Alpine_actual": 0.0,
+        "Aston Martin_actual": 0.0,
+        "Ferrari_actual": 0.0,
+        "McLaren_actual": 0.0,
+        "Mercedes_actual": 0.0,
+        "Red Bull_actual": 0.0,
+        "VCARB_actual": 0.0
+      },
+      {
+        "race": "Bahrain",
+        "Alpine_actual": 23.0,
+        "Aston Martin_actual": 16.0,
+        "Ferrari_actual": 9.0,
+        "McLaren_actual": 15.0,
+        "Mercedes_actual": 4.0,
+        "Red Bull_actual": 14.0,
+        "VCARB_actual": 28.0
+      },
+      {
+        "race": "Miami Sprint",
+        "Alpine_actual": 24.0,
+        "Aston Martin_actual": 20.0,
+        "Ferrari_actual": 10.0,
+        "McLaren_actual": 22.0,
+        "Mercedes_actual": 19.0,
+        "Red Bull_actual": 15.0,
+        "VCARB_actual": 37.0
+      },
+      {
+        "race": "Miami",
+        "Alpine_actual": 40.0,
+        "Aston Martin_actual": 29.0,
+        "Ferrari_actual": 24.0,
+        "McLaren_actual": 58.0,
+        "Mercedes_actual": 23.0,
+        "Red Bull_actual": 33.0,
+        "VCARB_actual": 42.0
+      },
+      {
+        "race": "Spain",
+        "Alpine_actual": 60.0,
+        "Aston Martin_actual": 34.0,
+        "Ferrari_actual": 31.0,
+        "McLaren_actual": 63.0,
+        "Mercedes_actual": 51.0,
+        "Red Bull_actual": 53.0,
+        "VCARB_actual": 67.0
+      },
+      {
+        "race": "Mexico",
+        "Alpine_actual": 70.0,
+        "Aston Martin_actual": 41.0,
+        "Ferrari_actual": 32.0,
+        "McLaren_actual": 74.0,
+        "Mercedes_actual": 96.0,
+        "Red Bull_actual": 61.0,
+        "VCARB_actual": 94.0
+      },
+      {
+        "race": "Baku",
+        "Alpine_actual": 88.0,
+        "Aston Martin_actual": 48.0,
+        "Ferrari_actual": 42.0,
+        "McLaren_actual": 89.0,
+        "Mercedes_actual": 135.0,
+        "Red Bull_actual": 68.0,
+        "VCARB_actual": 106.0
+      },
+      {
+        "race": "Austria Reverse",
+        "Alpine_actual": 112.0,
+        "Aston Martin_actual": 58.0,
+        "Ferrari_actual": 47.0,
+        "McLaren_actual": 101.0,
+        "Mercedes_actual": 171.0,
+        "Red Bull_actual": 70.0,
+        "VCARB_actual": 124.0
+      },
+      {
+        "race": "Spa Sprint",
+        "Alpine_actual": 120.0,
+        "Aston Martin_actual": 58.5,
+        "Ferrari_actual": 48.5,
+        "McLaren_actual": 103.0,
+        "Mercedes_actual": 186.0,
+        "Red Bull_actual": 71.0,
+        "VCARB_actual": 134.0
+      },
+      {
+        "race": "Spa",
+        "Alpine_actual": 139.0,
+        "Aston Martin_actual": 60.5,
+        "Ferrari_actual": 49.5,
+        "McLaren_actual": 128.0,
+        "Mercedes_actual": 205.0,
+        "Red Bull_actual": 75.0,
+        "VCARB_actual": 169.0
+      },
+      {
+        "race": "Brazil Sprint",
+        "Alpine_actual": 148.0,
+        "Aston Martin_actual": 60.5,
+        "Ferrari_actual": 52.0,
+        "McLaren_actual": 134.0,
+        "Mercedes_actual": 215.0,
+        "Red Bull_actual": 76.0,
+        "VCARB_actual": 178.0
+      },
+      {
+        "race": "Brazil",
+        "Alpine_actual": 171.0,
+        "Aston Martin_actual": 60.5,
+        "Ferrari_actual": 59.0,
+        "McLaren_actual": 149.0,
+        "Mercedes_actual": 253.0,
+        "Red Bull_actual": 81.0,
+        "VCARB_actual": 198.0
+      },
+      {
+        "race": "Austria",
+        "Alpine_actual": 192.0,
+        "Aston Martin_actual": 73.5,
+        "Ferrari_actual": 70.0,
+        "McLaren_actual": 149.0,
+        "Mercedes_actual": 276.0,
+        "Red Bull_actual": 92.0,
+        "VCARB_actual": 228.0
+      },
+      {
+        "race": "Zandvoort",
+        "Alpine_actual": 219.0,
+        "Aston Martin_actual": 80.5,
+        "Ferrari_actual": 77.0,
+        "McLaren_actual": 161.0,
+        "Mercedes_actual": 294.0,
+        "Red Bull_actual": 103.0,
+        "VCARB_actual": 256.0
+      },
+      {
+        "race": "Jeddah",
+        "Alpine_actual": 251.0,
+        "Aston Martin_actual": 80.5,
+        "Ferrari_actual": 95.0,
+        "McLaren_actual": 175.0,
+        "Mercedes_actual": 297.0,
+        "Red Bull_actual": 104.0,
+        "VCARB_actual": 290.0
+      },
+      {
+        "race": "Las Vegas",
+        "Alpine_actual": 261.0,
+        "Aston Martin_actual": 86.5,
+        "Ferrari_actual": 116.0,
+        "McLaren_actual": 190.0,
+        "Mercedes_actual": 323.0,
+        "Red Bull_actual": 104.0,
+        "VCARB_actual": 310.0
+      },
+      {
+        "race": "Abu Dhabi",
+        "Alpine_actual": 286.0,
+        "Aston Martin_actual": 94.5,
+        "Ferrari_actual": 122.0,
+        "McLaren_actual": 190.0,
+        "Mercedes_actual": 362.0,
+        "Red Bull_actual": 112.0,
+        "VCARB_actual": 329.0
+      },
+      {
+        "race": "Monza",
+        "Alpine_actual": 306.0,
+        "Aston Martin_actual": 105.5,
+        "Ferrari_actual": 133.0,
+        "McLaren_actual": 193.0,
+        "Mercedes_actual": 394.0,
+        "Red Bull_actual": 118.0,
+        "VCARB_actual": 356.0
+      }
+    ],
+    "lines_record": {}
+  },
+  "season_5": {
+    "season": 5,
+    "next_race": "Miami Sprint",
+    "next_main_race": "Miami",
+    "completed_races": [
+      "Australia",
+      "Imola"
+    ],
+    "upcoming_races": [
+      "Miami Sprint",
+      "Miami",
+      "Monza",
+      "Spa Sprint",
+      "Spa",
+      "Brazil",
+      "Silverstone Sprint",
+      "Silverstone",
+      "Suzuka",
+      "Abu Dhabi",
+      "Bahrain Sprint",
+      "Bahrain",
+      "COTA",
+      "Zandvoort Sprint",
+      "Zandvoort",
+      "Qatar",
+      "Singapore Sprint",
+      "Singapore"
+    ],
+    "teams": [
+      "Audi",
+      "Cadillac",
+      "Ferrari",
+      "Haas",
+      "McLaren",
+      "Mercedes",
+      "Red Bull",
+      "Williams"
+    ],
+    "team_track_ratings": {
+      "Audi": 6.74,
+      "Cadillac": 9.86,
+      "Ferrari": 9.76,
+      "Haas": 10.09,
+      "McLaren": 33.23,
+      "Mercedes": 13.93,
+      "Red Bull": 11.23,
+      "Williams": 1.84
+    },
+    "team_total_projections": {
+      "Audi": 0.122,
+      "Cadillac": 0.369,
+      "Ferrari": 0.256,
+      "Haas": 0.221,
+      "McLaren": 0.495,
+      "Mercedes": 0.21,
+      "Red Bull": 0.304,
+      "Williams": 0.05
+    },
+    "expected_winner": "McLaren",
+    "expected_winner_score": 0.495,
+    "expected_highest_score_team": "McLaren",
+    "highest_expected_points": 54,
+    "team_points_calc": {
+      "Audi": 0,
+      "Cadillac": 39,
+      "Ferrari": 12,
+      "Haas": 8,
+      "McLaren": 54,
+      "Mercedes": 2,
+      "Red Bull": 22,
+      "Williams": 0
+    },
+    "expected_podium": [
+      "McLaren",
+      "Cadillac",
+      "Red Bull"
+    ],
+    "team_expected_lines": {
+      "Audi": 1.5,
+      "Cadillac": 38.5,
+      "Ferrari": 11.5,
+      "Haas": 7.5,
+      "McLaren": 53.5,
+      "Mercedes": 1.5,
+      "Red Bull": 21.5,
+      "Williams": 1.5
+    },
+    "line_chart_data": [
+      {
+        "race": "Start",
+        "Audi_actual": 0.0,
+        "Audi_projected": 0.0,
+        "Cadillac_actual": 0.0,
+        "Cadillac_projected": 0.0,
+        "Ferrari_actual": 0.0,
+        "Ferrari_projected": 0.0,
+        "Haas_actual": 0.0,
+        "Haas_projected": 0.0,
+        "McLaren_actual": 0.0,
+        "McLaren_projected": 0.0,
+        "Mercedes_actual": 0.0,
+        "Mercedes_projected": 0.0,
+        "Red Bull_actual": 0.0,
+        "Red Bull_projected": 0.0,
+        "Williams_actual": 0.0,
+        "Williams_projected": 0.0
+      },
+      {
+        "race": "Australia",
+        "Audi_actual": 1.0,
+        "Cadillac_actual": 37.0,
+        "Ferrari_actual": 20.0,
+        "Haas_actual": 5.0,
+        "McLaren_actual": 8.0,
+        "Mercedes_actual": 20.0,
+        "Red Bull_actual": 19.0,
+        "Williams_actual": 2.0
+      },
+      {
+        "race": "Imola",
+        "Audi_actual": 2.0,
+        "Cadillac_actual": 68.0,
+        "Ferrari_actual": 33.0,
+        "Haas_actual": 13.0,
+        "McLaren_actual": 36.0,
+        "Mercedes_actual": 32.0,
+        "Red Bull_actual": 35.0,
+        "Williams_actual": 2.0,
+        "Audi_projected": 2.0,
+        "Cadillac_projected": 68.0,
+        "Ferrari_projected": 33.0,
+        "Haas_projected": 13.0,
+        "McLaren_projected": 36.0,
+        "Mercedes_projected": 32.0,
+        "Red Bull_projected": 35.0,
+        "Williams_projected": 2.0
+      },
+      {
+        "race": "Miami Sprint*",
+        "Audi_projected": 2.0,
+        "Cadillac_projected": 107.0,
+        "Ferrari_projected": 45.0,
+        "Haas_projected": 21.0,
+        "McLaren_projected": 90.0,
+        "Mercedes_projected": 34.0,
+        "Red Bull_projected": 57.0,
+        "Williams_projected": 2.0
+      },
+      {
+        "race": "Miami*",
+        "Audi_projected": 2.0,
+        "Cadillac_projected": 135.0,
+        "Ferrari_projected": 54.0,
+        "Haas_projected": 27.0,
+        "McLaren_projected": 130.0,
+        "Mercedes_projected": 36.0,
+        "Red Bull_projected": 73.0,
+        "Williams_projected": 2.0
+      },
+      {
+        "race": "Monza*",
+        "Audi_projected": 2.0,
+        "Cadillac_projected": 161.0,
+        "Ferrari_projected": 60.0,
+        "Haas_projected": 28.0,
+        "McLaren_projected": 155.0,
+        "Mercedes_projected": 61.0,
+        "Red Bull_projected": 91.0,
+        "Williams_projected": 2.0
+      },
+      {
+        "race": "Spa Sprint*",
+        "Audi_projected": 2.0,
+        "Cadillac_projected": 207.0,
+        "Ferrari_projected": 68.0,
+        "Haas_projected": 29.0,
+        "McLaren_projected": 205.0,
+        "Mercedes_projected": 68.0,
+        "Red Bull_projected": 116.0,
+        "Williams_projected": 2.0
+      },
+      {
+        "race": "Spa*",
+        "Audi_projected": 2.0,
+        "Cadillac_projected": 240.0,
+        "Ferrari_projected": 74.0,
+        "Haas_projected": 30.0,
+        "McLaren_projected": 242.0,
+        "Mercedes_projected": 74.0,
+        "Red Bull_projected": 134.0,
+        "Williams_projected": 2.0
+      },
+      {
+        "race": "Brazil*",
+        "Audi_projected": 3.0,
+        "Cadillac_projected": 265.0,
+        "Ferrari_projected": 92.0,
+        "Haas_projected": 30.0,
+        "McLaren_projected": 269.0,
+        "Mercedes_projected": 82.0,
+        "Red Bull_projected": 156.0,
+        "Williams_projected": 2.0
+      },
+      {
+        "race": "Silverstone Sprint*",
+        "Audi_projected": 3.0,
+        "Cadillac_projected": 296.0,
+        "Ferrari_projected": 105.0,
+        "Haas_projected": 30.0,
+        "McLaren_projected": 315.0,
+        "Mercedes_projected": 91.0,
+        "Red Bull_projected": 194.0,
+        "Williams_projected": 2.0
+      },
+      {
+        "race": "Silverstone*",
+        "Audi_projected": 3.0,
+        "Cadillac_projected": 318.0,
+        "Ferrari_projected": 115.0,
+        "Haas_projected": 30.0,
+        "McLaren_projected": 348.0,
+        "Mercedes_projected": 98.0,
+        "Red Bull_projected": 223.0,
+        "Williams_projected": 2.0
+      },
+      {
+        "race": "Suzuka*",
+        "Audi_projected": 3.0,
+        "Cadillac_projected": 337.0,
+        "Ferrari_projected": 126.0,
+        "Haas_projected": 38.0,
+        "McLaren_projected": 385.0,
+        "Mercedes_projected": 104.0,
+        "Red Bull_projected": 243.0,
+        "Williams_projected": 2.0
+      },
+      {
+        "race": "Abu Dhabi*",
+        "Audi_projected": 3.0,
+        "Cadillac_projected": 364.0,
+        "Ferrari_projected": 137.0,
+        "Haas_projected": 42.0,
+        "McLaren_projected": 408.0,
+        "Mercedes_projected": 122.0,
+        "Red Bull_projected": 261.0,
+        "Williams_projected": 2.0
+      },
+      {
+        "race": "Bahrain Sprint*",
+        "Audi_projected": 3.0,
+        "Cadillac_projected": 408.0,
+        "Ferrari_projected": 147.0,
+        "Haas_projected": 56.0,
+        "McLaren_projected": 450.0,
+        "Mercedes_projected": 123.0,
+        "Red Bull_projected": 287.0,
+        "Williams_projected": 2.0
+      },
+      {
+        "race": "Bahrain*",
+        "Audi_projected": 3.0,
+        "Cadillac_projected": 441.0,
+        "Ferrari_projected": 155.0,
+        "Haas_projected": 66.0,
+        "McLaren_projected": 480.0,
+        "Mercedes_projected": 124.0,
+        "Red Bull_projected": 306.0,
+        "Williams_projected": 2.0
+      },
+      {
+        "race": "COTA*",
+        "Audi_projected": 3.0,
+        "Cadillac_projected": 463.0,
+        "Ferrari_projected": 163.0,
+        "Haas_projected": 66.0,
+        "McLaren_projected": 513.0,
+        "Mercedes_projected": 129.0,
+        "Red Bull_projected": 339.0,
+        "Williams_projected": 2.0
+      },
+      {
+        "race": "Zandvoort Sprint*",
+        "Audi_projected": 3.0,
+        "Cadillac_projected": 501.0,
+        "Ferrari_projected": 179.0,
+        "Haas_projected": 74.0,
+        "McLaren_projected": 549.0,
+        "Mercedes_projected": 130.0,
+        "Red Bull_projected": 377.0,
+        "Williams_projected": 2.0
+      },
+      {
+        "race": "Zandvoort*",
+        "Audi_projected": 3.0,
+        "Cadillac_projected": 528.0,
+        "Ferrari_projected": 191.0,
+        "Haas_projected": 80.0,
+        "McLaren_projected": 575.0,
+        "Mercedes_projected": 131.0,
+        "Red Bull_projected": 406.0,
+        "Williams_projected": 2.0
+      },
+      {
+        "race": "Qatar*",
+        "Audi_projected": 5.0,
+        "Cadillac_projected": 555.0,
+        "Ferrari_projected": 200.0,
+        "Haas_projected": 80.0,
+        "McLaren_projected": 610.0,
+        "Mercedes_projected": 137.0,
+        "Red Bull_projected": 428.0,
+        "Williams_projected": 2.0
+      },
+      {
+        "race": "Singapore Sprint*",
+        "Audi_projected": 5.0,
+        "Cadillac_projected": 601.0,
+        "Ferrari_projected": 216.0,
+        "Haas_projected": 81.0,
+        "McLaren_projected": 638.0,
+        "Mercedes_projected": 145.0,
+        "Red Bull_projected": 466.0,
+        "Williams_projected": 2.0
+      },
+      {
+        "race": "Singapore*",
+        "Audi_projected": 5.0,
+        "Cadillac_projected": 634.0,
+        "Ferrari_projected": 228.0,
+        "Haas_projected": 82.0,
+        "McLaren_projected": 658.0,
+        "Mercedes_projected": 151.0,
+        "Red Bull_projected": 495.0,
+        "Williams_projected": 2.0
+      }
+    ],
+    "lines_record": {
+      "season": 5,
+      "next_race": "Miami Sprint",
+      "next_main_race": "Miami",
+      "expected_winner": "McLaren",
+      "expected_winner_prob": 49.5,
+      "expected_highest_score_team": "McLaren",
+      "expected_highest_score_pts": 54,
+      "expected_podium": [
+        "McLaren",
+        "Cadillac",
+        "Red Bull"
+      ],
+      "expected_points_lines": {
+        "Audi": 1.5,
+        "Cadillac": 38.5,
+        "Ferrari": 11.5,
+        "Haas": 7.5,
+        "McLaren": 53.5,
+        "Mercedes": 1.5,
+        "Red Bull": 21.5,
+        "Williams": 1.5
+      }
+    }
+  }
+}

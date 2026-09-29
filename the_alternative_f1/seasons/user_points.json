@@ -26,5 +26,12 @@
     "season_points": {
       "5": 100
     }
+  },
+  "brentuar": {
+    "points": 100,
+    "all_time_points": 100,
+    "season_points": {
+      "5": 100
+    }
   }
 }

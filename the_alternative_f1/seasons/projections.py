@@ -27,12 +27,22 @@ from the_alternative_f1.constructor_colors import CONSTRUCTOR_COLORS, get_constr
 from the_alternative_f1.articles.components import zoomable_chart, interactive_line_chart_key, DownloadState, chart_card
 
 PROJECTIONS_JSON = Path(__file__).parent / "projections_lines.json"
+PROJECTIONS_DATA_JSON = Path(__file__).parent / "projections_data.json"
 
 F1_POINTS = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1]
 SPRINT_POINTS = [8, 7, 6, 5, 4, 3, 2, 1]
 
 _PROJECTIONS_CACHE = {}
 _PROJECTIONS_MTIME = 0
+
+if PROJECTIONS_DATA_JSON.exists():
+    try:
+        with open(PROJECTIONS_DATA_JSON, "r", encoding="utf-8") as f:
+            _PROJECTIONS_CACHE = json.load(f)
+    except Exception as e:
+        print(f"Error loading projections_data.json: {e}")
+        _PROJECTIONS_CACHE = {}
+
 
 
 def _get_driver_track_rating(driver_name: str, track_name: str) -> float:
@@ -70,7 +80,7 @@ def _get_driver_track_rating(driver_name: str, track_name: str) -> float:
         return 10.0
 
 
-def compute_season_projections(season_num: int = 5) -> dict:
+def compute_season_projections(season_num: int = 5, force: bool = False) -> dict:
     """Pre-calculates all projection metrics and line chart data for the season."""
     global _PROJECTIONS_CACHE, _PROJECTIONS_MTIME
     if not isinstance(season_num, int):
@@ -79,11 +89,14 @@ def compute_season_projections(season_num: int = 5) -> dict:
         except Exception:
             season_num = 5
 
+    cache_key = f"season_{season_num}"
+    if not force and cache_key in _PROJECTIONS_CACHE:
+        return _PROJECTIONS_CACHE[cache_key]
+
     excel_path = Path(__file__).parent.parent / "The_Alternative_F1.xlsx"
     curr_mtime = excel_path.stat().st_mtime if excel_path.exists() else 0.0
 
-    cache_key = f"season_{season_num}"
-    if _PROJECTIONS_MTIME == curr_mtime and cache_key in _PROJECTIONS_CACHE:
+    if not force and _PROJECTIONS_MTIME == curr_mtime and cache_key in _PROJECTIONS_CACHE:
         return _PROJECTIONS_CACHE[cache_key]
 
     df_season = get_excel_sheet(f"Season{season_num}")
@@ -194,6 +207,11 @@ def compute_season_projections(season_num: int = 5) -> dict:
         }
         _PROJECTIONS_CACHE[cache_key] = result
         _PROJECTIONS_MTIME = curr_mtime
+        try:
+            with open(PROJECTIONS_DATA_JSON, "w", encoding="utf-8") as f:
+                json.dump(_PROJECTIONS_CACHE, f, indent=2)
+        except Exception:
+            pass
         return result
 
     # Power rankings
@@ -405,7 +423,28 @@ def compute_season_projections(season_num: int = 5) -> dict:
 
     _PROJECTIONS_CACHE[cache_key] = result
     _PROJECTIONS_MTIME = curr_mtime
+    try:
+        with open(PROJECTIONS_DATA_JSON, "w", encoding="utf-8") as f:
+            json.dump(_PROJECTIONS_CACHE, f, indent=2)
+    except Exception as e:
+        print(f"Error persisting projections data: {e}")
     return result
+
+
+def precompute_all_season_projections(force: bool = False) -> dict:
+    """Pre-calculates projections for all available seasons and persists to projections_data.json."""
+    global _PROJECTIONS_CACHE
+    from the_alternative_f1.seasons import seasons
+    for s in seasons:
+        s_num = s["season_number"]
+        k = f"season_{s_num}"
+        if force or k not in _PROJECTIONS_CACHE:
+            try:
+                compute_season_projections(s_num, force=force)
+            except Exception as e:
+                print(f"Error precomputing projections for season {s_num}: {e}")
+    return _PROJECTIONS_CACHE
+
 
 
 class ProjectionsState(rx.State):

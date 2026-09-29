@@ -68,18 +68,29 @@ def normalize_username(username: str) -> str:
     return ACCOUNT_ALIASES.get(clean.lower(), clean)
 
 
+_USER_POINTS_CACHE: dict = {}
+_PREDICTIONS_CACHE: dict = {}
+_SETTLED_SEASONS: set = set()
+
+
 # ── Local File Persistence Fallbacks for Total Points & Predictions ───────────
 def _load_local_user_points() -> dict:
+    global _USER_POINTS_CACHE
+    if _USER_POINTS_CACHE:
+        return _USER_POINTS_CACHE.copy()
     if USER_POINTS_JSON.exists():
         try:
             with open(USER_POINTS_JSON, "r", encoding="utf-8") as f:
-                return json.load(f)
+                _USER_POINTS_CACHE = json.load(f)
+                return _USER_POINTS_CACHE.copy()
         except Exception:
             pass
     return {}
 
 
 def _save_local_user_points(data: dict):
+    global _USER_POINTS_CACHE
+    _USER_POINTS_CACHE = data.copy()
     try:
         with open(USER_POINTS_JSON, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2)
@@ -98,11 +109,31 @@ def _load_local_predictions() -> list[dict]:
 
 
 def _save_local_predictions(data: list[dict]):
+    global _PREDICTIONS_CACHE
+    by_s = {}
+    for p in data:
+        s = int(p.get("season", 5))
+        if s not in by_s:
+            by_s[s] = []
+        by_s[s].append(p)
+    _PREDICTIONS_CACHE.update(by_s)
     try:
         with open(PREDICTIONS_JSON, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2)
     except Exception as e:
         print(f"Error saving predictions.json: {e}")
+
+
+# Initialize in-memory cache on module import
+_load_local_user_points()
+if PREDICTIONS_JSON.exists():
+    _init_preds = _load_local_predictions()
+    for _p in _init_preds:
+        _s = int(_p.get("season", 5))
+        if _s not in _PREDICTIONS_CACHE:
+            _PREDICTIONS_CACHE[_s] = []
+        _PREDICTIONS_CACHE[_s].append(_p)
+
 
 
 # ── Lockout Calculation (1 Hour Pre-Race; Days + Hours Display) ───────────────
@@ -161,6 +192,9 @@ def get_user_total_points(username: str) -> int:
     username = normalize_username(username)
     if not username:
         return 0
+
+    if username in _USER_POINTS_CACHE:
+        return int(_USER_POINTS_CACHE[username].get("points", 100))
 
     local_data = _load_local_user_points()
     # Purge any obsolete names from local cache
@@ -433,11 +467,21 @@ def settle_completed_predictions(season_num: int = 5):
         print(f"Prediction settlement error: {e}")
 
 
-def get_all_predictions(season_num: int = 5) -> list[dict]:
-    """Retrieves all predictions for the season, auto-settling completed races."""
-    settle_completed_predictions(season_num)
+def get_all_predictions(season_num: int = 5, force_fetch: bool = False) -> list[dict]:
+    """Retrieves all predictions for the season, serving immediately from cache if available."""
+    global _PREDICTIONS_CACHE, _SETTLED_SEASONS
+    if not force_fetch and season_num in _PREDICTIONS_CACHE:
+        return _PREDICTIONS_CACHE[season_num]
+
+    if season_num not in _SETTLED_SEASONS:
+        try:
+            settle_completed_predictions(season_num)
+            _SETTLED_SEASONS.add(season_num)
+        except Exception:
+            pass
+
     sb = _get_supabase()
-    if sb:
+    if sb and force_fetch:
         try:
             res = sb.table("predictions").select("*").eq("season", season_num).order("created_at", desc=True).execute()
             if res.data is not None:
@@ -449,14 +493,74 @@ def get_all_predictions(season_num: int = 5) -> list[dict]:
                         combined.append(lp)
                 for p in combined:
                     p["username"] = normalize_username(p.get("username", ""))
+                _PREDICTIONS_CACHE[season_num] = combined
+                _save_local_predictions(combined)
                 return combined
         except Exception as e:
             print(f"Supabase get_all_predictions error: {e}")
+
     local_preds = _load_local_predictions()
     res_list = [p for p in local_preds if int(p.get("season", 5)) == season_num]
     for p in res_list:
         p["username"] = normalize_username(p.get("username", ""))
+    _PREDICTIONS_CACHE[season_num] = res_list
     return res_list
+
+
+def precompute_all_predictions(force: bool = False):
+    """Pre-calculates all predictions and user points, syncing from Supabase and storing to predictions.json."""
+    global _PREDICTIONS_CACHE, _USER_POINTS_CACHE, _SETTLED_SEASONS
+    from the_alternative_f1.seasons import seasons
+
+    # 1. Sync User Points from Supabase if available
+    sb = _get_supabase()
+    if sb:
+        try:
+            res_pts = sb.table("user_prediction_points").select("*").execute()
+            if res_pts.data:
+                local_data = _load_local_user_points()
+                for r in res_pts.data:
+                    u = normalize_username(str(r.get("display_name") or r.get("username", "")).strip())
+                    if u and u != "Matthew Newman":
+                        pts = int(r.get("points", 100))
+                        local_data[u] = {
+                            "points": pts,
+                            "all_time_points": pts,
+                            "season_points": {"5": pts},
+                        }
+                _save_local_user_points(local_data)
+        except Exception as e:
+            print(f"Supabase sync points error: {e}")
+
+    # 2. Settle and cache all predictions
+    all_preds = []
+    for s in seasons:
+        s_num = s["season_number"]
+        try:
+            settle_completed_predictions(s_num)
+            _SETTLED_SEASONS.add(s_num)
+        except Exception:
+            pass
+
+        if sb:
+            try:
+                res = sb.table("predictions").select("*").eq("season", s_num).order("created_at", desc=True).execute()
+                if res.data is not None:
+                    preds = list(res.data)
+                    for p in preds:
+                        p["username"] = normalize_username(p.get("username", ""))
+                    _PREDICTIONS_CACHE[s_num] = preds
+                    all_preds.extend(preds)
+                    continue
+            except Exception as e:
+                print(f"Supabase get predictions error: {e}")
+
+        local_s_preds = [p for p in _load_local_predictions() if int(p.get("season", 5)) == s_num]
+        _PREDICTIONS_CACHE[s_num] = local_s_preds
+        all_preds.extend(local_s_preds)
+
+    _save_local_predictions(all_preds)
+
 
 
 def insert_prediction(pred: dict) -> bool:
@@ -1365,7 +1469,7 @@ class PredictionsMarketState(rx.State):
             "Cleanest Driver",
         ]
 
-    @rx.var
+    @rx.var(auto_deps=False, deps=[])
     def target_options(self) -> list[str]:
         """All prediction targets are active constructors (SDDREQ-156)."""
         proj = compute_season_projections(5)
@@ -1381,7 +1485,7 @@ class PredictionsMarketState(rx.State):
     def current_user(self) -> str:
         return self.discord_username
 
-    @rx.var
+    @rx.var(auto_deps=False, deps=["refresh_trigger", "discord_username"])
     def user_remaining_points(self) -> int:
         _ = self.refresh_trigger
         username = self.current_user
@@ -1389,21 +1493,21 @@ class PredictionsMarketState(rx.State):
             return 0
         return get_user_remaining_points(username, 5)
 
-    @rx.var
+    @rx.var(auto_deps=False, deps=[])
     def is_locked(self) -> bool:
         proj = compute_season_projections(5)
         race_name = proj.get("next_race", "")
         locked, _ = is_race_locked(5, race_name)
         return locked
 
-    @rx.var
+    @rx.var(auto_deps=False, deps=[])
     def lockout_label(self) -> str:
         proj = compute_season_projections(5)
         race_name = proj.get("next_race", "")
         _, status_str = is_race_locked(5, race_name)
         return status_str
 
-    @rx.var
+    @rx.var(auto_deps=False, deps=["refresh_trigger", "discord_username"])
     def all_predictions_list(self) -> list[dict]:
         _ = self.refresh_trigger
         preds = get_all_predictions(5)

@@ -268,7 +268,6 @@ def races_all_time_view(num_seasons: int) -> rx.Component:
             ),
             rx.text(
                 f"Podium finishers for every race across Season 1 – Season {num_seasons}. "
-                "Season columns display side-by-side on wide screens and smoothly cascade with a ~70% overlap on narrower screens. "
                 "Click any season column or tab to inspect or flip that column to the top layer.",
                 color="#AAAAAA",
                 font_size="sm",

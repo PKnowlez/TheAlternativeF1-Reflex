@@ -1,0 +1,50 @@
+[
+  {
+    "user": "Jatthew Newman",
+    "all_time_pts": 100,
+    "s5": 100,
+    "rank": 1,
+    "rank_str": "1",
+    "rank_color": "#FFD700",
+    "rank_bg": "#FFD70022",
+    "rank_border": "1px solid #FFD70044",
+    "pts_str": "100 pts",
+    "s5_str": "100 pts"
+  },
+  {
+    "user": "Jellywaffles37",
+    "all_time_pts": 100,
+    "s5": 100,
+    "rank": 2,
+    "rank_str": "2",
+    "rank_color": "#C0C0C0",
+    "rank_bg": "#C0C0C022",
+    "rank_border": "1px solid #C0C0C044",
+    "pts_str": "100 pts",
+    "s5_str": "100 pts"
+  },
+  {
+    "user": "PK",
+    "all_time_pts": 100,
+    "s5": 100,
+    "rank": 3,
+    "rank_str": "3",
+    "rank_color": "#CD7F32",
+    "rank_bg": "#CD7F3222",
+    "rank_border": "1px solid #CD7F3244",
+    "pts_str": "100 pts",
+    "s5_str": "100 pts"
+  },
+  {
+    "user": "uhh_josh",
+    "all_time_pts": 100,
+    "s5": 100,
+    "rank": 4,
+    "rank_str": "4",
+    "rank_color": "#888888",
+    "rank_bg": "#88888822",
+    "rank_border": "1px solid #88888844",
+    "pts_str": "100 pts",
+    "s5_str": "100 pts"
+  }
+]

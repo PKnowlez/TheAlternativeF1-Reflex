@@ -86,14 +86,33 @@ from the_alternative_f1.seasons.Tab3_ConstructorStatistics import Tab3
 from the_alternative_f1.seasons.Tab4_DriverStatistics import Tab4
 from the_alternative_f1.seasons.Tab5_DriverComparison import Tab5
 from the_alternative_f1.seasons.Tab6_RaceSchedule import Tab6
-from the_alternative_f1.seasons.projections import projections_tab_view
-from the_alternative_f1.seasons.predictions_market import predictions_market_tab_view, PredictionsMarketState
-from the_alternative_f1.seasons.leaderboard import alternative_points_leaderboard_view, LeaderboardState
+from the_alternative_f1.seasons.projections import (
+    projections_tab_view,
+    compute_season_projections,
+    precompute_all_season_projections,
+)
+from the_alternative_f1.seasons.predictions_market import (
+    predictions_market_tab_view,
+    PredictionsMarketState,
+    precompute_all_predictions,
+)
+from the_alternative_f1.seasons.leaderboard import (
+    alternative_points_leaderboard_view,
+    LeaderboardState,
+    precompute_leaderboard_cache,
+)
+from the_alternative_f1.seasons.power_rankings import (
+    load_power_rankings,
+    precompute_all_power_rankings,
+)
 
 # ── Dynamically derived from seasons __init__.py ─────────────────────────────
 NUM_SEASONS: int = LATEST_SEASON
 try:
-    compute_season_projections(LATEST_SEASON)
+    precompute_all_power_rankings()
+    precompute_all_season_projections()
+    precompute_all_predictions()
+    precompute_leaderboard_cache()
 except Exception:
     pass
 # ─────────────────────────────────────────────────────────────────────────────
@@ -245,6 +264,11 @@ def warm_up_caches():
             compute_entity_detailed_metrics(len(seasons), "driver", d)
         for t in teams:
             compute_entity_detailed_metrics(len(seasons), "constructor", t)
+
+        precompute_all_power_rankings()
+        precompute_all_season_projections()
+        precompute_all_predictions()
+        precompute_leaderboard_cache()
     except Exception:
         pass
 
