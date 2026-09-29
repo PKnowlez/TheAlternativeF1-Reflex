@@ -112,7 +112,7 @@ try:
     precompute_all_power_rankings()
     precompute_all_season_projections()
     precompute_all_predictions()
-    precompute_leaderboard_cache()
+    precompute_leaderboard_cache(force=True)
 except Exception:
     pass
 # ─────────────────────────────────────────────────────────────────────────────
@@ -268,7 +268,7 @@ def warm_up_caches():
         precompute_all_power_rankings()
         precompute_all_season_projections()
         precompute_all_predictions()
-        precompute_leaderboard_cache()
+        precompute_leaderboard_cache(force=True)
     except Exception:
         pass
 

@@ -17,6 +17,8 @@ def load_env():
                     os.environ[k] = v
 
 load_env()
+# Disable SSR prerender to prevent React Router from timing out on the large client SPA page
+os.environ.setdefault("REFLEX_SSR", "false")
 
 config = rx.Config(
     app_name="the_alternative_f1",

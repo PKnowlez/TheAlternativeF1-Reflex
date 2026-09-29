@@ -50,6 +50,7 @@ def get_predictor_key_items() -> list[tuple[str, str]]:
         "PK",
         "Jellywaffles37",
         "uhh_josh",
+        "brentuar",
     ]
     local_pts = _load_local_user_points()
     for u in local_pts.keys():
@@ -66,7 +67,7 @@ def get_predictor_key_items() -> list[tuple[str, str]]:
 PREDICTOR_KEY_ITEMS = get_predictor_key_items()
 
 
-def compute_leaderboard_data(force: bool = False) -> list[dict]:
+def compute_leaderboard_data(force: bool = True) -> list[dict]:
     """Compiles all-time and seasonal points for logged-in users who received points or placed predictions.
     Only displays users who have logged in and received their 100 points or placed predictions (SDDREQ-153).
     Deduplicates accounts if a user has changed display names.
@@ -76,11 +77,12 @@ def compute_leaderboard_data(force: bool = False) -> list[dict]:
         return _LEADERBOARD_CACHE
 
     all_users = set()
+    user_totals = {}
 
     sb = _get_supabase()
-    if sb:
+    if sb and force:
         try:
-            # Active synchronization: migrate any old predictions and purge obsolete rows
+            # Active synchronization: purge obsolete alias
             sb.table("predictions").update({"username": "Jatthew Newman"}).eq("username", "Matthew Newman").execute()
             sb.table("user_prediction_points").delete().eq("username", "Matthew Newman").execute()
         except Exception:
@@ -89,7 +91,6 @@ def compute_leaderboard_data(force: bool = False) -> list[dict]:
         try:
             res = sb.table("user_prediction_points").select("*").execute()
             if res.data:
-                # Group by discord_id to handle any display name changes dynamically
                 users_by_discord_id = {}
                 for r in res.data:
                     d_id = r.get("discord_id")
@@ -101,8 +102,10 @@ def compute_leaderboard_data(force: bool = False) -> list[dict]:
                         if d_id in users_by_discord_id:
                             old_u = users_by_discord_id[d_id]
                             all_users.discard(old_u)
+                            user_totals.pop(old_u, None)
                         users_by_discord_id[d_id] = u_name
                     all_users.add(u_name)
+                    user_totals[u_name] = int(r.get("points", 100))
         except Exception:
             pass
 
@@ -114,31 +117,52 @@ def compute_leaderboard_data(force: bool = False) -> list[dict]:
                     u = normalize_username(raw_u)
                     if u and u != "Matthew Newman" and u not in all_users:
                         all_users.add(u)
+                        if u not in user_totals:
+                            user_totals[u] = 100
         except Exception:
             pass
 
+    # Synchronize with local storage
     local_pts = _load_local_user_points()
-    # Always purge obsolete alias from local cache immediately
     if "Matthew Newman" in local_pts:
         del local_pts["Matthew Newman"]
         _save_local_user_points(local_pts)
 
     if not all_users:
-        for u in list(local_pts.keys()):
+        for u, data in local_pts.items():
             u_clean = normalize_username(str(u).strip())
             if u_clean and u_clean != "Matthew Newman":
                 all_users.add(u_clean)
+                user_totals[u_clean] = int(data.get("points", 100))
     else:
-        # Sync local cache with Supabase to purge obsolete accounts
         dirty_local = False
         for u in list(local_pts.keys()):
             if u not in all_users or u == "Matthew Newman":
                 del local_pts[u]
                 dirty_local = True
+        for u in all_users:
+            if u not in local_pts:
+                local_pts[u] = {
+                    "points": user_totals.get(u, 100),
+                    "all_time_points": user_totals.get(u, 100),
+                    "season_points": {"5": user_totals.get(u, 100)},
+                }
+                dirty_local = True
+            elif u in user_totals:
+                local_pts[u]["points"] = user_totals[u]
+                local_pts[u]["all_time_points"] = user_totals[u]
         if dirty_local:
             _save_local_user_points(local_pts)
 
-    # Discard obsolete name if it ever entered the set
+    # Also check local predictions for any additional users
+    all_preds = get_all_predictions(5, force_fetch=force)
+    for p in all_preds:
+        u_p = normalize_username(str(p.get("username", "")).strip())
+        if u_p and u_p != "Matthew Newman" and u_p not in all_users:
+            all_users.add(u_p)
+            if u_p not in user_totals:
+                user_totals[u_p] = local_pts.get(u_p, {}).get("points", 100)
+
     all_users.discard("Matthew Newman")
 
     rows = []
@@ -146,7 +170,14 @@ def compute_leaderboard_data(force: bool = False) -> list[dict]:
         canonical_user = normalize_username(user)
         if not canonical_user or canonical_user == "Matthew Newman":
             continue
-        rem_pts = get_user_remaining_points(canonical_user, 5)
+        tot_pts = user_totals.get(canonical_user, local_pts.get(canonical_user, {}).get("points", 100))
+        # Active open wagers for season 5
+        active_wagers = sum(
+            int(p.get("points", 0))
+            for p in all_preds
+            if normalize_username(str(p.get("username", ""))) == canonical_user and str(p.get("status", "open")).lower() == "open"
+        )
+        rem_pts = max(0, tot_pts - active_wagers)
         rows.append({
             "user": canonical_user,
             "all_time_pts": rem_pts,
@@ -176,7 +207,7 @@ def compute_leaderboard_data(force: bool = False) -> list[dict]:
     return rows
 
 
-def precompute_leaderboard_cache(force: bool = False) -> list[dict]:
+def precompute_leaderboard_cache(force: bool = True) -> list[dict]:
     """Pre-calculates and persists the leaderboard data to leaderboard.json."""
     return compute_leaderboard_data(force=force)
 
@@ -230,7 +261,7 @@ class LeaderboardState(rx.State):
     @rx.var(auto_deps=False, deps=["refresh_counter"])
     def leaderboard_rows(self) -> list[dict]:
         _ = self.refresh_counter
-        return compute_leaderboard_data()
+        return compute_leaderboard_data(force=True)
 
     @rx.var
     def has_rows(self) -> bool:
@@ -240,13 +271,13 @@ class LeaderboardState(rx.State):
     def user_wagers_stacked_data(self) -> list[dict]:
         """Data for User Wagers Correct/Incorrect Stacked Bar Chart (SDDREQ-165)."""
         _ = self.refresh_counter
-        all_preds = get_all_predictions(5)
+        all_preds = get_all_predictions(5, force_fetch=True)
         rows = self.leaderboard_rows
         chart_data = []
 
         for r in rows:
             u = r["user"]
-            u_preds = [p for p in all_preds if p.get("username") == u]
+            u_preds = [p for p in all_preds if normalize_username(str(p.get("username", ""))) == u]
             correct_pts = sum(int(p.get("points", 0)) for p in u_preds if str(p.get("status", "")).lower() == "correct")
             incorrect_pts = sum(int(p.get("points", 0)) for p in u_preds if str(p.get("status", "")).lower() == "incorrect")
             open_pts = sum(int(p.get("points", 0)) for p in u_preds if str(p.get("status", "")).lower() == "open")
@@ -255,6 +286,7 @@ class LeaderboardState(rx.State):
                 "user": u,
                 "correct": correct_pts,
                 "incorrect": incorrect_pts,
+                "open": open_pts,
                 "correct_pts": correct_pts,
                 "incorrect_pts": incorrect_pts,
                 "open_pts": open_pts,
@@ -324,9 +356,6 @@ class LeaderboardState(rx.State):
         data.append(end_pt)
 
         return data
-
-    def refresh(self):
-        self.refresh_counter += 1
 
 
 def alternative_points_leaderboard_view() -> rx.Component:
@@ -604,6 +633,7 @@ def alternative_points_leaderboard_view() -> rx.Component:
                 rx.recharts.cartesian_grid(horizontal=False, stroke="rgba(255, 255, 255, 0.1)"),
                 rx.recharts.bar(data_key="correct", stack_id="a", fill="#00b4da", name="Correct Points"),
                 rx.recharts.bar(data_key="incorrect", stack_id="a", fill="#FF8C00", name="Incorrect Points"),
+                rx.recharts.bar(data_key="open", stack_id="a", fill="#FFD700", name="Pending Points"),
                 rx.recharts.graphing_tooltip(),
                 data=LeaderboardState.user_wagers_stacked_data,
                 layout="vertical",
@@ -632,7 +662,7 @@ def alternative_points_leaderboard_view() -> rx.Component:
         icon="bar-chart-2",
         extra_content=interactive_line_chart_key(
             chart_id="user_wagers_stacked_bar_chart",
-            items=[("Correct Points", "#00b4da"), ("Incorrect Points", "#FF8C00")],
+            items=[("Correct Points", "#00b4da"), ("Incorrect Points", "#FF8C00"), ("Pending Points", "#FFD700")],
             title="Key (Wager Outcomes)",
             hint="Click outcome to highlight",
         ),
