@@ -255,13 +255,15 @@ class LeaderboardState(rx.State):
         self.single_season_only = val
 
     def refresh(self):
-        compute_leaderboard_data(force=True)
+        global _LEADERBOARD_CACHE
+        _LEADERBOARD_CACHE = None
+        compute_leaderboard_data(force=False)
         self.refresh_counter += 1
 
     @rx.var(auto_deps=False, deps=["refresh_counter"])
     def leaderboard_rows(self) -> list[dict]:
         _ = self.refresh_counter
-        return compute_leaderboard_data(force=True)
+        return compute_leaderboard_data(force=False)
 
     @rx.var
     def has_rows(self) -> bool:
@@ -271,7 +273,7 @@ class LeaderboardState(rx.State):
     def user_wagers_stacked_data(self) -> list[dict]:
         """Data for User Wagers Correct/Incorrect Stacked Bar Chart (SDDREQ-165)."""
         _ = self.refresh_counter
-        all_preds = get_all_predictions(5, force_fetch=True)
+        all_preds = get_all_predictions(5, force_fetch=False)
         rows = self.leaderboard_rows
         chart_data = []
 
@@ -356,6 +358,90 @@ class LeaderboardState(rx.State):
         data.append(end_pt)
 
         return data
+
+    @rx.var(auto_deps=False, deps=["refresh_counter"])
+    def predictor_series(self) -> list[dict[str, str]]:
+        """Dynamic list of {user, color} for every active user in the leaderboard."""
+        _ = self.refresh_counter
+        rows = self.leaderboard_rows
+        palette = [
+            "#00b4da", "#FFD700", "#FF4B4B", "#9B59B6", "#1ABC9C",
+            "#E67E22", "#3498DB", "#2ECC71", "#E74C3C", "#F39C12"
+        ]
+        return [
+            {"user": r["user"], "color": palette[idx % len(palette)]}
+            for idx, r in enumerate(rows)
+        ]
+
+
+def dynamic_predictor_chart_key(chart_id: str = "points_growth_line_chart") -> rx.Component:
+    """Render dynamic interactive key for line chart that automatically reflects new users in real-time."""
+    def _render_item(item: dict) -> rx.Component:
+        return rx.box(
+            rx.box(
+                width="8px",
+                height="8px",
+                border_radius="50%",
+                bg=item["color"],
+                flex_shrink="0",
+            ),
+            rx.text(
+                item["user"],
+                font_size="12px",
+                font_weight="700",
+                font_family="Outfit",
+                color="#FFFFFF",
+                class_name="taf1-key-text",
+                white_space="nowrap",
+            ),
+            class_name="taf1-chart-key-item prc-legend-item",
+            custom_attrs={
+                "data-chart-id": chart_id,
+                "data-name": item["user"],
+                "data-color": item["color"],
+            },
+            display="inline-flex",
+            align_items="center",
+            gap="6px",
+            padding="4px 8px",
+            border_radius="6px",
+            bg="#1B1B22",
+            border="1px solid #2A2A34",
+            cursor="pointer",
+            transition="all 0.15s ease",
+            _hover={
+                "border_color": "#00b4da",
+                "color": "#00b4da",
+                "transform": "translateY(-1px)",
+            },
+        )
+
+    return rx.box(
+        rx.hstack(
+            rx.text("Key (Predictors)", color="#00b4da", font_weight="700", font_size="12px", font_family="Outfit"),
+            rx.text("(Click predictor to highlight)", color="#8E8E98", font_size="11px", font_family="Outfit"),
+            spacing="2",
+            align="center",
+            margin_bottom="2",
+        ),
+        rx.flex(
+            rx.foreach(LeaderboardState.predictor_series, _render_item),
+            class_name="prc-legend",
+            flex_wrap="wrap",
+            gap="6px",
+            align="center",
+            width="100%",
+        ),
+        custom_attrs={"data-key-for-chart": chart_id},
+        class_name="taf1-chart-key-container prc-info-bar",
+        bg="#141418",
+        border="1px solid #28282E",
+        border_radius="10px",
+        padding="9px 13px",
+        width="100%",
+        box_sizing="border-box",
+        box_shadow="0 4px 14px rgba(0,0,0,0.35)",
+    )
 
 
 def alternative_points_leaderboard_view() -> rx.Component:
@@ -713,17 +799,17 @@ def alternative_points_leaderboard_view() -> rx.Component:
                 rx.recharts.reference_line(y=100, stroke="rgba(255, 255, 255, 0.25)", stroke_dasharray="3 3", label="100 Base Pts"),
                 rx.recharts.cartesian_grid(vertical=False, stroke="rgba(255, 255, 255, 0.1)"),
                 rx.recharts.graphing_tooltip(),
-                *[
-                    rx.recharts.line(
-                        data_key=user,
-                        stroke=color,
+                rx.foreach(
+                    LeaderboardState.predictor_series,
+                    lambda s: rx.recharts.line(
+                        data_key=s["user"],
+                        stroke=s["color"],
                         stroke_width=2,
-                        dot={"fill": color, "stroke": color, "r": 3},
-                        name=user,
+                        dot={"fill": s["color"], "stroke": s["color"], "r": 3},
+                        name=s["user"],
                         type_="monotone",
-                    )
-                    for user, color in PREDICTOR_KEY_ITEMS
-                ],
+                    ),
+                ),
                 data=LeaderboardState.points_growth_chart_data,
                 width="100%",
                 height=h,
@@ -747,12 +833,7 @@ def alternative_points_leaderboard_view() -> rx.Component:
         chart_id="points_growth_line_chart",
         download_position="top_right",
         icon="trending-up",
-        extra_content=interactive_line_chart_key(
-            chart_id="points_growth_line_chart",
-            items=PREDICTOR_KEY_ITEMS,
-            title="Key (Predictors)",
-            hint="Click predictor to highlight",
-        ),
+        extra_content=dynamic_predictor_chart_key("points_growth_line_chart"),
         border_radius="2xl",
         box_shadow="0 8px 24px rgba(0,0,0,0.4)",
     )

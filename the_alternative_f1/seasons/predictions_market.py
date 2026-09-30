@@ -21,11 +21,19 @@ Implements TAF1APP-SDDFEAT-16 and approved downstream SDD requirements:
 - SDDREQ-163: User Predictions Metric (Interactive 3-ring donut chart: outer users, middle positive/negative split, center-most Correct/Incorrect/Open)
 - SDDREQ-164: Predictions Tab Layout (Ordered top-to-bottom layout with default closed Submitted Predictions expander and 3-ring donut charts without keys)
 - SDDREQ-168: User Account Consistency (persistent account ID across display name changes)
+- SDDREQ-169: Parlay Option (Single vs Parlay prediction toggle, mandatory legs, Next/Submit flow)
+- SDDREQ-170: Parlay Payout (All legs hit: Wager + (Wager * (0.15 + (legs * 0.1))))
+- SDDREQ-171: Next Race vs. Full Season Option (Two option segmented control button for Next Race vs Full Season wagers)
+- SDDREQ-172: Full Season Wager Options (Single/Parlay with Constructor Champion, Top 3 Constructor, Constructor Win Margin, Driver Champion, Top 3 Driver, Driver Win Margin)
+- SDDREQ-173: Full Season Wager Payout & Multiplier (Single: Wager + Wager*(0.15 + races_remaining*0.1); Parlay: Wager + Wager*(0.15 + legs*0.1 + races_remaining*0.1))
+- SDDREQ-174: Full Season Indicator ([Full Season] prefixed in Category column of Submitted Predictions table)
 """
 
 import os
 import json
 import math
+import time
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 import pandas as pd
@@ -43,6 +51,77 @@ from the_alternative_f1.articles.components import (
 
 USER_POINTS_JSON = Path(__file__).parent / "user_points.json"
 PREDICTIONS_JSON = Path(__file__).parent / "predictions.json"
+
+WIN_MARGIN_OPTIONS = [
+    "1-10 pts",
+    "11-20 pts",
+    "21-30 pts",
+    "31-40 pts",
+    "41-50 pts",
+    "51-60 pts",
+    "61-70 pts",
+    "71-80 pts",
+    "81-90 pts",
+    "91-100 pts",
+    "101-110 pts",
+    "111-120 pts",
+    "121-130 pts",
+    "131-140 pts",
+    "141-150 pts",
+    "150+ pts",
+]
+
+
+def get_active_constructors(season_num: int = 5) -> list[str]:
+    """Returns active constructors for the specified season."""
+    try:
+        df = get_excel_sheet(f"Season{season_num}")
+        if not df.empty and "Team" in df.columns:
+            return sorted([str(t).strip() for t in df["Team"].dropna().unique() if str(t).strip()])
+    except Exception:
+        pass
+    return ["Audi", "Cadillac", "Ferrari", "Haas", "McLaren", "Mercedes", "Red Bull", "Williams"]
+
+
+def get_active_drivers(season_num: int = 5) -> list[str]:
+    """Returns active drivers for the specified season."""
+    try:
+        df = get_excel_sheet(f"Season{season_num}")
+        if not df.empty and "Driver" in df.columns:
+            return sorted([str(d).strip() for d in df["Driver"].dropna().unique() if str(d).strip()])
+    except Exception:
+        pass
+    return ['Boz', 'Brently', 'Del', 'Eddie', 'Evelo', 'Grayson', 'Jaden', 'Jairo', 'Josh', 'Josh C.', 'Joshua', 'Leo', 'Matthew', 'Nick', 'Patrick', 'Randy']
+
+
+def get_driver_constructor(driver_name: str, season_num: int = 5) -> str:
+    """Returns the constructor a driver belongs to in the given season."""
+    try:
+        df = get_excel_sheet(f"Season{season_num}")
+        match = df[df["Driver"].astype(str).str.strip().str.lower() == driver_name.strip().lower()]
+        if not match.empty:
+            return str(match.iloc[0]["Team"]).strip()
+    except Exception:
+        pass
+    return ""
+
+
+def get_remaining_feature_races(season_num: int = 5) -> list[str]:
+    """Returns list of uncompleted feature races (explicitly excluding sprint races per SDDREQ-173)."""
+    try:
+        df_sched = get_excel_sheet(f"S{season_num}Schedule")
+        df_season = get_excel_sheet(f"Season{season_num}")
+        if df_sched.empty:
+            return []
+        all_races = [str(r).strip() for r in df_sched["Race"] if pd.notna(r) and not str(r).strip().startswith(("Pre", "Post"))]
+        feature_races = [r for r in all_races if "sprint" not in r.lower()]
+        completed = [
+            r for r in feature_races
+            if f"{r}Points" in df_season.columns and (pd.to_numeric(df_season[f"{r}Points"], errors="coerce").fillna(0) > 0).any()
+        ]
+        return [r for r in feature_races if r not in completed]
+    except Exception:
+        return []
 
 
 def _get_supabase():
@@ -276,7 +355,10 @@ def update_user_points(username: str, new_points: int):
 
 
 # ── Prediction Records & Settlement Engine ─────────────────────────────────────
-def settle_completed_predictions(season_num: int = 5):
+_SETTLEMENT_EXECUTOR = ThreadPoolExecutor(max_workers=2, thread_name_prefix="pred_settlement")
+
+
+def _run_settle_completed_predictions(season_num: int = 5):
     """Auto-settles open predictions when race results are uploaded in the Season sheet."""
     sb = _get_supabase()
     if not sb:
@@ -288,8 +370,19 @@ def settle_completed_predictions(season_num: int = 5):
         if df_season.empty or df_sched.empty:
             return
 
-        res = sb.table("predictions").select("*").eq("season", season_num).eq("status", "open").execute()
-        open_preds = res.data if res.data else []
+        res = None
+        for attempt in range(3):
+            try:
+                res = sb.table("predictions").select("*").eq("season", season_num).eq("status", "open").execute()
+                break
+            except (BlockingIOError, OSError) as se:
+                if attempt < 2:
+                    time.sleep(0.4)
+                    continue
+                print(f"Prediction settlement socket warning: {se}")
+                return
+
+        open_preds = res.data if res and res.data else []
         if not open_preds:
             return
 
@@ -463,8 +556,150 @@ def settle_completed_predictions(season_num: int = 5):
                         "status": "incorrect",
                         "payout": 0,
                     }).eq("id", p["id"]).execute()
+
+        # 3. Settle Full Season Predictions if season has concluded (0 remaining feature races)
+        rem_feature_races = get_remaining_feature_races(season_num)
+        if len(rem_feature_races) == 0:
+            teams = sorted(df_season["Team"].dropna().unique())
+            drivers = sorted(df_season["Driver"].dropna().unique())
+            all_races = [str(r).strip() for r in df_sched["Race"] if pd.notna(r) and not str(r).strip().startswith(("Pre", "Post"))]
+
+            team_season_pts = {t: 0.0 for t in teams}
+            driver_season_pts = {d: 0.0 for d in drivers}
+            for r in all_races:
+                col = f"{r}Points"
+                if col in df_season.columns:
+                    for t in teams:
+                        team_season_pts[t] += float(pd.to_numeric(df_season[df_season["Team"] == t][col], errors="coerce").fillna(0).sum())
+                    for d in drivers:
+                        driver_season_pts[d] += float(pd.to_numeric(df_season[df_season["Driver"] == d][col], errors="coerce").fillna(0).sum())
+
+            sorted_teams = sorted(teams, key=lambda t: team_season_pts[t], reverse=True)
+            sorted_drivers = sorted(drivers, key=lambda d: driver_season_pts[d], reverse=True)
+
+            champ_team = sorted_teams[0] if sorted_teams else ""
+            top3_teams = sorted_teams[:3]
+            team_margin = (team_season_pts[sorted_teams[0]] - team_season_pts[sorted_teams[1]]) if len(sorted_teams) > 1 else 0.0
+
+            champ_driver = sorted_drivers[0] if sorted_drivers else ""
+            top3_drivers = sorted_drivers[:3]
+            driver_margin = (driver_season_pts[sorted_drivers[0]] - driver_season_pts[sorted_drivers[1]]) if len(sorted_drivers) > 1 else 0.0
+
+            def _eval_margin_hit(target_str: str, actual_diff: float) -> bool:
+                s = target_str.replace("pts", "").strip()
+                if "+" in s:
+                    try:
+                        low = float(s.replace("+", "").strip())
+                        return actual_diff >= low
+                    except Exception:
+                        return False
+                if "-" in s:
+                    try:
+                        low, high = [float(x.strip()) for x in s.split("-")]
+                        return low <= actual_diff <= high
+                    except Exception:
+                        return False
+                return False
+
+            fs_open_preds = [
+                p for p in open_preds
+                if str(p.get("category", "")).startswith("[Full Season]")
+                or p.get("scope") == "full_season"
+                or str(p.get("race", "")).lower() in ("season 5", "full season")
+            ]
+
+            for p in fs_open_preds:
+                is_parlay = (p.get("stance") == "PARLAY" or "Parlay" in str(p.get("category", "")))
+                races_rem = int(p.get("line_value", 0) or 0)
+                wager = int(p.get("points", 0))
+
+                if is_parlay:
+                    try:
+                        legs = json.loads(p.get("target", "[]"))
+                    except Exception:
+                        legs = []
+                    all_hit = True
+                    for leg in legs:
+                        l_cat = leg.get("category", "").replace("[Full Season]", "").strip()
+                        l_target = str(leg.get("target", "")).strip()
+                        l_stance = str(leg.get("stance", "FOR")).upper()
+                        leg_hit = False
+
+                        if l_cat == "Constructor Champion":
+                            matched = (champ_team == l_target)
+                            leg_hit = (matched if "FOR" in l_stance else not matched)
+                        elif l_cat == "Top 3 Constructor":
+                            matched = (l_target in top3_teams)
+                            leg_hit = (matched if "FOR" in l_stance else not matched)
+                        elif l_cat == "Constructor Champion Win Margin":
+                            leg_hit = _eval_margin_hit(l_target, team_margin)
+                        elif l_cat == "Driver Champion":
+                            leg_hit = (champ_driver == l_target)
+                        elif l_cat == "Top 3 Driver":
+                            leg_hit = (l_target in top3_drivers)
+                        elif l_cat == "Driver Champion Win Margin":
+                            leg_hit = _eval_margin_hit(l_target, driver_margin)
+
+                        if not leg_hit:
+                            all_hit = False
+                            break
+
+                    if all_hit:
+                        num_legs = len(legs)
+                        mult = 0.15 + (num_legs * 0.1) + (races_rem * 0.1)
+                        total_payout = wager + int(round(wager * mult))
+                        sb.table("predictions").update({"status": "correct", "payout": total_payout}).eq("id", p["id"]).execute()
+                        u = p["username"]
+                        curr_pts = get_user_total_points(u)
+                        update_user_points(u, curr_pts + total_payout)
+                    else:
+                        sb.table("predictions").update({"status": "incorrect", "payout": 0}).eq("id", p["id"]).execute()
+                else:
+                    cat_clean = str(p.get("category", "")).replace("[Full Season]", "").strip()
+                    target = str(p.get("target", "")).strip()
+                    stance = str(p.get("stance", "FOR")).upper()
+                    is_correct = False
+
+                    if cat_clean == "Constructor Champion":
+                        matched = (champ_team == target)
+                        is_correct = (matched if "FOR" in stance else not matched)
+                    elif cat_clean == "Top 3 Constructor":
+                        matched = (target in top3_teams)
+                        is_correct = (matched if "FOR" in stance else not matched)
+                    elif cat_clean == "Constructor Champion Win Margin":
+                        is_correct = _eval_margin_hit(target, team_margin)
+                    elif cat_clean == "Driver Champion":
+                        is_correct = (champ_driver == target)
+                    elif cat_clean == "Top 3 Driver":
+                        is_correct = (target in top3_drivers)
+                    elif cat_clean == "Driver Champion Win Margin":
+                        is_correct = _eval_margin_hit(target, driver_margin)
+
+                    if is_correct:
+                        mult = 0.15 + (races_rem * 0.1)
+                        total_payout = wager + int(round(wager * mult))
+                        sb.table("predictions").update({"status": "correct", "payout": total_payout}).eq("id", p["id"]).execute()
+                        u = p["username"]
+                        curr_pts = get_user_total_points(u)
+                        update_user_points(u, curr_pts + total_payout)
+                    else:
+                        sb.table("predictions").update({"status": "incorrect", "payout": 0}).eq("id", p["id"]).execute()
+    except (BlockingIOError, OSError) as e:
+        print(f"Prediction settlement socket warning (Season {season_num}): {e}")
     except Exception as e:
         print(f"Prediction settlement error: {e}")
+
+
+def settle_completed_predictions(season_num: int = 5, async_run: bool = False):
+    """Auto-settles open predictions when race results are uploaded in the Season sheet."""
+    if async_run:
+        _SETTLEMENT_EXECUTOR.submit(_run_settle_completed_predictions, season_num)
+    else:
+        future = _SETTLEMENT_EXECUTOR.submit(_run_settle_completed_predictions, season_num)
+        try:
+            future.result(timeout=10.0)
+        except Exception as e:
+            print(f"Settlement execution error or timeout: {e}")
 
 
 def get_all_predictions(season_num: int = 5, force_fetch: bool = False) -> list[dict]:
@@ -474,30 +709,35 @@ def get_all_predictions(season_num: int = 5, force_fetch: bool = False) -> list[
         return _PREDICTIONS_CACHE[season_num]
 
     if season_num not in _SETTLED_SEASONS:
+        _SETTLED_SEASONS.add(season_num)
         try:
-            settle_completed_predictions(season_num)
-            _SETTLED_SEASONS.add(season_num)
+            settle_completed_predictions(season_num, async_run=True)
         except Exception:
             pass
 
     sb = _get_supabase()
     if sb and force_fetch:
-        try:
-            res = sb.table("predictions").select("*").eq("season", season_num).order("created_at", desc=True).execute()
-            if res.data is not None:
-                local_preds = _load_local_predictions()
-                sb_ids = {str(p.get("id")) for p in res.data}
-                combined = list(res.data)
-                for lp in local_preds:
-                    if str(lp.get("id")) not in sb_ids and int(lp.get("season", 5)) == season_num:
-                        combined.append(lp)
-                for p in combined:
-                    p["username"] = normalize_username(p.get("username", ""))
-                _PREDICTIONS_CACHE[season_num] = combined
-                _save_local_predictions(combined)
-                return combined
-        except Exception as e:
-            print(f"Supabase get_all_predictions error: {e}")
+        for attempt in range(2):
+            try:
+                res = sb.table("predictions").select("*").eq("season", season_num).order("created_at", desc=True).execute()
+                if res.data is not None:
+                    local_preds = _load_local_predictions()
+                    sb_ids = {str(p.get("id")) for p in res.data}
+                    combined = list(res.data)
+                    for lp in local_preds:
+                        if str(lp.get("id")) not in sb_ids and int(lp.get("season", 5)) == season_num:
+                            combined.append(lp)
+                    for p in combined:
+                        p["username"] = normalize_username(p.get("username", ""))
+                    _PREDICTIONS_CACHE[season_num] = combined
+                    _save_local_predictions(combined)
+                    return combined
+                break
+            except (BlockingIOError, OSError):
+                time.sleep(0.3)
+            except Exception as e:
+                print(f"Supabase get_all_predictions error: {e}")
+                break
 
     local_preds = _load_local_predictions()
     res_list = [p for p in local_preds if int(p.get("season", 5)) == season_num]
@@ -515,48 +755,59 @@ def precompute_all_predictions(force: bool = False):
     # 1. Sync User Points from Supabase if available
     sb = _get_supabase()
     if sb:
-        try:
-            res_pts = sb.table("user_prediction_points").select("*").execute()
-            if res_pts.data:
-                local_data = _load_local_user_points()
-                for r in res_pts.data:
-                    u = normalize_username(str(r.get("display_name") or r.get("username", "")).strip())
-                    if u and u != "Matthew Newman":
-                        pts = int(r.get("points", 100))
-                        local_data[u] = {
-                            "points": pts,
-                            "all_time_points": pts,
-                            "season_points": {"5": pts},
-                        }
-                _save_local_user_points(local_data)
-        except Exception as e:
-            print(f"Supabase sync points error: {e}")
+        for attempt in range(2):
+            try:
+                res_pts = sb.table("user_prediction_points").select("*").execute()
+                if res_pts.data:
+                    local_data = _load_local_user_points()
+                    for r in res_pts.data:
+                        u = normalize_username(str(r.get("display_name") or r.get("username", "")).strip())
+                        if u and u != "Matthew Newman":
+                            pts = int(r.get("points", 100))
+                            local_data[u] = {
+                                "points": pts,
+                                "all_time_points": pts,
+                                "season_points": {"5": pts},
+                            }
+                    _save_local_user_points(local_data)
+                break
+            except (BlockingIOError, OSError):
+                time.sleep(0.3)
+            except Exception as e:
+                print(f"Supabase sync points error: {e}")
+                break
 
     # 2. Settle and cache all predictions
     all_preds = []
     for s in seasons:
         s_num = s["season_number"]
-        try:
-            settle_completed_predictions(s_num)
+        if s_num not in _SETTLED_SEASONS:
             _SETTLED_SEASONS.add(s_num)
-        except Exception:
-            pass
+            try:
+                settle_completed_predictions(s_num, async_run=True)
+            except Exception:
+                pass
 
         if sb:
-            try:
-                res = sb.table("predictions").select("*").eq("season", s_num).order("created_at", desc=True).execute()
-                if res.data is not None:
-                    preds = list(res.data)
-                    for p in preds:
-                        p["username"] = normalize_username(p.get("username", ""))
-                    _PREDICTIONS_CACHE[s_num] = preds
-                    all_preds.extend(preds)
-                    continue
-            except Exception as e:
-                print(f"Supabase get predictions error: {e}")
+            for attempt in range(2):
+                try:
+                    res = sb.table("predictions").select("*").eq("season", s_num).order("created_at", desc=True).execute()
+                    if res.data is not None:
+                        preds = list(res.data)
+                        for p in preds:
+                            p["username"] = normalize_username(p.get("username", ""))
+                        _PREDICTIONS_CACHE[s_num] = preds
+                        all_preds.extend(preds)
+                        break
+                except (BlockingIOError, OSError):
+                    time.sleep(0.3)
+                except Exception as e:
+                    print(f"Supabase get predictions error: {e}")
+                    break
 
         local_s_preds = [p for p in _load_local_predictions() if int(p.get("season", 5)) == s_num]
-        _PREDICTIONS_CACHE[s_num] = local_s_preds
+        if s_num not in _PREDICTIONS_CACHE:
+            _PREDICTIONS_CACHE[s_num] = local_s_preds
         all_preds.extend(local_s_preds)
 
     _save_local_predictions(all_preds)
@@ -565,9 +816,14 @@ def precompute_all_predictions(force: bool = False):
 
 def insert_prediction(pred: dict) -> bool:
     """Inserts a new prediction record into database and local storage."""
+    global _PREDICTIONS_CACHE
     local_preds = _load_local_predictions()
     local_preds.insert(0, pred)
     _save_local_predictions(local_preds)
+
+    s_num = int(pred.get("season", 5))
+    if s_num in _PREDICTIONS_CACHE:
+        _PREDICTIONS_CACHE[s_num].insert(0, pred)
 
     sb = _get_supabase()
     if sb:
@@ -581,15 +837,24 @@ def insert_prediction(pred: dict) -> bool:
 
 def remove_prediction(pred_id: str | int, username: str) -> bool:
     """Removes a prediction and refunds points."""
+    global _PREDICTIONS_CACHE
     refund_points = 0
     local_preds = _load_local_predictions()
     updated = []
+    season_affected = 5
     for p in local_preds:
         if str(p.get("id")) == str(pred_id) and p.get("username") == username:
             refund_points = int(p.get("points", 0))
+            season_affected = int(p.get("season", 5))
         else:
             updated.append(p)
     _save_local_predictions(updated)
+
+    if season_affected in _PREDICTIONS_CACHE:
+        _PREDICTIONS_CACHE[season_affected] = [
+            p for p in _PREDICTIONS_CACHE[season_affected]
+            if not (str(p.get("id")) == str(pred_id) and p.get("username") == username)
+        ]
 
     sb = _get_supabase()
     if sb:
@@ -1112,11 +1377,12 @@ class PredictionsMarketState(rx.State):
 
     # Submit Prediction Modal state
     modal_open: bool = False
+    wager_scope: str = "next_race"  # "next_race" or "full_season" (TAF1APP-SDDREQ-171)
     prediction_mode: str = "single"  # "single" or "parlay" (TAF1APP-SDDREQ-169)
     selected_category: str = "Expected Race Winner"
     selected_target: str = ""
     selected_stance: str = "FOR"
-    wager_amount: int = 10
+    wager_amount: str = "10"
     feedback_message: str = ""
 
     # Parlay state (TAF1APP-SDDREQ-169 & SDDREQ-170)
@@ -1247,7 +1513,8 @@ class PredictionsMarketState(rx.State):
     def open_modal(self):
         self.modal_open = True
         self.feedback_message = ""
-        self.wager_amount = 10
+        self.wager_amount = "10"
+        self.wager_scope = "next_race"
         self.prediction_mode = "single"
         self.selected_category = "Expected Race Winner"
         self.selected_stance = "FOR"
@@ -1278,11 +1545,75 @@ class PredictionsMarketState(rx.State):
         self.modal_open = False
         self.feedback_message = ""
 
+    def set_wager_scope(self, scope: str | list[str]):
+        val = scope[0] if isinstance(scope, list) else str(scope)
+        self.wager_scope = val
+        if val == "full_season":
+            self.selected_category = "Constructor Champion"
+            constructors = get_active_constructors(5)
+            self.selected_target = constructors[0] if constructors else ""
+            self.selected_stance = "FOR"
+            if self.parlay_legs:
+                legs = [dict(l) for l in self.parlay_legs]
+                drivers = get_active_drivers(5)
+                legs[0]["category"] = "Constructor Champion"
+                legs[0]["target"] = constructors[0] if constructors else ""
+                legs[0]["stance"] = "FOR"
+                if len(legs) > 1:
+                    legs[1]["category"] = "Driver Champion"
+                    legs[1]["target"] = drivers[0] if drivers else ""
+                    legs[1]["stance"] = "FOR"
+                for extra in legs[2:]:
+                    extra["category"] = "Top 3 Constructor"
+                    extra["target"] = constructors[0] if constructors else ""
+                    extra["stance"] = "FOR"
+                self.parlay_legs = legs
+        else:
+            self.selected_category = "Expected Race Winner"
+            proj = compute_season_projections(5)
+            teams = sorted(proj.get("teams", []))
+            self.selected_target = proj.get("expected_winner", teams[0] if teams else "")
+            self.selected_stance = "FOR"
+            if self.parlay_legs:
+                legs = [dict(l) for l in self.parlay_legs]
+                legs[0]["category"] = "Expected Race Winner"
+                legs[0]["target"] = proj.get("expected_winner", teams[0] if teams else "")
+                legs[0]["stance"] = "FOR"
+                if len(legs) > 1:
+                    podiums = proj.get("expected_podium", [])
+                    legs[1]["category"] = "Podium Teams"
+                    legs[1]["target"] = podiums[0] if podiums else (teams[0] if teams else "")
+                    legs[1]["stance"] = "FOR"
+                for extra in legs[2:]:
+                    extra["category"] = "Expected Race Winner"
+                    extra["target"] = teams[0] if teams else ""
+                    extra["stance"] = "FOR"
+                self.parlay_legs = legs
+        self.feedback_message = ""
+
     def set_prediction_mode(self, mode: str | list[str]):
         if isinstance(mode, list):
             self.prediction_mode = mode[0] if mode else "single"
         else:
             self.prediction_mode = str(mode)
+        if self.prediction_mode == "parlay" and self.wager_scope == "full_season":
+            constructors = get_active_constructors(5)
+            drivers = get_active_drivers(5)
+            if not self.parlay_legs or len(self.parlay_legs) < 2:
+                self.parlay_legs = [
+                    {
+                        "leg_num": "1",
+                        "category": "Constructor Champion",
+                        "target": constructors[0] if constructors else "",
+                        "stance": "FOR",
+                    },
+                    {
+                        "leg_num": "2",
+                        "category": "Driver Champion",
+                        "target": drivers[0] if drivers else "",
+                        "stance": "FOR",
+                    },
+                ]
         self.feedback_message = ""
 
     def select_leg(self, index: int):
@@ -1291,16 +1622,25 @@ class PredictionsMarketState(rx.State):
             self.feedback_message = ""
 
     def add_parlay_leg(self):
-        proj = compute_season_projections(5)
-        teams = sorted(proj.get("teams", []))
-        default_target = teams[0] if teams else ""
         new_leg_num = str(len(self.parlay_legs) + 1)
-        new_leg = {
-            "leg_num": new_leg_num,
-            "category": "Expected Race Winner",
-            "target": proj.get("expected_winner", default_target),
-            "stance": "FOR",
-        }
+        if self.wager_scope == "full_season":
+            constructors = get_active_constructors(5)
+            new_leg = {
+                "leg_num": new_leg_num,
+                "category": "Constructor Champion",
+                "target": constructors[0] if constructors else "",
+                "stance": "FOR",
+            }
+        else:
+            proj = compute_season_projections(5)
+            teams = sorted(proj.get("teams", []))
+            default_target = teams[0] if teams else ""
+            new_leg = {
+                "leg_num": new_leg_num,
+                "category": "Expected Race Winner",
+                "target": proj.get("expected_winner", default_target),
+                "stance": "FOR",
+            }
         legs = [dict(l) for l in self.parlay_legs]
         legs.append(new_leg)
         self.parlay_legs = legs
@@ -1333,19 +1673,32 @@ class PredictionsMarketState(rx.State):
 
     def set_leg_category(self, cat: str):
         if 0 <= self.active_leg_index < len(self.parlay_legs):
-            proj = compute_season_projections(5)
-            teams = sorted(proj.get("teams", []))
-            target = teams[0] if teams else ""
-            stance = "FOR"
-            if cat == "Expected Race Winner":
-                target = proj.get("expected_winner", target)
-            elif cat == "Highest Scoring Team":
-                target = proj.get("expected_highest_score_team", target)
-            elif cat == "Podium Teams":
-                podiums = proj.get("expected_podium", [])
-                target = podiums[0] if podiums else target
-            elif cat == "Expected Points":
-                stance = "OVER"
+            if self.wager_scope == "full_season":
+                if cat in ["Driver Champion", "Top 3 Driver"]:
+                    drivers = get_active_drivers(5)
+                    target = drivers[0] if drivers else ""
+                    stance = "FOR"
+                elif cat in ["Constructor Champion Win Margin", "Driver Champion Win Margin"]:
+                    target = WIN_MARGIN_OPTIONS[0]
+                    stance = "—"
+                else:
+                    constructors = get_active_constructors(5)
+                    target = constructors[0] if constructors else ""
+                    stance = "FOR"
+            else:
+                proj = compute_season_projections(5)
+                teams = sorted(proj.get("teams", []))
+                target = teams[0] if teams else ""
+                stance = "FOR"
+                if cat == "Expected Race Winner":
+                    target = proj.get("expected_winner", target)
+                elif cat == "Highest Scoring Team":
+                    target = proj.get("expected_highest_score_team", target)
+                elif cat == "Podium Teams":
+                    podiums = proj.get("expected_podium", [])
+                    target = podiums[0] if podiums else target
+                elif cat == "Expected Points":
+                    stance = "OVER"
 
             legs = [dict(l) for l in self.parlay_legs]
             legs[self.active_leg_index]["category"] = cat
@@ -1368,24 +1721,37 @@ class PredictionsMarketState(rx.State):
 
     def set_category(self, cat: str):
         self.selected_category = cat
-        proj = compute_season_projections(5)
-        teams = sorted(proj.get("teams", []))
-        if cat == "Expected Race Winner":
-            self.selected_target = proj.get("expected_winner", teams[0] if teams else "")
-            self.selected_stance = "FOR"
-        elif cat == "Highest Scoring Team":
-            self.selected_target = proj.get("expected_highest_score_team", teams[0] if teams else "")
-            self.selected_stance = "FOR"
-        elif cat == "Podium Teams":
-            podiums = proj.get("expected_podium", [])
-            self.selected_target = podiums[0] if podiums else (teams[0] if teams else "")
-            self.selected_stance = "FOR"
-        elif cat == "Expected Points":
-            self.selected_target = teams[0] if teams else ""
-            self.selected_stance = "OVER"
+        if self.wager_scope == "full_season":
+            if cat in ["Driver Champion", "Top 3 Driver"]:
+                drivers = get_active_drivers(5)
+                self.selected_target = drivers[0] if drivers else ""
+                self.selected_stance = "FOR"
+            elif cat in ["Constructor Champion Win Margin", "Driver Champion Win Margin"]:
+                self.selected_target = WIN_MARGIN_OPTIONS[0]
+                self.selected_stance = "—"
+            else:
+                constructors = get_active_constructors(5)
+                self.selected_target = constructors[0] if constructors else ""
+                self.selected_stance = "FOR"
         else:
-            self.selected_target = teams[0] if teams else ""
-            self.selected_stance = "FOR"
+            proj = compute_season_projections(5)
+            teams = sorted(proj.get("teams", []))
+            if cat == "Expected Race Winner":
+                self.selected_target = proj.get("expected_winner", teams[0] if teams else "")
+                self.selected_stance = "FOR"
+            elif cat == "Highest Scoring Team":
+                self.selected_target = proj.get("expected_highest_score_team", teams[0] if teams else "")
+                self.selected_stance = "FOR"
+            elif cat == "Podium Teams":
+                podiums = proj.get("expected_podium", [])
+                self.selected_target = podiums[0] if podiums else (teams[0] if teams else "")
+                self.selected_stance = "FOR"
+            elif cat == "Expected Points":
+                self.selected_target = teams[0] if teams else ""
+                self.selected_stance = "OVER"
+            else:
+                self.selected_target = teams[0] if teams else ""
+                self.selected_stance = "FOR"
 
     def set_target(self, target: str):
         self.selected_target = target
@@ -1397,10 +1763,19 @@ class PredictionsMarketState(rx.State):
             self.selected_stance = str(stance)
 
     def set_wager(self, amount: int | str):
+        val = str(amount).strip()
+        if not val:
+            self.wager_amount = ""
+            return
+        digits = "".join(ch for ch in val if ch.isdigit())
+        self.wager_amount = digits
+
+    @rx.var
+    def parsed_wager_amount(self) -> int:
         try:
-            self.wager_amount = max(1, int(amount))
-        except Exception:
-            self.wager_amount = 1
+            return max(0, int(self.wager_amount))
+        except (ValueError, TypeError):
+            return 0
 
     @rx.var
     def active_leg(self) -> dict[str, str]:
@@ -1454,10 +1829,50 @@ class PredictionsMarketState(rx.State):
     def parlay_payout_preview(self) -> int:
         num_legs = len(self.parlay_legs)
         mult = 0.15 + (num_legs * 0.1)
-        return self.wager_amount + int(round(self.wager_amount * mult))
+        wager = self.parsed_wager_amount
+        return wager + int(round(wager * mult))
+
+    @rx.var
+    def remaining_feature_races_count(self) -> int:
+        return len(get_remaining_feature_races(5))
+
+    @rx.var
+    def full_season_single_multiplier_pct(self) -> int:
+        rem_races = self.remaining_feature_races_count
+        return int(round((0.15 + (rem_races * 0.1)) * 100))
+
+    @rx.var
+    def full_season_single_payout_preview(self) -> int:
+        rem_races = self.remaining_feature_races_count
+        mult = 0.15 + (rem_races * 0.1)
+        wager = self.parsed_wager_amount
+        return wager + int(round(wager * mult))
+
+    @rx.var
+    def full_season_parlay_multiplier_pct(self) -> int:
+        num_legs = len(self.parlay_legs)
+        rem_races = self.remaining_feature_races_count
+        return int(round((0.15 + (num_legs * 0.1) + (rem_races * 0.1)) * 100))
+
+    @rx.var
+    def full_season_parlay_payout_preview(self) -> int:
+        num_legs = len(self.parlay_legs)
+        rem_races = self.remaining_feature_races_count
+        mult = 0.15 + (num_legs * 0.1) + (rem_races * 0.1)
+        wager = self.parsed_wager_amount
+        return wager + int(round(wager * mult))
 
     @rx.var
     def category_options(self) -> list[str]:
+        if self.wager_scope == "full_season":
+            return [
+                "Constructor Champion",
+                "Top 3 Constructor",
+                "Constructor Champion Win Margin",
+                "Driver Champion",
+                "Top 3 Driver",
+                "Driver Champion Win Margin",
+            ]
         return [
             "Expected Race Winner",
             "Highest Scoring Team",
@@ -1469,17 +1884,85 @@ class PredictionsMarketState(rx.State):
             "Cleanest Driver",
         ]
 
-    @rx.var(auto_deps=False, deps=[])
+    @rx.var
     def target_options(self) -> list[str]:
-        """All prediction targets are active constructors (SDDREQ-156)."""
+        if self.wager_scope == "full_season":
+            cat = self.selected_category
+            if cat in ["Driver Champion", "Top 3 Driver"]:
+                return get_active_drivers(5)
+            elif cat in ["Constructor Champion Win Margin", "Driver Champion Win Margin"]:
+                return WIN_MARGIN_OPTIONS
+            return get_active_constructors(5)
         proj = compute_season_projections(5)
         return sorted(proj.get("teams", []))
 
     @rx.var
+    def target_label(self) -> str:
+        if self.wager_scope == "full_season":
+            cat = self.selected_category
+            if cat in ["Driver Champion", "Top 3 Driver"]:
+                return "PREDICTION TARGET (DRIVER)"
+            elif cat in ["Constructor Champion Win Margin", "Driver Champion Win Margin"]:
+                return "PREDICTION TARGET (WIN MARGIN IN POINTS)"
+            return "PREDICTION TARGET (CONSTRUCTOR)"
+        return "PREDICTION TARGET (CONSTRUCTOR)"
+
+    @rx.var
+    def has_stance(self) -> bool:
+        if self.wager_scope == "full_season":
+            return self.selected_category not in ["Constructor Champion Win Margin", "Driver Champion Win Margin"]
+        return True
+
+    @rx.var
+    def is_stance_for_only(self) -> bool:
+        if self.wager_scope == "full_season":
+            return self.selected_category in ["Driver Champion", "Top 3 Driver"]
+        return False
+
+    @rx.var
     def stance_options(self) -> list[str]:
+        if self.wager_scope == "full_season":
+            if self.selected_category in ["Driver Champion", "Top 3 Driver"]:
+                return ["FOR"]
+            return ["FOR", "AGAINST"]
         if self.selected_category == "Expected Points":
             return ["OVER", "UNDER"]
         return ["FOR", "AGAINST"]
+
+    @rx.var
+    def current_leg_target_options(self) -> list[str]:
+        if self.wager_scope == "full_season":
+            cat = self.current_leg_category
+            if cat in ["Driver Champion", "Top 3 Driver"]:
+                return get_active_drivers(5)
+            elif cat in ["Constructor Champion Win Margin", "Driver Champion Win Margin"]:
+                return WIN_MARGIN_OPTIONS
+            return get_active_constructors(5)
+        proj = compute_season_projections(5)
+        return sorted(proj.get("teams", []))
+
+    @rx.var
+    def current_leg_target_label(self) -> str:
+        if self.wager_scope == "full_season":
+            cat = self.current_leg_category
+            if cat in ["Driver Champion", "Top 3 Driver"]:
+                return "PREDICTION TARGET (DRIVER)"
+            elif cat in ["Constructor Champion Win Margin", "Driver Champion Win Margin"]:
+                return "PREDICTION TARGET (WIN MARGIN IN POINTS)"
+            return "PREDICTION TARGET (CONSTRUCTOR)"
+        return "PREDICTION TARGET (CONSTRUCTOR)"
+
+    @rx.var
+    def current_leg_has_stance(self) -> bool:
+        if self.wager_scope == "full_season":
+            return self.current_leg_category not in ["Constructor Champion Win Margin", "Driver Champion Win Margin"]
+        return True
+
+    @rx.var
+    def current_leg_is_stance_for_only(self) -> bool:
+        if self.wager_scope == "full_season":
+            return self.current_leg_category in ["Driver Champion", "Top 3 Driver"]
+        return False
 
     @rx.var
     def current_user(self) -> str:
@@ -1516,15 +1999,31 @@ class PredictionsMarketState(rx.State):
             item = dict(p)
             item["is_mine"] = (p.get("username") == self.current_user)
             item["can_delete"] = (p.get("username") == self.current_user and p.get("status") == "open" and not self.is_locked)
-            
+
+            cat = str(p.get("category", ""))
+            is_full_season = (
+                cat.startswith("[Full Season]")
+                or p.get("scope") == "full_season"
+                or str(p.get("race", "")).lower() in ("season 5", "full season")
+                or any(fsc in cat for fsc in ["Constructor Champion", "Driver Champion", "Top 3 Constructor", "Top 3 Driver", "Win Margin"])
+            )
+            if is_full_season and not cat.startswith("[Full Season]"):
+                cat = f"[Full Season] {cat}"
+            item["category"] = cat
+            item["is_full_season"] = is_full_season
+
             stance = str(p.get("stance", "FOR")).upper()
-            is_parlay = (stance == "PARLAY" or str(p.get("category", "")).startswith("Parlay"))
+            is_parlay = (stance == "PARLAY" or "Parlay" in cat)
             item["is_parlay"] = is_parlay
 
             if is_parlay:
                 item["team_color"] = "#C084FC"  # Purple for Parlay
                 item["is_positive"] = True
-                item["line_display"] = "Multi-Leg"
+                if is_full_season:
+                    rem = p.get("line_value")
+                    item["line_display"] = f"{int(rem)} races rem." if rem is not None else "Season"
+                else:
+                    item["line_display"] = "Multi-Leg"
                 try:
                     legs = json.loads(p.get("target", "[]"))
                     legs_summary = " + ".join([f"{l.get('target', '')} ({l.get('stance', '')})" for l in legs])
@@ -1532,11 +2031,27 @@ class PredictionsMarketState(rx.State):
                 except Exception:
                     item["target_display"] = str(p.get("target", ""))
             else:
-                item["team_color"] = get_constructor_color(str(p.get("target", "")))
-                item["is_positive"] = bool("FOR" in stance or "OVER" in stance)
-                item["target_display"] = str(p.get("target", ""))
-                lv = p.get("line_value")
-                item["line_display"] = f"{float(lv):.1f} pts" if lv is not None else "—"
+                target_str = str(p.get("target", ""))
+                item["target_display"] = target_str
+                if target_str in get_active_constructors(5):
+                    item["team_color"] = get_constructor_color(target_str)
+                elif target_str in get_active_drivers(5):
+                    drv_team = get_driver_constructor(target_str, 5)
+                    item["team_color"] = get_constructor_color(drv_team) if drv_team else "#00b4da"
+                else:
+                    item["team_color"] = "#00b4da"
+
+                if stance in ("—", "N/A", "NONE"):
+                    item["is_positive"] = True
+                else:
+                    item["is_positive"] = bool("FOR" in stance or "OVER" in stance)
+
+                if is_full_season:
+                    rem = p.get("line_value")
+                    item["line_display"] = f"{int(rem)} races rem." if rem is not None else "Season"
+                else:
+                    lv = p.get("line_value")
+                    item["line_display"] = f"{float(lv):.1f} pts" if lv is not None else "—"
 
             status_val = str(p.get("status", "open")).lower()
             item["status_upper"] = status_val.upper()
@@ -1779,14 +2294,35 @@ class PredictionsMarketState(rx.State):
             self.feedback_message = "Predictions are currently locked for this race."
             return
 
+        wager_str = str(self.wager_amount).strip()
+        if not wager_str:
+            self.feedback_message = "Please enter a wager amount before submitting."
+            return
+
+        try:
+            wager_val = int(wager_str)
+            if wager_val <= 0:
+                self.feedback_message = "Wager amount must be at least 1 point."
+                return
+        except (ValueError, TypeError):
+            self.feedback_message = "Please enter a valid numeric wager amount."
+            return
+
         rem = self.user_remaining_points
-        if self.wager_amount > rem:
+        if wager_val > rem:
             self.feedback_message = f"Insufficient points. You only have {rem} points available."
             return
 
-        proj = compute_season_projections(5)
-        race_name = proj.get("next_main_race", proj.get("next_race", "Upcoming Race"))
-        lines = proj.get("team_expected_lines", {})
+        is_fs = (self.wager_scope == "full_season")
+        rem_races = len(get_remaining_feature_races(5))
+
+        if is_fs:
+            race_name = "Season 5"
+            lines = {}
+        else:
+            proj = compute_season_projections(5)
+            race_name = proj.get("next_main_race", proj.get("next_race", "Upcoming Race"))
+            lines = proj.get("team_expected_lines", {})
 
         import time
         pred_id = int(time.time() * 1000)
@@ -1799,45 +2335,55 @@ class PredictionsMarketState(rx.State):
             enriched_legs = []
             for leg in self.parlay_legs:
                 leg_copy = dict(leg)
-                if leg_copy.get("category") == "Expected Points":
+                if not is_fs and leg_copy.get("category") == "Expected Points":
                     leg_copy["line_value"] = lines.get(leg_copy.get("target"), 0.0)
                 else:
                     leg_copy["line_value"] = None
                 enriched_legs.append(leg_copy)
 
             num_legs = len(enriched_legs)
+            cat_label = f"[Full Season] Parlay ({num_legs} Legs)" if is_fs else f"Parlay ({num_legs} Legs)"
             new_pred = {
                 "id": pred_id,
                 "username": username,
                 "season": 5,
                 "race": race_name,
-                "category": f"Parlay ({num_legs} Legs)",
+                "category": cat_label,
                 "target": json.dumps(enriched_legs),
-                "line_value": None,
+                "line_value": float(rem_races) if is_fs else None,
                 "stance": "PARLAY",
-                "points": self.wager_amount,
+                "points": wager_val,
                 "status": "open",
                 "payout": 0,
                 "created_at": datetime.now(timezone.utc).isoformat(),
             }
         else:
-            line_val = lines.get(self.selected_target, 0.0) if self.selected_category == "Expected Points" else None
+            if is_fs:
+                cat_label = f"[Full Season] {self.selected_category}"
+                stance_val = "—" if not self.has_stance else self.selected_stance
+                line_val = float(rem_races)
+            else:
+                cat_label = self.selected_category
+                stance_val = self.selected_stance
+                line_val = lines.get(self.selected_target, 0.0) if self.selected_category == "Expected Points" else None
+
             new_pred = {
                 "id": pred_id,
                 "username": username,
                 "season": 5,
                 "race": race_name,
-                "category": self.selected_category,
+                "category": cat_label,
                 "target": self.selected_target,
                 "line_value": line_val,
-                "stance": self.selected_stance,
-                "points": self.wager_amount,
+                "stance": stance_val,
+                "points": wager_val,
                 "status": "open",
                 "payout": 0,
                 "created_at": datetime.now(timezone.utc).isoformat(),
             }
 
         insert_prediction(new_pred)
+
         self.modal_open = False
         self.refresh_trigger += 1
         try:
@@ -1863,9 +2409,19 @@ class PredictionsMarketState(rx.State):
 
 # ── UI Components ─────────────────────────────────────────────────────────────
 def _submit_prediction_modal() -> rx.Component:
-    """Modal dialog for placing a prediction (TAF1APP-SDDREQ-143, 146, 156, 158, 169, 170)."""
+    """Modal dialog for placing a prediction (TAF1APP-SDDREQ-143, 146, 156, 158, 169, 170, 171, 172, 173)."""
 
-    # Top mode selector (Single Prediction vs Parlay Prediction per SDDREQ-169)
+    # Next Race vs Full Season Scope selector (TAF1APP-SDDREQ-171)
+    scope_toggle = rx.segmented_control.root(
+        rx.segmented_control.item("Next Race", value="next_race"),
+        rx.segmented_control.item("Full Season", value="full_season"),
+        value=PredictionsMarketState.wager_scope,
+        on_change=PredictionsMarketState.set_wager_scope,
+        width="100%",
+        color_scheme="cyan",
+    )
+
+    # Prediction type mode selector (Single Prediction vs Parlay Prediction per SDDREQ-169 & SDDREQ-172)
     mode_toggle = rx.segmented_control.root(
         rx.segmented_control.item("Single Prediction", value="single"),
         rx.segmented_control.item("Parlay Prediction", value="parlay"),
@@ -1875,7 +2431,7 @@ def _submit_prediction_modal() -> rx.Component:
         color_scheme="cyan",
     )
 
-    # 1. Single Prediction View (Standard functionality)
+    # 1. Single Prediction View
     single_view = rx.vstack(
         # Category selector
         rx.vstack(
@@ -1893,9 +2449,9 @@ def _submit_prediction_modal() -> rx.Component:
             width="100%",
             align_items="start",
         ),
-        # Prediction target (All constructors per SDDREQ-156)
+        # Prediction target (Dynamic: Constructors, Drivers, or Points Win Margin per SDDREQ-156 & SDDREQ-172)
         rx.vstack(
-            rx.text("PREDICTION TARGET (CONSTRUCTOR)", font_size="10px", font_weight="800", color="#00b4da", letter_spacing="0.05em"),
+            rx.text(PredictionsMarketState.target_label, font_size="10px", font_weight="800", color="#00b4da", letter_spacing="0.05em"),
             rx.select(
                 PredictionsMarketState.target_options,
                 value=PredictionsMarketState.selected_target,
@@ -1909,31 +2465,45 @@ def _submit_prediction_modal() -> rx.Component:
             width="100%",
             align_items="start",
         ),
-        # Stance selector (FOR/AGAINST or OVER/UNDER)
-        rx.vstack(
-            rx.text("STANCE", font_size="10px", font_weight="800", color="#00b4da", letter_spacing="0.05em"),
-            rx.cond(
-                PredictionsMarketState.selected_category != "Expected Points",
-                rx.segmented_control.root(
-                    rx.segmented_control.item("FOR", value="FOR"),
-                    rx.segmented_control.item("AGAINST", value="AGAINST"),
-                    value=PredictionsMarketState.selected_stance,
-                    on_change=PredictionsMarketState.set_stance,
-                    width="100%",
-                    color_scheme="cyan",
+        # Stance selector (Conditional: hidden for win margins, FOR only for drivers, FOR/AGAINST or OVER/UNDER for constructors)
+        rx.cond(
+            PredictionsMarketState.has_stance,
+            rx.vstack(
+                rx.text("STANCE", font_size="10px", font_weight="800", color="#00b4da", letter_spacing="0.05em"),
+                rx.cond(
+                    PredictionsMarketState.is_stance_for_only,
+                    rx.segmented_control.root(
+                        rx.segmented_control.item("FOR (Only Option)", value="FOR"),
+                        value="FOR",
+                        disabled=True,
+                        width="100%",
+                        color_scheme="cyan",
+                    ),
+                    rx.cond(
+                        PredictionsMarketState.selected_category != "Expected Points",
+                        rx.segmented_control.root(
+                            rx.segmented_control.item("FOR", value="FOR"),
+                            rx.segmented_control.item("AGAINST", value="AGAINST"),
+                            value=PredictionsMarketState.selected_stance,
+                            on_change=PredictionsMarketState.set_stance,
+                            width="100%",
+                            color_scheme="cyan",
+                        ),
+                        rx.segmented_control.root(
+                            rx.segmented_control.item("OVER", value="OVER"),
+                            rx.segmented_control.item("UNDER", value="UNDER"),
+                            value=PredictionsMarketState.selected_stance,
+                            on_change=PredictionsMarketState.set_stance,
+                            width="100%",
+                            color_scheme="cyan",
+                        ),
+                    ),
                 ),
-                rx.segmented_control.root(
-                    rx.segmented_control.item("OVER", value="OVER"),
-                    rx.segmented_control.item("UNDER", value="UNDER"),
-                    value=PredictionsMarketState.selected_stance,
-                    on_change=PredictionsMarketState.set_stance,
-                    width="100%",
-                    color_scheme="cyan",
-                ),
+                spacing="1",
+                width="100%",
+                align_items="start",
             ),
-            spacing="1",
-            width="100%",
-            align_items="start",
+            rx.fragment(),
         ),
         # Points to wager
         rx.vstack(
@@ -1948,6 +2518,7 @@ def _submit_prediction_modal() -> rx.Component:
                 type="number",
                 min="1",
                 max=PredictionsMarketState.user_remaining_points,
+                placeholder="Enter points to wager...",
                 value=PredictionsMarketState.wager_amount,
                 on_change=PredictionsMarketState.set_wager,
                 width="100%",
@@ -1958,6 +2529,50 @@ def _submit_prediction_modal() -> rx.Component:
             spacing="1",
             width="100%",
             align_items="start",
+        ),
+        # Full Season Single Payout Boost badge (TAF1APP-SDDREQ-173)
+        rx.cond(
+            PredictionsMarketState.wager_scope == "full_season",
+            rx.box(
+                rx.vstack(
+                    rx.hstack(
+                        rx.hstack(
+                            rx.icon("sparkles", size=14, color="#00b4da"),
+                            rx.text(
+                                f"Full Season Boost: +{PredictionsMarketState.full_season_single_multiplier_pct}%",
+                                font_size="11px",
+                                font_weight="800",
+                                color="#00b4da",
+                            ),
+                            spacing="1",
+                            align="center",
+                        ),
+                        rx.spacer(),
+                        rx.text(
+                            f"Potential Win: {PredictionsMarketState.full_season_single_payout_preview} pts",
+                            font_size="11px",
+                            font_weight="800",
+                            color="#FFD700",
+                        ),
+                        width="100%",
+                        align="center",
+                    ),
+                    rx.text(
+                        f"Includes {PredictionsMarketState.remaining_feature_races_count} remaining feature races (+10% per race)",
+                        font_size="10px",
+                        color="#888888",
+                        font_style="italic",
+                    ),
+                    spacing="1",
+                    width="100%",
+                ),
+                bg="rgba(0, 180, 218, 0.08)",
+                border="1px solid rgba(0, 180, 218, 0.25)",
+                border_radius="lg",
+                padding="6px 12px",
+                width="100%",
+            ),
+            rx.fragment(),
         ),
         # Action buttons
         rx.hstack(
@@ -1980,7 +2595,7 @@ def _submit_prediction_modal() -> rx.Component:
         padding_top="2",
     )
 
-    # 2. Parlay Prediction View (TAF1APP-SDDREQ-169 & SDDREQ-170)
+    # 2. Parlay Prediction View (TAF1APP-SDDREQ-169, SDDREQ-170, SDDREQ-172, SDDREQ-173)
     parlay_view = rx.vstack(
         # Sub-tabs for legs + "Add a Leg" button per SDDREQ-169
         rx.hstack(
@@ -2062,11 +2677,11 @@ def _submit_prediction_modal() -> rx.Component:
             width="100%",
             align_items="start",
         ),
-        # Leg Target selector
+        # Leg Target selector (Dynamic constructors, drivers, or win margin points)
         rx.vstack(
-            rx.text("PREDICTION TARGET (CONSTRUCTOR)", font_size="10px", font_weight="800", color="#00b4da", letter_spacing="0.05em"),
+            rx.text(PredictionsMarketState.current_leg_target_label, font_size="10px", font_weight="800", color="#00b4da", letter_spacing="0.05em"),
             rx.select(
-                PredictionsMarketState.target_options,
+                PredictionsMarketState.current_leg_target_options,
                 value=PredictionsMarketState.current_leg_target,
                 on_change=PredictionsMarketState.set_leg_target,
                 width="100%",
@@ -2078,31 +2693,45 @@ def _submit_prediction_modal() -> rx.Component:
             width="100%",
             align_items="start",
         ),
-        # Leg Stance selector
-        rx.vstack(
-            rx.text("STANCE", font_size="10px", font_weight="800", color="#00b4da", letter_spacing="0.05em"),
-            rx.cond(
-                PredictionsMarketState.current_leg_category != "Expected Points",
-                rx.segmented_control.root(
-                    rx.segmented_control.item("FOR", value="FOR"),
-                    rx.segmented_control.item("AGAINST", value="AGAINST"),
-                    value=PredictionsMarketState.current_leg_stance,
-                    on_change=PredictionsMarketState.set_leg_stance,
-                    width="100%",
-                    color_scheme="cyan",
+        # Leg Stance selector (Conditional per SDDREQ-172)
+        rx.cond(
+            PredictionsMarketState.current_leg_has_stance,
+            rx.vstack(
+                rx.text("STANCE", font_size="10px", font_weight="800", color="#00b4da", letter_spacing="0.05em"),
+                rx.cond(
+                    PredictionsMarketState.current_leg_is_stance_for_only,
+                    rx.segmented_control.root(
+                        rx.segmented_control.item("FOR (Only Option)", value="FOR"),
+                        value="FOR",
+                        disabled=True,
+                        width="100%",
+                        color_scheme="cyan",
+                    ),
+                    rx.cond(
+                        PredictionsMarketState.current_leg_category != "Expected Points",
+                        rx.segmented_control.root(
+                            rx.segmented_control.item("FOR", value="FOR"),
+                            rx.segmented_control.item("AGAINST", value="AGAINST"),
+                            value=PredictionsMarketState.current_leg_stance,
+                            on_change=PredictionsMarketState.set_leg_stance,
+                            width="100%",
+                            color_scheme="cyan",
+                        ),
+                        rx.segmented_control.root(
+                            rx.segmented_control.item("OVER", value="OVER"),
+                            rx.segmented_control.item("UNDER", value="UNDER"),
+                            value=PredictionsMarketState.current_leg_stance,
+                            on_change=PredictionsMarketState.set_leg_stance,
+                            width="100%",
+                            color_scheme="cyan",
+                        ),
+                    ),
                 ),
-                rx.segmented_control.root(
-                    rx.segmented_control.item("OVER", value="OVER"),
-                    rx.segmented_control.item("UNDER", value="UNDER"),
-                    value=PredictionsMarketState.current_leg_stance,
-                    on_change=PredictionsMarketState.set_leg_stance,
-                    width="100%",
-                    color_scheme="cyan",
-                ),
+                spacing="1",
+                width="100%",
+                align_items="start",
             ),
-            spacing="1",
-            width="100%",
-            align_items="start",
+            rx.fragment(),
         ),
         # Points to wager (grayed out until on final leg per SDDREQ-169)
         rx.vstack(
@@ -2127,6 +2756,7 @@ def _submit_prediction_modal() -> rx.Component:
                 type="number",
                 min="1",
                 max=PredictionsMarketState.user_remaining_points,
+                placeholder="Enter points to wager...",
                 value=PredictionsMarketState.wager_amount,
                 on_change=PredictionsMarketState.set_wager,
                 disabled=rx.cond(PredictionsMarketState.is_final_leg, False, True),
@@ -2139,29 +2769,75 @@ def _submit_prediction_modal() -> rx.Component:
             width="100%",
             align_items="start",
         ),
-        # Parlay payout boost preview badge (TAF1APP-SDDREQ-170)
-        rx.box(
-            rx.hstack(
-                rx.hstack(
-                    rx.icon("sparkles", size=14, color="#FFD700"),
-                    rx.text(f"Parlay Boost: +{PredictionsMarketState.parlay_multiplier_pct}%", font_size="11px", font_weight="800", color="#FFD700"),
+        # Parlay payout boost preview badge (TAF1APP-SDDREQ-170 & SDDREQ-173)
+        rx.cond(
+            PredictionsMarketState.wager_scope == "full_season",
+            rx.box(
+                rx.vstack(
+                    rx.hstack(
+                        rx.hstack(
+                            rx.icon("sparkles", size=14, color="#00b4da"),
+                            rx.text(
+                                f"Full Season Parlay Boost: +{PredictionsMarketState.full_season_parlay_multiplier_pct}%",
+                                font_size="11px",
+                                font_weight="800",
+                                color="#00b4da",
+                            ),
+                            spacing="1",
+                            align="center",
+                        ),
+                        rx.spacer(),
+                        rx.cond(
+                            PredictionsMarketState.is_final_leg,
+                            rx.text(
+                                f"Potential Win: {PredictionsMarketState.full_season_parlay_payout_preview} pts",
+                                font_size="11px",
+                                font_weight="800",
+                                color="#FFD700",
+                            ),
+                            rx.fragment(),
+                        ),
+                        width="100%",
+                        align="center",
+                    ),
+                    rx.text(
+                        f"Calculated with {PredictionsMarketState.parlay_legs_count} legs (+10%/leg) + {PredictionsMarketState.remaining_feature_races_count} remaining feature races (+10%/race)",
+                        font_size="10px",
+                        color="#888888",
+                        font_style="italic",
+                    ),
                     spacing="1",
+                    width="100%",
+                ),
+                bg="rgba(0, 180, 218, 0.08)",
+                border="1px solid rgba(0, 180, 218, 0.25)",
+                border_radius="lg",
+                padding="6px 12px",
+                width="100%",
+            ),
+            rx.box(
+                rx.hstack(
+                    rx.hstack(
+                        rx.icon("sparkles", size=14, color="#FFD700"),
+                        rx.text(f"Parlay Boost: +{PredictionsMarketState.parlay_multiplier_pct}%", font_size="11px", font_weight="800", color="#FFD700"),
+                        spacing="1",
+                        align="center",
+                    ),
+                    rx.spacer(),
+                    rx.cond(
+                        PredictionsMarketState.is_final_leg,
+                        rx.text(f"Potential Win: {PredictionsMarketState.parlay_payout_preview} pts", font_size="11px", font_weight="800", color="#00b4da"),
+                        rx.fragment(),
+                    ),
+                    width="100%",
                     align="center",
                 ),
-                rx.spacer(),
-                rx.cond(
-                    PredictionsMarketState.is_final_leg,
-                    rx.text(f"Potential Win: {PredictionsMarketState.parlay_payout_preview} pts", font_size="11px", font_weight="800", color="#00b4da"),
-                    rx.fragment(),
-                ),
+                bg="rgba(255, 215, 0, 0.08)",
+                border="1px solid rgba(255, 215, 0, 0.25)",
+                border_radius="lg",
+                padding="6px 12px",
                 width="100%",
-                align="center",
             ),
-            bg="rgba(255, 215, 0, 0.08)",
-            border="1px solid rgba(255, 215, 0, 0.25)",
-            border_radius="lg",
-            padding="6px 12px",
-            width="100%",
         ),
         # Parlay Navigation & Action buttons (Next until final leg, then Submit Parlay per SDDREQ-169)
         rx.hstack(
@@ -2207,9 +2883,25 @@ def _submit_prediction_modal() -> rx.Component:
 
     return rx.dialog.root(
         rx.dialog.content(
-            rx.dialog.title("Submit a Prediction", font_family="Outfit", font_weight="800", color="white", margin_bottom="4"),
-            rx.box(
-                mode_toggle,
+            rx.dialog.title("Submit a Prediction", font_family="Outfit", font_weight="800", color="white", margin_bottom="3"),
+            rx.vstack(
+                # Two-option button for Next Race vs Full Season (TAF1APP-SDDREQ-171)
+                rx.vstack(
+                    rx.text("WAGER SCOPE", font_size="10px", font_weight="800", color="#00b4da", letter_spacing="0.05em"),
+                    scope_toggle,
+                    spacing="1",
+                    width="100%",
+                    align_items="start",
+                ),
+                # Two-option button for Single Prediction vs Parlay Prediction (TAF1APP-SDDREQ-169 & SDDREQ-172)
+                rx.vstack(
+                    rx.text("PREDICTION TYPE", font_size="10px", font_weight="800", color="#00b4da", letter_spacing="0.05em"),
+                    mode_toggle,
+                    spacing="1",
+                    width="100%",
+                    align_items="start",
+                ),
+                spacing="3",
                 width="100%",
                 margin_bottom="4",
             ),

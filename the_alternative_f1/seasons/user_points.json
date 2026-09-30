@@ -1,11 +1,4 @@
 {
-  "Jellywaffles37": {
-    "points": 100,
-    "all_time_points": 100,
-    "season_points": {
-      "5": 100
-    }
-  },
   "PK": {
     "points": 100,
     "all_time_points": 100,
@@ -28,6 +21,13 @@
     }
   },
   "brentuar": {
+    "points": 100,
+    "all_time_points": 100,
+    "season_points": {
+      "5": 100
+    }
+  },
+  "Jellywaffles37": {
     "points": 100,
     "all_time_points": 100,
     "season_points": {
