@@ -29,8 +29,9 @@ from the_alternative_f1.articles.components import zoomable_chart, interactive_l
 PROJECTIONS_JSON = Path(__file__).parent / "projections_lines.json"
 PROJECTIONS_DATA_JSON = Path(__file__).parent / "projections_data.json"
 
-F1_POINTS = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1]
-SPRINT_POINTS = [8, 7, 6, 5, 4, 3, 2, 1]
+# The Alternative F1 Official Points Scale (Regulations 2 & 12: 109 regular / 40 sprint for 16 drivers)
+F1_POINTS = [25, 18, 15, 12, 10, 8, 6, 4, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+SPRINT_POINTS = [8, 7, 6, 5, 4, 3, 2, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
 
 _PROJECTIONS_CACHE = {}
 _PROJECTIONS_MTIME = 0
@@ -90,8 +91,6 @@ def compute_season_projections(season_num: int = 5, force: bool = False) -> dict
             season_num = 5
 
     cache_key = f"season_{season_num}"
-    if not force and cache_key in _PROJECTIONS_CACHE:
-        return _PROJECTIONS_CACHE[cache_key]
 
     excel_path = Path(__file__).parent.parent / "The_Alternative_F1.xlsx"
     curr_mtime = excel_path.stat().st_mtime if excel_path.exists() else 0.0
@@ -299,15 +298,14 @@ def compute_season_projections(season_num: int = 5, force: bool = False) -> dict
             pts += s_pts
         driver_assigned_points[d] = pts
 
-    # Sum two drivers for constructor (if sum ends in 0.5, round up)
+    # Sum two drivers for constructor (The Alternative F1 official points scale)
     team_points_calc = {}
     team_expected_lines = {}
     for team in teams:
         d_list = team_to_drivers.get(team, [])
         pts_sum = sum(driver_assigned_points.get(d, 0) for d in d_list)
-        if str(pts_sum).endswith(".5"):
-            pts_sum = math.ceil(pts_sum)
-        team_points_calc[team] = int(pts_sum)
+        pts_sum = round(pts_sum, 1)
+        team_points_calc[team] = int(pts_sum) if pts_sum == int(pts_sum) else pts_sum
         # SDDREQ-140: Display each team & expected points minus 0.5 (cannot be negative; automatically changes to 1.5)
         line_val = round(pts_sum - 0.5, 1)
         if line_val < 0:

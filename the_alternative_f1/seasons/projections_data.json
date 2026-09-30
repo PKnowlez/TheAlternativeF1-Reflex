@@ -974,14 +974,14 @@
     "expected_highest_score_team": "McLaren",
     "highest_expected_points": 54,
     "team_points_calc": {
-      "Audi": 0,
+      "Audi": 3,
       "Cadillac": 39,
-      "Ferrari": 12,
-      "Haas": 8,
+      "Ferrari": 13.5,
+      "Haas": 9.5,
       "McLaren": 54,
-      "Mercedes": 2,
+      "Mercedes": 5,
       "Red Bull": 22,
-      "Williams": 0
+      "Williams": 3
     },
     "expected_podium": [
       "McLaren",
@@ -989,14 +989,14 @@
       "Red Bull"
     ],
     "team_expected_lines": {
-      "Audi": 1.5,
+      "Audi": 2.5,
       "Cadillac": 38.5,
-      "Ferrari": 11.5,
-      "Haas": 7.5,
+      "Ferrari": 13.0,
+      "Haas": 9.0,
       "McLaren": 53.5,
-      "Mercedes": 1.5,
+      "Mercedes": 4.5,
       "Red Bull": 21.5,
-      "Williams": 1.5
+      "Williams": 2.5
     },
     "line_chart_data": [
       {

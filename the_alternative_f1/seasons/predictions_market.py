@@ -1873,7 +1873,6 @@ def _submit_prediction_modal() -> rx.Component:
         on_change=PredictionsMarketState.set_prediction_mode,
         width="100%",
         color_scheme="cyan",
-        margin_bottom="3",
     )
 
     # 1. Single Prediction View (Standard functionality)
@@ -1978,6 +1977,7 @@ def _submit_prediction_modal() -> rx.Component:
         ),
         spacing="3",
         width="100%",
+        padding_top="2",
     )
 
     # 2. Parlay Prediction View (TAF1APP-SDDREQ-169 & SDDREQ-170)
@@ -2202,18 +2202,17 @@ def _submit_prediction_modal() -> rx.Component:
         ),
         spacing="3",
         width="100%",
+        padding_top="2",
     )
 
     return rx.dialog.root(
         rx.dialog.content(
-            rx.dialog.title("Submit a Prediction", font_family="Outfit", font_weight="800", color="white"),
-            rx.dialog.description(
-                "Wager your Alternative Points against single lines or multi-leg parlays for the upcoming race.",
-                color="#A0A0AA",
-                font_size="xs",
-                margin_bottom="3",
+            rx.dialog.title("Submit a Prediction", font_family="Outfit", font_weight="800", color="white", margin_bottom="4"),
+            rx.box(
+                mode_toggle,
+                width="100%",
+                margin_bottom="4",
             ),
-            mode_toggle,
             rx.cond(
                 PredictionsMarketState.prediction_mode == "single",
                 single_view,
