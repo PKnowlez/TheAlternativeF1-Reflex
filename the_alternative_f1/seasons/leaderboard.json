@@ -1,74 +1,74 @@
 [
   {
     "user": "PK",
-    "all_time_pts": 173,
-    "s5": 173,
+    "all_time_pts": 185,
+    "s5": 185,
     "rank": 1,
     "rank_str": "1",
     "rank_color": "#FFD700",
     "rank_bg": "#FFD70022",
     "rank_border": "1px solid #FFD70044",
-    "pts_str": "173 pts",
-    "s5_str": "173 pts"
+    "pts_str": "185 pts",
+    "s5_str": "185 pts"
   },
   {
-    "user": "Jatthew Newman",
-    "all_time_pts": 112,
-    "s5": 112,
+    "user": "Nat",
+    "all_time_pts": 129,
+    "s5": 129,
     "rank": 2,
     "rank_str": "2",
     "rank_color": "#C0C0C0",
     "rank_bg": "#C0C0C022",
     "rank_border": "1px solid #C0C0C044",
-    "pts_str": "112 pts",
-    "s5_str": "112 pts"
+    "pts_str": "129 pts",
+    "s5_str": "129 pts"
   },
   {
-    "user": "Nat",
-    "all_time_pts": 106,
-    "s5": 106,
+    "user": "Jatthew Newman",
+    "all_time_pts": 112,
+    "s5": 112,
     "rank": 3,
     "rank_str": "3",
     "rank_color": "#CD7F32",
     "rank_bg": "#CD7F3222",
     "rank_border": "1px solid #CD7F3244",
-    "pts_str": "106 pts",
-    "s5_str": "106 pts"
+    "pts_str": "112 pts",
+    "s5_str": "112 pts"
   },
   {
     "user": "uhh_josh",
-    "all_time_pts": 102,
-    "s5": 102,
+    "all_time_pts": 112,
+    "s5": 112,
     "rank": 4,
     "rank_str": "4",
     "rank_color": "#888888",
     "rank_bg": "#88888822",
     "rank_border": "1px solid #88888844",
-    "pts_str": "102 pts",
-    "s5_str": "102 pts"
+    "pts_str": "112 pts",
+    "s5_str": "112 pts"
   },
   {
     "user": "brentuar",
-    "all_time_pts": 80,
-    "s5": 80,
+    "all_time_pts": 100,
+    "s5": 100,
     "rank": 5,
     "rank_str": "5",
     "rank_color": "#888888",
     "rank_bg": "#88888822",
     "rank_border": "1px solid #88888844",
-    "pts_str": "80 pts",
-    "s5_str": "80 pts"
+    "pts_str": "100 pts",
+    "s5_str": "100 pts"
   },
   {
     "user": "Jellywaffles37",
-    "all_time_pts": 40,
-    "s5": 40,
+    "all_time_pts": 64,
+    "s5": 64,
     "rank": 6,
     "rank_str": "6",
     "rank_color": "#888888",
     "rank_bg": "#88888822",
     "rank_border": "1px solid #88888844",
-    "pts_str": "40 pts",
-    "s5_str": "40 pts"
+    "pts_str": "64 pts",
+    "s5_str": "64 pts"
   }
 ]
