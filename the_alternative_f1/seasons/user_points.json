@@ -1,23 +1,23 @@
 {
   "PK": {
-    "points": 100,
-    "all_time_points": 100,
+    "points": 195,
+    "all_time_points": 195,
     "season_points": {
-      "5": 100
+      "5": 158
     }
   },
   "Jatthew Newman": {
-    "points": 100,
-    "all_time_points": 100,
+    "points": 112,
+    "all_time_points": 112,
     "season_points": {
-      "5": 100
+      "5": 112
     }
   },
   "uhh_josh": {
-    "points": 100,
-    "all_time_points": 100,
+    "points": 112,
+    "all_time_points": 112,
     "season_points": {
-      "5": 100
+      "5": 112
     }
   },
   "brentuar": {
@@ -28,10 +28,17 @@
     }
   },
   "Jellywaffles37": {
-    "points": 100,
-    "all_time_points": 100,
+    "points": 114,
+    "all_time_points": 114,
     "season_points": {
       "5": 100
+    }
+  },
+  "Nat": {
+    "points": 169,
+    "all_time_points": 169,
+    "season_points": {
+      "5": 146
     }
   }
 }
