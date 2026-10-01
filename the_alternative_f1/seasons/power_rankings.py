@@ -276,23 +276,33 @@ def calculate_all_seasons():
                 pass
     return data
 
+_EXCEL_PATH = Path(__file__).parent.parent / "The_Alternative_F1.xlsx"
 _power_rankings_cache = {}
+_power_rankings_mtime = 0
+
 if JSON_PATH.exists():
     try:
         with open(JSON_PATH, "r", encoding="utf-8") as f:
             _power_rankings_cache = json.load(f)
+        excel_mtime = _EXCEL_PATH.stat().st_mtime if _EXCEL_PATH.exists() else 0
+        if JSON_PATH.stat().st_mtime >= excel_mtime and all(str(s["season_number"]) in _power_rankings_cache for s in seasons):
+            _power_rankings_mtime = excel_mtime
     except Exception as e:
         print(f"Error reading power_rankings.json: {e}")
         _power_rankings_cache = {}
 
+
 def precompute_all_power_rankings(force: bool = False) -> dict:
     """Pre-calculates power rankings for all seasons and persists to power_rankings.json."""
-    global _power_rankings_cache
-    if not force and _power_rankings_cache and all(str(s["season_number"]) in _power_rankings_cache for s in seasons):
+    global _power_rankings_cache, _power_rankings_mtime
+    excel_mtime = _EXCEL_PATH.stat().st_mtime if _EXCEL_PATH.exists() else 0
+
+    if not force and _power_rankings_cache and _power_rankings_mtime == excel_mtime and all(str(s["season_number"]) in _power_rankings_cache for s in seasons):
         return _power_rankings_cache
 
     calculated_data = calculate_all_seasons()
     _power_rankings_cache.update(calculated_data)
+    _power_rankings_mtime = excel_mtime
     try:
         with open(JSON_PATH, "w", encoding="utf-8") as f:
             json.dump(_power_rankings_cache, f, indent=2)
@@ -300,11 +310,15 @@ def precompute_all_power_rankings(force: bool = False) -> dict:
         print(f"Error writing power_rankings.json: {e}")
     return _power_rankings_cache
 
+
 def load_power_rankings(season_num: int) -> dict:
-    global _power_rankings_cache
+    global _power_rankings_cache, _power_rankings_mtime
     s_key = str(season_num)
-    if s_key in _power_rankings_cache:
+    excel_mtime = _EXCEL_PATH.stat().st_mtime if _EXCEL_PATH.exists() else 0
+
+    if s_key in _power_rankings_cache and _power_rankings_mtime == excel_mtime:
         return _power_rankings_cache[s_key]
 
-    precompute_all_power_rankings()
+    precompute_all_power_rankings(force=True)
     return _power_rankings_cache.get(s_key, {"races": ["Preseason"], "rankings": {"Preseason": []}})
+

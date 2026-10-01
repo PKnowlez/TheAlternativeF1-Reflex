@@ -28,23 +28,23 @@
       "season": 5,
       "next_race": "Monza",
       "next_main_race": "Monza",
-      "expected_winner": "Cadillac",
-      "expected_winner_prob": 48.7,
-      "expected_highest_score_team": "Cadillac",
-      "expected_highest_score_pts": 26,
+      "expected_winner": "Mercedes",
+      "expected_winner_prob": 54.3,
+      "expected_highest_score_team": "Mercedes",
+      "expected_highest_score_pts": 29,
       "expected_podium": [
+        "Mercedes",
         "Cadillac",
-        "McLaren",
         "Red Bull"
       ],
       "expected_points_lines": {
         "Audi": 1.5,
-        "Cadillac": 25.5,
-        "Ferrari": 6.5,
-        "Haas": 2.5,
-        "McLaren": 24.5,
-        "Mercedes": 25.5,
-        "Red Bull": 17.5,
+        "Cadillac": 27.5,
+        "Ferrari": 4.5,
+        "Haas": 1.5,
+        "McLaren": 17.5,
+        "Mercedes": 28.5,
+        "Red Bull": 22.5,
         "Williams": 1.5
       }
     }
