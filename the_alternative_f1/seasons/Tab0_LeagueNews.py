@@ -18,7 +18,7 @@ def Tab0(season_data: dict, select_article = None, season_articles_expanded = No
     configured_articles = season_data.get("articles", [])
 
     # Ensure thumbnail paths use the custom domain
-    from the_alternative_f1.articles.components import rewrite_r2_url
+    from the_alternative_f1.articles.components import rewrite_r2_url, fia_badge
     for art in configured_articles:
         if "image" in art and isinstance(art["image"], str):
             art["image"] = rewrite_r2_url(art["image"])
@@ -60,6 +60,7 @@ def Tab0(season_data: dict, select_article = None, season_articles_expanded = No
 
     # Render matching article cards
     def news_card(article: dict) -> rx.Component:
+        has_fia = bool(article.get("fia", False))
         return rx.box(
             rx.vstack(
                 rx.image(
@@ -69,19 +70,30 @@ def Tab0(season_data: dict, select_article = None, season_articles_expanded = No
                     object_fit="contain",
                 ),
                 rx.vstack(
-                    rx.text(
-                        article.get("date", ""),
-                        font_size="10px",
-                        color="#00b4da",
-                        font_weight="bold",
-                        text_transform="uppercase",
-                    ),
-                    rx.heading(
-                        article.get("title", ""),
-                        size="4",
-                        color="white",
-                        font_family="Outfit",
-                        font_weight="700",
+                    rx.hstack(
+                        rx.vstack(
+                            rx.text(
+                                article.get("date", ""),
+                                font_size="10px",
+                                color="#00b4da",
+                                font_weight="bold",
+                                text_transform="uppercase",
+                            ),
+                            rx.heading(
+                                article.get("title", ""),
+                                size="4",
+                                color="white",
+                                font_family="Outfit",
+                                font_weight="700",
+                            ),
+                            spacing="1",
+                            align_items="start",
+                            flex="1",
+                        ),
+                        fia_badge(font_size="15px", padding_x="14px") if has_fia else rx.fragment(),
+                        width="100%",
+                        justify="between",
+                        align="stretch",
                     ),
                     rx.text(
                         article.get("blurb", ""),

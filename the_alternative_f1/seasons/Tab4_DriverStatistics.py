@@ -13,6 +13,7 @@ from the_alternative_f1.articles.components import (
     zoomable_chart,
     chart_card,
 )
+from the_alternative_f1.race_metrics import parse_status
 
 
 def is_truthy(val) -> bool:
@@ -65,16 +66,30 @@ def Tab4(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
             color="#00b4da",
             font_weight="bold",
             font_size="11px",
+            vertical_align="bottom",
+            padding_bottom="8px",
         )
     ]
     for r in races_points_only:
         sl_header_cells.append(
             rx.table.column_header_cell(
-                str(r),
-                color="#00b4da",
-                font_weight="bold",
-                font_size="11px",
+                rx.box(
+                    rx.text(
+                        str(r),
+                        color="#00b4da",
+                        font_weight="bold",
+                        font_size="11px",
+                        white_space="nowrap",
+                    ),
+                    writing_mode="vertical-rl",
+                    transform="rotate(180deg)",
+                    margin="0 auto",
+                    display="inline-block",
+                ),
                 text_align="center",
+                vertical_align="bottom",
+                padding_bottom="8px",
+                padding_x="4px",
             )
         )
     sl_header_cells.append(
@@ -84,6 +99,8 @@ def Tab4(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
             font_weight="bold",
             font_size="11px",
             text_align="center",
+            vertical_align="bottom",
+            padding_bottom="8px",
         )
     )
 
@@ -202,12 +219,31 @@ def Tab4(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
         driver_name = new_df["Driver"].iloc[i]
         driver_points = new_df.iloc[i, 1:].tolist()
 
+        index_a = int(index_x + 0.5)
+        num_completed = index_a
+
+        # Retrieve place, qualifying, and pos change series for this driver
+        driver_qualifying = []
+        driver_place_list = []
+        driver_pos_changes = []
+
+        if new_df_EffectiveQ is not None and len(new_df_EffectiveQ.columns) > 1:
+            driver_qualifying = new_df_EffectiveQ.iloc[i, 1:index_a + 1].tolist()
+        elif len(new_df_Q.columns) > 1:
+            driver_qualifying = new_df_Q.iloc[i, 1:index_a + 1].tolist()
+
+        if new_df_EffectivePlace is not None and len(new_df_EffectivePlace.columns) > 1:
+            driver_place_list = new_df_EffectivePlace.iloc[i, 1:index_a + 1].tolist()
+        elif len(new_df_Place.columns) > 1:
+            driver_place_list = new_df_Place.iloc[i, 1:index_a + 1].tolist()
+
+        if new_df_PosChange is not None and len(new_df_PosChange.columns) > 1:
+            driver_pos_changes = new_df_PosChange.iloc[i, 1:index_a + 1].tolist()
+
+        raw_places = new_df_Place.iloc[i, 1:index_a + 1].tolist() if (new_df_Place is not None and len(new_df_Place.columns) > 1) else []
+
         # ── Points per race bar chart ────────────────────────────────────
         pts_bar_data = []
-        num_completed = int(season_data.get("index_x", 0) + 0.5) if "index_x" in season_data else int(new_df.columns.size - 1)
-        # Wait, calculations data has "index_x", but let's check: Calculations returns "index_x" in the data dict!
-        # So since the function parameter is `data: dict`, we can do:
-        num_completed = int(data["index_x"] + 0.5)
         for j in range(num_completed):
             race = races_points_only[j]
             pts = driver_points[j] if j < len(driver_points) else 0
@@ -244,42 +280,65 @@ def Tab4(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
             download_position=pos_pts,
         )
 
-        # ── Best finish ──────────────────────────────────────────────────
-        valid_pts = [p for p in driver_points if not pd.isnull(p)]
-        highest_score = max(valid_pts) if valid_pts else 0
-        idx_best = driver_points.index(highest_score) if highest_score > 0 else 0
+        # ── Best finish (based on actual finishing place) ───────────────
+        best_race_info = None
+        for j in range(index_a):
+            raw_p = raw_places[j] if j < len(raw_places) else None
+            p_val = driver_place_list[j] if j < len(driver_place_list) else None
+            status_p = parse_status(raw_p, season_num) if raw_p is not None else parse_status(p_val, season_num)
+            if status_p in ("EMPTY", "DNS") or (p_val is None and raw_p is None) or (pd.isnull(p_val) and pd.isnull(raw_p)):
+                continue
 
-        place_labels = {
-            25: "1st", 18: "2nd", 15: "3rd", 12: "4th",
-            10: "5th", 8: "6th", 6: "7th", 4: "8th", 3: "9th",
-        }
-        place = "10th+"
-        for threshold, label in place_labels.items():
-            if highest_score >= threshold:
-                place = label
-                break
+            pts = float(driver_points[j]) if j < len(driver_points) and not pd.isnull(driver_points[j]) else 0.0
+            race = races_points_only[j] if j < len(races_points_only) else "—"
 
-        best_race = races_points_only[idx_best] if idx_best < len(races_points_only) else "—"
-        best_finish = f"Best: {place} at {best_race} ({highest_score} pts)"
+            if status_p == "FINISH":
+                try:
+                    p_num = int(float(raw_p if raw_p is not None and not pd.isnull(raw_p) else p_val))
+                except (ValueError, TypeError):
+                    p_num = 99
+                rank = (0, p_num, -pts)
+                suffix = "st" if p_num == 1 else "nd" if p_num == 2 else "rd" if p_num == 3 else "th"
+                label = f"{p_num}{suffix}"
+            else:
+                rank = (1, 99, -pts)
+                label = status_p
 
-        # ── Wins ─────────────────────────────────────────────────────────
-        wins = sum(1 for p in valid_pts if p >= 25)
+            if best_race_info is None or rank < best_race_info["rank"]:
+                pts_str = f"{pts:.1f}" if pts % 1 != 0 else f"{int(pts)}"
+                best_race_info = {
+                    "rank": rank,
+                    "label": label,
+                    "race": race,
+                    "pts_str": pts_str,
+                }
 
-        # ── Podiums ──────────────────────────────────────────────────────
-        podiums = sum(1 for p in valid_pts if p >= 15)
+        if best_race_info:
+            best_finish = f"Best: {best_race_info['label']} at {best_race_info['race']} ({best_race_info['pts_str']} pts)"
+        else:
+            best_finish = "Best: —"
 
-        # ── Total points ─────────────────────────────────────────────────
-        total_pts = sum(valid_pts)
-
-        # ── Placement summary chart ──────────────────────────────────────
+        # ── Placement summary chart (based on actual finishing place) ───
         placements = [0] * 10
         places_list = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th+"]
-        thresholds = [25, 18, 15, 12, 10, 8, 6, 4, 3, 0.5]
-        for val in valid_pts:
-            for k, t in enumerate(thresholds):
-                if val >= t:
-                    placements[k] += 1
-                    break
+        for j in range(index_a):
+            raw_p = raw_places[j] if j < len(raw_places) else None
+            p_val = driver_place_list[j] if j < len(driver_place_list) else None
+            status_p = parse_status(raw_p, season_num) if raw_p is not None else parse_status(p_val, season_num)
+            if status_p in ("EMPTY", "DNS") or (p_val is None and raw_p is None) or (pd.isnull(p_val) and pd.isnull(raw_p)):
+                continue
+
+            if status_p == "FINISH":
+                try:
+                    p_num = int(float(raw_p if raw_p is not None and not pd.isnull(raw_p) else p_val))
+                except (ValueError, TypeError):
+                    p_num = int(float(p_val)) if p_val is not None and not pd.isnull(p_val) else 10
+                if 1 <= p_num <= 9:
+                    placements[p_num - 1] += 1
+                elif p_num >= 10:
+                    placements[9] += 1
+            elif status_p in ("DNF", "DSQ"):
+                placements[9] += 1
 
         placement_data = [{"place": places_list[k], "count": placements[k]} for k in range(10)]
 
@@ -310,30 +369,19 @@ def Tab4(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
             download_position=pos_plc,
         )
 
+        # ── Wins & Podiums (derived directly from actual finishing places) ──
+        wins = placements[0]
+        podiums = sum(placements[:3])
+
+        # ── Total points ─────────────────────────────────────────────────
+        valid_pts = [p for p in driver_points if not pd.isnull(p)]
+        total_pts = sum(valid_pts)
+
         # ── Fastest laps ────────────────────────────────────────────────
         fl_count = 0
         if len(new_df_FL.columns) > 1:
             fl_values = new_df_FL.iloc[i, 1:].tolist()
             fl_count = sum(1 for v in fl_values if is_truthy(v))
-
-        # ── Qualifying vs place analysis ────────────────────────────────
-        index_a = int(index_x + 0.5)
-        driver_qualifying = []
-        driver_place_list = []
-        driver_pos_changes = []
-
-        if new_df_EffectiveQ is not None and len(new_df_EffectiveQ.columns) > 1:
-            driver_qualifying = new_df_EffectiveQ.iloc[i, 1:index_a + 1].tolist()
-        elif len(new_df_Q.columns) > 1:
-            driver_qualifying = new_df_Q.iloc[i, 1:index_a + 1].tolist()
-
-        if new_df_EffectivePlace is not None and len(new_df_EffectivePlace.columns) > 1:
-            driver_place_list = new_df_EffectivePlace.iloc[i, 1:index_a + 1].tolist()
-        elif len(new_df_Place.columns) > 1:
-            driver_place_list = new_df_Place.iloc[i, 1:index_a + 1].tolist()
-
-        if new_df_PosChange is not None and len(new_df_PosChange.columns) > 1:
-            driver_pos_changes = new_df_PosChange.iloc[i, 1:index_a + 1].tolist()
 
         # Positions gained/lost (exclude DNS / unrun races)
         pos_change_data = []
@@ -419,11 +467,19 @@ def Tab4(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
 
         for j in range(num_completed):
             race_name = str(races_points_only[j]).strip() if j < len(races_points_only) else ""
-            p_val = driver_points[j] if j < len(driver_points) and not pd.isnull(driver_points[j]) else 0
-            plc_val = driver_place_list[j] if j < len(driver_place_list) else (1.0 if p_val >= 25 else 0.0)
+            raw_p = raw_places[j] if j < len(raw_places) else None
+            p_val = driver_place_list[j] if j < len(driver_place_list) else None
+            status_p = parse_status(raw_p, season_num) if raw_p is not None else parse_status(p_val, season_num)
+
+            p_finish = None
+            if status_p == "FINISH":
+                try:
+                    p_finish = float(raw_p if raw_p is not None and not pd.isnull(raw_p) else p_val)
+                except (ValueError, TypeError):
+                    p_finish = float(p_val) if p_val is not None and not pd.isnull(p_val) else None
 
             # Single season win streak logic (consecutive 1st place finishes)
-            if plc_val == 1 or p_val >= 25:
+            if p_finish == 1.0:
                 curr_ss_win_streak += 1
                 max_ss_win_streak = max(max_ss_win_streak, curr_ss_win_streak)
             else:
@@ -433,7 +489,7 @@ def Tab4(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
             if race_name.startswith(("Pre", "Post")) or "Sprint" in race_name:
                 continue
 
-            is_podium = (1.0 <= plc_val <= 3.0) or (p_val >= 15)
+            is_podium = (p_finish is not None and 1.0 <= p_finish <= 3.0)
             if is_podium:
                 curr_ss_podium_streak += 1
                 max_ss_podium_streak = max(max_ss_podium_streak, curr_ss_podium_streak)

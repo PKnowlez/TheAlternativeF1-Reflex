@@ -549,10 +549,12 @@
                     item.style.boxShadow = 'none';
                     if (textEl) textEl.style.color = '#FFFFFF';
                 } else {
-                    const isKeyMatch = Boolean(
-                        (cleanActive && iName && iName === cleanActive) ||
-                        (normActiveColor && iColor && iColor === normActiveColor)
-                    );
+                    let isKeyMatch = false;
+                    if (cleanActive && iName) {
+                        isKeyMatch = (iName === cleanActive);
+                    } else if (normActiveColor && iColor) {
+                        isKeyMatch = (iColor === normActiveColor);
+                    }
                     if (isKeyMatch) {
                         item.style.opacity = '1.0';
                         item.style.borderColor = '#00b4da';
@@ -765,17 +767,11 @@
                     // Find key item by strict entity name or exact normalized color
                     const keyItems = Array.from(document.querySelectorAll(`[data-key-for-chart="${chartId}"] .taf1-chart-key-item`));
                     let matchedKeyItem = null;
-                    for (const ki of keyItems) {
-                        const kiName = extractEntityName(ki.getAttribute('data-name'));
-                        const kiColor = normalizeColor(ki.getAttribute('data-color'));
-                        if (cleanLineName && kiName === cleanLineName) {
-                            matchedKeyItem = ki;
-                            break;
-                        }
-                        if (normColor && kiColor === normColor) {
-                            matchedKeyItem = ki;
-                            break;
-                        }
+                    if (cleanLineName) {
+                        matchedKeyItem = keyItems.find(ki => extractEntityName(ki.getAttribute('data-name')) === cleanLineName);
+                    }
+                    if (!matchedKeyItem && normColor) {
+                        matchedKeyItem = keyItems.find(ki => normalizeColor(ki.getAttribute('data-color')) === normColor);
                     }
 
                     if (matchedKeyItem) {

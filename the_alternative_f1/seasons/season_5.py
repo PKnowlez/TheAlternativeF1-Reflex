@@ -23,6 +23,7 @@ from the_alternative_f1.articles.Season5.Race_Week.imola_race_week import articl
 from the_alternative_f1.articles.Season5.Race_Recap.imola_race_recap import article as Imola_Race_Recap_Article
 from the_alternative_f1.articles.Season5.Bye_Week.bye_week1 import article as Bye_Week_Article1
 from the_alternative_f1.articles.Season5.Race_Week.miami_race_week import article as Miami_Race_Week_Article
+from the_alternative_f1.articles.Season5.Race_Recap.miami_race_recap import article as Miami_Race_Recap_Article
 
 season = {
     "season_number": 5,
@@ -32,7 +33,8 @@ season = {
     # Rookies: drivers not present in Season 4
     "rookies": {"Grayson", "Josh C.", "Randy", "Evelo"},
 
-    "articles": [Miami_Race_Week_Article, Bye_Week_Article1, Imola_Race_Recap_Article, 
+    "articles": [Miami_Race_Recap_Article, 
+    Miami_Race_Week_Article, Bye_Week_Article1, Imola_Race_Recap_Article, 
     Imola_Race_Week_Article, Australia_Race_Recap_Article, Australia_Race_Week_Article, 
     TrophyReveal_Article, Hungary_Recap_Article, TrophyTeaser_Article, 
     Vegas_Recap_Article, Mexico_Recap_Article, Preseason_Article, 
@@ -72,22 +74,22 @@ season = {
     },
 
     "super_license_points": {
-        "Joshua":   [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        "Eddie":    [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        "Nick":     [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        "Del":      [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        "Patrick":  [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        "Josh":     [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        "Matthew":  [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        "Brently":  [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        "Grayson":  [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        "Josh C.":  [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        "Boz":      [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        "Evelo":    [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        "Jaden":    [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        "Leo":      [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        "Jairo":    [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        "Randy":    [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Joshua":   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Eddie":    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Nick":     [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Del":      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Patrick":  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Josh":     [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Matthew":  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Brently":  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Grayson":  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Josh C.":  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Boz":      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Evelo":    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Jaden":    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Leo":      [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Jairo":    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        "Randy":    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
     },
 
     "preseason_power_rankings": [

@@ -211,15 +211,19 @@ def Calculations(season_data: dict, sprint_only: bool = False) -> dict:
 
     # ── Filtered DataFrames for driver stats ─────────────────────────────
     points_columns = [col for col in df.columns if col.endswith(("Points", "SprintPoints"))]
+    filtered_place_columns = [col for col in place_columns]
+    filtered_qualifying_columns = [col for col in qualifying_columns]
     if sprint_only and has_sprint:
         points_columns = [col for col in points_columns if "Sprint" in col]
+        filtered_place_columns = [col for col in filtered_place_columns if "Sprint" in col]
+        filtered_qualifying_columns = [col for col in filtered_qualifying_columns if "Sprint" in col]
 
     new_df = df.set_index("Driver")[points_columns].reset_index()
     new_df_FL = df.set_index("Driver")[fastest_lap_columns].reset_index() if fastest_lap_columns else pd.DataFrame({"Driver": df["Driver"]})
     new_df_DOTD = df.set_index("Driver")[DOTD_columns].reset_index() if DOTD_columns else pd.DataFrame({"Driver": df["Driver"]})
     new_df_MOT = df.set_index("Driver")[MOT_columns].reset_index() if MOT_columns else pd.DataFrame({"Driver": df["Driver"]})
-    new_df_Q = df.set_index("Driver")[qualifying_columns].reset_index() if qualifying_columns else pd.DataFrame({"Driver": df["Driver"]})
-    new_df_Place = df.set_index("Driver")[place_columns].reset_index() if place_columns else pd.DataFrame({"Driver": df["Driver"]})
+    new_df_Q = df.set_index("Driver")[filtered_qualifying_columns].reset_index() if filtered_qualifying_columns else pd.DataFrame({"Driver": df["Driver"]})
+    new_df_Place = df.set_index("Driver")[filtered_place_columns].reset_index() if filtered_place_columns else pd.DataFrame({"Driver": df["Driver"]})
     new_df_CD = df.set_index("Driver")[CD_columns].reset_index() if CD_columns else pd.DataFrame({"Driver": df["Driver"]})
 
     # ── Dynamic race metrics (positions gained/lost with dynamic competitor count) ──
@@ -228,7 +232,7 @@ def Calculations(season_data: dict, sprint_only: bool = False) -> dict:
     effective_qual_dict = {"Driver": df["Driver"].tolist()}
     pos_change_dict = {"Driver": df["Driver"].tolist()}
 
-    for col in place_columns:
+    for col in filtered_place_columns:
         qual_col = col.replace("Place", "Qualifying")
         q_col_name = qual_col if qual_col in df.columns else None
         start_col = col.replace("Place", "Starting")

@@ -258,4 +258,5 @@ article = {
     "author": "System Administrator",
     "date": "June 24, 2026",
     "season": 5,
+    "fia": True,
 }

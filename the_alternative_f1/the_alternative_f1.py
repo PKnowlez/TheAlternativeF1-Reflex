@@ -67,7 +67,7 @@ KNOWN_CAR_ICONS = {
 
 from the_alternative_f1.constructor_colors import CONSTRUCTOR_COLORS, get_constructor_color
 from the_alternative_f1.articles import articles
-from the_alternative_f1.articles.components import DownloadState
+from the_alternative_f1.articles.components import DownloadState, fia_badge
 from the_alternative_f1.regulations_settings.Regulations import Regulations as regulations_content
 from the_alternative_f1.regulations_settings.Settings import Settings as settings_content
 from the_alternative_f1.all_time_stats.ConstructorAllTime import constructor_stats_view
@@ -1511,31 +1511,43 @@ def header() -> rx.Component:
 
 def article_card(article: dict) -> rx.Component:
     """A card showcasing an article."""
+    has_fia = bool(article.get("fia", False))
     return rx.box(
         rx.vstack(
             rx.image(
-                src=article["image"],
+                src=article.get("image", ""),
                 width="100%",
                 height="auto",
                 object_fit="contain",
             ),
             rx.vstack(
-                rx.text(
-                    article["date"],
-                    font_size="10px",
-                    color="#00b4da",
-                    font_weight="bold",
-                    text_transform="uppercase",
+                rx.hstack(
+                    rx.vstack(
+                        rx.text(
+                            article.get("date", ""),
+                            font_size="10px",
+                            color="#00b4da",
+                            font_weight="bold",
+                            text_transform="uppercase",
+                        ),
+                        rx.heading(
+                            article.get("title", ""),
+                            size="4",
+                            color="white",
+                            font_family="Outfit",
+                            font_weight="700",
+                        ),
+                        spacing="1",
+                        align_items="start",
+                        flex="1",
+                    ),
+                    fia_badge(font_size="15px", padding_x="14px") if has_fia else rx.fragment(),
+                    width="100%",
+                    justify="between",
+                    align="stretch",
                 ),
-                rx.heading(
-                    article["title"],
-                    size="4",
-                    color="white",
-                    font_family="Outfit",
-                    font_weight="700",
-                ),
                 rx.text(
-                    article["blurb"],
+                    article.get("blurb", ""),
                     font_size="sm",
                     color="#CCCCCC",
                 ),
@@ -2359,6 +2371,7 @@ def comments_popout_panel() -> rx.Component:
 def article_detail() -> rx.Component:
     """The detailed article reading view."""
     def build_reader(article: dict) -> rx.Component:
+        has_fia = bool(article.get("fia", False))
         return rx.vstack(
             rx.image(
                 src=article["image"],
@@ -2372,18 +2385,32 @@ def article_detail() -> rx.Component:
             ),
             rx.vstack(
                 rx.hstack(
-                    rx.badge(article["date"], color_scheme="cyan", variant="solid"),
-                    rx.text(f"Written by {article['author']}", color="#888888", font_size="sm"),
-                    spacing="4",
+                    rx.vstack(
+                        rx.hstack(
+                            rx.badge(article.get("date", ""), color_scheme="cyan", variant="solid"),
+                            rx.text(f"Written by {article.get('author', '')}", color="#888888", font_size="sm"),
+                            spacing="4",
+                            align_items="center",
+                        ),
+                        rx.heading(
+                            article.get("title", ""),
+                            size="7",
+                            color="white",
+                            font_weight="900",
+                            margin_top="2",
+                            margin_bottom="0",
+                            line_height="1.2",
+                        ),
+                        spacing="1",
+                        align_items="start",
+                        flex="1",
+                    ),
+                    fia_badge(font_size="24px", padding_x="18px", letter_spacing="-1px") if has_fia else rx.fragment(),
+                    width="100%",
+                    justify="between",
+                    align="stretch",
                     margin_top="4",
-                ),
-                rx.heading(
-                    article["title"],
-                    size="7",
-                    color="white",
-                    font_weight="900",
-                    margin_y="4",
-                    line_height="1.2",
+                    margin_bottom="4",
                 ),
                 rx.vstack(
                     *[

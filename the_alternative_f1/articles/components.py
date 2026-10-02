@@ -1144,3 +1144,32 @@ def image_carousel(
     )
 
 
+def fia_badge(
+    font_size: str = "15px",
+    padding_x: str = "14px",
+    letter_spacing: str = "-0.5px",
+    **kwargs,
+) -> rx.Component:
+    """An FIA badge component rendered as a red rectangle with rounded corners,
+    stretching dynamically to the exact height of its sibling content.
+    """
+    return rx.center(
+        rx.text(
+            "FiA",
+            color="#FFFFFF",
+            font_weight="900",
+            font_family="Outfit",
+            font_size=font_size,
+            letter_spacing=letter_spacing,
+            line_height="1",
+            user_select="none",
+        ),
+        bg="#E10600",
+        border_radius="6px",
+        padding_x=padding_x,
+        align_self="stretch",
+        flex_shrink="0",
+        **kwargs,
+    )
+
+

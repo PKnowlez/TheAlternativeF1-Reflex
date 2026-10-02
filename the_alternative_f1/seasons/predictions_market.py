@@ -189,8 +189,18 @@ def _load_local_predictions() -> list[dict]:
 
 def _save_local_predictions(data: list[dict]):
     global _PREDICTIONS_CACHE
-    by_s = {}
+    seen_ids = set()
+    deduped_data = []
     for p in data:
+        pid = str(p.get("id")) if p.get("id") is not None else None
+        if pid is not None:
+            if pid in seen_ids:
+                continue
+            seen_ids.add(pid)
+        deduped_data.append(p)
+
+    by_s = {}
+    for p in deduped_data:
         s = int(p.get("season", 5))
         if s not in by_s:
             by_s[s] = []
@@ -198,7 +208,7 @@ def _save_local_predictions(data: list[dict]):
     _PREDICTIONS_CACHE.update(by_s)
     try:
         with open(PREDICTIONS_JSON, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2)
+            json.dump(deduped_data, f, indent=2)
     except Exception as e:
         print(f"Error saving predictions.json: {e}")
 
@@ -207,7 +217,13 @@ def _save_local_predictions(data: list[dict]):
 _load_local_user_points()
 if PREDICTIONS_JSON.exists():
     _init_preds = _load_local_predictions()
+    _init_seen = set()
     for _p in _init_preds:
+        _pid = str(_p.get("id")) if _p.get("id") is not None else None
+        if _pid is not None:
+            if _pid in _init_seen:
+                continue
+            _init_seen.add(_pid)
         _s = int(_p.get("season", 5))
         if _s not in _PREDICTIONS_CACHE:
             _PREDICTIONS_CACHE[_s] = []
@@ -788,6 +804,7 @@ def precompute_all_predictions(force: bool = False):
             except Exception:
                 pass
 
+        season_preds = []
         if sb:
             for attempt in range(2):
                 try:
@@ -796,8 +813,7 @@ def precompute_all_predictions(force: bool = False):
                         preds = list(res.data)
                         for p in preds:
                             p["username"] = normalize_username(p.get("username", ""))
-                        _PREDICTIONS_CACHE[s_num] = preds
-                        all_preds.extend(preds)
+                        season_preds = preds
                         break
                 except (BlockingIOError, OSError):
                     time.sleep(0.3)
@@ -806,9 +822,16 @@ def precompute_all_predictions(force: bool = False):
                     break
 
         local_s_preds = [p for p in _load_local_predictions() if int(p.get("season", 5)) == s_num]
-        if s_num not in _PREDICTIONS_CACHE:
-            _PREDICTIONS_CACHE[s_num] = local_s_preds
-        all_preds.extend(local_s_preds)
+        seen_s_ids = {str(p.get("id")) for p in season_preds if p.get("id") is not None}
+        for lp in local_s_preds:
+            lpid = str(lp.get("id")) if lp.get("id") is not None else None
+            if lpid is None or lpid not in seen_s_ids:
+                season_preds.append(lp)
+                if lpid is not None:
+                    seen_s_ids.add(lpid)
+
+        _PREDICTIONS_CACHE[s_num] = season_preds
+        all_preds.extend(season_preds)
 
     _save_local_predictions(all_preds)
 
@@ -817,13 +840,12 @@ def precompute_all_predictions(force: bool = False):
 def insert_prediction(pred: dict) -> bool:
     """Inserts a new prediction record into database and local storage."""
     global _PREDICTIONS_CACHE
+    pred_id_str = str(pred.get("id")) if pred.get("id") is not None else None
     local_preds = _load_local_predictions()
+    if pred_id_str is not None:
+        local_preds = [p for p in local_preds if str(p.get("id")) != pred_id_str]
     local_preds.insert(0, pred)
     _save_local_predictions(local_preds)
-
-    s_num = int(pred.get("season", 5))
-    if s_num in _PREDICTIONS_CACHE:
-        _PREDICTIONS_CACHE[s_num].insert(0, pred)
 
     sb = _get_supabase()
     if sb:
@@ -1377,6 +1399,7 @@ class PredictionsMarketState(rx.State):
 
     # Submit Prediction Modal state
     modal_open: bool = False
+    is_submitting: bool = False
     wager_scope: str = "next_race"  # "next_race" or "full_season" (TAF1APP-SDDREQ-171)
     prediction_mode: str = "single"  # "single" or "parlay" (TAF1APP-SDDREQ-169)
     selected_category: str = "Expected Race Winner"
@@ -1995,7 +2018,13 @@ class PredictionsMarketState(rx.State):
         _ = self.refresh_trigger
         preds = get_all_predictions(5)
         res = []
+        seen_ids = set()
         for p in preds:
+            pid = str(p.get("id")) if p.get("id") is not None else None
+            if pid is not None:
+                if pid in seen_ids:
+                    continue
+                seen_ids.add(pid)
             item = dict(p)
             item["is_mine"] = (p.get("username") == self.current_user)
             item["can_delete"] = (p.get("username") == self.current_user and p.get("status") == "open" and not self.is_locked)
@@ -2055,18 +2084,25 @@ class PredictionsMarketState(rx.State):
 
             status_val = str(p.get("status", "open")).lower()
             item["status_upper"] = status_val.upper()
+            payout_val = int(p.get("payout", 0))
             if status_val == "correct":
                 item["status_color"] = "#00b4da"
                 item["status_bg"] = "rgba(0, 180, 218, 0.18)"
                 item["status_border"] = "1px solid rgba(0, 180, 218, 0.4)"
+                item["payout_display"] = f"{payout_val} pts"
+                item["payout_color"] = "#00b4da"
             elif status_val == "incorrect":
                 item["status_color"] = "#FF8C00"
                 item["status_bg"] = "rgba(255, 140, 0, 0.18)"
                 item["status_border"] = "1px solid rgba(255, 140, 0, 0.4)"
+                item["payout_display"] = "0"
+                item["payout_color"] = "#888888"
             else:
                 item["status_color"] = "#D0D0D5"
                 item["status_bg"] = "rgba(255, 255, 255, 0.08)"
                 item["status_border"] = "1px solid rgba(255, 255, 255, 0.15)"
+                item["payout_display"] = "-"
+                item["payout_color"] = "#888888"
             item["points_display"] = f"{p.get('points', 0)} pts"
             res.append(item)
         return res
@@ -2285,113 +2321,119 @@ class PredictionsMarketState(rx.State):
         return build_user_metrics_donut_svg(self.all_predictions_list, "user-metrics-donut-svg")
 
     async def submit_prediction(self):
-        username = self.current_user
-        if not username:
-            self.feedback_message = "Please log in with Discord first."
+        if self.is_submitting:
             return
-
-        if self.is_locked:
-            self.feedback_message = "Predictions are currently locked for this race."
-            return
-
-        wager_str = str(self.wager_amount).strip()
-        if not wager_str:
-            self.feedback_message = "Please enter a wager amount before submitting."
-            return
-
+        self.is_submitting = True
         try:
-            wager_val = int(wager_str)
-            if wager_val <= 0:
-                self.feedback_message = "Wager amount must be at least 1 point."
-                return
-        except (ValueError, TypeError):
-            self.feedback_message = "Please enter a valid numeric wager amount."
-            return
-
-        rem = self.user_remaining_points
-        if wager_val > rem:
-            self.feedback_message = f"Insufficient points. You only have {rem} points available."
-            return
-
-        is_fs = (self.wager_scope == "full_season")
-        rem_races = len(get_remaining_feature_races(5))
-
-        if is_fs:
-            race_name = "Season 5"
-            lines = {}
-        else:
-            proj = compute_season_projections(5)
-            race_name = proj.get("next_main_race", proj.get("next_race", "Upcoming Race"))
-            lines = proj.get("team_expected_lines", {})
-
-        import time
-        pred_id = int(time.time() * 1000)
-
-        if self.prediction_mode == "parlay":
-            if len(self.parlay_legs) < 2:
-                self.feedback_message = "Parlay must contain at least 2 legs."
+            username = self.current_user
+            if not username:
+                self.feedback_message = "Please log in with Discord first."
                 return
 
-            enriched_legs = []
-            for leg in self.parlay_legs:
-                leg_copy = dict(leg)
-                if not is_fs and leg_copy.get("category") == "Expected Points":
-                    leg_copy["line_value"] = lines.get(leg_copy.get("target"), 0.0)
-                else:
-                    leg_copy["line_value"] = None
-                enriched_legs.append(leg_copy)
+            if self.is_locked:
+                self.feedback_message = "Predictions are currently locked for this race."
+                return
 
-            num_legs = len(enriched_legs)
-            cat_label = f"[Full Season] Parlay ({num_legs} Legs)" if is_fs else f"Parlay ({num_legs} Legs)"
-            new_pred = {
-                "id": pred_id,
-                "username": username,
-                "season": 5,
-                "race": race_name,
-                "category": cat_label,
-                "target": json.dumps(enriched_legs),
-                "line_value": float(rem_races) if is_fs else None,
-                "stance": "PARLAY",
-                "points": wager_val,
-                "status": "open",
-                "payout": 0,
-                "created_at": datetime.now(timezone.utc).isoformat(),
-            }
-        else:
+            wager_str = str(self.wager_amount).strip()
+            if not wager_str:
+                self.feedback_message = "Please enter a wager amount before submitting."
+                return
+
+            try:
+                wager_val = int(wager_str)
+                if wager_val <= 0:
+                    self.feedback_message = "Wager amount must be at least 1 point."
+                    return
+            except (ValueError, TypeError):
+                self.feedback_message = "Please enter a valid numeric wager amount."
+                return
+
+            rem = self.user_remaining_points
+            if wager_val > rem:
+                self.feedback_message = f"Insufficient points. You only have {rem} points available."
+                return
+
+            is_fs = (self.wager_scope == "full_season")
+            rem_races = len(get_remaining_feature_races(5))
+
             if is_fs:
-                cat_label = f"[Full Season] {self.selected_category}"
-                stance_val = "—" if not self.has_stance else self.selected_stance
-                line_val = float(rem_races)
+                race_name = "Season 5"
+                lines = {}
             else:
-                cat_label = self.selected_category
-                stance_val = self.selected_stance
-                line_val = lines.get(self.selected_target, 0.0) if self.selected_category == "Expected Points" else None
+                proj = compute_season_projections(5)
+                race_name = proj.get("next_main_race", proj.get("next_race", "Upcoming Race"))
+                lines = proj.get("team_expected_lines", {})
 
-            new_pred = {
-                "id": pred_id,
-                "username": username,
-                "season": 5,
-                "race": race_name,
-                "category": cat_label,
-                "target": self.selected_target,
-                "line_value": line_val,
-                "stance": stance_val,
-                "points": wager_val,
-                "status": "open",
-                "payout": 0,
-                "created_at": datetime.now(timezone.utc).isoformat(),
-            }
+            import time
+            pred_id = int(time.time() * 1000)
 
-        insert_prediction(new_pred)
+            if self.prediction_mode == "parlay":
+                if len(self.parlay_legs) < 2:
+                    self.feedback_message = "Parlay must contain at least 2 legs."
+                    return
 
-        self.modal_open = False
-        self.refresh_trigger += 1
-        try:
-            from the_alternative_f1.seasons.leaderboard import LeaderboardState
-            lb_state = await self.get_state(LeaderboardState)
-            lb_state.refresh()
-        except Exception:
-            pass
+                enriched_legs = []
+                for leg in self.parlay_legs:
+                    leg_copy = dict(leg)
+                    if not is_fs and leg_copy.get("category") == "Expected Points":
+                        leg_copy["line_value"] = lines.get(leg_copy.get("target"), 0.0)
+                    else:
+                        leg_copy["line_value"] = None
+                    enriched_legs.append(leg_copy)
+
+                num_legs = len(enriched_legs)
+                cat_label = f"[Full Season] Parlay ({num_legs} Legs)" if is_fs else f"Parlay ({num_legs} Legs)"
+                new_pred = {
+                    "id": pred_id,
+                    "username": username,
+                    "season": 5,
+                    "race": race_name,
+                    "category": cat_label,
+                    "target": json.dumps(enriched_legs),
+                    "line_value": float(rem_races) if is_fs else None,
+                    "stance": "PARLAY",
+                    "points": wager_val,
+                    "status": "open",
+                    "payout": 0,
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                }
+            else:
+                if is_fs:
+                    cat_label = f"[Full Season] {self.selected_category}"
+                    stance_val = "—" if not self.has_stance else self.selected_stance
+                    line_val = float(rem_races)
+                else:
+                    cat_label = self.selected_category
+                    stance_val = self.selected_stance
+                    line_val = lines.get(self.selected_target, 0.0) if self.selected_category == "Expected Points" else None
+
+                new_pred = {
+                    "id": pred_id,
+                    "username": username,
+                    "season": 5,
+                    "race": race_name,
+                    "category": cat_label,
+                    "target": self.selected_target,
+                    "line_value": line_val,
+                    "stance": stance_val,
+                    "points": wager_val,
+                    "status": "open",
+                    "payout": 0,
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                }
+
+            insert_prediction(new_pred)
+
+            self.modal_open = False
+            self.refresh_trigger += 1
+            try:
+                from the_alternative_f1.seasons.leaderboard import LeaderboardState
+                lb_state = await self.get_state(LeaderboardState)
+                lb_state.refresh()
+            except Exception:
+                pass
+        finally:
+            self.is_submitting = False
 
     async def delete_prediction(self, pred_id: str | int):
         username = self.current_user
@@ -2584,6 +2626,8 @@ def _submit_prediction_modal() -> rx.Component:
                 color="white",
                 font_weight="700",
                 _hover={"bg": "#009bbd"},
+                loading=PredictionsMarketState.is_submitting,
+                disabled=PredictionsMarketState.is_submitting,
                 on_click=PredictionsMarketState.submit_prediction,
             ),
             width="100%",
@@ -2861,6 +2905,8 @@ def _submit_prediction_modal() -> rx.Component:
                     color="white",
                     font_weight="700",
                     _hover={"bg": "#009bbd"},
+                    loading=PredictionsMarketState.is_submitting,
+                    disabled=PredictionsMarketState.is_submitting,
                     on_click=PredictionsMarketState.submit_prediction,
                 ),
                 rx.button(
@@ -3375,8 +3421,14 @@ def predictions_market_tab_view() -> rx.Component:
                                     )
                                 ),
                                 rx.table.cell(rx.text(p["line_display"], font_size="xs", color="#AAAAAA")),
-                                rx.table.cell(rx.badge(p["points_display"], bg="rgba(255,255,255,0.06)", color="white", font_size="xs", font_weight="800")),
-                                rx.table.cell(rx.text(f"{p['payout']} pts" if str(p['status']).lower() == 'correct' else "—", font_size="xs", color="#00b4da" if str(p['status']).lower() == 'correct' else "#888888", font_weight="700")),
+                                rx.table.cell(
+                                    rx.text(
+                                        p["payout_display"],
+                                        font_size="xs",
+                                        color=p["payout_color"],
+                                        font_weight="700",
+                                    )
+                                ),
                                 rx.table.cell(
                                     rx.cond(
                                         p["can_delete"],
