@@ -24,8 +24,10 @@ from .Season5.Race_Recap.imola_race_recap import article as Imola_Race_Recap_Art
 from .Season5.Bye_Week.bye_week1 import article as Bye_Week_Article1
 from .Season5.Race_Week.miami_race_week import article as Miami_Race_Week_Article
 from .Season5.Race_Recap.miami_race_recap import article as Miami_Race_Recap_Article
+from .Season5.Race_Week.monza_race_week import article as Monza_Race_Week_Article
 
-articles = [Miami_Race_Recap_Article, Miami_Race_Week_Article, Bye_Week_Article1, 
+articles = [Monza_Race_Week_Article, 
+Miami_Race_Recap_Article, Miami_Race_Week_Article, Bye_Week_Article1, 
 Imola_Race_Recap_Article, Imola_Race_Week_Article, Australia_Race_Recap_Article, 
 Australia_Race_Week_Article, TrophyReveal_Article, Hungary_Recap_Article, 
 TrophyTeaser_Article, Vegas_Recap_Article, Mexico_Recap_Article,

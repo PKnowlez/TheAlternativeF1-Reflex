@@ -2096,7 +2096,7 @@ class PredictionsMarketState(rx.State):
                 item["status_bg"] = "rgba(255, 140, 0, 0.18)"
                 item["status_border"] = "1px solid rgba(255, 140, 0, 0.4)"
                 item["payout_display"] = "0"
-                item["payout_color"] = "#888888"
+                item["payout_color"] = "#FF8C00"
             else:
                 item["status_color"] = "#D0D0D5"
                 item["status_bg"] = "rgba(255, 255, 255, 0.08)"

@@ -1,5 +1,47 @@
 [
   {
+    "id": 1790916891718,
+    "username": "PK",
+    "season": 5,
+    "race": "Monza",
+    "category": "Parlay (3 Legs)",
+    "target": "[{\"leg_num\": \"1\", \"category\": \"Expected Race Winner\", \"target\": \"Mercedes\", \"stance\": \"AGAINST\", \"line_value\": null}, {\"leg_num\": \"2\", \"category\": \"Expected Points\", \"target\": \"Mercedes\", \"stance\": \"UNDER\", \"line_value\": 28.5}, {\"leg_num\": \"3\", \"category\": \"Expected Points\", \"target\": \"Cadillac\", \"stance\": \"OVER\", \"line_value\": 27.5}]",
+    "line_value": null,
+    "stance": "PARLAY",
+    "points": 10,
+    "status": "open",
+    "payout": 0,
+    "created_at": "2026-10-02T04:54:51.718429+00:00"
+  },
+  {
+    "id": 1790916846774,
+    "username": "PK",
+    "season": 5,
+    "race": "Monza",
+    "category": "Expected Points",
+    "target": "Mercedes",
+    "line_value": 28.5,
+    "stance": "UNDER",
+    "points": 10,
+    "status": "open",
+    "payout": 0,
+    "created_at": "2026-10-02T04:54:06.774904+00:00"
+  },
+  {
+    "id": 1790916658783,
+    "username": "PK",
+    "season": 5,
+    "race": "Monza",
+    "category": "Highest Scoring Team",
+    "target": "Mercedes",
+    "line_value": null,
+    "stance": "AGAINST",
+    "points": 10,
+    "status": "open",
+    "payout": 0,
+    "created_at": "2026-10-02T04:50:58.783996+00:00"
+  },
+  {
     "id": 1790787094712,
     "username": "Jellywaffles37",
     "season": 5,

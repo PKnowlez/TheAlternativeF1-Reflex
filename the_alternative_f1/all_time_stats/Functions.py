@@ -2,6 +2,7 @@
 # Adapted from Functions copy.py to be dependency-free (no streamlit/plotting)
 
 import os
+import json
 from pathlib import Path
 import pandas as pd
 import numpy as np
@@ -173,6 +174,109 @@ def is_season_completed(season):
     _func_cache[cache_key] = True
     return True
 
+
+_HIGHEST_POSITIONS_CACHE = {}
+
+
+def get_all_time_highest_positions(num_seasons: int = 5, force_refresh: bool = False) -> dict:
+    """Retrieve all-time highest positions for constructors and drivers (TAF1APP-SDDREQ-224, 225, 226).
+    Loads from persistent precomputed JSON storage (zero-lag builds).
+    If recalculating, entities not active in the current season sheet are preserved without recalculation.
+    """
+    global _HIGHEST_POSITIONS_CACHE
+    if _HIGHEST_POSITIONS_CACHE and not force_refresh:
+        return _HIGHEST_POSITIONS_CACHE
+
+    json_file = Path(__file__).parent / "all_time_highest_positions.json"
+    if json_file.exists() and not force_refresh:
+        try:
+            with open(json_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                _HIGHEST_POSITIONS_CACHE = data
+                return data
+        except Exception:
+            pass
+
+    # Dynamic calculation with optimization: preserve historical records for inactive entities
+    from the_alternative_f1.all_time_stats.SummaryAllTime import precompute_summary_data
+    ds = precompute_summary_data(num_seasons)
+    team_line = ds.get("team_line_data", [])
+    driver_line = ds.get("driver_line_data", [])
+
+    def format_pos(rank, race_label):
+        if rank == 1:
+            return f"🥇 {race_label}"
+        elif rank == 2:
+            return f"🥈 {race_label}"
+        elif rank == 3:
+            return f"🥉 {race_label}"
+        else:
+            suffix = "th" if 11 <= (rank % 100) <= 13 else {1: "st", 2: "nd", 3: "rd"}.get(rank % 10, "th")
+            return f"{rank}{suffix} - {race_label}"
+
+    def compute_highest(line_data):
+        highest = {}
+        for entry in line_data:
+            race = entry.get("race", "")
+            pts_map = {k: v for k, v in entry.items() if k != "race" and v is not None}
+            sorted_entities = sorted(pts_map.items(), key=lambda item: item[1], reverse=True)
+            for i, (entity, pts) in enumerate(sorted_entities):
+                rank = i + 1
+                if entity not in highest or rank < highest[entity]["rank"]:
+                    highest[entity] = {
+                        "rank": rank,
+                        "race": race,
+                        "display": format_pos(rank, race)
+                    }
+        return highest
+
+    # Check active entities in current season
+    current_season_df = get_excel_sheet(f"Season{num_seasons}")
+    active_drivers = set()
+    active_teams = set()
+    if not current_season_df.empty:
+        if "Driver" in current_season_df.columns:
+            active_drivers = set(current_season_df["Driver"].dropna().astype(str).str.strip().unique())
+        if "Team" in current_season_df.columns:
+            active_teams = set(current_season_df["Team"].dropna().astype(str).str.strip().unique())
+
+    # Load existing stored data if present
+    existing_data = {"constructors": {}, "drivers": {}}
+    if json_file.exists():
+        try:
+            with open(json_file, "r", encoding="utf-8") as f:
+                existing_data = json.load(f)
+        except Exception:
+            pass
+
+    team_h = compute_highest(team_line)
+    driver_h = compute_highest(driver_line)
+
+    constructors_dict = existing_data.get("constructors", {})
+    for k, v in team_h.items():
+        if k in active_teams or k not in constructors_dict:
+            constructors_dict[k] = v["display"]
+
+    drivers_dict = existing_data.get("drivers", {})
+    for k, v in driver_h.items():
+        if k in active_drivers or k not in drivers_dict:
+            drivers_dict[k] = v["display"]
+
+    data = {
+        "constructors": constructors_dict,
+        "drivers": drivers_dict
+    }
+
+    try:
+        with open(json_file, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+    except Exception:
+        pass
+
+    _HIGHEST_POSITIONS_CACHE = data
+    return data
+
+
 def CalculateAllTime(NumSeason, tORd):
     cache_key = ("CalculateAllTime", NumSeason, tORd)
     excel_path = Path(file)
@@ -320,7 +424,10 @@ def CalculateAllTime(NumSeason, tORd):
     combined_totals['Win Streak'] = combined_totals[tORd].map(max_streak).fillna(0).astype(int)
     combined_totals['Single Season Win Streak'] = combined_totals[tORd].map(max_ss_streak).fillna(0).astype(int)
 
+    highest_positions = get_all_time_highest_positions(NumSeason)
+
     if tORd == 'Driver':
+        combined_totals['Highest Position'] = combined_totals['Driver'].map(highest_positions.get('drivers', {})).fillna("—")
         for i in range(NumSeason):
             season_num = i + 1
             try:
@@ -334,12 +441,13 @@ def CalculateAllTime(NumSeason, tORd):
                 combined_totals[f'Season {season_num}'] = '—'
 
         season_cols = [f'Season {i+1}' for i in range(NumSeason)]
-        combined_totals = combined_totals[['Place', tORd, 'Points', '1st Place', '2nd Place', '3rd Place', 'Podiums', x, 'Win Streak', 'Single Season Win Streak'] + season_cols]
+        combined_totals = combined_totals[['Place', tORd, 'Points', '1st Place', '2nd Place', '3rd Place', 'Podiums', x, 'Highest Position', 'Win Streak', 'Single Season Win Streak'] + season_cols]
         combined_totals['Place'] = combined_totals.index + 1
 
     elif tORd == 'Team':
         if 'Podiums' in combined_totals.columns:
             combined_totals = combined_totals.drop(columns=['Podiums'])
+        combined_totals['Highest Position'] = combined_totals['Team'].map(highest_positions.get('constructors', {})).fillna("—")
         
         for i in range(NumSeason):
             season_num = i + 1
@@ -354,7 +462,7 @@ def CalculateAllTime(NumSeason, tORd):
                 combined_totals[f'Season {season_num}'] = '—'
 
         season_cols = [f'Season {i+1}' for i in range(NumSeason)]
-        combined_totals = combined_totals[['Place', tORd, 'Points', '1st Place', '2nd Place', '3rd Place', x, 'Win Streak', 'Single Season Win Streak'] + season_cols]
+        combined_totals = combined_totals[['Place', tORd, 'Points', '1st Place', '2nd Place', '3rd Place', x, 'Highest Position', 'Win Streak', 'Single Season Win Streak'] + season_cols]
         combined_totals['Place'] = combined_totals.index + 1
 
     _func_cache[cache_key] = combined_totals.copy()

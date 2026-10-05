@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 import reflex as rx
 
-from the_alternative_f1.all_time_stats.Functions import get_excel_sheet, CalculateAllTime, PointTotals, file as excel_file
+from the_alternative_f1.all_time_stats.Functions import get_excel_sheet, CalculateAllTime, PointTotals, file as excel_file, get_all_time_highest_positions
 from the_alternative_f1.constructor_colors import get_constructor_color
 from the_alternative_f1.articles.components import zoomable_chart, DownloadState, chart_header
 from the_alternative_f1.race_metrics import get_race_metrics
@@ -702,7 +702,11 @@ class DetailedStatsState(rx.State):
                 else:
                     curr_podium_streak = 0
 
-        # Requirement 75: All 14 Simple Statistics Bubbles in exact specified order
+        # Requirement 75 & 226: Simple Statistics Bubbles
+        highest_pos_dict = get_all_time_highest_positions(num_seasons)
+        pos_map = highest_pos_dict.get("constructors", {}) if entity_type == "Team" else highest_pos_dict.get("drivers", {})
+        highest_pos_str = pos_map.get(active_name, "—")
+
         badges = [
             f"Total Points: {tot_pts:.1f}",
             f"Wins: {wins}",
@@ -718,6 +722,7 @@ class DetailedStatsState(rx.State):
             f"Most Overtakes: {mot_count}",
             f"Cleanest Driver: {cd_count}",
             f"Best: {best_pts_str}",
+            f"Highest Position: {highest_pos_str}",
         ]
 
         all_pos_change_data = compute_all_time_avg_pos_change(num_seasons, entity_type, active_name)

@@ -122,6 +122,7 @@ def constructor_stats_view(num_seasons: int) -> rx.Component:
                         header_cell("2nd"),
                         header_cell("3rd"),
                         header_cell("Championships"),
+                        header_cell("Highest Pos"),
                         header_cell("Win Streak"),
                         header_cell("SS Streak"),
                         *[header_cell(f"S{i+1}") for i in range(num_seasons)],
@@ -151,6 +152,7 @@ def constructor_stats_view(num_seasons: int) -> rx.Component:
                             data_cell(row["2nd Place"]),
                             data_cell(row["3rd Place"]),
                             champion_cell(row["Constructor's Champion"]),
+                            data_cell(row.get("Highest Position", "—")),
                             streak_cell(row["Win Streak"]),
                             streak_cell(row["Single Season Win Streak"]),
                             *[

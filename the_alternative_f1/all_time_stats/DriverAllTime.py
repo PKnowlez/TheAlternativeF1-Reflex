@@ -134,6 +134,7 @@ def driver_stats_view(num_seasons: int) -> rx.Component:
                         header_cell("3rd"),
                         header_cell("Podiums"),
                         header_cell("Champ."),
+                        header_cell("Highest Pos"),
                         header_cell("Win Streak"),
                         header_cell("SS Streak"),
                         *[header_cell(f"S{i+1}") for i in range(num_seasons)],
@@ -153,6 +154,7 @@ def driver_stats_view(num_seasons: int) -> rx.Component:
                             data_cell(row["3rd Place"]),
                             data_cell(row["Podiums"]),
                             champion_cell(row["Driver's Champion"]),
+                            data_cell(row.get("Highest Position", "—")),
                             streak_cell(row["Win Streak"]),
                             streak_cell(row["Single Season Win Streak"]),
                             *[
