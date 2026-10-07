@@ -8,6 +8,7 @@ import json
 import os
 from supabase import create_client, Client as SupabaseClient
 from the_alternative_f1.oauth_discord import oauth_discord
+from the_alternative_f1.alternative_intelligence import alternative_intelligence_drawer, gemini_trigger_button
 from pydantic import BaseModel
 
 class CommentReplyData(BaseModel):
@@ -486,20 +487,20 @@ class State(rx.State):
     def load_comments(self):
         try:
             import re
-            from datetime import datetime
+            from datetime import datetime, timezone
             
             def format_dt(raw_dt):
                 if not raw_dt:
                     return ""
                 try:
-                    dt_str = str(raw_dt).replace("Z", "+00:00")
+                    dt_str = str(raw_dt).strip().replace("Z", "+00:00")
                     if "T" in dt_str:
                         dt = datetime.fromisoformat(dt_str)
                     else:
-                        dt = datetime.strptime(dt_str.split(".")[0], "%Y-%m-%d %H:%M:%S")
-                    return dt.strftime("%b %d, %Y %I:%M %p")
+                        dt = datetime.strptime(dt_str.split(".")[0], "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+                    return dt.isoformat()
                 except Exception:
-                    return str(raw_dt).split(".")[0]
+                    return str(raw_dt)
 
             def parse_text_and_gif(raw_text: str, raw_gif: str):
                 text = (raw_text or "").strip()
@@ -596,8 +597,8 @@ class State(rx.State):
         
         self.is_submitting = True
         
-        from datetime import datetime
-        now_formatted = datetime.now().strftime("%b %d, %Y %I:%M %p")
+        from datetime import datetime, timezone
+        now_formatted = datetime.now(timezone.utc).isoformat()
 
         # Optimistic update
         temp_id = -1
@@ -665,8 +666,8 @@ class State(rx.State):
         
         self.is_submitting_reply = True
         
-        from datetime import datetime
-        now_formatted = datetime.now().strftime("%b %d, %Y %I:%M %p")
+        from datetime import datetime, timezone
+        now_formatted = datetime.now(timezone.utc).isoformat()
 
         # Optimistic update
         for c in self.comments_list:
@@ -1858,7 +1859,14 @@ def comment_card(comment: CommentData) -> rx.Component:
                     rx.spacer(),
                     rx.cond(
                         reply.created_at != "",
-                        rx.text(reply.created_at, font_size="9px", color="#888888", align_self="center"),
+                        rx.moment(
+                            date=reply.created_at,
+                            format="MMM DD, YYYY h:mm A",
+                            local=True,
+                            font_size="9px",
+                            color="#888888",
+                            align_self="center",
+                        ),
                         rx.fragment()
                     ),
                     spacing="2",
@@ -1969,7 +1977,14 @@ def comment_card(comment: CommentData) -> rx.Component:
             rx.spacer(),
             rx.cond(
                 comment.created_at != "",
-                rx.text(comment.created_at, font_size="10px", color="#888888", align_self="center"),
+                rx.moment(
+                    date=comment.created_at,
+                    format="MMM DD, YYYY h:mm A",
+                    local=True,
+                    font_size="10px",
+                    color="#888888",
+                    align_self="center",
+                ),
                 rx.fragment()
             ),
             spacing="4",
@@ -2988,6 +3003,7 @@ def footer() -> rx.Component:
     footer_height = "60px"
     home_button_height = "70px"  # 15% taller than 60px
     return rx.hstack(
+        gemini_trigger_button(),
         rx.hstack(
             # Left Group (Regulations, All Time Stats)
             rx.hstack(
@@ -3484,6 +3500,7 @@ def index() -> rx.Component:
         ),
         comment_fab(),
         comments_popout_panel(),
+        alternative_intelligence_drawer(),
         rx.button(
             id="complete-discord-login-btn",
             on_click=State.complete_discord_login,

@@ -373,5 +373,35 @@
     cursor: pointer !important;
 }
 
+/* Alternative Intelligence Input Placeholder / Infotip (Android & Cross-Device Compatibility) */
+#ai-search-input::placeholder,
+.ai-search-input::placeholder,
+.ai-search-input input::placeholder,
+input#ai-search-input::placeholder,
+.rt-TextFieldInput.ai-search-input::placeholder {
+    color: #D4D4D8 !important;
+    -webkit-text-fill-color: #D4D4D8 !important;
+    opacity: 1 !important;
+}
 
+#ai-search-input::-webkit-input-placeholder,
+.ai-search-input::-webkit-input-placeholder,
+.ai-search-input input::-webkit-input-placeholder,
+input#ai-search-input::-webkit-input-placeholder,
+.rt-TextFieldInput.ai-search-input::-webkit-input-placeholder {
+    color: #D4D4D8 !important;
+    -webkit-text-fill-color: #D4D4D8 !important;
+    opacity: 1 !important;
+}
 
+#ai-search-input::-moz-placeholder,
+.ai-search-input input::-moz-placeholder {
+    color: #D4D4D8 !important;
+    opacity: 1 !important;
+}
+
+#ai-search-input:-ms-input-placeholder,
+.ai-search-input input:-ms-input-placeholder {
+    color: #D4D4D8 !important;
+    opacity: 1 !important;
+}
