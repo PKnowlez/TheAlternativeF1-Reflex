@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import AsyncGenerator
 from pydantic import BaseModel
 import reflex as rx
+import pandas as pd
 from the_alternative_f1.constructor_colors import get_constructor_color
 
 # Cache storage for grounded league context and working models
@@ -70,7 +71,11 @@ def get_driver_most_recent_constructor(driver_name: str) -> tuple[str, str]:
 
 
 def compute_h2h_battle_stats(entity1: str, entity2: str, is_constructor: bool = False, seasons_filter=None) -> dict:
-    """Deterministically compute Head-to-Head battle statistics across official league race records."""
+    """Deterministically compute Head-to-Head battle statistics across official league race records.
+    
+    When seasons_filter is not provided, automatically restricts the comparison scope to the
+    SHARED SEASONS where BOTH entities competed in at least one race.
+    """
     e1_clean = entity1.strip().lower()
     e2_clean = entity2.strip().lower()
 
@@ -84,10 +89,42 @@ def compute_h2h_battle_stats(entity1: str, entity2: str, is_constructor: bool = 
         from the_alternative_f1.seasons import seasons
         from the_alternative_f1.seasons.Calculations import Calculations
 
-        target_seasons = seasons
+        # 1. Determine target seasons (Shared Seasons by default)
         if seasons_filter:
             target_seasons = [s for s in seasons if s.get("season_number") in seasons_filter]
+            s_nums = [s.get("season_number") for s in target_seasons]
+            if len(s_nums) == 1:
+                seasons_label = f"Season {s_nums[0]}"
+            else:
+                seasons_label = f"Seasons {', '.join(str(n) for n in s_nums)}"
+        else:
+            shared_seasons = []
+            for s in seasons:
+                calc = Calculations(s)
+                df = calc.get("df")
+                if df is None or df.empty:
+                    continue
+                if is_constructor:
+                    has_1 = not df[df["Team"].astype(str).str.strip().str.lower() == e1_clean].empty
+                    has_2 = not df[df["Team"].astype(str).str.strip().str.lower() == e2_clean].empty
+                else:
+                    has_1 = not df[df["Driver"].astype(str).str.strip().str.lower() == e1_clean].empty
+                    has_2 = not df[df["Driver"].astype(str).str.strip().str.lower() == e2_clean].empty
+                if has_1 and has_2:
+                    shared_seasons.append(s)
 
+            if shared_seasons:
+                target_seasons = shared_seasons
+                s_nums = [s.get("season_number") for s in target_seasons]
+                if len(s_nums) == 1:
+                    seasons_label = f"Shared Season (Season {s_nums[0]})"
+                else:
+                    seasons_label = f"Shared Seasons (Seasons {' & '.join(str(n) for n in s_nums)})"
+            else:
+                target_seasons = seasons
+                seasons_label = "All Seasons"
+
+        # 2. Compute exact statistics across target seasons
         for s in target_seasons:
             calc = Calculations(s)
             df = calc.get("df")
@@ -99,19 +136,15 @@ def compute_h2h_battle_stats(entity1: str, entity2: str, is_constructor: bool = 
                 continue
 
             if is_constructor:
-                c1_rows = df[df["Team"].str.strip().str.lower() == e1_clean]
-                c2_rows = df[df["Team"].str.strip().str.lower() == e2_clean]
-                if c1_rows.empty and c2_rows.empty:
-                    continue
                 c_totals = calc.get("constructor_totals")
                 if c_totals is not None and not c_totals.empty:
-                    for _, r in c_totals.iterrows():
-                        t = str(r.get("Team", "")).strip().lower()
-                        p = float(r.get("Points", 0))
-                        if t == e1_clean:
-                            pts1 += p
-                        elif t == e2_clean:
-                            pts2 += p
+                    r1 = c_totals[c_totals["Team"].astype(str).str.strip().str.lower() == e1_clean]
+                    r2 = c_totals[c_totals["Team"].astype(str).str.strip().str.lower() == e2_clean]
+                    if not r1.empty:
+                        pts1 += float(r1.iloc[0].get("Points", 0))
+                    if not r2.empty:
+                        pts2 += float(r2.iloc[0].get("Points", 0))
+
                 for r_name in races[:num_completed]:
                     c_pre = r_name.replace(" Sprint", "Sprint")
                     p_col = f"{c_pre}Place"
@@ -130,27 +163,20 @@ def compute_h2h_battle_stats(entity1: str, entity2: str, is_constructor: bool = 
                             elif pod_t == e2_clean:
                                 pod2 += 1
             else:
-                d1_row = df[df["Driver"].str.strip().str.lower() == e1_clean]
-                d2_row = df[df["Driver"].str.strip().str.lower() == e2_clean]
-                if d1_row.empty:
-                    d1_row = df[df["Driver"].str.strip().str.lower().str.contains(e1_clean, regex=False)]
-                if d2_row.empty:
-                    d2_row = df[df["Driver"].str.strip().str.lower().str.contains(e2_clean, regex=False)]
-
-                has_d1 = not d1_row.empty
-                has_d2 = not d2_row.empty
-
                 d_totals = calc.get("driver_totals")
                 if d_totals is not None and not d_totals.empty:
-                    for _, r in d_totals.iterrows():
-                        d_name = str(r.get("Driver", "")).strip().lower()
-                        p_val = float(r.get("Points", 0))
-                        if d_name == e1_clean or (has_d1 and d_name in d1_row.iloc[0]["Driver"].strip().lower()):
-                            pts1 += p_val
-                        elif d_name == e2_clean or (has_d2 and d_name in d2_row.iloc[0]["Driver"].strip().lower()):
-                            pts2 += p_val
+                    r1 = d_totals[d_totals["Driver"].astype(str).str.strip().str.lower() == e1_clean]
+                    r2 = d_totals[d_totals["Driver"].astype(str).str.strip().str.lower() == e2_clean]
+                    if not r1.empty:
+                        pts1 += float(r1.iloc[0].get("Points", 0))
+                    if not r2.empty:
+                        pts2 += float(r2.iloc[0].get("Points", 0))
 
-                if not has_d1 or not has_d2:
+                # Exact equality to avoid substring collisions (e.g. Josh vs Joshua vs Josh C. vs Josh L)
+                d1_row = df[df["Driver"].astype(str).str.strip().str.lower() == e1_clean]
+                d2_row = df[df["Driver"].astype(str).str.strip().str.lower() == e2_clean]
+
+                if d1_row.empty or d2_row.empty:
                     continue
 
                 d1_data = d1_row.iloc[0]
@@ -207,6 +233,7 @@ def compute_h2h_battle_stats(entity1: str, entity2: str, is_constructor: bool = 
             "pts2": pts2_str,
             "win1": win1,
             "win2": win2,
+            "seasons_label": seasons_label,
         }
     except Exception:
         return {
@@ -215,6 +242,7 @@ def compute_h2h_battle_stats(entity1: str, entity2: str, is_constructor: bool = 
             "pod1": pod1, "pod2": pod2,
             "pts1": str(pts1), "pts2": str(pts2),
             "win1": win1, "win2": win2,
+            "seasons_label": "Shared Seasons",
         }
 
 
@@ -380,63 +408,226 @@ def compute_champion_campaign_stats(season_num: int = 4, entity_name: str = "", 
         }
 
 
+def sanitize_race_week_terminology(text: str) -> str:
+    """
+    Guarantees that no form of 'weekend' leaks into user-facing output or prompt context.
+    Deterministically transforms real-world F1 weekend terminology into official Alternative F1 race week terminology.
+    """
+    if not text:
+        return text
+
+    def _repl(pattern: str, repl_lower: str, repl_cap: str, src: str) -> str:
+        def match_func(m):
+            matched = m.group(0)
+            if matched[0].isupper():
+                return repl_cap
+            return repl_lower
+        return re.sub(pattern, match_func, src, flags=re.IGNORECASE)
+
+    # 1. off-weekends / off weekends
+    text = _repl(r"\boff[- ]weekends\b", "off-weeks", "Off-weeks", text)
+    text = _repl(r"\boff[- ]weekend\b", "off-week", "Off-week", text)
+    # 2. race weekends / race weekend
+    text = _repl(r"\brace weekends\b", "race weeks", "Race weeks", text)
+    text = _repl(r"\brace weekend\b", "race week", "Race week", text)
+    # 3. Phrasal idioms with weekend
+    text = _repl(r"\bover the weekend\b", "during the race week", "During the race week", text)
+    text = _repl(r"\bthis weekend\b", "this race week", "This race week", text)
+    text = _repl(r"\bnext weekend\b", "next race week", "Next race week", text)
+    text = _repl(r"\blast weekend\b", "last race week", "Last race week", text)
+    text = _repl(r"\bevery weekend\b", "every race week", "Every race week", text)
+    # 4. generic plural / singular weekend
+    text = _repl(r"\bweekends\b", "race weeks", "Race weeks", text)
+    text = _repl(r"\bweekend\b", "race week", "Race week", text)
+
+    return text
+
+
+def extract_article_full_text(content_item) -> str:
+    """
+    Recursively extract human-readable text from an article's content structure.
+    Handles raw strings, nested lists, dicts, and Reflex components (rx.box, rx.text, Bare components, etc.).
+    Filters out UI controls like 'Download Image' or icons.
+    """
+    texts = []
+
+    def _recurse(item):
+        if item is None:
+            return
+        if isinstance(item, str):
+            clean = " ".join(item.split())
+            if clean and clean != "Download Image":
+                texts.append(clean)
+            return
+
+        if isinstance(item, (list, tuple)):
+            for sub in item:
+                _recurse(sub)
+            return
+
+        if isinstance(item, dict):
+            for v in item.values():
+                _recurse(v)
+            return
+
+        # Skip Reflex image/button UI artifacts
+        tag = getattr(item, "tag", "")
+        if tag in ("img", "RadixThemesButton", "LucideDownload", "LucideX"):
+            return
+
+        # Handle Reflex Bare / Var components with contents
+        if hasattr(item, "contents") and item.contents is not None:
+            raw = str(item.contents).strip()
+            if raw.startswith('"') and raw.endswith('"') and len(raw) >= 2:
+                try:
+                    raw = json.loads(raw)
+                except Exception:
+                    raw = raw[1:-1]
+            clean = " ".join(str(raw).split())
+            if clean and clean != '""' and clean != "Download Image":
+                texts.append(clean)
+
+        # Handle Reflex container components with children
+        if hasattr(item, "children") and item.children:
+            for child in item.children:
+                _recurse(child)
+
+    _recurse(content_item)
+    return "\n\n".join(texts)
+
+
+_ALL_LEAGUE_ARTICLES_CACHE: list[dict] = []
+
+
+def get_all_league_articles() -> list[dict]:
+    """Retrieve and cache all published editorial articles across all seasons with their full extracted text."""
+    global _ALL_LEAGUE_ARTICLES_CACHE
+    if _ALL_LEAGUE_ARTICLES_CACHE:
+        return _ALL_LEAGUE_ARTICLES_CACHE
+
+    res = []
+    try:
+        from the_alternative_f1.seasons import seasons
+        for s in seasons:
+            s_num = s.get("season_number")
+            arts = s.get("articles", [])
+            for a in arts:
+                t = str(a.get("title", "")).strip()
+                d = str(a.get("date", "")).strip()
+                auth = str(a.get("author", "")).strip()
+                blurb = str(a.get("blurb", "")).strip()
+                raw_body = a.get("content", [])
+                full_body = extract_article_full_text(raw_body)
+                clean_body = sanitize_race_week_terminology(full_body)
+                res.append({
+                    "season": f"Season {s_num}",
+                    "season_num": s_num,
+                    "title": t,
+                    "date": d,
+                    "author": auth,
+                    "blurb": blurb,
+                    "content": clean_body,
+                })
+
+        try:
+            from the_alternative_f1.articles.app_intro import article as App_Intro_Article
+            if App_Intro_Article:
+                res.append({
+                    "season": "Platform Launch",
+                    "season_num": 0,
+                    "title": str(App_Intro_Article.get("title", "")).strip(),
+                    "date": str(App_Intro_Article.get("date", "")).strip(),
+                    "author": str(App_Intro_Article.get("author", "")).strip(),
+                    "blurb": str(App_Intro_Article.get("blurb", "")).strip(),
+                    "content": sanitize_race_week_terminology(extract_article_full_text(App_Intro_Article.get("content", []))),
+                })
+        except Exception:
+            pass
+
+    except Exception:
+        pass
+
+    _ALL_LEAGUE_ARTICLES_CACHE = res
+    return _ALL_LEAGUE_ARTICLES_CACHE
+
+
+def search_league_articles(query: str, top_k: int = 4) -> list[dict]:
+    """
+    Search all published league articles against the user's query keywords.
+    Ranks articles based on keyword matching across title, blurb, and full body text.
+    """
+    if not query or len(query.strip()) < 3:
+        return []
+
+    articles = get_all_league_articles()
+    if not articles:
+        return []
+
+    stopwords = {
+        "the", "a", "an", "and", "or", "in", "on", "at", "to", "for", "with", "by", "from",
+        "of", "is", "was", "are", "were", "did", "does", "do", "has", "have", "had", "he",
+        "she", "it", "they", "his", "her", "their", "this", "that", "what", "who", "when",
+        "where", "why", "how", "tell", "about", "me", "any", "some", "all", "can", "could",
+    }
+
+    raw_tokens = re.findall(r"[A-Za-z0-9]+", query.lower())
+    tokens = [t for t in raw_tokens if len(t) > 2 and t not in stopwords]
+    if not tokens:
+        return []
+
+    scored_articles = []
+    for art in articles:
+        title_lower = art["title"].lower()
+        blurb_lower = art["blurb"].lower()
+        content_lower = art["content"].lower()
+
+        score = 0
+        q_clean = " ".join(tokens)
+        if len(tokens) >= 2 and q_clean in content_lower:
+            score += 30
+
+        for tok in tokens:
+            if tok in title_lower:
+                score += 20
+            if tok in blurb_lower:
+                score += 10
+            count = content_lower.count(tok)
+            if count > 0:
+                score += min(count * 2, 25)
+
+        if score > 0:
+            scored_articles.append((score, art))
+
+    scored_articles.sort(key=lambda x: x[0], reverse=True)
+    return [item[1] for item in scored_articles[:top_k]]
+
+
 def format_all_season_articles() -> list[str]:
     """Format all published editorial articles across all seasons for grounded context."""
     lines = []
     lines.append("## COMPLETE LEAGUE EDITORIAL NEWS & ARTICLES ARCHIVE (ALL SEASONS)")
     lines.append(
         "This archive contains all official editorial articles, race recaps, race week previews, "
-        "and investigative reports published in the league. You can answer questions about who wrote articles, "
-        "what article covered specific races, driver milestones, drama, and awards.\n"
+        "investigative reports, and paddock news published in the league. You have full access to the complete "
+        "narrative text, interviews, quotes, driver drama, and lore across all seasons.\n"
     )
 
-    try:
-        from the_alternative_f1.seasons import seasons
-        for s in seasons:
-            s_num = s.get("season_number")
-            arts = s.get("articles", [])
-            if not arts:
-                continue
-            lines.append(f"### Season {s_num} Published Articles ({len(arts)} Articles):")
-            for a in arts:
-                title = str(a.get("title", "")).strip()
-                date_str = str(a.get("date", "")).strip()
-                author = str(a.get("author", "")).strip()
-                blurb = str(a.get("blurb", "")).strip()
+    articles = get_all_league_articles()
+    from collections import defaultdict
+    by_season = defaultdict(list)
+    for a in articles:
+        by_season[a["season"]].append(a)
 
-                # Extract textual narrative excerpts from content if available
-                content_excerpts = []
-                content_raw = a.get("content", [])
-                if isinstance(content_raw, list):
-                    for item in content_raw:
-                        if isinstance(item, str) and item.strip():
-                            clean_item = " ".join(item.split())
-                            content_excerpts.append(clean_item)
-                elif isinstance(content_raw, str):
-                    content_excerpts.append(" ".join(content_raw.split()))
-
-                summary_text = ""
-                if content_excerpts:
-                    first_text = content_excerpts[0]
-                    summary_text = f" | Excerpt: \"{first_text[:220]}...\"" if len(first_text) > 220 else f" | Excerpt: \"{first_text}\""
-
-                date_part = f"Published: {date_str}" if date_str else "Date: Not specified"
-                author_part = f"by {author}" if author else ""
-                lines.append(f"- **\"{title}\"** ({date_part} {author_part}): {blurb}{summary_text}")
+    for season_name, arts in by_season.items():
+        lines.append(f"### {season_name} Published Articles ({len(arts)} Articles):")
+        for a in arts:
+            lines.append(f"#### Article: \"{a['title']}\" ({a['season']}, Published: {a['date']} by {a['author']})")
+            if a["blurb"]:
+                lines.append(f"Blurb: {a['blurb']}")
+            if a["content"]:
+                lines.append(f"Full Article Text:\n{a['content']}")
             lines.append("")
-
-        # Also include App Platform Launch article
-        try:
-            from the_alternative_f1.articles.app_intro import article as App_Intro_Article
-            if App_Intro_Article:
-                lines.append("### League Platform Launch Articles:")
-                lines.append(f"- **\"{App_Intro_Article.get('title')}\"** ({App_Intro_Article.get('date')} by {App_Intro_Article.get('author')}): {App_Intro_Article.get('blurb')}")
-                lines.append("")
-        except Exception:
-            pass
-
-    except Exception as e:
-        lines.append(f"Note: Error formatting articles archive: {str(e)}")
+        lines.append("")
 
     return lines
 
@@ -507,6 +698,174 @@ def build_grounded_league_context() -> str:
             return []
         except Exception as e:
             return [f"Note: Error calculating Season {s_number} qualifying battles: {str(e)}\n"]
+
+    def _format_workbook_notes_and_scoring(excel_p: Path) -> list:
+        res = []
+        if not excel_p.exists():
+            return res
+        try:
+            import openpyxl
+            wb = openpyxl.load_workbook(str(excel_p), data_only=True)
+            if "Scoring" in wb.sheetnames:
+                res.append("## OFFICIAL LEAGUE SCORING & POINTS ALLOCATION MATRIX")
+                res.append(
+                    "CRITICAL SPRINT vs. GRAND PRIX RULES:\n"
+                    "- Grand Prix Feature Races = Full Races (Award 25, 18, 15, 12, 10, 8, 6, 4, 3, 2, 1 pts to top 10 finishers). Maximum base race win = 25 pts (plus up to 4 accolade bonus points = 29 pts max).\n"
+                    "- Sprints = Sprint Races (Award 8, 7, 6, 5, 4, 3, 2, 1, 0.5 pts). Maximum sprint win = 8 pts (NEVER 25 pts).\n"
+                    "- Sprints are NOT considered full races! They are shorter sprint sessions.\n"
+                    "- Sprints do not count as full Grand Prix race starts, nor do they award full race points.\n"
+                )
+                res.append("| Position | Grand Prix Race Points | Sprint Race Points |")
+                res.append("| :--- | :--- | :--- |")
+                sheet = wb["Scoring"]
+                for row in list(sheet.iter_rows(values_only=True))[1:]:
+                    if row and row[0] is not None and row[1] is not None:
+                        try:
+                            p_race = int(float(row[0]))
+                            pts_race = float(row[1])
+                            pts_sprint = float(row[4]) if len(row) > 4 and row[4] is not None else 0.0
+                            res.append(f"| P{p_race} | {pts_race:g} pts | {pts_sprint:g} pts |")
+                        except Exception:
+                            pass
+                res.append("")
+            if "Notes" in wb.sheetnames:
+                res.append("## OFFICIAL LEAGUE NOTES, STATUS CODES & DRIVER GAMERTAGS")
+                res.append("- Status Codes (Seasons 1–4): Position 21 = DNF (Did Not Finish), Position 22 = DNS (Did Not Start), Position 23 = DSQ (Disqualified).")
+                res.append("- Status Codes (Season 5 and onward / S5+): Position 23 = DNF (Did Not Finish), Position 24 = DNS (Did Not Start), Position 25 = DSQ (Disqualified).")
+                res.append("Official Driver Gamertags:")
+                sheet = wb["Notes"]
+                for row in list(sheet.iter_rows(values_only=True))[4:]:
+                    if row and len(row) >= 3 and row[0] and row[1]:
+                        team = str(row[0]).strip()
+                        driver = str(row[1]).strip()
+                        gamertag = str(row[2]).strip() if row[2] else "N/A"
+                        res.append(f"- {driver} ({team}): Gamertag `{gamertag}`")
+                res.append("")
+        except Exception as e:
+            res.append(f"Note: Error reading workbook Notes and Scoring: {str(e)}\n")
+        return res
+
+    def _format_regulations_and_settings() -> list:
+        res = []
+        try:
+            res.append("## OFFICIAL SPORTING & TECHNICAL REGULATIONS")
+            rules_data = [
+                ("Points Eligibility", "Points are only awarded to drivers that complete the race. No points are awarded to those who DNS or DNF."),
+                ("Finishing Points", "Points are awarded based on finishing position in each race: 1st: 25, 2nd: 18, 3rd: 15, 4th: 12, 5th: 10, 6th: 8, 7th: 6, 8th: 4, 9th: 3, 10th: 2, 11th-20th: 1."),
+                ("Fastest Lap Award", "One (1) point awarded to the driver with the Fastest Lap at the end of the race."),
+                ("Driver of the Day Award", "One (1) point awarded to the driver who earns Driver of the Day at the end of the race."),
+                ("Most Overtakes Award", "One (1) point awarded to the driver with the Most Overtakes at the end of the race."),
+                ("Cleanest Driver Award", "One (1) point awarded to the driver who earns Cleanest Driver at the end of the race."),
+                ("VSC or Safety Car Delta Glitch", "If a driver wrongfully receives a Drive Through Penalty due to a VSC or Safety Car delta glitch, the driver will have their finishing time improved by 20 seconds upon driver request and FIA review, if no Safety Car or Red Flag occurs after the glitch."),
+                ("Endangering or Ruining Another Driver's Race", "If a driver's race is ruined (DNF) or endangered (more than 3 lost places) due to reckless driving, the reckless driver will be awarded a 5 place penalty to their finishing position. If deemed intentional, disqualification."),
+                ("Right to Protest", "Any driver that disagrees with a ruling has the right to protest within one day of the final ruling. Requires a 2/3rds majority league vote to overturn."),
+                ("Penalty Points", "Drivers earning an Endangering/Ruining penalty also earn 1 penalty point. 2 penalty points increases severity by +2 places. For every additional 2 penalty points, increases by +3 places."),
+                ("Sprint Day Format", "Sprint Qualifying > Sprint > Race Qualifying = Reverse Grid set by Sprint Results (All AI placed in front of ALL drivers, regardless of finish)."),
+                ("Sprint Race Finishing Points", "Sprint points: 1st: 8, 2nd: 7, 3rd: 6, 4th: 5, 5th: 4, 6th: 3, 7th: 2, 8th: 1, 9th-20th: 0.5."),
+                ("Race Start Incident", "During start or Red Flag restart, any driver causing a collision/squeeze/brake check causing damage or losing >3 places is penalized from Q2 in the next main race (qualifies last) plus 1 penalty point on super license."),
+                ("Causing a Collision", "For collisions not severe enough for Regulation 8, 5s or 10s penalty based on review, plus 1 penalty point on super license."),
+                ("Race Restarts", "Races will not be restarted for racing incidents. Bugs or glitches before/during start may trigger restart."),
+                ("Damaging Another Vehicle", "Contact damage via telemetry bot: repairable front wing/tire damage = 1 place penalty; irreparable floor/sidepod/rear wing damage = 2-3 place penalty."),
+            ]
+            for idx, (title, desc) in enumerate(rules_data, start=1):
+                res.append(f"- Regulation {idx} ({title}): {desc}")
+            res.append("")
+
+            res.append("## OFFICIAL LEAGUE SETTINGS & CONFIGURATION")
+            res.append("Assist Restrictions: Steering Assist: Off; Braking Assist: Off; Anti-Lock Brakes (ABS): On; Traction Control: Full; Dynamic Racing Line: Corners Only; Gearbox: Automatic; Pit Assist: On; Pit Release Assist: On; ERS Assist: Off; DRS Assist: Off; Force Cockpit Camera: Off.")
+            res.append("Simulation Settings: Equal Car Performance: On; Recovery Mode: None; Surface Type: Realistic; Low Fuel Mode: Easy; Race Starts: Manual; Unsafe Pit Release: Off; Car Damage: Simulation; Car Damage Rate: Simulation; Collisions: On; Weather: Dynamic.")
+            res.append("Rules & Flags Settings: Rules & Flags: On; Corner Cutting Stringency: Strict; Parc Ferme Rules: On; Pit Stop Experience: Broadcast; Safety Car: Increased; Safety Car Experience: Immersive; Formation Lap: Off; Red Flags: Increased; Affects Licence Level: Off.")
+            res.append("Race Week Structures: Standard Format: Practice Off, Qualifying Full, Session Length Long (50%), Starting Grid Qualifying. Sprint Format: Practice Off, Sprint Qualifying Short, Race Qualifying Off, Sprint Length Long, Race Length Long, Sprint Grid Qualifying, Race Grid Reverse Sprint Results.")
+            res.append("")
+        except Exception as e:
+            res.append(f"Note: Error formatting regulations and settings: {str(e)}\n")
+        return res
+
+    def _format_season_round_by_round_results(s_number: int, df_data, all_r: list, completed_only: bool = False, done_races: list = None) -> list:
+        if df_data is None or df_data.empty or not all_r:
+            return []
+        target_r = done_races if (completed_only and done_races) else all_r
+        res = [f"### Season {s_number} Driver Round-by-Round Official Results (Qualifying & Finish):"]
+
+        def _parse_val(val):
+            if val is None or pd.isnull(val):
+                return None
+            val_str = str(val).strip().upper()
+            if val_str in ("", "-", "NONE", "NAN", "NULL"):
+                return None
+            if "DNS" in val_str:
+                return "DNS"
+            if "DSQ" in val_str:
+                return "DSQ"
+            if "DNF" in val_str:
+                return "DNF"
+            try:
+                num = float(val_str)
+                if num <= 0:
+                    return None
+                # Season-aware numeric status code translation (matching race_metrics and Excel Notes)
+                if s_number <= 4:
+                    if num == 21.0:
+                        return "DNF"
+                    elif num == 22.0:
+                        return "DNS"
+                    elif num == 23.0:
+                        return "DSQ"
+                else:  # Season 5 and onward
+                    if num == 23.0:
+                        return "DNF"
+                    elif num == 24.0:
+                        return "DNS"
+                    elif num == 25.0:
+                        return "DSQ"
+                return f"P{int(round(num))}"
+            except Exception:
+                return val_str
+
+        for _, row in df_data.iterrows():
+            d_name = str(row.get("Driver", "")).strip()
+            tm_name = str(row.get("Team", "")).strip()
+            if not d_name:
+                continue
+            r_details = []
+            for r in target_r:
+                q_col = next((c for c in [f"{r}Qualifying", f"{r.replace(' Sprint', 'Sprint')}Qualifying", f"{r} Qualifying"] if c in df_data.columns), None)
+                p_col = next((c for c in [f"{r}Place", f"{r.replace(' Sprint', 'Sprint')}Place", f"{r} Place"] if c in df_data.columns), None)
+                pts_col = next((c for c in [f"{r}Points", f"{r.replace(' Sprint', 'Sprint')}Points", f"{r} Points"] if c in df_data.columns), None)
+                fl_col = next((c for c in [f"{r}FastestLap", f"{r.replace(' Sprint', 'Sprint')}FastestLap"] if c in df_data.columns), None)
+
+                q_v = row.get(q_col) if q_col else None
+                p_v = row.get(p_col) if p_col else None
+                pts_v = row.get(pts_col) if pts_col else None
+                fl_v = row.get(fl_col) if fl_col else None
+
+                items = []
+                q_parsed = _parse_val(q_v)
+                if q_parsed:
+                    items.append(f"Q:{q_parsed}")
+
+                p_parsed = _parse_val(p_v)
+                if p_parsed:
+                    items.append(f"Finish:{p_parsed}")
+
+                if pts_v is not None:
+                    try:
+                        pts_f = float(pts_v)
+                        if pts_f > 0:
+                            items.append(f"{pts_f:g}pts")
+                    except Exception:
+                        pass
+                if fl_v is not None and str(fl_v) in ("1", "1.0", "True"):
+                    items.append("FL")
+
+                stat_str = f" [{', '.join(items)}]" if items else " [DNS/No Data]"
+                r_details.append(f"{r}{stat_str}")
+            res.append(f"- {d_name} ({tm_name}): {'; '.join(r_details)}")
+        res.append("")
+        return res
+
+    lines.extend(_format_workbook_notes_and_scoring(excel_path))
+    lines.extend(_format_regulations_and_settings())
 
     try:
         from the_alternative_f1.seasons import seasons, LATEST_SEASON
@@ -591,10 +950,22 @@ def build_grounded_league_context() -> str:
 
                     # Seasonal Teammate Qualifying Battles (SDDREQ-249)
                     lines.extend(_format_season_qualifying_battles(s_num, raw_df, constructor_totals, completed_races, races))
+                    lines.extend(_format_season_round_by_round_results(s_num, raw_df, races, completed_only=True, done_races=completed_races))
 
                     # Calendar & Schedule
                     if schedule_df is not None and not schedule_df.empty:
-                        lines.append("### Season 5 Calendar & Schedule (Races held on Wednesdays):")
+                        gp_races = [r for r in races if "sprint" not in r.lower()]
+                        sprint_races = [r for r in races if "sprint" in r.lower()]
+                        done_gp = [r for r in completed_races if "sprint" not in r.lower()]
+                        done_sprint = [r for r in completed_races if "sprint" in r.lower()]
+                        rem_gp = len(gp_races) - len(done_gp)
+                        rem_sprint = len(sprint_races) - len(done_sprint)
+
+                        lines.append("### Season 5 Calendar & Schedule (Qualifying & Races held on Wednesdays; Qualifying immediately precedes Race):")
+                        lines.append(f"Official Season 5 Round Structure: {len(races)} Total Scheduled Rounds ({len(gp_races)} Grand Prix Feature Races + {len(sprint_races)} Sprint Races).")
+                        lines.append(f"- Completed to Date: {len(completed_races)} Rounds ({len(done_gp)} Grand Prix Feature Races + {len(done_sprint)} Sprint Races).")
+                        lines.append(f"- Remaining on Calendar: {len(races) - len(completed_races)} Rounds ({rem_gp} Grand Prix Feature Races + {rem_sprint} Sprint Races).")
+                        lines.append("CRITICAL: Sprints are NOT full races! Sprints award at most 8 points for P1 (Sprint Scoring: 8-7-6-5-4-3-2-1-0.5), while Grand Prix feature races award 25 points for P1 (plus up to 4 accolade points).")
                         for _, row in schedule_df.iterrows():
                             r_name = str(row.get("Race", "")).strip()
                             r_track = str(row.get("Track", "")).strip()
@@ -602,10 +973,9 @@ def build_grounded_league_context() -> str:
                             raw_date = str(row.get("Date", "")).strip().replace(" 00:00:00", "")
                             date_str = f" (Date: {raw_date})" if raw_date and raw_date.lower() != "nan" else " (Date: Not Recorded)"
                             status_str = f" [{status}]" if status and status.lower() != "nan" else ""
-                            if r_track and r_track.lower() != "nan":
-                                lines.append(f"- {r_name} at {r_track}{date_str}{status_str}")
-                            elif r_name and r_name.lower() != "nan":
-                                lines.append(f"- {r_name}{date_str}{status_str}")
+                            round_type = "[Sprint Race - Max 8 pts]" if "sprint" in r_name.lower() else "[Grand Prix Feature Race - Max 25 pts]"
+                            track_desc = f" at {r_track}" if r_track and r_track.lower() != "nan" else ""
+                            lines.append(f"- {r_name}{track_desc} {round_type}{date_str}{status_str}")
                         lines.append("")
 
                     # Rookies
@@ -660,10 +1030,15 @@ def build_grounded_league_context() -> str:
 
                     # Historical Teammate Qualifying Battles (SDDREQ-249)
                     lines.extend(_format_season_qualifying_battles(s_num, raw_df, constructor_totals, completed_races, races))
+                    lines.extend(_format_season_round_by_round_results(s_num, raw_df, races))
 
                     # Historical Calendar & Schedule
                     if schedule_df is not None and not schedule_df.empty:
-                        lines.append(f"### Season {s_num} Calendar & Schedule (Races held on Wednesdays):")
+                        gp_races_h = [r for r in races if "sprint" not in r.lower()]
+                        sprint_races_h = [r for r in races if "sprint" in r.lower()]
+                        sprint_info = f" ({len(gp_races_h)} Grand Prix Feature Races + {len(sprint_races_h)} Sprint Races)" if sprint_races_h else f" ({len(gp_races_h)} Grand Prix Feature Races)"
+                        lines.append(f"### Season {s_num} Calendar & Schedule (Qualifying & Races held on Wednesdays; Qualifying immediately precedes Race):")
+                        lines.append(f"Official Season {s_num} Structure: {len(races)} Total Rounds{sprint_info}.")
                         for _, row in schedule_df.iterrows():
                             r_name = str(row.get("Race", "")).strip()
                             r_track = str(row.get("Track", "")).strip()
@@ -671,10 +1046,9 @@ def build_grounded_league_context() -> str:
                             raw_date = str(row.get("Date", "")).strip().replace(" 00:00:00", "")
                             date_str = f" (Date: {raw_date})" if raw_date and raw_date.lower() != "nan" else " (Date: Not Recorded)"
                             status_str = f" [{status}]" if status and status.lower() != "nan" else ""
-                            if r_track and r_track.lower() != "nan":
-                                lines.append(f"- {r_name} at {r_track}{date_str}{status_str}")
-                            elif r_name and r_name.lower() != "nan":
-                                lines.append(f"- {r_name}{date_str}{status_str}")
+                            round_type = "[Sprint Race - Max 8 pts]" if "sprint" in r_name.lower() else "[Grand Prix Feature Race - Max 25 pts]"
+                            track_desc = f" at {r_track}" if r_track and r_track.lower() != "nan" else ""
+                            lines.append(f"- {r_name}{track_desc} {round_type}{date_str}{status_str}")
                         lines.append("")
                     lines.append("")
 
@@ -683,6 +1057,97 @@ def build_grounded_league_context() -> str:
 
     except Exception as e:
         lines.append(f"Note: Error initializing Seasons engine: {str(e)}")
+
+    # 1.5 Official Driver & Constructor Career Debuts, Active Seasons, and Milestones
+    lines.append("## OFFICIAL DRIVER CAREER DEBUTS, ACTIVE SEASONS & CAREER STINTS (ALL 24 DRIVERS)")
+    lines.append(
+        "CRITICAL CHRONOLOGICAL RULE: Drivers only exist and compete in seasons starting from their official Debut Season. "
+        "NEVER assume, invent, or state that a driver competed, drove for a team, or scored results in seasons prior to their official Debut Season!\n"
+        "- Brently and Patrick debuted in Season 3 as Rookies (VCARB). They DID NOT COMPETE in Season 1 or Season 2!\n"
+        "- Josh, Matthew, Leo, Jaden, and Jairo debuted in Season 4 as Rookies. They DID NOT COMPETE in Seasons 1, 2, or 3!\n"
+        "- Grayson, Josh C., Randy, and Evelo debuted in Season 5 as Rookies. They DID NOT COMPETE in Seasons 1, 2, 3, or 4!\n"
+        "- Del, Joshua, Eddie, and Yeti debuted in Season 2 as Rookies. They DID NOT COMPETE in Season 1!\n"
+        "- Nick, Erick, Marcus, Zane, David, Gary, Boz, Travis, and Josh L are Inaugural Founding Drivers who debuted in Season 1."
+    )
+    lines.append("| Driver | Debut Season | Debut Race | Debut Constructor | Rookie Class | Seasons Competed | Inactive / Absent Seasons | Career Team Stints by Season | Maiden Full-Race Podium (Position, Race, Season) | Races from Debut to Maiden Podium | Maiden Race Win (Race, Season) | Races from Debut to Maiden Win |")
+    lines.append("| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |")
+    lines.append("| Nick | Season 1 | S1 Bahrain | McLaren | S1 Inaugural Founding Driver | S1, S2, S3, S4, S5 | None | S1: McLaren, S2: McLaren, S3: McLaren, S4: McLaren, S5: McLaren | P1 at S1 Bahrain (Win on Debut!) | 1 race | P1 at S1 Bahrain | 1 race |")
+    lines.append("| Erick | Season 1 | S1 Bahrain | Mercedes | S1 Inaugural Founding Driver | S1, S2, S3, S4 | S5 (Inactive) | S1: Mercedes, S2: Ferrari, S3: Ferrari, S4: Ferrari | P2 at S1 Bahrain | 1 race | P1 at S1 Singapore | 10 races |")
+    lines.append("| Marcus | Season 1 | S1 Bahrain | Mercedes | S1 Inaugural Founding Driver | S1, S2 | S3, S4, S5 (Inactive) | S1: Mercedes, S2: Red Bull | P3 at S1 Jeddah | 2 races | P1 at S1 Australia | 3 races |")
+    lines.append("| Zane | Season 1 | S1 Bahrain | Aston Martin | S1 Inaugural Founding Driver | S1, S2, S3 | S4, S5 (Inactive) | S1: Aston Martin, S2: Red Bull, S3: Ferrari | P2 at S1 Bahrain | 1 race | P1 at S1 Baku | 4 races |")
+    lines.append("| David | Season 1 | S1 Bahrain | Aston Martin | S1 Inaugural Founding Driver | S1, S2 | S3, S4, S5 (Inactive) | S1: Aston Martin, S2: Alfa Romeo | None (All-Time Standings Peak: 4th at S1 Bahrain) | None | None | None |")
+    lines.append("| Josh L | Season 1 | S1 Bahrain | Red Bull | S1 Inaugural Founding Driver | S1, S2 | S3, S4, S5 (Inactive) | S1: Red Bull, S2: Alfa Romeo | None (All-Time Standings Peak: 5th at S1 Bahrain) | None | None | None |")
+    lines.append("| Boz | Season 1 | S1 Bahrain | Red Bull | S1 Inaugural Founding Driver | S1, S2, S3, S4, S5 | None | S1: Red Bull, S2: Mercedes, S3: Red Bull, S4: Haas, S5: Audi | None (All-Time Standings Peak: 5th at S1 Miami) | None | None | None |")
+    lines.append("| Travis | Season 1 | S1 Bahrain | McLaren | S1 Inaugural Founding Driver | S1, S2, S3, S4 | S5 (Inactive) | S1: McLaren, S2: AlphaTauri, S3: McLaren, S4: McLaren | None (All-Time Standings Peak: 5th at S1 Silverstone) | None | None | None |")
+    lines.append("| Gary | Season 1 | S1 Bahrain | Ferrari | S1 Inaugural Founding Driver | S1, S2, S3 | S4, S5 (Inactive) | S1: Ferrari, S2: McLaren, S3: Aston Martin | None (All-Time Standings Peak: 8th at S1 Bahrain) | None | None | None |")
+    lines.append("| Del | Season 2 | S2 Bahrain | Mercedes | Season 2 Rookie | S2, S3, S4, S5 | S1 (DID NOT COMPETE in S1) | S2: Mercedes, S3: Ferrari, S4: Aston Martin, S5: McLaren | P2 at S2 Bahrain | 1 race | P1 at S2 Spain | 5 races |")
+    lines.append("| Joshua | Season 2 | S2 Bahrain | Alpine | Season 2 Rookie | S2, S3, S4, S5 | S1 (DID NOT COMPETE in S1) | S2: Alpine, S3: Alpine, S4: Alpine, S5: Red Bull | P3 at S2 Bahrain | 1 race | P1 at S3 Austria | 16 races |")
+    lines.append("| Eddie | Season 2 | S2 Bahrain | Alpine | Season 2 Rookie | S2, S3, S4, S5 | S1 (DID NOT COMPETE in S1) | S2: Alpine, S3: Alpine, S4: Alpine, S5: Red Bull | P3 at S3 COTA | 21 races | None | None |")
+    lines.append("| Yeti | Season 2 | S2 Bahrain | AlphaTauri | Season 2 Rookie | S2, S3 | S1, S4, S5 (Inactive) | S2: AlphaTauri, S3: Aston Martin | None (All-Time Standings Peak: 10th at S2 Monza) | None | None | None |")
+    lines.append("| Patrick | Season 3 | S3 Bahrain | VCARB | Season 3 Rookie | S3, S4, S5 | S1, S2 (DID NOT COMPETE in S1, S2) | S3: VCARB, S4: VCARB, S5: Cadillac | P2 at S3 Baku | 7 races | P1 at S3 Austria | 13 races |")
+    lines.append("| Brently | Season 3 | S3 Bahrain | VCARB | Season 3 Rookie | S3, S4, S5 | S1, S2 (DID NOT COMPETE in S1, S2) | S3: VCARB, S4: Red Bull, S5: Haas | P1 at S3 Monaco (Maiden Win & Podium in Rookie Season!) | 15 races | P1 at S3 Monaco | 15 races |")
+    lines.append("| Josh | Season 4 | S4 Bahrain | VCARB | Season 4 Rookie | S4, S5 | S1, S2, S3 (DID NOT COMPETE in S1, S2, S3) | S4: VCARB, S5: Cadillac | P3 at S4 Bahrain | 1 race | P1 at S5 Imola | 18 races |")
+    lines.append("| Matthew | Season 4 | S4 Bahrain | Red Bull | Season 4 Rookie | S4, S5 | S1, S2, S3 (DID NOT COMPETE in S1, S2, S3) | S4: Red Bull, S5: Haas | None (All-Time Standings Peak: 17th at S4 Spa Sprint) | None | None | None |")
+    lines.append("| Leo | Season 4 | S4 Bahrain | Ferrari | Season 4 Rookie | S4, S5 | S1, S2, S3 (DID NOT COMPETE in S1, S2, S3) | S4: Ferrari, S5: Ferrari | None (All-Time Standings Peak: 10th at S4 Mexico) | None | None | None |")
+    lines.append("| Jaden | Season 4 | S4 Bahrain | Mercedes | Season 4 Rookie | S4, S5 | S1, S2, S3 (DID NOT COMPETE in S1, S2, S3) | S4: Mercedes, S5: Ferrari | P2 at S4 Bahrain | 1 race | P1 at S4 Austria Reverse | 9 races |")
+    lines.append("| Jairo | Season 4 | S4 Bahrain | Mercedes | Season 4 Rookie | S4, S5 | S1, S2, S3 (DID NOT COMPETE in S1, S2, S3) | S4: Mercedes, S5: Mercedes | P1 at S4 Bahrain (Win on Debut!) | 1 race | P1 at S4 Bahrain | 1 race |")
+    lines.append("| Grayson | Season 5 | S5 Australia | Audi | Season 5 Rookie | S5 | S1, S2, S3, S4 (DID NOT COMPETE in S1-S4) | S5: Audi | None (Active Rookie) | None | None | None |")
+    lines.append("| Josh C. | Season 5 | S5 Australia | Williams | Season 5 Rookie | S5 | S1, S2, S3, S4 (DID NOT COMPETE in S1-S4) | S5: Williams | None (Active Rookie) | None | None | None |")
+    lines.append("| Randy | Season 5 | S5 Australia | Mercedes | Season 5 Rookie | S5 | S1, S2, S3, S4 (DID NOT COMPETE in S1-S4) | S5: Mercedes | None (Active Rookie) | None | None | None |")
+    lines.append("| Evelo | Season 5 | S5 Australia | Williams | Season 5 Rookie | S5 | S1, S2, S3, S4 (DID NOT COMPETE in S1-S4) | S5: Williams | None (Active Rookie) | None | None | None |")
+    lines.append("")
+
+    lines.append("## OFFICIAL CONSTRUCTOR CAREER DEBUTS & ACTIVE SEASONS (ALL 13 CONSTRUCTORS)")
+    lines.append("| Constructor | Debut Season | Debut Race | Seasons Competed / Active | Inactive / Absent Seasons | Championships |")
+    lines.append("| :--- | :--- | :--- | :--- | :--- | :--- |")
+    lines.append("| McLaren | Season 1 | S1 Bahrain | Season 1, Season 2, Season 3, Season 4, Season 5 | None | 🏆 x1 (Season 2) |")
+    lines.append("| Mercedes | Season 1 | S1 Bahrain | Season 1, Season 2, Season 4, Season 5 | Season 3 (Departed / Did Not Compete) | 🏆 x2 (Season 1, Season 4) |")
+    lines.append("| Red Bull | Season 1 | S1 Bahrain | Season 1, Season 2, Season 3, Season 4, Season 5 | None | 0 |")
+    lines.append("| Ferrari | Season 1 | S1 Bahrain | Season 1, Season 2, Season 3, Season 4, Season 5 | None | 0 |")
+    lines.append("| Aston Martin | Season 1 | S1 Bahrain | Season 1, Season 3, Season 4 | Season 2, Season 5 (Did Not Compete) | 0 |")
+    lines.append("| Alpine | Season 2 | S2 Bahrain | Season 2, Season 3, Season 4 | Season 1, Season 5 (Did Not Compete) | 🏆 x1 (Season 3) |")
+    lines.append("| Alfa Romeo | Season 2 | S2 Bahrain | Season 2 (Single season) | Season 1, Season 3, Season 4, Season 5 | 0 |")
+    lines.append("| AlphaTauri | Season 2 | S2 Bahrain | Season 2 (Single season) | Season 1, Season 3, Season 4, Season 5 | 0 |")
+    lines.append("| VCARB | Season 3 | S3 Bahrain | Season 3, Season 4 | Season 1, Season 2, Season 5 (Did Not Compete) | 0 |")
+    lines.append("| Cadillac | Season 5 | S5 Australia | Season 5 (Active Standings Leader) | Season 1, Season 2, Season 3, Season 4 | 0 |")
+    lines.append("| Haas | Season 5 | S5 Australia | Season 5 | Season 1, Season 2, Season 3, Season 4 | 0 |")
+    lines.append("| Audi | Season 5 | S5 Australia | Season 5 | Season 1, Season 2, Season 3, Season 4 | 0 |")
+    lines.append("| Williams | Season 5 | S5 Australia | Season 5 | Season 1, Season 2, Season 3, Season 4 | 0 |")
+    lines.append("")
+
+    lines.append("## OFFICIAL SEASON-BY-SEASON ROSTER & ROOKIE CATEGORIZATION")
+    lines.append("- Season 1 (2023, 19 races): Inaugural Class (Nick, Travis, Zane, David, Erick, Marcus, Josh L, Boz, Gary). Constructors: McLaren, Mercedes, Red Bull, Ferrari, Aston Martin.")
+    lines.append("- Season 2 (2023, 10 races): Rookie Class (Del, Joshua, Eddie, Yeti). Returning: Nick, Gary, Boz, Erick, David, Zane, Marcus, Josh L, Travis. Constructors: McLaren, Mercedes, Ferrari, Alpine, Red Bull, Alfa Romeo, AlphaTauri.")
+    lines.append("- Season 3 (2024, 15 races): Rookie Class (Patrick, Brently). Returning: Nick, Travis, Joshua, Eddie, Erick, Zane, Del, Gary, Yeti, Boz. Constructors: McLaren, Alpine, Ferrari, VCARB, Aston Martin, Red Bull.")
+    lines.append("- Season 4 (2025, 17 races): Rookie Class (Josh, Matthew, Leo, Jaden, Jairo). Returning: Joshua, Eddie, Nick, Travis, Patrick, Brently, Erick, Del, Boz. Constructors: Alpine, McLaren, VCARB, Mercedes, Red Bull, Ferrari, Aston Martin.")
+    lines.append("- Season 5 (2026, 20 races scheduled): Rookie Class (Grayson, Josh C., Randy, Evelo). Returning: Joshua, Eddie, Nick, Del, Patrick, Josh, Matthew, Brently, Boz, Jaden, Leo, Jairo. Constructors: Ferrari, McLaren, Red Bull, Mercedes, Haas, Audi, Cadillac, Williams.")
+    lines.append("")
+
+    lines.append("## OFFICIAL MILESTONE LEADERBOARDS: MAIDEN PODIUMS & MAIDEN WINS")
+    lines.append("### Longest Wait from League Debut to Maiden Full-Race Podium (Ranked by Races from Debut):")
+    lines.append("1. Eddie: 21 races from debut (Debuted Season 2 Bahrain; scored maiden podium at Season 3 COTA finishing P3).")
+    lines.append("2. Brently: 15 races from debut (Debuted Season 3 Bahrain; scored maiden podium & victory at Season 3 Monaco finishing P1 in his rookie season).")
+    lines.append("3. Patrick: 7 races from debut (Debuted Season 3 Bahrain; scored maiden podium at Season 3 Baku finishing P2).")
+    lines.append("4. Marcus: 2 races from debut (Debuted Season 1 Bahrain; scored maiden podium at Season 1 Jeddah finishing P3).")
+    lines.append("5. Nick, Erick, Zane, Del, Joshua, Josh, Jairo, Jaden: 1 race from debut (All scored a podium in their very first career start at Bahrain).")
+    lines.append("- Drivers Awaiting Maiden Podium (0 career podiums): Boz, Travis, Gary, David, Josh L, Yeti, Matthew, Leo, Grayson, Josh C., Randy, Evelo.")
+    lines.append("")
+    lines.append("### Longest Wait from League Debut to Maiden Race Win (Ranked by Races from Debut):")
+    lines.append("1. Josh: 18 races from debut (Debuted Season 4 Bahrain; scored maiden win at Season 5 Imola finishing P1 in Cadillac).")
+    lines.append("2. Joshua: 16 races from debut (Debuted Season 2 Bahrain; scored maiden win at Season 3 Austria finishing P1 in Alpine).")
+    lines.append("3. Brently: 15 races from debut (Debuted Season 3 Bahrain; scored maiden win at Season 3 Monaco finishing P1 in VCARB in rookie season).")
+    lines.append("4. Patrick: 13 races from debut (Debuted Season 3 Bahrain; scored maiden win at Season 3 Austria finishing P1 in VCARB).")
+    lines.append("5. Erick: 10 races from debut (Debuted Season 1 Bahrain; scored maiden win at Season 1 Singapore finishing P1 in Mercedes).")
+    lines.append("6. Jaden: 9 races from debut (Debuted Season 4 Bahrain; scored maiden win at Season 4 Austria Reverse finishing P1 in Mercedes).")
+    lines.append("7. Del: 5 races from debut (Debuted Season 2 Bahrain; scored maiden win at Season 2 Spain finishing P1 in Mercedes).")
+    lines.append("8. Zane: 4 races from debut (Debuted Season 1 Bahrain; scored maiden win at Season 1 Baku finishing P1 in Aston Martin).")
+    lines.append("9. Marcus: 3 races from debut (Debuted Season 1 Bahrain; scored maiden win at Season 1 Australia finishing P1 in Mercedes).")
+    lines.append("10. Nick, Jairo: 1 race from debut (Won their very first career start at Bahrain).")
+    lines.append("")
+
+    lines.append("## OFFICIAL DRIVER TRACK AFFINITIES & NICKNAMES")
+    lines.append("- Miami Lover / Miami Favorite: Nick's all time favorite track is Miami. Erick is known as the Miami Lover, but really that nickname should be held by Nick (no pun intended).")
+    lines.append("")
 
     # 2. Per-Track Driver Statistical Ratings (SDDREQ-76 & Projections)
     try:
@@ -808,18 +1273,19 @@ def build_grounded_league_context() -> str:
         try:
             with open(highest_pos_path, "r", encoding="utf-8") as f:
                 pos_data = json.load(f)
-                lines.append("## ALL-TIME LEAGUE PEAK POSITIONS")
+                lines.append("## ALL-TIME LEAGUE STANDINGS PEAK POSITIONS")
+                lines.append("Note: These metrics represent the entity's highest rank ever achieved on the cumulative championship leaderboard line, NOT a single-race finish position.")
                 driver_pos = pos_data.get("drivers", {})
-                lines.append("### Driver Peak All-Time Positions:")
+                lines.append("### Driver All-Time Standings Peak:")
                 for d_name, details in list(driver_pos.items())[:25]:
                     pos_str = details.get("highest_position", "—") if isinstance(details, dict) else str(details)
-                    lines.append(f"- {d_name}: Peak All-Time Rank {pos_str}")
+                    lines.append(f"- {d_name}: All-Time Standings Peak {pos_str}")
 
                 const_pos = pos_data.get("constructors", {})
-                lines.append("\n### Constructor Peak All-Time Positions:")
+                lines.append("\n### Constructor All-Time Standings Peak:")
                 for c_name, details in list(const_pos.items())[:15]:
                     pos_str = details.get("highest_position", "—") if isinstance(details, dict) else str(details)
-                    lines.append(f"- {c_name}: Peak All-Time Rank {pos_str}")
+                    lines.append(f"- {c_name}: All-Time Standings Peak {pos_str}")
                 lines.append("")
         except Exception:
             pass
@@ -884,7 +1350,7 @@ def build_grounded_league_context() -> str:
     lines.extend(format_all_season_articles())
 
 
-    _GROUNDED_CONTEXT_CACHE = "\n".join(lines)
+    _GROUNDED_CONTEXT_CACHE = sanitize_race_week_terminology("\n".join(lines))
     _CACHE_TIMESTAMP = now
     return _GROUNDED_CONTEXT_CACHE
 
@@ -895,9 +1361,16 @@ STRICT GROUNDING & CONTEXT RULES:
 1. You must answer strictly and exclusively based on the provided League Grounded Context below.
 2. DO NOT use or retrieve real-world Formula 1 statistics or history under ANY circumstances. The Alternative F1 is an independent private sim racing league with its own drivers (which can be found within the data stored in the application), teams, and race calendar.
 3. If the user asks about an entity or stat completely absent from all seasons, clarify that it is absent from The Alternative F1 records.
-4. RACE DAY SCHEDULE (WEDNESDAYS NOT SUNDAYS):
-   - In The Alternative F1, races occur on WEDNESDAYS (never refer to race day as Sunday).
-   - Regular real-world Formula 1 has races on Sundays, but The Alternative F1 has races on WEDNESDAYS. You must always refer to race days as Wednesdays and NEVER refer to them as Sundays.
+4. SESSION SCHEDULE & "RACE WEEK" TERMINOLOGY (WEDNESDAYS ONLY; NO SATURDAY/SUNDAY; "RACE WEEK" NOT "WEEKEND"):
+   - In The Alternative F1, BOTH Qualifying and the Race take place on WEDNESDAYS during race week.
+   - Qualifying takes place on WEDNESDAYS immediately prior to the race.
+   - Regular real-world Formula 1 has qualifying on Saturday and races on Sunday, but in The Alternative F1, all competitive sessions (Qualifying and Race) occur on WEDNESDAYS.
+   - NEVER state, imply, or assume that Qualifying occurs on Saturday, and NEVER refer to races as occurring on Sunday.
+   - Always refer to the period in which races occur as a "race week" (or "race weeks").
+   - STRICT ZERO-TOLERANCE PROHIBITION ON THE WORD "WEEKEND":
+     * NEVER use the words "weekend", "weekends", "race weekend", "race weekends", "off-weekend", or "off-weekends" in any response under ANY circumstance!
+     * When describing an off-event or poor performance round, use "off-week", "off race week", "difficult race week", or "poor round" (NEVER "off-weekend" or "off-weekends").
+     * CRITICAL CHECK: Before outputting, eliminate conversational sports habits like "a couple of off-weekends" or "this weekend"—replace them strictly with "a couple of off-weeks" and "this race week".
    - Do not expressly mention this rule or hint at it in responses. It is for your reference and guidance only.
 5. DATES & CALENDAR YEARS GROUNDING:
    - When asked about dates or years for races, refer strictly and exclusively to the official schedules provided in the League Grounded Context or under the season schedules for each season that include dates.
@@ -984,18 +1457,24 @@ SPECIALIZED SKILL 2: SEASONAL QUALIFYING COMPARISON (TAF1APP-SDDREQ-249):
 
 SPECIALIZED SKILL 3: HEAD TO HEAD COMPARISON INFOGRAPHIC (TAF1APP-SDDREQ-247):
 10. When the user asks for a "Head to Head Comparison Infographic" or invokes via "@Head to Head Comparison Infographic":
-   - Compare two drivers OR two constructors from the league records.
+   - Compare two drivers OR two constructors from the league records to evaluate which entity OUTPERFORMED the other.
    - Driver/Constructor 1 will be listed in the top left ("h2h_name1").
    - Driver/Constructor 2 will be listed in the top right ("h2h_name2").
-   - By default the data and information shared is for all seasons in the league, unless the user inputs a specific season or group of seasons (e.g. "Season 5", "Seasons 2-4"), in which case the data will only be from those seasons.
+   - By default, head-to-head comparison evaluates the SHARED SEASONS where both entities competed simultaneously in the league (e.g., for Josh vs. Joshua, compare strictly across Seasons 4 & 5 where both were active, yielding Josh: 206.0 pts vs Joshua: 309.0 pts), unless the user inputs a specific season or group of seasons (e.g. "Season 5", "Seasons 2-4"), in which case the data will only be from those seasons.
    - For drivers: list teammates in "h2h_teammates1" and "h2h_teammates2". Set "h2h_is_constructor": false.
    - For constructors: list the drivers who drove on the team in "h2h_teammates1" and "h2h_teammates2". Set "h2h_is_constructor": true.
-   - MUST display the following 5 comparison metrics in "h2h_stats":
-     1. Qualifying (Out-qualified battle score across shared race sessions: count of sessions where Driver 1 qualified ahead of Driver 2 vs Driver 2 ahead of Driver 1. NEVER return 0 vs 0 if both drivers competed in the league)
-     2. Race Result (Race finishes ahead count across shared races: count of races where Driver 1 finished ahead of Driver 2 vs Driver 2 ahead of Driver 1. NEVER return 0 vs 0 if both drivers competed in the league)
-     3. Podiums (Podium finishes)
-     4. Points (Points scored)
-     5. Wins (Race wins)
+   - MANDATORY COMPARISON METRICS IN "h2h_stats" (STRICT OUT-PERFORMANCE TALLY):
+     1. Qualifying: MUST be the direct head-to-head out-qualified score across shared qualifying sessions where both competed (count of sessions where Driver 1 qualified ahead of Driver 2 vs Driver 2 ahead of Driver 1).
+        * "val1": Exact count of sessions Driver 1 qualified ahead of Driver 2.
+        * "val2": Exact count of sessions Driver 2 qualified ahead of Driver 1.
+        * CRITICAL PROHIBITION: NEVER output total career qualifying sessions (e.g. do NOT output 21 vs 46; output the direct head-to-head out-qualification score such as 9 vs 12).
+     2. Race Result: MUST be the direct head-to-head race finishes ahead score across shared races where both competed (count of races where Driver 1 finished ahead of Driver 2 vs Driver 2 ahead of Driver 1).
+        * "val1": Exact count of races Driver 1 finished ahead of Driver 2.
+        * "val2": Exact count of races Driver 2 finished ahead of Driver 1.
+        * CRITICAL PROHIBITION: NEVER output total career race starts or standalone participation numbers.
+     3. Podiums: Number of podium finishes earned by Driver 1 ("val1") vs Driver 2 ("val2") across the compared shared seasons.
+     4. Points: Total points scored by Driver 1 ("val1") vs Driver 2 ("val2") across the compared shared seasons (MUST strictly rely on official season standings totals based on the official points scale).
+     5. Wins: Race wins earned by Driver 1 ("val1") vs Driver 2 ("val2") across the compared shared seasons.
    - Output structured JSON block tagged ```infographic-json:
 ```infographic-json
 {
@@ -1009,15 +1488,27 @@ SPECIALIZED SKILL 3: HEAD TO HEAD COMPARISON INFOGRAPHIC (TAF1APP-SDDREQ-247):
   "h2h_teammates1": "<List of teammates for Driver 1, or list of drivers for Constructor 1>",
   "h2h_teammates2": "<List of teammates for Driver 2, or list of drivers for Constructor 2>",
   "h2h_stats": [
-    {"metric": "Qualifying", "val1": "<Driver/Constructor 1 score>", "val2": "<Driver/Constructor 2 score>"},
-    {"metric": "Race Result", "val1": "<Driver/Constructor 1 finishes ahead>", "val2": "<Driver/Constructor 2 finishes ahead>"},
-    {"metric": "Podiums", "val1": "<Driver/Constructor 1 podiums>", "val2": "<Driver/Constructor 2 podiums>"},
-    {"metric": "Points", "val1": "<Driver/Constructor 1 points>", "val2": "<Driver/Constructor 2 points>"},
-    {"metric": "Wins", "val1": "<Driver/Constructor 1 wins>", "val2": "<Driver/Constructor 2 wins>"}
+    {"metric": "Qualifying", "val1": "<Driver 1 sessions ahead>", "val2": "<Driver 2 sessions ahead>"},
+    {"metric": "Race Result", "val1": "<Driver 1 finishes ahead>", "val2": "<Driver 2 finishes ahead>"},
+    {"metric": "Podiums", "val1": "<Driver 1 podiums>", "val2": "<Driver 2 podiums>"},
+    {"metric": "Points", "val1": "<Driver 1 points>", "val2": "<Driver 2 points>"},
+    {"metric": "Wins", "val1": "<Driver 1 wins>", "val2": "<Driver 2 wins>"}
   ]
 }
 ```
-   - Follow with an in-depth analytical breakdown comparing racecraft, qualifying pace, consistency, and rivalry context.
+   - MANDATORY ANALYTICAL WRITE-UP STRUCTURE (EVALUATING WHO ACTUALLY OUTPERFORMED THE OTHER):
+     The analytical write-up following the infographic MUST evaluate who actually outperformed the other, structured with the following 3 sections:
+     * 1. Definitive Out-Performance Verdict:
+       - State clearly and authoritatively which entity outperformed the other overall.
+       - Declare the winner of the Qualifying Battle (and exact score margin).
+       - Declare the winner of the Race Finish Battle (and exact score margin).
+       - Declare who held the Points & Podiums advantage and net margin.
+     * 2. Direct Head-to-Head Session Breakdown:
+       - State the shared seasons/timeline where both drivers competed simultaneously (e.g. for Josh vs Joshua: Season 4 and Season 5).
+       - Detail the head-to-head qualifying battles and race finish battles session by session across the shared race weeks.
+     * 3. Pace, Racecraft, Consistency & Rivalry Context:
+       - Contrast raw one-lap pace, racecraft under pressure, reliability/DNFs, and head-to-head wheel-to-wheel encounters.
+     * CRITICAL PROHIBITION: NEVER simply list the standalone number of races, starts, or qualifying sessions each driver has entered. The entire response must center on who beat whom and who outperformed the other!
 
 SPECIALIZED SKILL 4: CHAMPION COMPARISON SKILL (TAF1APP-SDDREQ-250):
 11. When the user asks for a "Champion Comparison Skill" or invokes via "@Champion Comparison Skill":
@@ -1085,13 +1576,15 @@ FORMATTING:
    - Use ordinal badges (🥇, 🥈, 🥉, 4th, 5th) where appropriate.
 13. Be concise, analytical, courteous, and authoritative on all league statistics.
 
-EDITORIAL & HISTORICAL ARTICLES INQUIRIES:
-14. When asked about articles, editorials, recaps, previews, rankings, or league lore across any season:
-    - Search the COMPLETE LEAGUE EDITORIAL NEWS & ARTICLES ARCHIVE across Seasons 3, 4, 5, and the App Launch.
-    - Reference and cite the exact Article Title, Season, Publication Date, Author, and relevant narrative context.
-    - Specific historical race examples:
+EDITORIAL, LORE & HISTORICAL ARTICLES INQUIRIES (DEEP READING & SUMMARIZATION):
+14. When asked about articles, editorials, recaps, previews, rankings, league lore, driver drama, off-track stories, or paddock events across any season:
+    - Thoroughly examine the COMPLETE LEAGUE EDITORIAL NEWS & ARTICLES ARCHIVE and any PRIMARY RELEVANT ARTICLES RETRIEVED FOR THIS INQUIRY section.
+    - Deeply read the full article body text and provide comprehensive, accurate, and entertaining summaries based on the user's prompt.
+    - Accurately summarize specific aspects, driver quotes, behind-the-scenes reporting, and investigative details.
+    - Do NOT give vague or generic answers. Always extract and explain the actual narrative:
+      * Erick's religious retreat & Houston Scientology speedrun: In the June 27, 2026 Season 5 article "Erick's Esterillos Enlightment" (by Patrick and The Intern), Erick went on a digital detox and ayahuasca retreat in Costa Rica, then returned to Houston and attempted to speedrun the Houston Scientology Church. He got his foot trapped at the entrance gate, was brought in by the cult cronies, joined Scientology (the cult of L. Ron Hubbard), ascended multiple ranks, and sent a letter to McLaren stating that due to current F1 technology, it was against his religion to race in Season 5. Nick confirmed Erick got sucked into the cult, joking about Battlefield Earth and jumping on couches with Tom Cruise, leaving McLaren with an open seat.
       * Josh's first pole and win in Imola: In Season 5, Josh scored his first pole and maiden victory at the Imola Grand Prix in the Cadillac. This is prominently covered in the official Season 5 Imola Race Recap titled **"The Wunderkind Strikes Again"** (published September 17, 2026 by The Intern) as well as the race preview **"Race Week: Imola"** (published September 12, 2026 by Patrick).
-      * If both a preview and recap exist for a race, mention both so the user has the complete reading list.
+    - If asked to summarize any aspect of an article or explain league lore, cite the article title, author, publication date, and pull direct facts, quotes, and conclusions from the full article text.
 
 CAPTAIN SLOW INQUIRIES:
 15. When the user asks about "Captain Slow" in any way (e.g., "who is captain slow", "captain slow", "tell me about captain slow"):
@@ -1112,6 +1605,75 @@ CONSTRUCTOR CHAMPIONSHIP DRIVERS & NON-CHAMPION DRIVER INQUIRIES:
       * Do NOT point to any single predetermined driver as the default answer.
       * Dynamically analyze the grounded career statistics across all non-champion drivers (comparing career points, race wins, podiums, win rates, peak championship standings, and consistency).
       * Objectively present the data and compare the strongest contenders based on the statistics.
+
+DRIVER ROUND-BY-ROUND RESULTS & QUALIFYING INQUIRIES:
+17. When asked for a driver's qualifying positions, starting grid slots, race finishes, or points for any season (e.g. "Please create a bulleted list of each race and the corresponding qualifying position Josh came in during Season 4"):
+    - Retrieve the exact data from the corresponding "Season [X] Driver Round-by-Round Official Results (Qualifying & Finish)" section.
+    - Output the requested bulleted list or table immediately with every race and their exact qualifying grid position (Q:P...) and/or race finish.
+    - CRITICAL RULE: NEVER state or imply that individual race-by-race qualifying grid slots or finishing positions are absent from the database. They are fully recorded and provided in the context.
+
+SPORTING REGULATIONS & LEAGUE SETTINGS INQUIRIES:
+18. When asked about regulations, rules, penalty points, safety car glitches, collisions, damage, protests, assists, or game configuration settings:
+    - Answer strictly and authoritatively from the "OFFICIAL SPORTING & TECHNICAL REGULATIONS" (Regulations 1–16) and "OFFICIAL LEAGUE SETTINGS & CONFIGURATION" sections in the League Grounded Context.
+
+STRUCTURE OF RESPONSES (MANDATORY FOR ALL RESPONSES):
+19. You MUST begin EVERY response immediately with `<thinking>` and close it with `</thinking>`.
+    Example structure:
+    <thinking>
+    - Query evaluation: [brief check, under 100 words]
+    - Data retrieval: [brief key stat/record]
+    - Core answer: [concise conclusion outline]
+    </thinking>
+    [Your definitive final answer in clean Markdown]
+
+    CRITICAL CONSTRAINTS:
+    - Keep everything inside `<thinking>` brief (max 150 words total). Never produce exhaustive transcripts or lengthy essays inside `<thinking>`.
+    - NEVER omit `<thinking>` or `</thinking>`.
+    - NEVER output reasoning phrases ("Analyze the user inquiry", "Check guidelines and rules", "Formulate the answer", "Review against constraints") outside of `<thinking>`.
+    - All user-facing prose, bulleted lists, and tables must begin AFTER `</thinking>`.
+
+DRIVER & CONSTRUCTOR CAREER DEBUTS, SEASONS ACTIVE & INACTIVITY GUARDRAIL:
+20. When asked about driver or constructor debuts, rookie seasons, seasons competed, or team history:
+    - Strictly reference the "OFFICIAL DRIVER CAREER DEBUTS, ACTIVE SEASONS & CAREER STINTS" and "OFFICIAL CONSTRUCTOR CAREER DEBUTS & ACTIVE SEASONS" sections.
+    - NEVER attribute race starts, points, wins, podiums, or stints to any driver in seasons prior to their official Debut Season.
+    - Key historical boundaries:
+      * Brently and Patrick debuted in Season 3 as Rookies for VCARB. They DID NOT COMPETE in Season 1 or Season 2. Brently won the Season 3 Monaco Grand Prix (maiden win & podium in S3). In Season 4, Brently drove for Red Bull; in Season 5, Brently drives for Haas.
+      * Josh, Matthew, Leo, Jaden, and Jairo debuted in Season 4 as Rookies. They DID NOT COMPETE in Seasons 1, 2, or 3.
+      * Grayson, Josh C., Randy, and Evelo debuted in Season 5 as Rookies. They DID NOT COMPETE in Seasons 1, 2, 3, or 4.
+      * Del, Joshua, Eddie, and Yeti debuted in Season 2 as Rookies. They DID NOT COMPETE in Season 1.
+      * Nick, Erick, Marcus, Zane, David, Gary, Boz, Travis, and Josh L are Inaugural Founding Drivers who debuted in Season 1.
+
+MAIDEN PODIUM, MAIDEN WIN & CAREER "WAIT TIME" INQUIRIES:
+21. When asked which driver waited the longest from their debut to their first official podium (or win), or when computing races from debut:
+    - Strictly reference the "OFFICIAL MILESTONE LEADERBOARDS: MAIDEN PODIUMS & MAIDEN WINS" table.
+    - Count races starting strictly and only from the driver's actual league debut race (never count races from Season 1 for drivers who debuted in later seasons).
+    - Longest wait from debut to maiden podium in league history:
+      1. Eddie: 21 races from debut (Debuted Season 2 Bahrain; maiden podium at Season 3 COTA P3).
+      2. Brently: 15 races from debut (Debuted Season 3 Bahrain; scored maiden podium & victory at Season 3 Monaco P1 in rookie campaign).
+      3. Patrick: 7 races from debut (Debuted Season 3 Bahrain; maiden podium at Season 3 Baku P2).
+      4. Marcus: 2 races from debut (Debuted Season 1 Bahrain; maiden podium at Season 1 Jeddah P3).
+      5. Nick, Erick, Zane, Del, Joshua, Josh, Jairo, Jaden: 1 race from debut (podium on debut).
+    - Longest wait from debut to maiden win: Josh (18 races), Joshua (16 races), Brently (15 races), Patrick (13 races), Erick (10 races), Jaden (9 races), Del (5 races), Zane (4 races), Marcus (3 races), Nick & Jairo (1 race).
+
+ALL-TIME STANDINGS PEAK TERMINOLOGY (NOT SINGLE RACE FINISH):
+22. When citing a driver or constructor's peak rank from the all-time records / `all_time_highest_positions.json` (e.g. Matthew at 17th at S4 Spa Sprint, Leo at 10th, Boz at 5th, David at 4th):
+    - ALWAYS label it as their "All-Time Standings Peak" (or "All-Time Peak Championship Standings Rank").
+    - NEVER refer to it simply as "Career Peak" or "Career Peak finish/place", which erroneously suggests it was an individual single-race finishing position.
+    - Clarify that this metric represents their highest recorded position on the cumulative league championship standings leaderboard over time.
+
+SPRINT RACES vs. FULL GRAND PRIX RACES (SCORING & CALENDAR DISTINCTION):
+23. Sprints are Sprint Races and are NOT considered full races. Never refer to Sprints as full races or full Grand Prix starts:
+    - SPRINT SCORING (Regulation 12): 1st: 8 pts, 2nd: 7 pts, 3rd: 6 pts, 4th: 5 pts, 5th: 4 pts, 6th: 3 pts, 7th: 2 pts, 8th: 1 pt, 9th-20th: 0.5 pts. Maximum Sprint win = 8 pts (NEVER 25 pts).
+    - GRAND PRIX SCORING (Regulation 2): 1st: 25 pts, 2nd: 18 pts, 3rd: 15 pts, 4th: 12 pts, 5th: 10 pts, 6th: 8 pts, 7th: 6 pts, 8th: 4 pts, 9th: 3 pts, 10th: 2 pts, 11th-20th: 1 pt. Maximum Grand Prix win = 25 pts (plus up to 4 accolade bonus points = 29 pts max).
+    - Sprints do NOT count as full Grand Prix race starts, nor do they count as full Grand Prix race wins or full Grand Prix race podiums.
+    - When discussing the calendar, remaining rounds, points deficits, or mathematical title chances (e.g. Patrick's or any driver's path in Season 5):
+      * Always explicitly distinguish between Grand Prix feature races and Sprint races (e.g. state "X Grand Prix feature races and Y Sprint races remaining", NEVER lump them together as simply "a 20-race season" or "16 races remaining").
+      * Accurately calculate maximum available points: each remaining Grand Prix offers up to 25 pts (29 with all accolades), while each remaining Sprint offers up to 8 pts.
+
+MIAMI LOVER & CIRCUIT AFFINITIES LORE:
+24. If asked about who loves Miami, who the "Miami Lover" is, or who has a special connection to Miami:
+    - You MUST respond with:
+      "Nick's all time favorite track is Miami. Erick is known as the Miami Lover, but really that nickname should be held by Nick (no pun intended)."
 """
 
 
@@ -1236,6 +1798,7 @@ class ChatMessage(BaseModel):
     """Strongly-typed conversational message and visual infographic payload."""
     role: str = ""
     content: str = ""
+    thinking_content: str = ""
     timestamp: str = ""
     skill_badge: str = ""
     is_infographic: bool = False
@@ -1302,6 +1865,73 @@ class ChatMessage(BaseModel):
     champ_runner_up2: str = ""
     champ_entities: list[ChampionEntity] = []
     champ_stats: list[ChampionMetricRow] = []
+
+
+def parse_thinking_and_content(raw_text: str, api_thought_text: str = "") -> tuple[str, str]:
+    """Separate internal thinking/scratchpad reasoning from the final visible response."""
+    thinking_parts = []
+    if api_thought_text and api_thought_text.strip():
+        thinking_parts.append(api_thought_text.strip())
+
+    text = raw_text
+
+    # 1. Extract closed <thinking>...</thinking> or <think>...</think> tags
+    def _extract_tag(pattern: str, src_text: str) -> tuple[list[str], str]:
+        extracted = []
+        matches = list(re.finditer(pattern, src_text, flags=re.DOTALL | re.IGNORECASE))
+        if not matches:
+            return extracted, src_text
+        clean = re.sub(pattern, "", src_text, flags=re.DOTALL | re.IGNORECASE)
+        for m in matches:
+            body = m.group(1).strip()
+            if body:
+                extracted.append(body)
+        return extracted, clean
+
+    tag_thinks, text = _extract_tag(r"<thinking>(.*?)</thinking>", text)
+    thinking_parts.extend(tag_thinks)
+    tag_thinks_2, text = _extract_tag(r"<think>(.*?)</think>", text)
+    thinking_parts.extend(tag_thinks_2)
+
+    # 2. Extract ```thinking ... ``` markdown blocks
+    block_thinks, text = _extract_tag(r"```thinking\s*(.*?)\s*```", text)
+    thinking_parts.extend(block_thinks)
+
+    # 3. Handle unclosed streaming tags (e.g. while generation is in progress)
+    for open_tag in ("<thinking>", "<think>", "```thinking"):
+        if open_tag in text:
+            idx = text.find(open_tag)
+            pre = text[:idx].strip()
+            ongoing = text[idx + len(open_tag):].strip()
+            if ongoing:
+                thinking_parts.append(ongoing)
+            text = pre
+
+    # 4. Fallback heuristic: If no thinking tags were used, but the model outputted
+    # stream-of-consciousness scratchpad evaluations/self-corrections or structured CoT
+    # (e.g. "Analyze the user inquiry:", "Check guidelines:", "Review against constraints:", "To summarize...")
+    if not thinking_parts:
+        split_pats = [
+            r"(?:Review against constraints[^\n]*\n+)(.*)",
+            r"(?:Formulate the answer:[^\n]*\n+)(.*)",
+            r"\n\n(To summarize.*)",
+            r"\n\n(In summary.*)",
+            r"\n\n(### Summary.*)",
+            r"\n\n(Based on the official.*)",
+        ]
+        for sp in split_pats:
+            match = re.search(sp, text, re.DOTALL | re.IGNORECASE)
+            if match:
+                lead = text[:match.start()].strip()
+                ans = match.group(1).strip()
+                cot_markers = ("analyze the user", "check guidelines", "rule 1", "retrieve data", "wait,", "formulate the answer", "review against constraints", "scratchpad")
+                if any(k in lead.lower() for k in cot_markers):
+                    thinking_parts.append(lead)
+                    text = ans
+                    break
+
+    combined_thinking = "\n\n".join(thinking_parts).strip()
+    return combined_thinking, sanitize_race_week_terminology(text.strip())
 
 
 
@@ -1486,38 +2116,59 @@ def extract_infographic_data(text: str, skill_selected: bool = True) -> dict:
             standard_metrics = ["QUALIFYING", "RACE RESULT", "PODIUMS", "POINTS", "WINS"]
             h2h_rows: list[ComparisonStatRow] = []
 
+            has_deterministic = (
+                h2h_battle.get("shared_active", False)
+                or h2h_battle.get("pts1", "0") != "0"
+                or h2h_battle.get("pts2", "0") != "0"
+                or h2h_battle.get("qual1", 0) > 0
+                or h2h_battle.get("qual2", 0) > 0
+                or h2h_battle.get("race1", 0) > 0
+                or h2h_battle.get("race2", 0) > 0
+            )
+
             for m_key in standard_metrics:
                 v1_str, v2_str = metric_map.get(m_key, ("", ""))
                 display_metric = m_key.title()
                 if m_key == "RACE RESULT":
                     display_metric = "Race Result"
 
-                if m_key == "QUALIFYING":
-                    if (v1_str in ("0", "") and v2_str in ("0", "")) and (h2h_battle["qual1"] > 0 or h2h_battle["qual2"] > 0):
+                if has_deterministic:
+                    if m_key == "QUALIFYING":
                         v1_str = str(h2h_battle["qual1"])
                         v2_str = str(h2h_battle["qual2"])
-                    elif not v1_str and not v2_str:
-                        v1_str = str(h2h_battle["qual1"])
-                        v2_str = str(h2h_battle["qual2"])
-                elif m_key == "RACE RESULT":
-                    if (v1_str in ("0", "") and v2_str in ("0", "")) and (h2h_battle["race1"] > 0 or h2h_battle["race2"] > 0):
+                    elif m_key == "RACE RESULT":
                         v1_str = str(h2h_battle["race1"])
                         v2_str = str(h2h_battle["race2"])
-                    elif not v1_str and not v2_str:
-                        v1_str = str(h2h_battle["race1"])
-                        v2_str = str(h2h_battle["race2"])
-                elif m_key == "PODIUMS":
-                    if (v1_str in ("0", "") and v2_str in ("0", "")) and (h2h_battle["pod1"] > 0 or h2h_battle["pod2"] > 0):
+                    elif m_key == "PODIUMS":
                         v1_str = str(h2h_battle["pod1"])
                         v2_str = str(h2h_battle["pod2"])
-                elif m_key == "POINTS":
-                    if (v1_str in ("0", "0.0", "") and v2_str in ("0", "0.0", "")) and (h2h_battle["pts1"] != "0" or h2h_battle["pts2"] != "0"):
+                    elif m_key == "POINTS":
                         v1_str = str(h2h_battle["pts1"])
                         v2_str = str(h2h_battle["pts2"])
-                elif m_key == "WINS":
-                    if (v1_str in ("0", "") and v2_str in ("0", "")) and (h2h_battle["win1"] > 0 or h2h_battle["win2"] > 0):
+                    elif m_key == "WINS":
                         v1_str = str(h2h_battle["win1"])
                         v2_str = str(h2h_battle["win2"])
+                else:
+                    if m_key == "QUALIFYING":
+                        if (v1_str in ("0", "") and v2_str in ("0", "")) and (h2h_battle["qual1"] > 0 or h2h_battle["qual2"] > 0):
+                            v1_str = str(h2h_battle["qual1"])
+                            v2_str = str(h2h_battle["qual2"])
+                    elif m_key == "RACE RESULT":
+                        if (v1_str in ("0", "") and v2_str in ("0", "")) and (h2h_battle["race1"] > 0 or h2h_battle["race2"] > 0):
+                            v1_str = str(h2h_battle["race1"])
+                            v2_str = str(h2h_battle["race2"])
+                    elif m_key == "PODIUMS":
+                        if (v1_str in ("0", "") and v2_str in ("0", "")) and (h2h_battle["pod1"] > 0 or h2h_battle["pod2"] > 0):
+                            v1_str = str(h2h_battle["pod1"])
+                            v2_str = str(h2h_battle["pod2"])
+                    elif m_key == "POINTS":
+                        if (v1_str in ("0", "0.0", "") and v2_str in ("0", "0.0", "")) and (h2h_battle["pts1"] != "0" or h2h_battle["pts2"] != "0"):
+                            v1_str = str(h2h_battle["pts1"])
+                            v2_str = str(h2h_battle["pts2"])
+                    elif m_key == "WINS":
+                        if (v1_str in ("0", "") and v2_str in ("0", "")) and (h2h_battle["win1"] > 0 or h2h_battle["win2"] > 0):
+                            v1_str = str(h2h_battle["win1"])
+                            v2_str = str(h2h_battle["win2"])
 
                 if not v1_str:
                     v1_str = "0"
@@ -1548,6 +2199,10 @@ def extract_infographic_data(text: str, skill_selected: bool = True) -> dict:
                     color2=color2,
                 ))
 
+            h2h_seasons_display = h2h_battle.get("seasons_label") if has_deterministic else parsed.get("h2h_seasons", "All Seasons")
+            if not h2h_seasons_display:
+                h2h_seasons_display = "All Seasons"
+
             return {
                 "is_infographic": True,
                 "infographic_type": "h2h",
@@ -1561,7 +2216,7 @@ def extract_infographic_data(text: str, skill_selected: bool = True) -> dict:
                 "h2h_color2": color2,
                 "h2h_text_color1": txt1,
                 "h2h_text_color2": txt2,
-                "h2h_seasons": parsed.get("h2h_seasons", "All Seasons"),
+                "h2h_seasons": h2h_seasons_display,
                 "h2h_teammates1": parsed.get("h2h_teammates1", ""),
                 "h2h_teammates2": parsed.get("h2h_teammates2", ""),
                 "h2h_stats": h2h_rows,
@@ -2199,6 +2854,34 @@ class AlternativeIntelligenceState(rx.State):
             """)
             return
 
+        # Custom canonical lore response for Miami Lover / who loves Miami
+        miami_lover_match = re.search(
+            r"(?:who\s+(?:loves|likes)\s+miami|\bmiami\s+lover\b|who(?:'s|\s+is)?(?:\s+the)?\s+miami\s+lover)",
+            query,
+            re.IGNORECASE,
+        )
+        if miami_lover_match:
+            self.messages[-1].content = (
+                "Nick's all time favorite track is Miami. Erick is known as the Miami Lover, but really that nickname should be held by Nick (no pun intended)."
+            )
+            self.is_generating = False
+            yield
+            try:
+                yield rx.call_script("""
+                    setTimeout(() => {
+                        const anchor = document.getElementById('ai-chat-bottom-anchor');
+                        if (anchor) {
+                            anchor.scrollIntoView({ behavior: 'smooth' });
+                        } else {
+                            const feed = document.getElementById('ai-chat-feed');
+                            if (feed) feed.scrollTop = feed.scrollHeight;
+                        }
+                    }, 60);
+                """)
+            except Exception:
+                pass
+            return
+
         api_key = os.getenv("GEMINI_API_KEY", "").strip()
         if not api_key:
             self.is_generating = False
@@ -2222,8 +2905,72 @@ class AlternativeIntelligenceState(rx.State):
                 "Do NOT output any ```infographic-json block, do NOT use specialized infographic structures, and do NOT construct preview cards.]"
             )
 
+        # Search relevant articles for high-priority retrieval matching user query
+        retrieved_articles_section = ""
+        try:
+            matched_articles = search_league_articles(query, top_k=3)
+            if matched_articles:
+                art_blocks = []
+                for art in matched_articles:
+                    art_blocks.append(
+                        f"### Matched Article: \"{art['title']}\" ({art['season']}, Published: {art['date']} by {art['author']})\n"
+                        f"Blurb: {art['blurb']}\n"
+                        f"Full Article Text:\n{art['content']}"
+                    )
+                retrieved_articles_section = (
+                    "\n\nPRIMARY RELEVANT ARTICLES RETRIEVED FOR THIS INQUIRY:\n"
+                    + "\n\n".join(art_blocks)
+                    + "\n"
+                )
+        except Exception:
+            pass
+
+        # Check if query requests Head-to-Head comparison to pre-ground exact shared seasons battle stats
+        h2h_grounding_section = ""
+        try:
+            is_h2h = (
+                is_skill_request and ("head to head" in badge_name.lower() or "h2h" in badge_name.lower())
+            ) or any(k in query.lower() for k in ["head-to-head", "head to head", "h2h", " vs ", " versus ", "compare "])
+
+            if is_h2h:
+                known_entities = sorted([
+                    "Aston Martin", "Alfa Romeo", "AlphaTauri", "Red Bull", "Cadillac", "Mercedes", "McLaren", "Ferrari", "Williams", "Alpine", "Audi", "Haas", "VCARB",
+                    "Josh C.", "Josh L", "Grayson", "Matthew", "Brently", "Patrick", "Joshua", "Eddie", "Erick", "David", "Travis", "Marcus", "Jaden", "Jairo", "Randy", "Evelo", "Gary", "Nick", "Zane", "Josh", "Boz", "Del", "Leo"
+                ], key=len, reverse=True)
+                ent_matches = []
+                for ent in known_entities:
+                    pattern = r"\b" + re.escape(ent) + (r"\b" if not ent.endswith(".") else r"")
+                    for m in re.finditer(pattern, query, re.IGNORECASE):
+                        if not any(not (m.end() <= s or m.start() >= e) for s, e, _ in ent_matches):
+                            ent_matches.append((m.start(), m.end(), ent))
+                ent_matches.sort(key=lambda x: x[0])
+                found_ents = [x[2] for x in ent_matches]
+
+                if len(found_ents) >= 2:
+                    ent1, ent2 = found_ents[0], found_ents[1]
+                    const_names = ["Cadillac", "Ferrari", "Mercedes", "McLaren", "Red Bull", "Haas", "Audi", "Williams", "Alpine", "Aston Martin", "VCARB", "Alfa Romeo", "AlphaTauri"]
+                    is_const = ent1 in const_names and ent2 in const_names
+                    h2h_stats_res = compute_h2h_battle_stats(ent1, ent2, is_constructor=is_const)
+                    if h2h_stats_res.get("shared_active") or h2h_stats_res.get("pts1") != "0" or h2h_stats_res.get("pts2") != "0":
+                        h2h_grounding_section = (
+                            f"\n\nOFFICIAL DETERMINISTIC HEAD-TO-HEAD BATTLE RECORDS (GROUNDED ACROSS {h2h_stats_res.get('seasons_label', 'SHARED SEASONS')}):\n"
+                            f"Entity 1: {ent1}\n"
+                            f"Entity 2: {ent2}\n"
+                            f"Timeline: {h2h_stats_res.get('seasons_label', 'Shared Seasons')}\n"
+                            f"Direct Out-Qualification Score: {ent1} {h2h_stats_res['qual1']} - {h2h_stats_res['qual2']} {ent2}\n"
+                            f"Direct Race Finishes Ahead: {ent1} {h2h_stats_res['race1']} - {h2h_stats_res['race2']} {ent2}\n"
+                            f"Podiums in Shared Seasons: {ent1} {h2h_stats_res['pod1']} - {h2h_stats_res['pod2']} {ent2}\n"
+                            f"Wins in Shared Seasons: {ent1} {h2h_stats_res['win1']} - {h2h_stats_res['win2']} {ent2}\n"
+                            f"Points in Shared Seasons (Official Standings Scale): {ent1} {h2h_stats_res['pts1']} pts - {h2h_stats_res['pts2']} pts {ent2}\n"
+                            f"CRITICAL DIRECTIVE: You MUST use these exact verified numbers in your ```infographic-json and in your analytical write-up. Do not hallucinate or compute divergent totals.\n"
+                        )
+        except Exception:
+            pass
+
         prompt_payload = (
-            f"LEAGUE GROUNDED CONTEXT:\n{grounded_context}\n\n"
+            f"LEAGUE GROUNDED CONTEXT:\n{grounded_context}\n"
+            f"{retrieved_articles_section}\n"
+            f"{h2h_grounding_section}\n"
             f"USER INQUIRY:\n{query}{skill_directive}"
         )
 
@@ -2243,7 +2990,7 @@ class AlternativeIntelligenceState(rx.State):
             },
             "generationConfig": {
                 "temperature": 0.2,
-                "maxOutputTokens": 4096,
+                "maxOutputTokens": 8192,
             }
         }
 
@@ -2322,6 +3069,8 @@ class AlternativeIntelligenceState(rx.State):
                     yield
                     return
 
+                accumulated_text = ""
+                accumulated_thought = ""
                 async for line in active_stream.aiter_lines():
                     if line.startswith("data: "):
                         data_str = line[6:].strip()
@@ -2333,31 +3082,44 @@ class AlternativeIntelligenceState(rx.State):
                             if candidates:
                                 parts = candidates[0].get("content", {}).get("parts", [])
                                 for part in parts:
+                                    is_thought = part.get("thought", False)
                                     text_delta = part.get("text", "")
-                                    accumulated_text += text_delta
+                                    if is_thought:
+                                        accumulated_thought += text_delta
+                                    else:
+                                        accumulated_text += text_delta
 
-                                    # Sanitize displayed text so raw JSON block is never visible during streaming
-                                    display_text = accumulated_text
+                                    cur_thinking, cur_content = parse_thinking_and_content(accumulated_text, accumulated_thought)
+
+                                    # Sanitize displayed text so raw JSON block is never visible during streaming, and "weekend" never appears
+                                    display_text = cur_content
                                     if "```infographic-json" in display_text or "```json" in display_text:
                                         # If block is completed, strip it
                                         display_text = re.sub(r"```(?:infographic-json|json)\s*\{.*?\}\s*```", "", display_text, flags=re.DOTALL).strip()
                                         # If block is still unclosed, hide everything from start of block
                                         display_text = re.sub(r"```(?:infographic-json|json).*$", "", display_text, flags=re.DOTALL).strip()
+                                    display_text = sanitize_race_week_terminology(display_text)
 
+                                    self.messages[-1].thinking_content = cur_thinking
                                     self.messages[-1].content = display_text
                                     yield
                         except Exception:
                             continue
                 await active_stream.aclose()
 
+                # Separate thinking from final content upon completion
+                final_thinking, final_content = parse_thinking_and_content(accumulated_text, accumulated_thought)
+                final_content = sanitize_race_week_terminology(final_content)
+
                 # Check if an infographic was generated and extract structured visual fields
-                info_data = extract_infographic_data(accumulated_text, skill_selected=is_skill_request)
+                info_data = extract_infographic_data(final_content, skill_selected=is_skill_request)
                 if info_data and info_data.get("is_infographic"):
-                    clean_text = info_data.get("clean_content", accumulated_text)
+                    clean_text = sanitize_race_week_terminology(info_data.get("clean_content", final_content))
                     unique_card_id = f"infographic-card-{int(time.time() * 1000)}"
                     self.messages[-1] = ChatMessage(
                         role="assistant",
                         content=clean_text,
+                        thinking_content=final_thinking,
                         timestamp=now_iso,
                         is_infographic=True,
                         card_id=unique_card_id,
@@ -2419,14 +3181,23 @@ class AlternativeIntelligenceState(rx.State):
                     yield
                 else:
                     # Sanitize in case an unclosed JSON block lingered without triggering full infographic
-                    display_text = accumulated_text
+                    display_text = final_content
                     if "```infographic-json" in display_text or "```json" in display_text:
                         display_text = re.sub(r"```(?:infographic-json|json)\s*\{.*?\}\s*```", "", display_text, flags=re.DOTALL).strip()
                         display_text = re.sub(r"```(?:infographic-json|json).*$", "", display_text, flags=re.DOTALL).strip()
+
+                    # Fallback recovery: if display_text is empty, promote thinking content so message is never blank
+                    if not display_text and final_thinking:
+                        display_text = re.sub(r"</?thinking>", "", final_thinking).strip()
+                    if not display_text:
+                        display_text = "Alternative Intelligence could not retrieve records for this query. Please re-submit."
+                    display_text = sanitize_race_week_terminology(display_text)
+
+                    self.messages[-1].thinking_content = final_thinking
                     self.messages[-1].content = display_text
                     yield
 
-            if not accumulated_text:
+            if not accumulated_text and not accumulated_thought:
                 self.messages[-1].content = "No response generated. Please refine your query."
                 yield
 
@@ -3806,7 +4577,7 @@ def message_card(msg: ChatMessage) -> rx.Component:
             ),
 
             rx.cond(
-                msg.content != "",
+                (msg.content != "") | (msg.thinking_content != "") | ((~is_user) & AlternativeIntelligenceState.is_generating),
                 rx.box(
                     # Assistant response top thin rainbow accent line
                     rx.cond(
@@ -3841,60 +4612,159 @@ def message_card(msg: ChatMessage) -> rx.Component:
                         ),
                         rx.fragment(),
                     ),
-                    rx.markdown(
-                        msg.content,
-                        style={
-                            "font_size": "0.9rem",
-                            "color": "#E4E4E7",
-                            "line_height": "1.5",
-                            "p": {"margin_bottom": "0.5rem"},
-                            "table": {
-                                "display": "block",
-                                "width": "100%",
-                                "max_width": "100%",
-                                "overflow_x": "auto",
-                                "-webkit-overflow-scrolling": "touch",
-                                "border_collapse": "collapse",
-                                "margin": "0.6rem 0",
-                                "font_size": "0.82rem",
+                    # Collapsible thinking artifact (collapsed by default)
+                    rx.cond(
+                        (~is_user) & (msg.thinking_content != ""),
+                        rx.box(
+                            rx.accordion.root(
+                                rx.accordion.item(
+                                    rx.accordion.trigger(
+                                        rx.hstack(
+                                            rx.icon("brain", size=13, color="#00b4da"),
+                                            rx.text("Thought Process", font_size="11px", font_weight="600", color="#A1A1AA", letter_spacing="0.02em"),
+                                            spacing="2",
+                                            align="center",
+                                        ),
+                                        padding_y="6px",
+                                        padding_x="10px",
+                                        background="#1F1F23",
+                                        border_radius="6px",
+                                        _hover={"background": "#27272A", "cursor": "pointer"},
+                                        width="100%",
+                                    ),
+                                    rx.accordion.content(
+                                        rx.box(
+                                            rx.markdown(
+                                                msg.thinking_content,
+                                                style={
+                                                    "font_size": "0.82rem",
+                                                    "color": "#A1A1AA",
+                                                    "line_height": "1.45",
+                                                    "p": {"margin_bottom": "0.4rem"},
+                                                    "table": {
+                                                        "display": "block",
+                                                        "width": "100%",
+                                                        "overflow_x": "auto",
+                                                        "border_collapse": "collapse",
+                                                        "margin": "0.4rem 0",
+                                                        "font_size": "0.78rem",
+                                                    },
+                                                    "th": {
+                                                        "border": "1px solid #3F3F46",
+                                                        "padding": "4px 8px",
+                                                        "background": "#27272A",
+                                                        "color": "#00b4da",
+                                                    },
+                                                    "td": {
+                                                        "border": "1px solid #27272A",
+                                                        "padding": "4px 8px",
+                                                    },
+                                                    "code": {
+                                                        "background": "#27272A",
+                                                        "padding": "2px 4px",
+                                                        "border_radius": "4px",
+                                                        "font_size": "0.78rem",
+                                                    },
+                                                    "pre": {
+                                                        "overflow_x": "auto",
+                                                        "background": "#27272A",
+                                                        "padding": "6px",
+                                                        "border_radius": "4px",
+                                                        "margin": "0.4rem 0",
+                                                    },
+                                                },
+                                            ),
+                                            padding="10px 12px",
+                                            background="#141416",
+                                            border="1px solid #27272A",
+                                            border_top="none",
+                                            border_bottom_left_radius="6px",
+                                            border_bottom_right_radius="6px",
+                                            width="100%",
+                                        ),
+                                    ),
+                                    value="thinking",
+                                    border="1px solid #27272A",
+                                    border_radius="6px",
+                                    width="100%",
+                                ),
+                                collapsible=True,
+                                type="single",
+                                width="100%",
+                            ),
+                            margin_bottom="10px",
+                            width="100%",
+                        ),
+                        rx.fragment(),
+                    ),
+                    rx.cond(
+                        msg.content != "",
+                        rx.markdown(
+                            msg.content,
+                            style={
+                                "font_size": "0.9rem",
+                                "color": "#E4E4E7",
+                                "line_height": "1.5",
+                                "p": {"margin_bottom": "0.5rem"},
+                                "table": {
+                                    "display": "block",
+                                    "width": "100%",
+                                    "max_width": "100%",
+                                    "overflow_x": "auto",
+                                    "-webkit-overflow-scrolling": "touch",
+                                    "border_collapse": "collapse",
+                                    "margin": "0.6rem 0",
+                                    "font_size": "0.82rem",
+                                },
+                                "th": {
+                                    "border": "1px solid #3F3F46",
+                                    "padding": "6px 10px",
+                                    "background": "#27272A",
+                                    "color": "#00b4da",
+                                    "white_space": "nowrap",
+                                },
+                                "td": {
+                                    "border": "1px solid #27272A",
+                                    "padding": "6px 10px",
+                                    "white_space": "nowrap",
+                                },
+                                "code": {
+                                    "background": "#27272A",
+                                    "padding": "2px 4px",
+                                    "border_radius": "4px",
+                                    "font_size": "0.8rem",
+                                },
+                                "pre": {
+                                    "overflow_x": "auto",
+                                    "max_width": "100%",
+                                    "background": "#27272A",
+                                    "padding": "8px",
+                                    "border_radius": "6px",
+                                    "margin": "0.5rem 0",
+                                },
+                                "img": {
+                                    "display": "inline-block",
+                                    "vertical_align": "middle",
+                                    "width": "34px",
+                                    "height": "34px",
+                                    "border_radius": "50%",
+                                    "margin_left": "6px",
+                                    "box_shadow": "0 0 10px rgba(245, 158, 11, 0.6)",
+                                    "border": "1px solid rgba(245, 158, 11, 0.8)",
+                                },
                             },
-                            "th": {
-                                "border": "1px solid #3F3F46",
-                                "padding": "6px 10px",
-                                "background": "#27272A",
-                                "color": "#00b4da",
-                                "white_space": "nowrap",
-                            },
-                            "td": {
-                                "border": "1px solid #27272A",
-                                "padding": "6px 10px",
-                                "white_space": "nowrap",
-                            },
-                            "code": {
-                                "background": "#27272A",
-                                "padding": "2px 4px",
-                                "border_radius": "4px",
-                                "font_size": "0.8rem",
-                            },
-                            "pre": {
-                                "overflow_x": "auto",
-                                "max_width": "100%",
-                                "background": "#27272A",
-                                "padding": "8px",
-                                "border_radius": "6px",
-                                "margin": "0.5rem 0",
-                            },
-                            "img": {
-                                "display": "inline-block",
-                                "vertical_align": "middle",
-                                "width": "34px",
-                                "height": "34px",
-                                "border_radius": "50%",
-                                "margin_left": "6px",
-                                "box_shadow": "0 0 10px rgba(245, 158, 11, 0.6)",
-                                "border": "1px solid rgba(245, 158, 11, 0.8)",
-                            },
-                        },
+                        ),
+                        rx.cond(
+                            AlternativeIntelligenceState.is_generating & (~is_user),
+                            rx.hstack(
+                                rx.spinner(size="1", color="#00b4da"),
+                                rx.text("Alternative Intelligence is evaluating league records...", font_size="12px", color="#A1A1AA"),
+                                spacing="2",
+                                align="center",
+                                padding_y="6px",
+                            ),
+                            rx.fragment(),
+                        ),
                     ),
                     bg=rx.cond(is_user, "#27272A", "#18181B"),
                     border=rx.cond(is_user, "1px solid #3F3F46", "1px solid #2C2C32"),
