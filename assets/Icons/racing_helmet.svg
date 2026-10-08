@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" fill="none" stroke="#00b4da" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Outer Shell Contour with top spoiler fin and jaw step -->
+  <path d="M 31 80 C 23 66 22 47 28 32 C 34 19 50 17 68 20 C 71 22 72 24 70 27 L 77 53 L 42 75 L 42 66 C 36 71 33 76 31 80 Z" />
+  <!-- 3/4 Visor Eyeport Contour -->
+  <path d="M 25 49 C 33 44 46 38 54 39 C 58 40 56 47 49 52 C 39 60 30 66 26 68 L 25 49 Z" />
+  <!-- Aerodynamic Brow Intake Vent -->
+  <path d="M 30 41 L 35 34 L 48 31 L 34 39 Z" fill="#00b4da" />
+  <!-- Crown Airflow Ridge -->
+  <path d="M 46 25 C 52 24 62 26 67 30" />
+  <!-- Side Aerodynamic Crease -->
+  <path d="M 42 66 C 53 56 63 46 72 34" />
+</svg>

@@ -405,3 +405,43 @@ input#ai-search-input::-webkit-input-placeholder,
     color: #D4D4D8 !important;
     opacity: 1 !important;
 }
+
+/* Responsive Discord Login Button */
+.discord-login-btn-full {
+    display: inline !important;
+    white-space: nowrap !important;
+}
+.discord-login-btn-short {
+    display: none !important;
+    white-space: nowrap !important;
+}
+
+@media (max-width: 540px) {
+    .discord-login-btn-full {
+        display: none !important;
+    }
+    .discord-login-btn-short {
+        display: inline !important;
+    }
+}
+
+/* Responsive Alternative Intelligence Skill Badge */
+.ai-skill-badge-full {
+    display: inline !important;
+    white-space: nowrap !important;
+}
+.ai-skill-badge-short {
+    display: none !important;
+    white-space: nowrap !important;
+}
+
+@media (max-width: 640px) {
+    .ai-skill-badge-full {
+        display: none !important;
+    }
+    .ai-skill-badge-short {
+        display: inline !important;
+    }
+}
+
+

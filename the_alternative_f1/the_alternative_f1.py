@@ -2232,18 +2232,22 @@ def comments_popout_panel() -> rx.Component:
                         State.discord_username == "",
                         # Prompt to login
                         rx.hstack(
-                            rx.text("You must be logged in to comment.", color="#AAAAAA", font_size="sm"),
+                            rx.text("You must be logged in to comment.", color="#AAAAAA", font_size="sm", min_width="0"),
                             rx.link(
                                 rx.button(
-                                    "Login with Discord",
+                                    rx.text("Login with Discord", class_name="discord-login-btn-full", display=["none", "none", "inline", "inline", "inline"]),
+                                    rx.text("Login", class_name="discord-login-btn-short", display=["inline", "inline", "none", "none", "none"]),
                                     bg="#5865F2",
                                     color="white",
                                     size="2",
                                     cursor="pointer",
+                                    white_space="nowrap",
+                                    flex_shrink="0",
                                 ),
                                 href=State.discord_auth_url,
                                 is_external=True,
                                 text_decoration="none",
+                                flex_shrink="0",
                             ),
                             bg="#18181C",
                             border="1px solid #2C2C32",

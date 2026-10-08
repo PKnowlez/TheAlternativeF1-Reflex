@@ -624,7 +624,8 @@
       "Australia",
       "Imola",
       "Miami Sprint",
-      "Miami"
+      "Miami",
+      "Monza"
     ],
     "rankings": {
       "Preseason": [
@@ -683,6 +684,16 @@
         "Red Bull",
         "McLaren",
         "Ferrari",
+        "Haas",
+        "Audi",
+        "Williams"
+      ],
+      "Monza": [
+        "Red Bull",
+        "Cadillac",
+        "Ferrari",
+        "Mercedes",
+        "McLaren",
         "Haas",
         "Audi",
         "Williams"

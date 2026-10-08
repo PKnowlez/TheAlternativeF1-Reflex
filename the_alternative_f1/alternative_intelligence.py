@@ -1116,11 +1116,21 @@ def build_grounded_league_context() -> str:
     lines.append("")
 
     lines.append("## OFFICIAL SEASON-BY-SEASON ROSTER & ROOKIE CATEGORIZATION")
-    lines.append("- Season 1 (2023, 19 races): Inaugural Class (Nick, Travis, Zane, David, Erick, Marcus, Josh L, Boz, Gary). Constructors: McLaren, Mercedes, Red Bull, Ferrari, Aston Martin.")
-    lines.append("- Season 2 (2023, 10 races): Rookie Class (Del, Joshua, Eddie, Yeti). Returning: Nick, Gary, Boz, Erick, David, Zane, Marcus, Josh L, Travis. Constructors: McLaren, Mercedes, Ferrari, Alpine, Red Bull, Alfa Romeo, AlphaTauri.")
-    lines.append("- Season 3 (2024, 15 races): Rookie Class (Patrick, Brently). Returning: Nick, Travis, Joshua, Eddie, Erick, Zane, Del, Gary, Yeti, Boz. Constructors: McLaren, Alpine, Ferrari, VCARB, Aston Martin, Red Bull.")
-    lines.append("- Season 4 (2025, 17 races): Rookie Class (Josh, Matthew, Leo, Jaden, Jairo). Returning: Joshua, Eddie, Nick, Travis, Patrick, Brently, Erick, Del, Boz. Constructors: Alpine, McLaren, VCARB, Mercedes, Red Bull, Ferrari, Aston Martin.")
-    lines.append("- Season 5 (2026, 20 races scheduled): Rookie Class (Grayson, Josh C., Randy, Evelo). Returning: Joshua, Eddie, Nick, Del, Patrick, Josh, Matthew, Brently, Boz, Jaden, Leo, Jairo. Constructors: Ferrari, McLaren, Red Bull, Mercedes, Haas, Audi, Cadillac, Williams.")
+    lines.append("- Season 1 (2023, 19 rounds): Inaugural Class (Nick, Travis, Zane, David, Erick, Marcus, Josh L, Boz, Gary). Constructors: McLaren, Mercedes, Red Bull, Ferrari, Aston Martin.")
+    lines.append("- Season 2 (2023, 10 rounds): Rookie Class (Del, Joshua, Eddie, Yeti). Returning: Nick, Gary, Boz, Erick, David, Zane, Marcus, Josh L, Travis. Constructors: McLaren, Mercedes, Ferrari, Alpine, Red Bull, Alfa Romeo, AlphaTauri.")
+    lines.append("- Season 3 (2024, 12 rounds; 3 rounds feature a Sprint: China, Austria, COTA): Rookie Class (Patrick, Brently). Returning: Nick, Travis, Joshua, Eddie, Erick, Zane, Del, Gary, Yeti, Boz. Constructors: McLaren, Alpine, Ferrari, VCARB, Aston Martin, Red Bull.")
+    lines.append("- Season 4 (2025, 14 rounds; 3 rounds feature a Sprint: Miami, Spa, Brazil): Rookie Class (Josh, Matthew, Leo, Jaden, Jairo). Returning: Joshua, Eddie, Nick, Travis, Patrick, Brently, Erick, Del, Boz. Constructors: Alpine, McLaren, VCARB, Mercedes, Red Bull, Ferrari, Aston Martin.")
+    lines.append("- Season 5 (2026, 14 rounds scheduled; 6 rounds feature a Sprint: Miami, Spa, Silverstone, Bahrain, Zandvoort, Singapore): Rookie Class (Grayson, Josh C., Randy, Evelo). Returning: Joshua, Eddie, Nick, Del, Patrick, Josh, Matthew, Brently, Boz, Jaden, Leo, Jairo. Constructors: Ferrari, McLaren, Red Bull, Mercedes, Haas, Audi, Cadillac, Williams.")
+    lines.append("")
+
+    lines.append("## OFFICIAL LEAGUE CALENDAR STRUCTURE (SPRINTS ARE PART OF THE FEATURE RACE ROUND)")
+    lines.append("- Sprints are part of the feature race round and do NOT count as separate rounds in any season.")
+    lines.append("- Season 1: 19 Rounds (19 Grand Prix feature races)")
+    lines.append("- Season 2: 10 Rounds (10 Grand Prix feature races)")
+    lines.append("- Season 3: 12 Rounds (12 Grand Prix feature races; rounds with Sprints: China, Austria, COTA)")
+    lines.append("- Season 4: 14 Rounds (14 Grand Prix feature races; rounds with Sprints: Miami, Spa, Brazil)")
+    lines.append("- Season 5: 14 Rounds (14 Grand Prix feature races; rounds with Sprints: Miami, Spa, Silverstone, Bahrain, Zandvoort, Singapore)")
+    lines.append("- CRITICAL PROHIBITION: Season 5 is a 14-round championship campaign, NOT 20 rounds. NEVER refer to Season 5 as a '20-round campaign' or '20-race season'.")
     lines.append("")
 
     lines.append("## OFFICIAL MILESTONE LEADERBOARDS: MAIDEN PODIUMS & MAIDEN WINS")
@@ -1147,6 +1157,7 @@ def build_grounded_league_context() -> str:
 
     lines.append("## OFFICIAL DRIVER TRACK AFFINITIES & NICKNAMES")
     lines.append("- Miami Lover / Miami Favorite: Nick's all time favorite track is Miami. Erick is known as the Miami Lover, but really that nickname should be held by Nick (no pun intended).")
+    lines.append("- Mets Fan: Joshua, Season 4 World Driver Champion is the biggest Mets fan in the world and he hates the Yankees.")
     lines.append("")
 
     # 2. Per-Track Driver Statistical Ratings (SDDREQ-76 & Projections)
@@ -1661,19 +1672,31 @@ ALL-TIME STANDINGS PEAK TERMINOLOGY (NOT SINGLE RACE FINISH):
     - NEVER refer to it simply as "Career Peak" or "Career Peak finish/place", which erroneously suggests it was an individual single-race finishing position.
     - Clarify that this metric represents their highest recorded position on the cumulative league championship standings leaderboard over time.
 
-SPRINT RACES vs. FULL GRAND PRIX RACES (SCORING & CALENDAR DISTINCTION):
-23. Sprints are Sprint Races and are NOT considered full races. Never refer to Sprints as full races or full Grand Prix starts:
+CALENDAR ROUNDS vs. SPRINTS STRUCTURE (SPRINTS ARE PART OF THE FEATURE RACE ROUND):
+23. Sprints are part of the feature race round and do NOT count as separate rounds in ANY season:
     - SPRINT SCORING (Regulation 12): 1st: 8 pts, 2nd: 7 pts, 3rd: 6 pts, 4th: 5 pts, 5th: 4 pts, 6th: 3 pts, 7th: 2 pts, 8th: 1 pt, 9th-20th: 0.5 pts. Maximum Sprint win = 8 pts (NEVER 25 pts).
     - GRAND PRIX SCORING (Regulation 2): 1st: 25 pts, 2nd: 18 pts, 3rd: 15 pts, 4th: 12 pts, 5th: 10 pts, 6th: 8 pts, 7th: 6 pts, 8th: 4 pts, 9th: 3 pts, 10th: 2 pts, 11th-20th: 1 pt. Maximum Grand Prix win = 25 pts (plus up to 4 accolade bonus points = 29 pts max).
     - Sprints do NOT count as full Grand Prix race starts, nor do they count as full Grand Prix race wins or full Grand Prix race podiums.
-    - When discussing the calendar, remaining rounds, points deficits, or mathematical title chances (e.g. Patrick's or any driver's path in Season 5):
-      * Always explicitly distinguish between Grand Prix feature races and Sprint races (e.g. state "X Grand Prix feature races and Y Sprint races remaining", NEVER lump them together as simply "a 20-race season" or "16 races remaining").
-      * Accurately calculate maximum available points: each remaining Grand Prix offers up to 25 pts (29 with all accolades), while each remaining Sprint offers up to 8 pts.
+    - LEAGUE CALENDAR ROUND TRUTH:
+      * Season 1: 19 Rounds
+      * Season 2: 10 Rounds
+      * Season 3: 12 Rounds (3 rounds feature a Sprint: China, Austria, COTA)
+      * Season 4: 14 Rounds (3 rounds feature a Sprint: Miami, Spa, Brazil)
+      * Season 5: 14 Rounds (6 rounds feature a Sprint: Miami, Spa, Silverstone, Bahrain, Zandvoort, Singapore)
+    - CRITICAL PROHIBITION: Season 5 is a 14-round championship campaign, NOT 20 rounds. NEVER refer to Season 5 as a '20-round campaign' or '20-race season'. When discussing remaining rounds, count remaining Grand Prix rounds (e.g. 10 rounds remaining if 4 completed), noting which remaining rounds include a Sprint session.
+    - When discussing the calendar, remaining rounds, points deficits, or mathematical title chances:
+      * Always explicitly distinguish between Grand Prix feature races and Sprint races within rounds.
+      * Accurately calculate maximum available points: each remaining Grand Prix feature race offers up to 25 pts (29 with all accolades), while each remaining Sprint offers up to 8 pts.
 
 MIAMI LOVER & CIRCUIT AFFINITIES LORE:
 24. If asked about who loves Miami, who the "Miami Lover" is, or who has a special connection to Miami:
     - You MUST respond with:
       "Nick's all time favorite track is Miami. Erick is known as the Miami Lover, but really that nickname should be held by Nick (no pun intended)."
+
+METS FAN LORE & INQUIRIES:
+25. If asked about "Mets fan" or someone asks about who is a Mets fan:
+    - You MUST respond with:
+      "Joshua, Season 4 World Driver Champion is the biggest Mets fan in the world and he hates the Yankees."
 """
 
 
@@ -1801,6 +1824,7 @@ class ChatMessage(BaseModel):
     thinking_content: str = ""
     timestamp: str = ""
     skill_badge: str = ""
+    user_avatar: str = ""
     is_infographic: bool = False
     card_id: str = ""
     infographic_type: str = "race"  # "race", "seasonal_qual", "h2h", or "champion_comparison"
@@ -2606,6 +2630,16 @@ class AlternativeIntelligenceState(rx.State):
     selected_skill: str = "Skills Library"
     active_skill_badge: str = ""
     active_skill_infotip: str = ""
+    discord_username: str = rx.LocalStorage("", name="discord_username", sync=True)
+    discord_avatar: str = rx.LocalStorage("", name="discord_avatar", sync=True)
+
+    @rx.var
+    def active_skill_badge_short(self) -> str:
+        """Truncated badge showing '@' and the first word on narrow screens (e.g. '@Specific')."""
+        if not self.active_skill_badge:
+            return ""
+        parts = self.active_skill_badge.strip().split()
+        return parts[0] if parts else ""
 
     def toggle_drawer(self):
         """Toggle the sidebar drawer open or closed."""
@@ -2767,6 +2801,7 @@ class AlternativeIntelligenceState(rx.State):
             content=display_content,
             timestamp=now_iso,
             skill_badge=badge_name,
+            user_avatar=self.discord_avatar,
         ))
         self.search_query = ""
         self.active_skill_badge = ""
@@ -2784,9 +2819,10 @@ class AlternativeIntelligenceState(rx.State):
         try:
             yield rx.call_script("""
                 setTimeout(() => {
-                    const anchor = document.getElementById('ai-chat-bottom-anchor');
-                    if (anchor) {
-                        anchor.scrollIntoView({ behavior: 'smooth' });
+                    const userPrompts = document.querySelectorAll('.ai-user-message-card');
+                    const latestPrompt = userPrompts[userPrompts.length - 1];
+                    if (latestPrompt) {
+                        latestPrompt.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     } else {
                         const feed = document.getElementById('ai-chat-feed');
                         if (feed) feed.scrollTop = feed.scrollHeight;
@@ -2796,6 +2832,19 @@ class AlternativeIntelligenceState(rx.State):
         except Exception:
             pass
 
+        # Custom canonical lore response for Mets fan
+        mets_fan_match = re.search(
+            r"(?:\bmets\s+fans?\b|who(?:'s|\s+is)?(?:\s+(?:a|the))?\s+mets\s+fan\b|who\s+(?:likes|supports|roots\s+for)\s+(?:the\s+)?mets\b)",
+            query,
+            re.IGNORECASE,
+        )
+        if mets_fan_match:
+            self.messages[-1].content = (
+                "Joshua, Season 4 World Driver Champion is the biggest Mets fan in the world and he hates the Yankees."
+            )
+            self.is_generating = False
+            yield
+            return
 
         # Custom Easter egg response for Captain Slow (Brently Season 3 Monaco winner)
         captain_slow_match = re.search(r"\bcaptain\s*slow\b", query, re.IGNORECASE)
@@ -2806,20 +2855,6 @@ class AlternativeIntelligenceState(rx.State):
             )
             self.is_generating = False
             yield
-            try:
-                yield rx.call_script("""
-                    setTimeout(() => {
-                        const anchor = document.getElementById('ai-chat-bottom-anchor');
-                        if (anchor) {
-                            anchor.scrollIntoView({ behavior: 'smooth' });
-                        } else {
-                            const feed = document.getElementById('ai-chat-feed');
-                            if (feed) feed.scrollTop = feed.scrollHeight;
-                        }
-                    }, 60);
-                """)
-            except Exception:
-                pass
             return
 
         # Custom Easter egg response for poopy person / poopy head
@@ -2841,17 +2876,6 @@ class AlternativeIntelligenceState(rx.State):
             self.messages[-1].content = f"Matthew is a {poopy_comment} and has {matthew_wins} wins."
             self.is_generating = False
             yield
-            yield rx.call_script("""
-                setTimeout(() => {
-                    const anchor = document.getElementById('ai-chat-bottom-anchor');
-                    if (anchor) {
-                        anchor.scrollIntoView({ behavior: 'smooth' });
-                    } else {
-                        const feed = document.getElementById('ai-chat-feed');
-                        if (feed) feed.scrollTop = feed.scrollHeight;
-                    }
-                }, 60);
-            """)
             return
 
         # Custom canonical lore response for Miami Lover / who loves Miami
@@ -2866,20 +2890,6 @@ class AlternativeIntelligenceState(rx.State):
             )
             self.is_generating = False
             yield
-            try:
-                yield rx.call_script("""
-                    setTimeout(() => {
-                        const anchor = document.getElementById('ai-chat-bottom-anchor');
-                        if (anchor) {
-                            anchor.scrollIntoView({ behavior: 'smooth' });
-                        } else {
-                            const feed = document.getElementById('ai-chat-feed');
-                            if (feed) feed.scrollTop = feed.scrollHeight;
-                        }
-                    }, 60);
-                """)
-            except Exception:
-                pass
             return
 
         api_key = os.getenv("GEMINI_API_KEY", "").strip()
@@ -3212,20 +3222,6 @@ class AlternativeIntelligenceState(rx.State):
         finally:
             self.is_generating = False
             yield
-            try:
-                yield rx.call_script("""
-                    setTimeout(() => {
-                        const anchor = document.getElementById('ai-chat-bottom-anchor');
-                        if (anchor) {
-                            anchor.scrollIntoView({ behavior: 'smooth' });
-                        } else {
-                            const feed = document.getElementById('ai-chat-feed');
-                            if (feed) feed.scrollTop = feed.scrollHeight;
-                        }
-                    }, 60);
-                """)
-            except Exception:
-                pass
 
 
 
@@ -4553,6 +4549,19 @@ def native_champion_comparison_card(msg: ChatMessage) -> rx.Component:
     )
 
 
+def racing_helmet_icon(size: int = 18, color: str = "#00b4da") -> rx.Component:
+    """Render a 3/4 angled SVG outline of a motorsport / racing helmet matching user reference."""
+    return rx.html(f"""
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="{size}" height="{size}" fill="none" stroke="{color}" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" style="display:block;">
+            <path d="M 31 80 C 23 66 22 47 28 32 C 34 19 50 17 68 20 C 71 22 72 24 70 27 L 77 53 L 42 75 L 42 66 C 36 71 33 76 31 80 Z" />
+            <path d="M 25 49 C 33 44 46 38 54 39 C 58 40 56 47 49 52 C 39 60 30 66 26 68 L 25 49 Z" />
+            <path d="M 30 41 L 35 34 L 48 31 L 34 39 Z" fill="{color}" />
+            <path d="M 46 25 C 52 24 62 26 67 30" />
+            <path d="M 42 66 C 53 56 63 46 72 34" />
+        </svg>
+    """)
+
+
 def message_card(msg: ChatMessage) -> rx.Component:
     """Render an individual conversational message card."""
     is_user = msg.role == "user"
@@ -4800,22 +4809,51 @@ def message_card(msg: ChatMessage) -> rx.Component:
         ),
         rx.cond(
             is_user,
-            rx.box(
-                rx.icon("user", size=16, color="#00b4da"),
-                bg="#27272A",
-                border="1px solid #3F3F46",
-                border_radius="50%",
-                padding="6px",
-                display="flex",
-                align_items="center",
-                justify_content="center",
-                height="32px",
-                width="32px",
-                min_width="32px",
-                margin_right="4px",
+            rx.cond(
+                (msg.user_avatar != "") | (AlternativeIntelligenceState.discord_avatar != ""),
+                rx.box(
+                    rx.avatar(
+                        src=rx.cond(
+                            msg.user_avatar != "",
+                            msg.user_avatar,
+                            AlternativeIntelligenceState.discord_avatar,
+                        ),
+                        fallback="U",
+                        size="2",
+                        bg="transparent",
+                        height="32px",
+                        width="32px",
+                        border_radius="50%",
+                    ),
+                    border="1px solid #00b4da",
+                    border_radius="50%",
+                    overflow="hidden",
+                    height="32px",
+                    width="32px",
+                    min_width="32px",
+                    margin_right="4px",
+                    display="flex",
+                    align_items="center",
+                    justify_content="center",
+                ),
+                rx.box(
+                    racing_helmet_icon(size=18, color="#00b4da"),
+                    bg="#27272A",
+                    border="1px solid #3F3F46",
+                    border_radius="50%",
+                    padding="6px",
+                    display="flex",
+                    align_items="center",
+                    justify_content="center",
+                    height="32px",
+                    width="32px",
+                    min_width="32px",
+                    margin_right="4px",
+                ),
             ),
             rx.fragment(),
         ),
+        class_name=rx.cond(is_user, "ai-user-message-card", "ai-assistant-message-card"),
         width="100%",
         justify=rx.cond(is_user, "end", "center"),
         spacing="2",
@@ -5066,6 +5104,18 @@ def alternative_intelligence_drawer() -> rx.Component:
                                 rx.hstack(
                                     rx.text(
                                         AlternativeIntelligenceState.active_skill_badge,
+                                        class_name="ai-skill-badge-full",
+                                        display=["none", "none", "inline", "inline", "inline"],
+                                        font_size="11px",
+                                        font_weight="bold",
+                                        color="white",
+                                        text_shadow="0 1px 3px rgba(0, 0, 0, 0.8)",
+                                        white_space="nowrap",
+                                    ),
+                                    rx.text(
+                                        AlternativeIntelligenceState.active_skill_badge_short,
+                                        class_name="ai-skill-badge-short",
+                                        display=["inline", "inline", "none", "none", "none"],
                                         font_size="11px",
                                         font_weight="bold",
                                         color="white",
@@ -5085,6 +5135,7 @@ def alternative_intelligence_drawer() -> rx.Component:
                                         _hover={"color": "#EF4444"},
                                         title="Clear selected skill",
                                     ),
+                                    title=AlternativeIntelligenceState.active_skill_badge,
                                     background="radial-gradient(circle at 20% 25%, rgba(230, 0, 73, 0.55) 0%, transparent 55%), radial-gradient(circle at 80% 25%, rgba(255, 140, 0, 0.55) 0%, transparent 50%), radial-gradient(circle at 20% 80%, rgba(123, 0, 255, 0.55) 0%, transparent 55%), radial-gradient(circle at 80% 80%, rgba(0, 153, 255, 0.55) 0%, transparent 50%), rgba(18, 18, 20, 0.55)",
                                     border="1px solid rgba(255, 255, 255, 0.3)",
                                     box_shadow="0 0 8px rgba(0, 180, 218, 0.3)",

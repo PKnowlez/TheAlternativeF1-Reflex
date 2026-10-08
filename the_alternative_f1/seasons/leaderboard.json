@@ -1,74 +1,74 @@
 [
   {
-    "user": "Nat",
-    "all_time_pts": 129,
-    "s5": 129,
+    "user": "PK",
+    "all_time_pts": 189,
+    "s5": 189,
     "rank": 1,
     "rank_str": "1",
     "rank_color": "#FFD700",
     "rank_bg": "#FFD70022",
     "rank_border": "1px solid #FFD70044",
-    "pts_str": "129 pts",
-    "s5_str": "129 pts"
+    "pts_str": "189 pts",
+    "s5_str": "189 pts"
   },
   {
-    "user": "Jatthew Newman",
-    "all_time_pts": 122,
-    "s5": 122,
+    "user": "Nat",
+    "all_time_pts": 162,
+    "s5": 162,
     "rank": 2,
     "rank_str": "2",
     "rank_color": "#C0C0C0",
     "rank_bg": "#C0C0C022",
     "rank_border": "1px solid #C0C0C044",
-    "pts_str": "122 pts",
-    "s5_str": "122 pts"
+    "pts_str": "162 pts",
+    "s5_str": "162 pts"
   },
   {
-    "user": "uhh_josh",
-    "all_time_pts": 102,
-    "s5": 102,
+    "user": "Jellywaffles37",
+    "all_time_pts": 138,
+    "s5": 138,
     "rank": 3,
     "rank_str": "3",
     "rank_color": "#CD7F32",
     "rank_bg": "#CD7F3222",
     "rank_border": "1px solid #CD7F3244",
-    "pts_str": "102 pts",
-    "s5_str": "102 pts"
+    "pts_str": "138 pts",
+    "s5_str": "138 pts"
   },
   {
-    "user": "brentuar",
-    "all_time_pts": 100,
-    "s5": 100,
+    "user": "Jatthew Newman",
+    "all_time_pts": 134,
+    "s5": 134,
     "rank": 4,
     "rank_str": "4",
     "rank_color": "#888888",
     "rank_bg": "#88888822",
     "rank_border": "1px solid #88888844",
-    "pts_str": "100 pts",
-    "s5_str": "100 pts"
+    "pts_str": "134 pts",
+    "s5_str": "134 pts"
   },
   {
-    "user": "Jellywaffles37",
-    "all_time_pts": 64,
-    "s5": 64,
+    "user": "uhh_josh",
+    "all_time_pts": 112,
+    "s5": 112,
     "rank": 5,
     "rank_str": "5",
     "rank_color": "#888888",
     "rank_bg": "#88888822",
     "rank_border": "1px solid #88888844",
-    "pts_str": "64 pts",
-    "s5_str": "64 pts"
+    "pts_str": "112 pts",
+    "s5_str": "112 pts"
   },
   {
-    "user": "PK",
-    "all_time_pts": 10,
-    "s5": 10,
+    "user": "brentuar",
+    "all_time_pts": 100,
+    "s5": 100,
     "rank": 6,
     "rank_str": "6",
     "rank_color": "#888888",
     "rank_bg": "#88888822",
     "rank_border": "1px solid #88888844",
-    "pts_str": "10 pts",
-    "s5_str": "10 pts"
+    "pts_str": "100 pts",
+    "s5_str": "100 pts"
   }
 ]
