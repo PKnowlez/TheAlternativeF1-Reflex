@@ -71,7 +71,7 @@ article = {
             margin_bottom="4",
         ),
         rx.text(
-            r"""Jairo proceeded to take home yet another Pole Position during Q3 with Joshua right behind. Most surprising though was the speed that VCARB's Josh was able to demonstrate during the third qualifying session, finding himself in third right next to reigning champion Nick in fourth.""",
+            r"""Jairo proceeded to take home yet another Pole Position during Q3 with Joshua right behind. Most surprising though was the speed that VCARB's Jelly was able to demonstrate during the third qualifying session, finding himself in third right next to reigning champion Nick in fourth.""",
             color="#E0E0E0",
             font_size="md",
             line_height="1.7",
@@ -93,7 +93,7 @@ article = {
             margin_bottom="4",
         ),
         rx.text(
-            r"""Surprisingly the start went off without a hitch. No major incidents, only little bumps and shoves during some of the light braking zones like Turn 2. Pole sitter Jairo got off to an incredibly strong start in the wet, while Joshua and Josh battled side-by-side all the way up and into the esses of the second half of the lap.""",
+            r"""Surprisingly the start went off without a hitch. No major incidents, only little bumps and shoves during some of the light braking zones like Turn 2. Pole sitter Jairo got off to an incredibly strong start in the wet, while Joshua and Jelly battled side-by-side all the way up and into the esses of the second half of the lap.""",
             color="#E0E0E0",
             font_size="md",
             line_height="1.7",

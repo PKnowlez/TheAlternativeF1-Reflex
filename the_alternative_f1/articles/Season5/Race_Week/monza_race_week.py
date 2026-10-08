@@ -21,7 +21,7 @@ article = {
                     race could see McLaren jumping up in the standings and moving past Ferrari. Much of this rests \
                         on the laurels of Nick who is the only active driver who has raced at Monza every single season. \
                             In addition to this, Leo starting from the rear may aid McLaren in this effort. \
-                                The most critical battle is between Jairo and Josh who are separated by just 9 points \
+                                The most critical battle is between Jairo and Jelly who are separated by just 9 points \
                                     going into the race this week.",
 
         rx.vstack(

@@ -84,7 +84,7 @@ article = {
             margin_bottom="4",
         ),
         rx.text(
-            r"""After some smooth passing and some...well...ridiculously ballsy passing concluded, the league found themselves nearly fully right side up just before a safety car struck. A total disaster-class for VCARB's Josh as he forgot to pit under the safety car and likely lost the race due to it.""",
+            r"""After some smooth passing and some...well...ridiculously ballsy passing concluded, the league found themselves nearly fully right side up just before a safety car struck. A total disaster-class for VCARB's Jelly as he forgot to pit under the safety car and likely lost the race due to it.""",
             color="#E0E0E0",
             font_size="md",
             line_height="1.7",
@@ -113,7 +113,7 @@ article = {
             font_family="Outfit"
         ),
         rx.text(
-            r"""Before this whole section begins, I want to take a moment to thank the great memers of the league. Josh, Newman, Nick, Travis, and others who provided ideas, you are all appreciated. Mostly because I am lazy and had no desire to do anything remotely creative over the break, lol, get taken advantage of newbs. And with that, enjoy the roasts.""",
+            r"""Before this whole section begins, I want to take a moment to thank the great memers of the league. Jelly, Newman, Nick, Travis, and others who provided ideas, you are all appreciated. Mostly because I am lazy and had no desire to do anything remotely creative over the break, lol, get taken advantage of newbs. And with that, enjoy the roasts.""",
             color="#E0E0E0",
             font_size="md",
             line_height="1.7",
@@ -260,7 +260,7 @@ article = {
             margin_y="4",
         ),
         rx.vstack(
-            rx.text("Josh Roast1", color="#888888", font_size="xs", margin_bottom="1"),
+            rx.text("Jelly Roast1", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
                 src="/thealternativef1-cloudflare/Season4/Images/Spa/Josh_roast1.jpg",
                 width="100%",
@@ -273,7 +273,7 @@ article = {
             margin_y="4",
         ),
         rx.vstack(
-            rx.text("Josh Roast2", color="#888888", font_size="xs", margin_bottom="1"),
+            rx.text("Jelly Roast2", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
                 src="/thealternativef1-cloudflare/Season4/Images/Spa/Josh_roast2.jpg",
                 width="100%",

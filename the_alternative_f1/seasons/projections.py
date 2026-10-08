@@ -36,10 +36,14 @@ SPRINT_POINTS = [8, 7, 6, 5, 4, 3, 2, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5,
 _PROJECTIONS_CACHE = {}
 _PROJECTIONS_MTIME = 0
 
+_EXCEL_PATH = Path(__file__).parent.parent / "The_Alternative_F1.xlsx"
+
 if PROJECTIONS_DATA_JSON.exists():
     try:
         with open(PROJECTIONS_DATA_JSON, "r", encoding="utf-8") as f:
             _PROJECTIONS_CACHE = json.load(f)
+        if _EXCEL_PATH.exists():
+            _PROJECTIONS_MTIME = _EXCEL_PATH.stat().st_mtime
     except Exception as e:
         print(f"Error loading projections_data.json: {e}")
         _PROJECTIONS_CACHE = {}
@@ -92,11 +96,12 @@ def compute_season_projections(season_num: int = 5, force: bool = False) -> dict
 
     cache_key = f"season_{season_num}"
 
-    excel_path = Path(__file__).parent.parent / "The_Alternative_F1.xlsx"
+    excel_path = _EXCEL_PATH
     curr_mtime = excel_path.stat().st_mtime if excel_path.exists() else 0.0
 
-    if not force and _PROJECTIONS_MTIME == curr_mtime and cache_key in _PROJECTIONS_CACHE:
+    if not force and cache_key in _PROJECTIONS_CACHE:
         return _PROJECTIONS_CACHE[cache_key]
+
 
     df_season = get_excel_sheet(f"Season{season_num}")
     df_sched = get_excel_sheet(f"S{season_num}Schedule")

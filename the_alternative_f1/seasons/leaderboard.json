@@ -1,27 +1,27 @@
 [
   {
     "user": "PK",
-    "all_time_pts": 189,
-    "s5": 189,
+    "all_time_pts": 263,
+    "s5": 263,
     "rank": 1,
     "rank_str": "1",
     "rank_color": "#FFD700",
     "rank_bg": "#FFD70022",
     "rank_border": "1px solid #FFD70044",
-    "pts_str": "189 pts",
-    "s5_str": "189 pts"
+    "pts_str": "263 pts",
+    "s5_str": "263 pts"
   },
   {
     "user": "Nat",
-    "all_time_pts": 162,
-    "s5": 162,
+    "all_time_pts": 262,
+    "s5": 262,
     "rank": 2,
     "rank_str": "2",
     "rank_color": "#C0C0C0",
     "rank_bg": "#C0C0C022",
     "rank_border": "1px solid #C0C0C044",
-    "pts_str": "162 pts",
-    "s5_str": "162 pts"
+    "pts_str": "262 pts",
+    "s5_str": "262 pts"
   },
   {
     "user": "Jellywaffles37",
@@ -36,39 +36,39 @@
     "s5_str": "138 pts"
   },
   {
-    "user": "Jatthew Newman",
-    "all_time_pts": 134,
-    "s5": 134,
+    "user": "uhh_josh",
+    "all_time_pts": 124,
+    "s5": 124,
     "rank": 4,
     "rank_str": "4",
     "rank_color": "#888888",
     "rank_bg": "#88888822",
     "rank_border": "1px solid #88888844",
-    "pts_str": "134 pts",
-    "s5_str": "134 pts"
-  },
-  {
-    "user": "uhh_josh",
-    "all_time_pts": 112,
-    "s5": 112,
-    "rank": 5,
-    "rank_str": "5",
-    "rank_color": "#888888",
-    "rank_bg": "#88888822",
-    "rank_border": "1px solid #88888844",
-    "pts_str": "112 pts",
-    "s5_str": "112 pts"
+    "pts_str": "124 pts",
+    "s5_str": "124 pts"
   },
   {
     "user": "brentuar",
     "all_time_pts": 100,
     "s5": 100,
-    "rank": 6,
-    "rank_str": "6",
+    "rank": 5,
+    "rank_str": "5",
     "rank_color": "#888888",
     "rank_bg": "#88888822",
     "rank_border": "1px solid #88888844",
     "pts_str": "100 pts",
     "s5_str": "100 pts"
+  },
+  {
+    "user": "Jatthew Newman",
+    "all_time_pts": 34,
+    "s5": 34,
+    "rank": 6,
+    "rank_str": "6",
+    "rank_color": "#888888",
+    "rank_bg": "#88888822",
+    "rank_border": "1px solid #88888844",
+    "pts_str": "34 pts",
+    "s5_str": "34 pts"
   }
 ]

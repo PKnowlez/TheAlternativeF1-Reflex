@@ -52,23 +52,23 @@
       "season": 5,
       "next_race": "Spa Sprint",
       "next_main_race": "Spa",
-      "expected_winner": "Cadillac",
-      "expected_winner_prob": 46.2,
-      "expected_highest_score_team": "Cadillac",
-      "expected_highest_score_pts": 46,
+      "expected_winner": "McLaren",
+      "expected_winner_prob": 50.7,
+      "expected_highest_score_team": "McLaren",
+      "expected_highest_score_pts": 50,
       "expected_podium": [
+        "McLaren",
         "Cadillac",
-        "Red Bull",
-        "McLaren"
+        "Mercedes"
       ],
       "expected_points_lines": {
         "Audi": 2.5,
         "Cadillac": 45.5,
-        "Ferrari": 10.0,
+        "Ferrari": 13.0,
         "Haas": 2.5,
-        "McLaren": 37.5,
-        "Mercedes": 14.0,
-        "Red Bull": 30.5,
+        "McLaren": 49.5,
+        "Mercedes": 17.0,
+        "Red Bull": 12.5,
         "Williams": 2.5
       }
     }

@@ -516,6 +516,7 @@ def get_all_league_articles() -> list[dict]:
                 d = str(a.get("date", "")).strip()
                 auth = str(a.get("author", "")).strip()
                 blurb = str(a.get("blurb", "")).strip()
+                headliner = str(a.get("headliner", "")).strip()
                 raw_body = a.get("content", [])
                 full_body = extract_article_full_text(raw_body)
                 clean_body = sanitize_race_week_terminology(full_body)
@@ -526,6 +527,7 @@ def get_all_league_articles() -> list[dict]:
                     "date": d,
                     "author": auth,
                     "blurb": blurb,
+                    "headliner": headliner,
                     "content": clean_body,
                 })
 
@@ -613,6 +615,7 @@ def format_all_season_articles() -> list[str]:
     )
 
     articles = get_all_league_articles()
+    lines.append(f"Total Number of Published League Articles: {len(articles)}\n")
     from collections import defaultdict
     by_season = defaultdict(list)
     for a in articles:
@@ -622,6 +625,8 @@ def format_all_season_articles() -> list[str]:
         lines.append(f"### {season_name} Published Articles ({len(arts)} Articles):")
         for a in arts:
             lines.append(f"#### Article: \"{a['title']}\" ({a['season']}, Published: {a['date']} by {a['author']})")
+            if a.get("headliner"):
+                lines.append(f"Headliner: {a['headliner']}")
             if a["blurb"]:
                 lines.append(f"Blurb: {a['blurb']}")
             if a["content"]:
@@ -630,6 +635,370 @@ def format_all_season_articles() -> list[str]:
         lines.append("")
 
     return lines
+
+
+def _format_comprehensive_statistical_matrix(excel_p: Path, seasons_list: list) -> list:
+    """Format exhaustive Driver and Constructor career and seasonal statistics (TAF1APP-SDDREQ-239)."""
+    res = []
+    try:
+        from collections import defaultdict
+        from the_alternative_f1.all_time_stats.Functions import get_all_time_highest_positions
+        from the_alternative_f1.all_time_stats.DetailedAllTime import compute_entity_detailed_metrics, get_entity_lists
+        from the_alternative_f1.seasons.projections import _get_driver_track_rating
+
+        num_seasons = 5
+        all_drivers, all_teams = get_entity_lists(num_seasons)
+        highest_pos = get_all_time_highest_positions(num_seasons)
+        d_peaks = highest_pos.get("drivers", {})
+        c_peaks = highest_pos.get("constructors", {})
+
+        # Tally Pre-Season & Post-Season Wins and Podiums
+        driver_pre_wins = defaultdict(int)
+        driver_pre_pods = defaultdict(int)
+        driver_post_wins = defaultdict(int)
+        driver_post_pods = defaultdict(int)
+        team_pre_wins = defaultdict(int)
+        team_pre_pods = defaultdict(int)
+        team_post_wins = defaultdict(int)
+        team_post_pods = defaultdict(int)
+
+        for s_data in seasons_list:
+            for pre_r in s_data.get("preseason_races", []):
+                for res_row in pre_r.get("results", []):
+                    d = str(res_row.get("driver", "")).strip()
+                    t = str(res_row.get("team", "")).strip()
+                    plc = res_row.get("place")
+                    if plc == 1:
+                        if d: driver_pre_wins[d] += 1
+                        if t: team_pre_wins[t] += 1
+                    if plc in (1, 2, 3):
+                        if d: driver_pre_pods[d] += 1
+                        if t: team_pre_pods[t] += 1
+
+            for post_r in s_data.get("postseason_races", []):
+                for res_row in post_r.get("results", []):
+                    d = str(res_row.get("driver", "")).strip()
+                    t = str(res_row.get("team", "")).strip()
+                    plc = res_row.get("place")
+                    if plc == 1:
+                        if d: driver_post_wins[d] += 1
+                        if t: team_post_wins[t] += 1
+                    if plc in (1, 2, 3):
+                        if d: driver_post_pods[d] += 1
+                        if t: team_post_pods[t] += 1
+
+        # ── 1. DRIVER COMPREHENSIVE STATISTICS MATRIX ──
+        res.append("## OFFICIAL DRIVER COMPREHENSIVE STATISTICAL MATRIX (TAF1APP-SDDREQ-239)")
+        res.append(
+            "| Driver | Total Feature Wins | Feature Wins by Season | Sprint Wins (Total & by Season) | Pre-Season Wins | Post-Season Wins | Win Streaks (Single Season / Cross Season) | "
+            "Total Feature Podiums | Feature Podiums by Season | Sprint Podiums (Total & by Season) | Pre-Season Podiums | Post-Season Podiums | Podium Streaks (Single / Cross) | "
+            "Career Points | Points by Season | Career Avg Place | Career Avg Qualifying | Career Avg Pos Change | Career Best Race | Career Poles | Career FL | Career DOTD | Career MOT | Career CD | All-Time Standings Peak |"
+        )
+        res.append("| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |")
+
+        for d_name in all_drivers:
+            df_races, _ = compute_entity_detailed_metrics(num_seasons, "Driver", d_name)
+            if df_races.empty:
+                continue
+
+            # Separate Feature Races vs Sprint Races
+            f_races = df_races[~df_races["raw_race"].str.lower().str.contains("sprint", na=False)]
+            s_races = df_races[df_races["raw_race"].str.lower().str.contains("sprint", na=False)]
+
+            tot_f_wins = int(f_races["wins_cnt"].sum())
+            tot_s_wins = int(s_races["wins_cnt"].sum())
+            tot_f_pods = int(f_races["podiums_cnt"].sum())
+            tot_s_pods = int(s_races["podiums_cnt"].sum())
+
+            # Wins and Podiums by season
+            f_wins_by_s = []
+            s_wins_by_s = []
+            f_pods_by_s = []
+            s_pods_by_s = []
+            pts_by_s = []
+
+            for s_idx in range(1, num_seasons + 1):
+                s_f = f_races[f_races["season"] == s_idx]
+                s_s = s_races[s_races["season"] == s_idx]
+                s_all = df_races[df_races["season"] == s_idx]
+
+                w_f = int(s_f["wins_cnt"].sum())
+                w_s = int(s_s["wins_cnt"].sum())
+                p_f = int(s_f["podiums_cnt"].sum())
+                p_s = int(s_s["podiums_cnt"].sum())
+                pts = float(s_all["pts"].sum())
+
+                if not s_all.empty:
+                    f_wins_by_s.append(f"S{s_idx}:{w_f}")
+                    if w_s > 0: s_wins_by_s.append(f"S{s_idx}:{w_s}")
+                    f_pods_by_s.append(f"S{s_idx}:{p_f}")
+                    if p_s > 0: s_pods_by_s.append(f"S{s_idx}:{p_s}")
+                    pts_by_s.append(f"S{s_idx}:{pts:g}pts")
+
+            f_wins_s_str = ", ".join(f_wins_by_s) or "0"
+            s_wins_s_str = f"{tot_s_wins} ({', '.join(s_wins_by_s)})" if tot_s_wins > 0 else "0"
+            f_pods_s_str = ", ".join(f_pods_by_s) or "0"
+            s_pods_s_str = f"{tot_s_pods} ({', '.join(s_pods_by_s)})" if tot_s_pods > 0 else "0"
+            pts_s_str = ", ".join(pts_by_s) or "0"
+
+            # Pre/Post Season wins & podiums (ALWAYS indicated as Pre or Post season)
+            pre_w = driver_pre_wins[d_name]
+            pre_w_str = f"{pre_w} (Pre-Season)" if pre_w > 0 else "0 (Pre-Season)"
+            post_w = driver_post_wins[d_name]
+            post_w_str = f"{post_w} (Post-Season)" if post_w > 0 else "0 (Post-Season)"
+
+            pre_p = driver_pre_pods[d_name]
+            pre_p_str = f"{pre_p} (Pre-Season)" if pre_p > 0 else "0 (Pre-Season)"
+            post_p = driver_post_pods[d_name]
+            post_p_str = f"{post_p} (Post-Season)" if post_p > 0 else "0 (Post-Season)"
+
+            # Streaks
+            max_ss_win = 0
+            curr_ss_win = 0
+            max_cross_win = 0
+            curr_cross_win = 0
+            last_s = None
+
+            max_ss_pod = 0
+            curr_ss_pod = 0
+            max_cross_pod = 0
+            curr_cross_pod = 0
+            last_pod_s = None
+
+            for _, r_item in f_races.iterrows():
+                cur_s = r_item["season"]
+                if last_s is not None and cur_s != last_s:
+                    curr_ss_win = 0
+                if last_pod_s is not None and cur_s != last_pod_s:
+                    curr_ss_pod = 0
+
+                is_w = (r_item["wins_cnt"] == 1)
+                is_p = (r_item["podiums_cnt"] == 1)
+
+                if is_w:
+                    curr_ss_win += 1
+                    curr_cross_win += 1
+                    max_ss_win = max(max_ss_win, curr_ss_win)
+                    max_cross_win = max(max_cross_win, curr_cross_win)
+                else:
+                    curr_ss_win = 0
+                    curr_cross_win = 0
+
+                if is_p:
+                    curr_ss_pod += 1
+                    curr_cross_pod += 1
+                    max_ss_pod = max(max_ss_pod, curr_ss_pod)
+                    max_cross_pod = max(max_cross_pod, curr_cross_pod)
+                else:
+                    curr_ss_pod = 0
+                    curr_cross_pod = 0
+
+                last_s = cur_s
+                last_pod_s = cur_s
+
+            win_streaks_str = f"Single:{max_ss_win} / Cross:{max_cross_win}"
+            pod_streaks_str = f"Single:{max_ss_pod} / Cross:{max_cross_pod}"
+
+            tot_pts = float(df_races["pts"].sum())
+            comp = df_races[df_races["competed"] == True] if "competed" in df_races.columns else df_races
+            valid_p = comp[comp["place"] > 0]["place"]
+            avg_p = float(valid_p.mean()) if not valid_p.empty else 0.0
+            valid_q = comp[comp["qual"] > 0]["qual"]
+            avg_q = float(valid_q.mean()) if not valid_q.empty else 0.0
+            pos_chgs = [float(c) for c in comp["pos_change"].dropna() if c is not None]
+            avg_chg = float(np.mean(pos_chgs)) if pos_chgs else (avg_q - avg_p)
+
+            # Best Race
+            if not valid_p.empty:
+                min_p = int(round(valid_p.min()))
+                best_rows = comp[comp["place"] == min_p]
+                best_race_row = best_rows.loc[best_rows["pts"].idxmax()] if not best_rows.empty else comp.iloc[0]
+                best_race_str = f"P{min_p} at S{best_race_row['season']} {best_race_row['race']} ({best_race_row['pts']:.0f}pts)"
+            else:
+                best_race_str = "N/A"
+
+            poles = int(df_races["poles_cnt"].sum())
+            fl_cnt = int(df_races["fl_cnt"].sum())
+            dotd_cnt = int(df_races["dotd_cnt"].sum())
+            mot_cnt = int(df_races["mot_cnt"].sum())
+            cd_cnt = int(df_races["cd_cnt"].sum())
+            peak_rank = d_peaks.get(d_name, "—")
+
+            res.append(
+                f"| {d_name} | {tot_f_wins} | {f_wins_s_str} | {s_wins_s_str} | {pre_w_str} | {post_w_str} | {win_streaks_str} | "
+                f"{tot_f_pods} | {f_pods_s_str} | {s_pods_s_str} | {pre_p_str} | {post_p_str} | {pod_streaks_str} | "
+                f"{tot_pts:.1f} | {pts_s_str} | {avg_p:.1f} | {avg_q:.1f} | {avg_chg:+.1f} | {best_race_str} | {poles} | {fl_cnt} | {dotd_cnt} | {mot_cnt} | {cd_cnt} | {peak_rank} |"
+            )
+        res.append("")
+
+        # ── 2. CONSTRUCTOR COMPREHENSIVE STATISTICS MATRIX ──
+        res.append("## OFFICIAL CONSTRUCTOR COMPREHENSIVE STATISTICAL MATRIX (TAF1APP-SDDREQ-239)")
+        res.append(
+            "| Constructor | Total Feature Wins | Feature Wins by Season | Sprint Wins (Total & by Season) | Pre-Season Wins | Post-Season Wins | Win Streaks (Single Season / Cross Season) | "
+            "Total Feature Podiums | Feature Podiums by Season | Sprint Podiums (Total & by Season) | Pre-Season Podiums | Post-Season Podiums | Podium Streaks (Single / Cross) | "
+            "Career Points | Points by Season | Career Avg Place | Career Avg Qualifying | Career Avg Pos Change | Career Best Race | Career Poles | Career FL | Career DOTD | Career MOT | Career CD | All-Time Standings Peak |"
+        )
+        res.append("| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |")
+
+        for c_name in all_teams:
+            df_races, _ = compute_entity_detailed_metrics(num_seasons, "Constructor", c_name)
+            if df_races.empty:
+                continue
+
+            f_races = df_races[~df_races["raw_race"].str.lower().str.contains("sprint", na=False)]
+            s_races = df_races[df_races["raw_race"].str.lower().str.contains("sprint", na=False)]
+
+            tot_f_wins = int(f_races["wins_cnt"].sum())
+            tot_s_wins = int(s_races["wins_cnt"].sum())
+            tot_f_pods = int(f_races["podiums_cnt"].sum())
+            tot_s_pods = int(s_races["podiums_cnt"].sum())
+
+            f_wins_by_s = []
+            s_wins_by_s = []
+            f_pods_by_s = []
+            s_pods_by_s = []
+            pts_by_s = []
+
+            for s_idx in range(1, num_seasons + 1):
+                s_f = f_races[f_races["season"] == s_idx]
+                s_s = s_races[s_races["season"] == s_idx]
+                s_all = df_races[df_races["season"] == s_idx]
+
+                w_f = int(s_f["wins_cnt"].sum())
+                w_s = int(s_s["wins_cnt"].sum())
+                p_f = int(s_f["podiums_cnt"].sum())
+                p_s = int(s_s["podiums_cnt"].sum())
+                pts = float(s_all["pts"].sum())
+
+                if not s_all.empty:
+                    f_wins_by_s.append(f"S{s_idx}:{w_f}")
+                    if w_s > 0: s_wins_by_s.append(f"S{s_idx}:{w_s}")
+                    f_pods_by_s.append(f"S{s_idx}:{p_f}")
+                    if p_s > 0: s_pods_by_s.append(f"S{s_idx}:{p_s}")
+                    pts_by_s.append(f"S{s_idx}:{pts:g}pts")
+
+            f_wins_s_str = ", ".join(f_wins_by_s) or "0"
+            s_wins_s_str = f"{tot_s_wins} ({', '.join(s_wins_by_s)})" if tot_s_wins > 0 else "0"
+            f_pods_s_str = ", ".join(f_pods_by_s) or "0"
+            s_pods_s_str = f"{tot_s_pods} ({', '.join(s_pods_by_s)})" if tot_s_pods > 0 else "0"
+            pts_s_str = ", ".join(pts_by_s) or "0"
+
+            pre_w = team_pre_wins[c_name]
+            pre_w_str = f"{pre_w} (Pre-Season)" if pre_w > 0 else "0 (Pre-Season)"
+            post_w = team_post_wins[c_name]
+            post_w_str = f"{post_w} (Post-Season)" if post_w > 0 else "0 (Post-Season)"
+
+            pre_p = team_pre_pods[c_name]
+            pre_p_str = f"{pre_p} (Pre-Season)" if pre_p > 0 else "0 (Pre-Season)"
+            post_p = team_post_pods[c_name]
+            post_p_str = f"{post_p} (Post-Season)" if post_p > 0 else "0 (Post-Season)"
+
+            # Streaks
+            max_ss_win = 0
+            curr_ss_win = 0
+            max_cross_win = 0
+            curr_cross_win = 0
+            last_s = None
+
+            max_ss_pod = 0
+            curr_ss_pod = 0
+            max_cross_pod = 0
+            curr_cross_pod = 0
+            last_pod_s = None
+
+            for _, r_item in f_races.iterrows():
+                cur_s = r_item["season"]
+                if last_s is not None and cur_s != last_s:
+                    curr_ss_win = 0
+                if last_pod_s is not None and cur_s != last_pod_s:
+                    curr_ss_pod = 0
+
+                is_w = (r_item["wins_cnt"] >= 1)
+                is_p = (r_item["podiums_cnt"] >= 1)
+
+                if is_w:
+                    curr_ss_win += 1
+                    curr_cross_win += 1
+                    max_ss_win = max(max_ss_win, curr_ss_win)
+                    max_cross_win = max(max_cross_win, curr_cross_win)
+                else:
+                    curr_ss_win = 0
+                    curr_cross_win = 0
+
+                if is_p:
+                    curr_ss_pod += 1
+                    curr_cross_pod += 1
+                    max_ss_pod = max(max_ss_pod, curr_ss_pod)
+                    max_cross_pod = max(max_cross_pod, curr_cross_pod)
+                else:
+                    curr_ss_pod = 0
+                    curr_cross_pod = 0
+
+                last_s = cur_s
+                last_pod_s = cur_s
+
+            win_streaks_str = f"Single:{max_ss_win} / Cross:{max_cross_win}"
+            pod_streaks_str = f"Single:{max_ss_pod} / Cross:{max_cross_pod}"
+
+            tot_pts = float(df_races["pts"].sum())
+            all_p_flat = [p for places in df_races["all_places"] for p in places if p > 0]
+            all_q_flat = [q for quals in df_races["all_quals"] for q in quals if q > 0]
+            avg_p = float(np.mean(all_p_flat)) if all_p_flat else 0.0
+            avg_q = float(np.mean(all_q_flat)) if all_q_flat else 0.0
+            pos_chgs = [float(c) for c in df_races["pos_change"].dropna() if c is not None]
+            avg_chg = float(np.mean(pos_chgs)) if pos_chgs else (avg_q - avg_p)
+
+            # Best Race
+            if all_p_flat:
+                min_p = int(round(min(all_p_flat)))
+                best_rows = df_races[df_races["all_places"].apply(lambda pl: min_p in [int(round(x)) for x in pl])]
+                best_race_row = best_rows.loc[best_rows["pts"].idxmax()] if not best_rows.empty else df_races.iloc[0]
+                best_race_str = f"P{min_p} at S{best_race_row['season']} {best_race_row['race']} ({best_race_row['pts']:.0f}pts)"
+            else:
+                best_race_str = "N/A"
+
+            poles = int(df_races["poles_cnt"].sum())
+            fl_cnt = int(df_races["fl_cnt"].sum())
+            dotd_cnt = int(df_races["dotd_cnt"].sum())
+            mot_cnt = int(df_races["mot_cnt"].sum())
+            cd_cnt = int(df_races["cd_cnt"].sum())
+            peak_rank = c_peaks.get(c_name, "—")
+
+            res.append(
+                f"| {c_name} | {tot_f_wins} | {f_wins_s_str} | {s_wins_s_str} | {pre_w_str} | {post_w_str} | {win_streaks_str} | "
+                f"{tot_f_pods} | {f_pods_s_str} | {s_pods_s_str} | {pre_p_str} | {post_p_str} | {pod_streaks_str} | "
+                f"{tot_pts:.1f} | {pts_s_str} | {avg_p:.1f} | {avg_q:.1f} | {avg_chg:+.1f} | {best_race_str} | {poles} | {fl_cnt} | {dotd_cnt} | {mot_cnt} | {cd_cnt} | {peak_rank} |"
+            )
+        res.append("")
+
+        # ── 3. DETAILED TRACK-BY-TRACK STATISTICS (POINTS, AVERAGES, POSITION DELTAS, RATINGS) ──
+        res.append("## OFFICIAL TRACK-BY-TRACK PERFORMANCE MATRIX (ALL TRACKS)")
+        tracks_all = [
+            "Spa", "Monza", "Australia", "Imola", "Miami", "Brazil",
+            "Silverstone", "Suzuka", "Qatar", "COTA", "Mexico", "Las Vegas", "Abu Dhabi",
+            "Bahrain", "Jeddah", "Spain", "Canada", "Austria", "Zandvoort", "Singapore"
+        ]
+        for tr in tracks_all:
+            res.append(f"### Track Performance: {tr}")
+            d_track_items = []
+            for d in all_drivers:
+                score = _get_driver_track_rating(d, tr)
+                df_races, _ = compute_entity_detailed_metrics(num_seasons, "Driver", d)
+                if not df_races.empty:
+                    t_rows = df_races[df_races["track"].str.lower() == tr.lower()]
+                    t_pts = float(t_rows["pts"].sum()) if not t_rows.empty else 0.0
+                    t_avg_pts = float(t_rows["pts"].mean()) if not t_rows.empty else 0.0
+                    t_pos_chgs = [float(c) for c in t_rows["pos_change"].dropna()] if not t_rows.empty else []
+                    t_avg_chg = float(np.mean(t_pos_chgs)) if t_pos_chgs else 0.0
+                    if not t_rows.empty:
+                        d_track_items.append(f"{d} (Rating:{score:.1f}, TotPts:{t_pts:.0f}, AvgPts:{t_avg_pts:.1f}, AvgPosChg:{t_avg_chg:+.1f})")
+            if d_track_items:
+                res.append(f"- Driver Track Metrics: {'; '.join(d_track_items)}")
+            res.append("")
+
+    except Exception as e:
+        res.append(f"Note: Error formatting comprehensive statistics matrix: {str(e)}\n")
+    return res
 
 
 def build_grounded_league_context() -> str:
@@ -829,15 +1198,22 @@ def build_grounded_league_context() -> str:
                 continue
             r_details = []
             for r in target_r:
-                q_col = next((c for c in [f"{r}Qualifying", f"{r.replace(' Sprint', 'Sprint')}Qualifying", f"{r} Qualifying"] if c in df_data.columns), None)
-                p_col = next((c for c in [f"{r}Place", f"{r.replace(' Sprint', 'Sprint')}Place", f"{r} Place"] if c in df_data.columns), None)
-                pts_col = next((c for c in [f"{r}Points", f"{r.replace(' Sprint', 'Sprint')}Points", f"{r} Points"] if c in df_data.columns), None)
-                fl_col = next((c for c in [f"{r}FastestLap", f"{r.replace(' Sprint', 'Sprint')}FastestLap"] if c in df_data.columns), None)
+                c_pre = r.replace(" Sprint", "Sprint")
+                q_col = next((c for c in [f"{r}Qualifying", f"{c_pre}Qualifying", f"{r} Qualifying"] if c in df_data.columns), None)
+                p_col = next((c for c in [f"{r}Place", f"{c_pre}Place", f"{r} Place"] if c in df_data.columns), None)
+                pts_col = next((c for c in [f"{r}Points", f"{c_pre}Points", f"{r} Points"] if c in df_data.columns), None)
+                fl_col = next((c for c in [f"{r}FastestLap", f"{c_pre}FastestLap"] if c in df_data.columns), None)
+                dotd_col = next((c for c in [f"{r}DOTD", f"{c_pre}DOTD"] if c in df_data.columns), None)
+                mot_col = next((c for c in [f"{r}MOT", f"{c_pre}MOT"] if c in df_data.columns), None)
+                cd_col = next((c for c in [f"{r}CD", f"{c_pre}CD"] if c in df_data.columns), None)
 
                 q_v = row.get(q_col) if q_col else None
                 p_v = row.get(p_col) if p_col else None
                 pts_v = row.get(pts_col) if pts_col else None
                 fl_v = row.get(fl_col) if fl_col else None
+                dotd_v = row.get(dotd_col) if dotd_col else None
+                mot_v = row.get(mot_col) if mot_col else None
+                cd_v = row.get(cd_col) if cd_col else None
 
                 items = []
                 q_parsed = _parse_val(q_v)
@@ -848,6 +1224,20 @@ def build_grounded_league_context() -> str:
                 if p_parsed:
                     items.append(f"Finish:{p_parsed}")
 
+                if q_parsed and p_parsed and q_parsed.startswith("P") and p_parsed.startswith("P"):
+                    try:
+                        q_i = int(q_parsed[1:])
+                        p_i = int(p_parsed[1:])
+                        diff = q_i - p_i
+                        if diff > 0:
+                            items.append(f"+{diff} pos gained")
+                        elif diff < 0:
+                            items.append(f"{diff} pos lost")
+                        else:
+                            items.append("0 pos change")
+                    except Exception:
+                        pass
+
                 if pts_v is not None:
                     try:
                         pts_f = float(pts_v)
@@ -857,6 +1247,12 @@ def build_grounded_league_context() -> str:
                         pass
                 if fl_v is not None and str(fl_v) in ("1", "1.0", "True"):
                     items.append("FL")
+                if dotd_v is not None and str(dotd_v) in ("1", "1.0", "True"):
+                    items.append("DOTD")
+                if mot_v is not None and str(mot_v) in ("1", "1.0", "True"):
+                    items.append("MOT")
+                if cd_v is not None and str(cd_v) in ("1", "1.0", "True"):
+                    items.append("CD")
 
                 stat_str = f" [{', '.join(items)}]" if items else " [DNS/No Data]"
                 r_details.append(f"{r}{stat_str}")
@@ -1064,7 +1460,7 @@ def build_grounded_league_context() -> str:
         "CRITICAL CHRONOLOGICAL RULE: Drivers only exist and compete in seasons starting from their official Debut Season. "
         "NEVER assume, invent, or state that a driver competed, drove for a team, or scored results in seasons prior to their official Debut Season!\n"
         "- Brently and Patrick debuted in Season 3 as Rookies (VCARB). They DID NOT COMPETE in Season 1 or Season 2!\n"
-        "- Josh, Matthew, Leo, Jaden, and Jairo debuted in Season 4 as Rookies. They DID NOT COMPETE in Seasons 1, 2, or 3!\n"
+        "- Jelly, Matthew, Leo, Jaden, and Jairo debuted in Season 4 as Rookies. They DID NOT COMPETE in Seasons 1, 2, or 3!\n"
         "- Grayson, Josh C., Randy, and Evelo debuted in Season 5 as Rookies. They DID NOT COMPETE in Seasons 1, 2, 3, or 4!\n"
         "- Del, Joshua, Eddie, and Yeti debuted in Season 2 as Rookies. They DID NOT COMPETE in Season 1!\n"
         "- Nick, Erick, Marcus, Zane, David, Gary, Boz, Travis, and Josh L are Inaugural Founding Drivers who debuted in Season 1."
@@ -1086,7 +1482,7 @@ def build_grounded_league_context() -> str:
     lines.append("| Yeti | Season 2 | S2 Bahrain | AlphaTauri | Season 2 Rookie | S2, S3 | S1, S4, S5 (Inactive) | S2: AlphaTauri, S3: Aston Martin | None (All-Time Standings Peak: 10th at S2 Monza) | None | None | None |")
     lines.append("| Patrick | Season 3 | S3 Bahrain | VCARB | Season 3 Rookie | S3, S4, S5 | S1, S2 (DID NOT COMPETE in S1, S2) | S3: VCARB, S4: VCARB, S5: Cadillac | P2 at S3 Baku | 7 races | P1 at S3 Austria | 13 races |")
     lines.append("| Brently | Season 3 | S3 Bahrain | VCARB | Season 3 Rookie | S3, S4, S5 | S1, S2 (DID NOT COMPETE in S1, S2) | S3: VCARB, S4: Red Bull, S5: Haas | P1 at S3 Monaco (Maiden Win & Podium in Rookie Season!) | 15 races | P1 at S3 Monaco | 15 races |")
-    lines.append("| Josh | Season 4 | S4 Bahrain | VCARB | Season 4 Rookie | S4, S5 | S1, S2, S3 (DID NOT COMPETE in S1, S2, S3) | S4: VCARB, S5: Cadillac | P3 at S4 Bahrain | 1 race | P1 at S5 Imola | 18 races |")
+    lines.append("| Jelly | Season 4 | S4 Bahrain | VCARB | Season 4 Rookie | S4, S5 | S1, S2, S3 (DID NOT COMPETE in S1, S2, S3) | S4: VCARB, S5: Cadillac | P3 at S4 Bahrain | 1 race | P1 at S5 Imola | 18 races |")
     lines.append("| Matthew | Season 4 | S4 Bahrain | Red Bull | Season 4 Rookie | S4, S5 | S1, S2, S3 (DID NOT COMPETE in S1, S2, S3) | S4: Red Bull, S5: Haas | None (All-Time Standings Peak: 17th at S4 Spa Sprint) | None | None | None |")
     lines.append("| Leo | Season 4 | S4 Bahrain | Ferrari | Season 4 Rookie | S4, S5 | S1, S2, S3 (DID NOT COMPETE in S1, S2, S3) | S4: Ferrari, S5: Ferrari | None (All-Time Standings Peak: 10th at S4 Mexico) | None | None | None |")
     lines.append("| Jaden | Season 4 | S4 Bahrain | Mercedes | Season 4 Rookie | S4, S5 | S1, S2, S3 (DID NOT COMPETE in S1, S2, S3) | S4: Mercedes, S5: Ferrari | P2 at S4 Bahrain | 1 race | P1 at S4 Austria Reverse | 9 races |")
@@ -1119,8 +1515,8 @@ def build_grounded_league_context() -> str:
     lines.append("- Season 1 (2023, 19 rounds): Inaugural Class (Nick, Travis, Zane, David, Erick, Marcus, Josh L, Boz, Gary). Constructors: McLaren, Mercedes, Red Bull, Ferrari, Aston Martin.")
     lines.append("- Season 2 (2023, 10 rounds): Rookie Class (Del, Joshua, Eddie, Yeti). Returning: Nick, Gary, Boz, Erick, David, Zane, Marcus, Josh L, Travis. Constructors: McLaren, Mercedes, Ferrari, Alpine, Red Bull, Alfa Romeo, AlphaTauri.")
     lines.append("- Season 3 (2024, 12 rounds; 3 rounds feature a Sprint: China, Austria, COTA): Rookie Class (Patrick, Brently). Returning: Nick, Travis, Joshua, Eddie, Erick, Zane, Del, Gary, Yeti, Boz. Constructors: McLaren, Alpine, Ferrari, VCARB, Aston Martin, Red Bull.")
-    lines.append("- Season 4 (2025, 14 rounds; 3 rounds feature a Sprint: Miami, Spa, Brazil): Rookie Class (Josh, Matthew, Leo, Jaden, Jairo). Returning: Joshua, Eddie, Nick, Travis, Patrick, Brently, Erick, Del, Boz. Constructors: Alpine, McLaren, VCARB, Mercedes, Red Bull, Ferrari, Aston Martin.")
-    lines.append("- Season 5 (2026, 14 rounds scheduled; 6 rounds feature a Sprint: Miami, Spa, Silverstone, Bahrain, Zandvoort, Singapore): Rookie Class (Grayson, Josh C., Randy, Evelo). Returning: Joshua, Eddie, Nick, Del, Patrick, Josh, Matthew, Brently, Boz, Jaden, Leo, Jairo. Constructors: Ferrari, McLaren, Red Bull, Mercedes, Haas, Audi, Cadillac, Williams.")
+    lines.append("- Season 4 (2025, 14 rounds; 3 rounds feature a Sprint: Miami, Spa, Brazil): Rookie Class (Jelly, Matthew, Leo, Jaden, Jairo). Returning: Joshua, Eddie, Nick, Travis, Patrick, Brently, Erick, Del, Boz. Constructors: Alpine, McLaren, VCARB, Mercedes, Red Bull, Ferrari, Aston Martin.")
+    lines.append("- Season 5 (2026, 14 rounds scheduled; 6 rounds feature a Sprint: Miami, Spa, Silverstone, Bahrain, Zandvoort, Singapore): Rookie Class (Grayson, Josh C., Randy, Evelo). Returning: Joshua, Eddie, Nick, Del, Patrick, Jelly, Matthew, Brently, Boz, Jaden, Leo, Jairo. Constructors: Ferrari, McLaren, Red Bull, Mercedes, Haas, Audi, Cadillac, Williams.")
     lines.append("")
 
     lines.append("## OFFICIAL LEAGUE CALENDAR STRUCTURE (SPRINTS ARE PART OF THE FEATURE RACE ROUND)")
@@ -1139,11 +1535,11 @@ def build_grounded_league_context() -> str:
     lines.append("2. Brently: 15 races from debut (Debuted Season 3 Bahrain; scored maiden podium & victory at Season 3 Monaco finishing P1 in his rookie season).")
     lines.append("3. Patrick: 7 races from debut (Debuted Season 3 Bahrain; scored maiden podium at Season 3 Baku finishing P2).")
     lines.append("4. Marcus: 2 races from debut (Debuted Season 1 Bahrain; scored maiden podium at Season 1 Jeddah finishing P3).")
-    lines.append("5. Nick, Erick, Zane, Del, Joshua, Josh, Jairo, Jaden: 1 race from debut (All scored a podium in their very first career start at Bahrain).")
+    lines.append("5. Nick, Erick, Zane, Del, Joshua, Jelly, Jairo, Jaden: 1 race from debut (All scored a podium in their very first career start at Bahrain).")
     lines.append("- Drivers Awaiting Maiden Podium (0 career podiums): Boz, Travis, Gary, David, Josh L, Yeti, Matthew, Leo, Grayson, Josh C., Randy, Evelo.")
     lines.append("")
     lines.append("### Longest Wait from League Debut to Maiden Race Win (Ranked by Races from Debut):")
-    lines.append("1. Josh: 18 races from debut (Debuted Season 4 Bahrain; scored maiden win at Season 5 Imola finishing P1 in Cadillac).")
+    lines.append("1. Jelly: 18 races from debut (Debuted Season 4 Bahrain; scored maiden win at Season 5 Imola finishing P1 in Cadillac).")
     lines.append("2. Joshua: 16 races from debut (Debuted Season 2 Bahrain; scored maiden win at Season 3 Austria finishing P1 in Alpine).")
     lines.append("3. Brently: 15 races from debut (Debuted Season 3 Bahrain; scored maiden win at Season 3 Monaco finishing P1 in VCARB in rookie season).")
     lines.append("4. Patrick: 13 races from debut (Debuted Season 3 Bahrain; scored maiden win at Season 3 Austria finishing P1 in VCARB).")
@@ -1175,7 +1571,7 @@ def build_grounded_league_context() -> str:
         ]
 
         if not active_drivers:
-            active_drivers = ["Josh", "Jairo", "Joshua", "Jaden", "Nick", "Eddie", "Del", "Patrick", "Matthew", "Brently", "Grayson", "Josh C.", "Boz", "Evelo", "Leo", "Randy"]
+            active_drivers = ["Jelly", "Jairo", "Joshua", "Jaden", "Nick", "Eddie", "Del", "Patrick", "Matthew", "Brently", "Grayson", "Josh C.", "Boz", "Evelo", "Leo", "Randy"]
 
         for track_name in tracks_to_compute:
             ratings = []
@@ -1233,6 +1629,9 @@ def build_grounded_league_context() -> str:
     except Exception as e:
         lines.append(f"Note: Error generating all-time career records: {str(e)}")
 
+    # Comprehensive Driver & Constructor Statistical Matrix (TAF1APP-SDDREQ-239)
+    lines.extend(_format_comprehensive_statistical_matrix(excel_path, seasons))
+
     # Official Championship Historical Archive (TAF1APP-SDDREQ-250)
     lines.append("## OFFICIAL CHAMPIONSHIP HISTORICAL ARCHIVE (SEASONS 1 - 5)")
     lines.append("| Season | Champion Entity | Type | Wins | Podiums | Accolades (Poles, FL, CD, DOTD, MOT) | Win Margin | Runner-Up | Races Led Championship |")
@@ -1246,7 +1645,7 @@ def build_grounded_league_context() -> str:
     lines.append("| Season 4 | Mercedes | Constructor | 8 | 11 | 24 (7 Poles, 8 FL, 3 CD, 6 DOTD) | +38.0 pts | VCARB | 13 of 17 races (76.5%) |")
     lines.append("| Season 4 | Joshua | Driver | 2 | 11 | 12 (4 Poles, 5 FL, 2 DOTD, 1 MOT) | +15.0 pts | Jairo | 8 of 17 races (47.1%) |")
     lines.append("| Season 5 (Active) | Cadillac | Constructor | 2 | 2 | 5 (1 Pole, 2 FL, 2 CD) | +36.0 pts | Mercedes | 4 of 4 races (100.0%) |")
-    lines.append("| Season 5 (Active) | Josh | Driver | 2 | 2 | 2 (1 Pole, 1 FL) | +9.0 pts | Jairo | 4 of 4 races (100.0%) |")
+    lines.append("| Season 5 (Active) | Jelly | Driver | 2 | 2 | 2 (1 Pole, 1 FL) | +9.0 pts | Jairo | 4 of 4 races (100.0%) |")
     lines.append("")
     lines.append("## OFFICIAL CONSTRUCTOR CHAMPIONSHIP WINNERS & WINNING DRIVER ROSTERS (SEASONS 1 - 5)")
     lines.append("CRITICAL RULE: Any driver who drove for the constructor that won the Constructor Championship is an official Constructor Champion!")
@@ -1258,7 +1657,7 @@ def build_grounded_league_context() -> str:
     lines.append("  * Both Joshua and Eddie won the Season 3 Constructor Championship.")
     lines.append("- Season 4 Constructor Champion: Mercedes (394.0 pts) | Winning Drivers: Jairo (241.0 pts), Jaden (153.0 pts)")
     lines.append("  * Both Jairo and Jaden won the Season 4 Constructor Championship.")
-    lines.append("- Season 5 (Active Standings Leader): Cadillac (101.0 pts) | Drivers: Josh (65.0 pts), Patrick (36.0 pts)")
+    lines.append("- Season 5 (Active Standings Leader): Cadillac (101.0 pts) | Drivers: Jelly (65.0 pts), Patrick (36.0 pts)")
     lines.append("")
     lines.append("## COMPREHENSIVE CHAMPIONSHIP WINNERS BREAKDOWN:")
     lines.append("Drivers who have won at least one Driver OR Constructor Championship (Completed Seasons 1-4):")
@@ -1273,7 +1672,7 @@ def build_grounded_league_context() -> str:
     lines.append("")
     lines.append("Drivers who have NEVER won a Driver OR Constructor Championship (Completed Seasons 1-4):")
     lines.append("- Non-Champion Drivers Pool: Patrick, Matthew, Del, Brently, Foster, Austin, Josh C., Boz, Evelo, Leo, Randy.")
-    lines.append("- Note on Season 5: Josh leads active Season 5, but has not completed or won a final championship yet.")
+    lines.append("- Note on Season 5: Jelly leads active Season 5, but has not completed or won a final championship yet.")
     lines.append("CRITICAL FACT: NEVER include Erick, Marcus, Gary, Eddie, Jairo, Jaden, Nick, or Joshua in the non-champion pool! All eight of these drivers have won official championships (Driver or Constructor). Erick won the Season 1 Constructor Championship with Mercedes.")
     lines.append("")
 
@@ -1471,7 +1870,7 @@ SPECIALIZED SKILL 3: HEAD TO HEAD COMPARISON INFOGRAPHIC (TAF1APP-SDDREQ-247):
    - Compare two drivers OR two constructors from the league records to evaluate which entity OUTPERFORMED the other.
    - Driver/Constructor 1 will be listed in the top left ("h2h_name1").
    - Driver/Constructor 2 will be listed in the top right ("h2h_name2").
-   - By default, head-to-head comparison evaluates the SHARED SEASONS where both entities competed simultaneously in the league (e.g., for Josh vs. Joshua, compare strictly across Seasons 4 & 5 where both were active, yielding Josh: 206.0 pts vs Joshua: 309.0 pts), unless the user inputs a specific season or group of seasons (e.g. "Season 5", "Seasons 2-4"), in which case the data will only be from those seasons.
+   - By default, head-to-head comparison evaluates the SHARED SEASONS where both entities competed simultaneously in the league (e.g., for Jelly vs. Joshua, compare strictly across Seasons 4 & 5 where both were active, yielding Jelly: 206.0 pts vs Joshua: 309.0 pts), unless the user inputs a specific season or group of seasons (e.g. "Season 5", "Seasons 2-4"), in which case the data will only be from those seasons.
    - For drivers: list teammates in "h2h_teammates1" and "h2h_teammates2". Set "h2h_is_constructor": false.
    - For constructors: list the drivers who drove on the team in "h2h_teammates1" and "h2h_teammates2". Set "h2h_is_constructor": true.
    - MANDATORY COMPARISON METRICS IN "h2h_stats" (STRICT OUT-PERFORMANCE TALLY):
@@ -1515,7 +1914,7 @@ SPECIALIZED SKILL 3: HEAD TO HEAD COMPARISON INFOGRAPHIC (TAF1APP-SDDREQ-247):
        - Declare the winner of the Race Finish Battle (and exact score margin).
        - Declare who held the Points & Podiums advantage and net margin.
      * 2. Direct Head-to-Head Session Breakdown:
-       - State the shared seasons/timeline where both drivers competed simultaneously (e.g. for Josh vs Joshua: Season 4 and Season 5).
+       - State the shared seasons/timeline where both drivers competed simultaneously (e.g. for Jelly vs Joshua: Season 4 and Season 5).
        - Detail the head-to-head qualifying battles and race finish battles session by session across the shared race weeks.
      * 3. Pace, Racecraft, Consistency & Rivalry Context:
        - Contrast raw one-lap pace, racecraft under pressure, reliability/DNFs, and head-to-head wheel-to-wheel encounters.
@@ -1594,7 +1993,7 @@ EDITORIAL, LORE & HISTORICAL ARTICLES INQUIRIES (DEEP READING & SUMMARIZATION):
     - Accurately summarize specific aspects, driver quotes, behind-the-scenes reporting, and investigative details.
     - Do NOT give vague or generic answers. Always extract and explain the actual narrative:
       * Erick's religious retreat & Houston Scientology speedrun: In the June 27, 2026 Season 5 article "Erick's Esterillos Enlightment" (by Patrick and The Intern), Erick went on a digital detox and ayahuasca retreat in Costa Rica, then returned to Houston and attempted to speedrun the Houston Scientology Church. He got his foot trapped at the entrance gate, was brought in by the cult cronies, joined Scientology (the cult of L. Ron Hubbard), ascended multiple ranks, and sent a letter to McLaren stating that due to current F1 technology, it was against his religion to race in Season 5. Nick confirmed Erick got sucked into the cult, joking about Battlefield Earth and jumping on couches with Tom Cruise, leaving McLaren with an open seat.
-      * Josh's first pole and win in Imola: In Season 5, Josh scored his first pole and maiden victory at the Imola Grand Prix in the Cadillac. This is prominently covered in the official Season 5 Imola Race Recap titled **"The Wunderkind Strikes Again"** (published September 17, 2026 by The Intern) as well as the race preview **"Race Week: Imola"** (published September 12, 2026 by Patrick).
+      * Jelly's first pole and win in Imola: In Season 5, Jelly scored his first pole and maiden victory at the Imola Grand Prix in the Cadillac. This is prominently covered in the official Season 5 Imola Race Recap titled **"The Wunderkind Strikes Again"** (published September 17, 2026 by The Intern) as well as the race preview **"Race Week: Imola"** (published September 12, 2026 by Patrick).
     - If asked to summarize any aspect of an article or explain league lore, cite the article title, author, publication date, and pull direct facts, quotes, and conclusions from the full article text.
 
 CAPTAIN SLOW INQUIRIES:
@@ -1618,7 +2017,7 @@ CONSTRUCTOR CHAMPIONSHIP DRIVERS & NON-CHAMPION DRIVER INQUIRIES:
       * Objectively present the data and compare the strongest contenders based on the statistics.
 
 DRIVER ROUND-BY-ROUND RESULTS & QUALIFYING INQUIRIES:
-17. When asked for a driver's qualifying positions, starting grid slots, race finishes, or points for any season (e.g. "Please create a bulleted list of each race and the corresponding qualifying position Josh came in during Season 4"):
+17. When asked for a driver's qualifying positions, starting grid slots, race finishes, or points for any season (e.g. "Please create a bulleted list of each race and the corresponding qualifying position Jelly came in during Season 4"):
     - Retrieve the exact data from the corresponding "Season [X] Driver Round-by-Round Official Results (Qualifying & Finish)" section.
     - Output the requested bulleted list or table immediately with every race and their exact qualifying grid position (Q:P...) and/or race finish.
     - CRITICAL RULE: NEVER state or imply that individual race-by-race qualifying grid slots or finishing positions are absent from the database. They are fully recorded and provided in the context.
@@ -1649,7 +2048,7 @@ DRIVER & CONSTRUCTOR CAREER DEBUTS, SEASONS ACTIVE & INACTIVITY GUARDRAIL:
     - NEVER attribute race starts, points, wins, podiums, or stints to any driver in seasons prior to their official Debut Season.
     - Key historical boundaries:
       * Brently and Patrick debuted in Season 3 as Rookies for VCARB. They DID NOT COMPETE in Season 1 or Season 2. Brently won the Season 3 Monaco Grand Prix (maiden win & podium in S3). In Season 4, Brently drove for Red Bull; in Season 5, Brently drives for Haas.
-      * Josh, Matthew, Leo, Jaden, and Jairo debuted in Season 4 as Rookies. They DID NOT COMPETE in Seasons 1, 2, or 3.
+      * Jelly, Matthew, Leo, Jaden, and Jairo debuted in Season 4 as Rookies. They DID NOT COMPETE in Seasons 1, 2, or 3.
       * Grayson, Josh C., Randy, and Evelo debuted in Season 5 as Rookies. They DID NOT COMPETE in Seasons 1, 2, 3, or 4.
       * Del, Joshua, Eddie, and Yeti debuted in Season 2 as Rookies. They DID NOT COMPETE in Season 1.
       * Nick, Erick, Marcus, Zane, David, Gary, Boz, Travis, and Josh L are Inaugural Founding Drivers who debuted in Season 1.
@@ -1663,8 +2062,8 @@ MAIDEN PODIUM, MAIDEN WIN & CAREER "WAIT TIME" INQUIRIES:
       2. Brently: 15 races from debut (Debuted Season 3 Bahrain; scored maiden podium & victory at Season 3 Monaco P1 in rookie campaign).
       3. Patrick: 7 races from debut (Debuted Season 3 Bahrain; maiden podium at Season 3 Baku P2).
       4. Marcus: 2 races from debut (Debuted Season 1 Bahrain; maiden podium at Season 1 Jeddah P3).
-      5. Nick, Erick, Zane, Del, Joshua, Josh, Jairo, Jaden: 1 race from debut (podium on debut).
-    - Longest wait from debut to maiden win: Josh (18 races), Joshua (16 races), Brently (15 races), Patrick (13 races), Erick (10 races), Jaden (9 races), Del (5 races), Zane (4 races), Marcus (3 races), Nick & Jairo (1 race).
+      5. Nick, Erick, Zane, Del, Joshua, Jelly, Jairo, Jaden: 1 race from debut (podium on debut).
+    - Longest wait from debut to maiden win: Jelly (18 races), Joshua (16 races), Brently (15 races), Patrick (13 races), Erick (10 races), Jaden (9 races), Del (5 races), Zane (4 races), Marcus (3 races), Nick & Jairo (1 race).
 
 ALL-TIME STANDINGS PEAK TERMINOLOGY (NOT SINGLE RACE FINISH):
 22. When citing a driver or constructor's peak rank from the all-time records / `all_time_highest_positions.json` (e.g. Matthew at 17th at S4 Spa Sprint, Leo at 10th, Boz at 5th, David at 4th):
@@ -1728,7 +2127,7 @@ SKILLS_LIBRARY = [
         "name": "Head to Head Comparison Infographic",
         "description": "Deep-dive statistical head-to-head comparison between two drivers or two constructors across seasons",
         "prompt": "@Head to Head Comparison Infographic ",
-        "infotip": "e.g., Josh vs Jairo, or Ferrari vs Red Bull (specify season if desired)",
+        "infotip": "e.g., Jelly vs Jairo, or Ferrari vs Red Bull (specify season if desired)",
     },
     {
         "id": "champion_comparison",
@@ -2300,8 +2699,8 @@ def extract_infographic_data(text: str, skill_selected: bool = True) -> dict:
                         {"season": "Season 2", "name": "Nick", "type": "Driver", "team": "McLaren"},
                         {"season": "Season 1", "name": "Nick", "type": "Driver", "team": "Mercedes"},
                     ]
-                    if "josh" in full_search_text or "season 5" in full_search_text:
-                        raw_entities.append({"season": "Season 5", "name": "Josh", "type": "Driver", "team": "Cadillac"})
+                    if "jelly" in full_search_text or "josh" in full_search_text or "season 5" in full_search_text:
+                        raw_entities.append({"season": "Season 5", "name": "Jelly", "type": "Driver", "team": "Cadillac"})
                 else:
                     # Binary comparison fallback
                     s1_str = str(parsed.get("champ_season1", "Season 4"))
@@ -2619,6 +3018,70 @@ def extract_infographic_data(text: str, skill_selected: bool = True) -> dict:
     return res
 
 
+def serialize_assistant_thread_message(msg: ChatMessage) -> str:
+    """Format an assistant message for the multi-turn thread context.
+    
+    Handles skills output where a response contains two boxes:
+    1. The visual infographic card (podium, track ratings, head-to-head stats, 
+       champion campaign metrics, or seasonal qualifying battles).
+    2. The analytical narrative write-up.
+    Both boxes are preserved in context.
+    """
+    card_parts = []
+    if msg.is_infographic:
+        itype = msg.infographic_type
+        if itype == "race":
+            card_lines = [f"[Infographic Card - {msg.track_name}]"]
+            if msg.expected_winner:
+                card_lines.append(f"Expected Winner: {msg.expected_winner} ({msg.expected_winner_team})")
+            if msg.p1_driver or msg.p2_driver or msg.p3_driver:
+                card_lines.append(f"Podium Projection: 1st {msg.p1_driver} ({msg.p1_team}), 2nd {msg.p2_driver} ({msg.p2_team}), 3rd {msg.p3_driver} ({msg.p3_team})")
+            if msg.top_ratings:
+                r_txt = ", ".join([f"{r.rank}: {r.driver} ({r.team}, {r.rating})" for r in msg.top_ratings])
+                card_lines.append(f"Track Ratings: {r_txt}")
+            if msg.qual_front:
+                card_lines.append(f"Front Row: {msg.qual_front}")
+            if msg.qual_second:
+                card_lines.append(f"Second Row: {msg.qual_second}")
+            card_parts.append("\n".join(card_lines))
+        elif itype == "h2h":
+            card_lines = [f"[Infographic Card - Head-to-Head Comparison: {msg.h2h_name1} vs {msg.h2h_name2}]"]
+            if msg.h2h_seasons:
+                card_lines.append(f"Compared Seasons: {msg.h2h_seasons}")
+            if msg.h2h_stats:
+                s_txt = "; ".join([f"{s.metric}: {msg.h2h_name1} {s.val1} - {s.val2} {msg.h2h_name2}" for s in msg.h2h_stats])
+                card_lines.append(f"Direct Battle Scores: {s_txt}")
+            card_parts.append("\n".join(card_lines))
+        elif itype == "champion_comparison":
+            card_lines = [f"[Infographic Card - Champion Comparison: {msg.champ_name1} ({msg.champ_season1}) vs {msg.champ_name2} ({msg.champ_season2})]"]
+            if msg.champ_stats:
+                cs_txt = "; ".join([f"{s.metric}: {s.val1} vs {s.val2} ({s.sub_text1 or ''})" for s in msg.champ_stats])
+                card_lines.append(f"Campaign Stats: {cs_txt}")
+            card_parts.append("\n".join(card_lines))
+        elif itype == "seasonal_qual":
+            card_lines = [f"[Infographic Card - Seasonal Qualifying Battles: {msg.season_title}]"]
+            if msg.seasonal_qual_rows:
+                q_txt = "; ".join([f"{r.team}: {r.driver1} {r.score1} - {r.score2} {r.driver2}" for r in msg.seasonal_qual_rows])
+                card_lines.append(f"Teammate Qualifying Scores: {q_txt}")
+            card_parts.append("\n".join(card_lines))
+
+    combined = []
+    if card_parts:
+        combined.append("\n".join(card_parts))
+    if msg.content and msg.content.strip():
+        combined.append(msg.content.strip())
+
+    return "\n\n".join(combined).strip()
+
+
+def serialize_user_thread_message(msg: ChatMessage) -> str:
+    """Format a user message for multi-turn thread context."""
+    text = msg.content.strip()
+    if msg.skill_badge and not text.startswith(f"@{msg.skill_badge}"):
+        text = f"@{msg.skill_badge} {text}"
+    return text
+
+
 class AlternativeIntelligenceState(rx.State):
     """Reflex state managing the Alternative Intelligence sidebar drawer and query engine."""
 
@@ -2660,9 +3123,12 @@ class AlternativeIntelligenceState(rx.State):
         self.search_query = query
 
     def clear_chat(self):
-        """Clear conversation history."""
+        """Clear conversation history and delete the current thread."""
         self.messages = []
         self.error_message = ""
+        self.is_generating = False
+
+    delete_thread = clear_chat
 
     def handle_key_down(self, key: str):
         """Submit query on Enter without Shift."""
@@ -2725,7 +3191,7 @@ class AlternativeIntelligenceState(rx.State):
             self.active_skill_infotip = "e.g., Season 5, Season 4, or leave blank"
         elif "Head to Head" in skill_name or "H2H" in skill_name:
             self.active_skill_badge = "@Head to Head Comparison Infographic "
-            self.active_skill_infotip = "e.g., Josh vs Jairo, or Ferrari vs Red Bull"
+            self.active_skill_infotip = "e.g., Jelly vs Jairo, or Ferrari vs Red Bull"
         elif "Champion" in skill_name:
             self.active_skill_badge = "@Champion Comparison Skill "
             self.active_skill_infotip = "e.g., S4 Mercedes vs S3 Alpine, or Joshua S4 vs Nick S3 (defaults to most recent constructor champion vs prior year)"
@@ -2902,6 +3368,19 @@ class AlternativeIntelligenceState(rx.State):
             yield
             return
 
+        # Check thread context size limit (TAF1APP-SDDREQ-251)
+        # Contextual threads repeat until deleted or the context is too large to return a timely response.
+        thread_prior_messages = self.messages[:-2]
+        total_thread_chars = sum(
+            len(m.content) + (len(m.thinking_content) if m.thinking_content else 0)
+            for m in thread_prior_messages
+        )
+        if total_thread_chars > 80000 or len(thread_prior_messages) >= 24:
+            self.messages[-1].content = "Please delete this thread and start a new one, as there is too much context to proceed."
+            self.is_generating = False
+            yield
+            return
+
         # Prepare Grounded League Context
         try:
             grounded_context = build_grounded_league_context()
@@ -2945,7 +3424,7 @@ class AlternativeIntelligenceState(rx.State):
             if is_h2h:
                 known_entities = sorted([
                     "Aston Martin", "Alfa Romeo", "AlphaTauri", "Red Bull", "Cadillac", "Mercedes", "McLaren", "Ferrari", "Williams", "Alpine", "Audi", "Haas", "VCARB",
-                    "Josh C.", "Josh L", "Grayson", "Matthew", "Brently", "Patrick", "Joshua", "Eddie", "Erick", "David", "Travis", "Marcus", "Jaden", "Jairo", "Randy", "Evelo", "Gary", "Nick", "Zane", "Josh", "Boz", "Del", "Leo"
+                    "Josh C.", "Josh L", "Grayson", "Matthew", "Brently", "Patrick", "Joshua", "Eddie", "Erick", "David", "Travis", "Marcus", "Jaden", "Jairo", "Randy", "Evelo", "Gary", "Nick", "Zane", "Jelly", "Boz", "Del", "Leo"
                 ], key=len, reverse=True)
                 ent_matches = []
                 for ent in known_entities:
@@ -2977,24 +3456,52 @@ class AlternativeIntelligenceState(rx.State):
         except Exception:
             pass
 
-        prompt_payload = (
-            f"LEAGUE GROUNDED CONTEXT:\n{grounded_context}\n"
+        # Assemble multi-turn thread context (TAF1APP-SDDREQ-251)
+        body_contents = []
+        is_first_user = True
+
+        for m in thread_prior_messages:
+            if m.role == "user":
+                u_text = serialize_user_thread_message(m)
+                if not u_text:
+                    continue
+                if is_first_user:
+                    u_text = f"LEAGUE GROUNDED CONTEXT:\n{grounded_context}\n\nUSER INQUIRY:\n{u_text}"
+                    is_first_user = False
+                if body_contents and body_contents[-1]["role"] == "user":
+                    body_contents[-1]["parts"][0]["text"] += f"\n\n{u_text}"
+                else:
+                    body_contents.append({"role": "user", "parts": [{"text": u_text}]})
+            elif m.role == "assistant":
+                a_text = serialize_assistant_thread_message(m)
+                if not a_text:
+                    continue
+                if body_contents and body_contents[-1]["role"] == "model":
+                    body_contents[-1]["parts"][0]["text"] += f"\n\n{a_text}"
+                elif body_contents and body_contents[-1]["role"] == "user":
+                    body_contents.append({"role": "model", "parts": [{"text": a_text}]})
+
+        # Append current user prompt turn
+        curr_turn_text = (
             f"{retrieved_articles_section}\n"
             f"{h2h_grounding_section}\n"
             f"USER INQUIRY:\n{query}{skill_directive}"
-        )
+        ).strip()
+
+        if is_first_user:
+            curr_turn_text = f"LEAGUE GROUNDED CONTEXT:\n{grounded_context}\n\n{curr_turn_text}"
+
+        if body_contents and body_contents[-1]["role"] == "user":
+            body_contents[-1]["parts"][0]["text"] += f"\n\n{curr_turn_text}"
+        else:
+            body_contents.append({"role": "user", "parts": [{"text": curr_turn_text}]})
 
         # Call Google Gemini API (gemini-3.5-flash with gemini-3.5-flash-lite fallback)
         model_name = "gemini-3.5-flash"
         endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:streamGenerateContent?alt=sse&key={api_key}"
 
         body = {
-            "contents": [
-                {
-                    "role": "user",
-                    "parts": [{"text": prompt_payload}]
-                }
-            ],
+            "contents": body_contents,
             "systemInstruction": {
                 "parts": [{"text": SYSTEM_PROMPT}]
             },
@@ -3070,11 +3577,14 @@ class AlternativeIntelligenceState(rx.State):
                         continue
 
                 if not active_stream:
-                    self.error_message = f"Could not connect to Gemini model: {last_err}"
-                    self.messages[-1].content = (
-                        "Sorry, I encountered an issue connecting to the Gemini model with this API key. "
-                        "Please verify your key in Google AI Studio."
-                    )
+                    if "too large" in last_err.lower() or "context" in last_err.lower() or "token" in last_err.lower() or "413" in last_err:
+                        self.messages[-1].content = "Please delete this thread and start a new one, as there is too much context to proceed."
+                    else:
+                        self.error_message = f"Could not connect to Gemini model: {last_err}"
+                        self.messages[-1].content = (
+                            "Sorry, I encountered an issue connecting to the Gemini model with this API key. "
+                            "Please verify your key in Google AI Studio."
+                        )
                     self.is_generating = False
                     yield
                     return
@@ -3212,8 +3722,11 @@ class AlternativeIntelligenceState(rx.State):
                 yield
 
         except httpx.TimeoutException:
-            self.error_message = "Request timed out. Please try asking again."
-            self.messages[-1].content = "The inquiry timed out while evaluating league statistics. Please retry."
+            if len(self.messages) > 6:
+                self.messages[-1].content = "Please delete this thread and start a new one, as there is too much context to proceed."
+            else:
+                self.error_message = "Request timed out. Please try asking again."
+                self.messages[-1].content = "The inquiry timed out while evaluating league statistics. Please retry."
             yield
         except Exception as e:
             self.error_message = f"Communication error: {str(e)}"
@@ -4987,20 +5500,6 @@ def alternative_intelligence_drawer() -> rx.Component:
                         AlternativeIntelligenceState.messages.length() > 0,
                         rx.vstack(
                             rx.foreach(AlternativeIntelligenceState.messages, message_card),
-                            rx.cond(
-                                AlternativeIntelligenceState.is_generating,
-                                rx.hstack(
-                                    ai_logo("16px", border_radius="sm"),
-                                    rx.text("Analyzing league database...", font_size="12px", color="#00b4da"),
-                                    spacing="2",
-                                    align="center",
-                                    padding="6px 12px",
-                                    bg="#18181B",
-                                    border_radius="md",
-                                    border="1px solid #00b4da",
-                                ),
-                                rx.fragment(),
-                            ),
                             rx.box(id="ai-chat-bottom-anchor", height="1px", width="100%"),
                             width="100%",
                             spacing="4",

@@ -6,7 +6,7 @@ article = {
     "blurb": "A track the league has never run, a new era of cars, and a first chance to start noticing trends.",
     "content": [
         "The league's first race of the season quickly became a statement win for the young Cadillac driver. \
-            Cadillac's Josh took home his first golden piece of hardware in what ended up being a dominant performance \
+            Cadillac's Jelly took home his first golden piece of hardware in what ended up being a dominant performance \
                 over the favorites like McLaren's Nick, Red Bull's Joshua, and Mercedes' Jario. This performance, paired with \
                     Patrick's fourth place finish propelled the Cadillac duo into the front of the power rankings.",
 

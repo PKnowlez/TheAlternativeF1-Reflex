@@ -40,7 +40,7 @@ article = {
             margin_bottom="4",
         ),
         rx.text(
-            r"""A shock performance from VCARB's Josh put him way the heck up the grid into 3rd and the Red Bull rookie Matthew also out performed his teammate to start in 4th.""",
+            r"""A shock performance from VCARB's Jelly put him way the heck up the grid into 3rd and the Red Bull rookie Matthew also out performed his teammate to start in 4th.""",
             color="#E0E0E0",
             font_size="md",
             line_height="1.7",
@@ -94,7 +94,7 @@ article = {
             margin_y="4",
         ),
         rx.text(
-            r"""1) Sabotage - Matthew did his best to crash out Patrick 2) The power of friendship - Josh and Patrick unite as a team 3) Top tier tango - Jairo and Joshua go all out 4) A new career approaches, bus driver - Erick reveals a hidden talent 5) Eddie "No Balls" Tavera Jr. - Eddie's failed overtake on Erick 6) Mystery VSC - Who knows why this even happened 7) Eddie "Delta Denier" Tavera Jr. - Eddie ignores his delta 8) Del sees red - Something about whatever he ate 9) Blue flag of death - Boz's race ending moment 10) Josh "Delta Denier" Anderson - Josh ignores his delta 11) Wide boi Josh - The SoCal Minister of Defense 12) Jairo the hero - A first win!""",
+            r"""1) Sabotage - Matthew did his best to crash out Patrick 2) The power of friendship - Jelly and Patrick unite as a team 3) Top tier tango - Jairo and Joshua go all out 4) A new career approaches, bus driver - Erick reveals a hidden talent 5) Eddie "No Balls" Tavera Jr. - Eddie's failed overtake on Erick 6) Mystery VSC - Who knows why this even happened 7) Eddie "Delta Denier" Tavera Jr. - Eddie ignores his delta 8) Del sees red - Something about whatever he ate 9) Blue flag of death - Boz's race ending moment 10) Josh (Jelly) "Delta Denier" Anderson - Jelly ignores his delta 11) Wide boi Jelly - The SoCal Minister of Defense 12) Jairo the hero - A first win!""",
             color="#E0E0E0",
             font_size="md",
             line_height="1.7",

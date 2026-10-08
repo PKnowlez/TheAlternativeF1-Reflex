@@ -81,7 +81,7 @@ article = {
             margin_bottom="4",
         ),
         rx.text(
-            r"""As it stands, no driver or constructor is technically out of the championship. As the season goes on, keep your eyes peeled here for updates in the race to the finish. As it currently stands, Jairo has a strong lead in the Driver’s Championship with a 15 point lead over Joshua in second, a 17 point lead over Nick in third, and a 27 point lead over Patrick in fourth. Streaking his way up, Josh has solidified himself in sixth and is chasing Jaden in fifth and his teammate in fourth while defending against the senior Red Bull team driver Brently.""",
+            r"""As it stands, no driver or constructor is technically out of the championship. As the season goes on, keep your eyes peeled here for updates in the race to the finish. As it currently stands, Jairo has a strong lead in the Driver’s Championship with a 15 point lead over Joshua in second, a 17 point lead over Nick in third, and a 27 point lead over Patrick in fourth. Streaking his way up, Jelly has solidified himself in sixth and is chasing Jaden in fifth and his teammate in fourth while defending against the senior Red Bull team driver Brently.""",
             color="#E0E0E0",
             font_size="md",
             line_height="1.7",

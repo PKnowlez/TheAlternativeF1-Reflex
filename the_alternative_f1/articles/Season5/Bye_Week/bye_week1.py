@@ -85,7 +85,7 @@ article = {
         "While analyzing these different critiques and reviews of drivers, an intriguing statistic came to light. Three times in league history, the first two races \
             were won by the same driver. In Season 1, then rookie McLaren driver Nick won in both Bahrain and Jeddah. He then went on to win his first Driver's Championship. \
                 In Season 3, then Alpine driver Joshua took home the win in Suzuka and Silverstone. He and his long-time teammate Eddie went on to win their first \
-                    Constructor's Championship. This season, the streaking sophomore Josh has won the first two races of the season. Does this mean he is destined \
+                    Constructor's Championship. This season, the streaking sophomore Jelly has won the first two races of the season. Does this mean he is destined \
                         for at least one championship? Or maybe, following the pattern through, both. One thing we do know, today, no one has ever won the first \
                             three races in a single season.",
 
@@ -107,7 +107,7 @@ article = {
         "Mixed up in the midfield are both Patrick and Eddie. The latter of which has been doing everything his teammate has asked of him 'just score points.' \
             Patrick has also found himself scoring points, but has had his worst two race start to a season yet. The shining spot for his drive so far has been adding \
                 an additional fastest lap to his all-time statistics. His ex-teammate Brently has also found himself in a similarly down position early in the season. \
-                    As time progresses, will we see the once promising duo regain confidence and speed? Both Josh and Matthew hope so.",
+                    As time progresses, will we see the once promising duo regain confidence and speed? Both Jelly and Matthew hope so.",
 
         "Speaking of Matthew, he has found himself in a rather even keel position compared to his rookie season. With his high-speed performance in Hungary, many \
             correspondents have begun expecting him to knock it out of the park in Miami under the same sprint format. Speaking of sprints in Miami, Leo finds \

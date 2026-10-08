@@ -42,7 +42,7 @@ article = {
             margin_bottom="4",
         ),
         rx.text(
-            r"""Behind him were the two Mercedes of Jairo and Jaden followed closely by Nick. With the first two rows of the grid set, the Red Bull and VCARB teams sorted in from 5th to 8th with Patrick, Josh, Matthew, and Brently. The second Alpine, Eddie, found himself in 9th with the two Ferraris in 10th and 11th. Notably, rookie Leo out qualified his senior teammate Erick.""",
+            r"""Behind him were the two Mercedes of Jairo and Jaden followed closely by Nick. With the first two rows of the grid set, the Red Bull and VCARB teams sorted in from 5th to 8th with Patrick, Jelly, Matthew, and Brently. The second Alpine, Eddie, found himself in 9th with the two Ferraris in 10th and 11th. Notably, rookie Leo out qualified his senior teammate Erick.""",
             color="#E0E0E0",
             font_size="md",
             line_height="1.7",
@@ -63,7 +63,7 @@ article = {
             margin_bottom="4",
         ),
         rx.text(
-            r"""Further down the field, Josh battled back from a minor incident with Joshua, which cost him a few positions. Leo and Eddie were once again found scrapping for 7th and 8th, and the Red Bulls brought home a double points finish.""",
+            r"""Further down the field, Jelly battled back from a minor incident with Joshua, which cost him a few positions. Leo and Eddie were once again found scrapping for 7th and 8th, and the Red Bulls brought home a double points finish.""",
             color="#E0E0E0",
             font_size="md",
             line_height="1.7",
@@ -223,7 +223,7 @@ article = {
             margin_y="4",
         ),
         rx.text(
-            r"""All in all, a very Ferrari coded race. Oh, and Patrick mentioned the Josh on Josh crime. I've taken the liberty to ensure Joshua does not escape with literally zero punishment for him crimes.""",
+            r"""All in all, a very Ferrari coded race. Oh, and Patrick mentioned the Josh on Josh (Jelly) crime. I've taken the liberty to ensure Joshua does not escape with literally zero punishment for him crimes.""",
             color="#E0E0E0",
             font_size="md",
             line_height="1.7",

@@ -40,7 +40,7 @@ article = {
             margin_bottom="4",
         ),
         rx.text(
-            rx.text("QUALIFYING", as_="span", font_weight="bold"), "Pretty standard qualifying, honestly. No real shakeups. Well...except the catastrophe at the end of Q1. VCARB driver Josh started singing 'Jesus Take the Wheel,' and demolished his entire car after already making it into Q2.",
+            rx.text("QUALIFYING", as_="span", font_weight="bold"), "Pretty standard qualifying, honestly. No real shakeups. Well...except the catastrophe at the end of Q1. VCARB driver Jelly started singing 'Jesus Take the Wheel,' and demolished his entire car after already making it into Q2.",
             color="#E0E0E0",
             font_size="md",
             line_height="1.7",
@@ -406,7 +406,7 @@ article = {
             margin_bottom="4",
         ),
         rx.heading(
-            "5 - Josh",
+            "5 - Jelly",
             size="4",
             color="#00b4da",
             margin_top="6",
@@ -414,7 +414,7 @@ article = {
             font_family="Outfit"
         ),
         rx.vstack(
-            rx.text("Josh1", color="#888888", font_size="xs", margin_bottom="1"),
+            rx.text("Jelly1", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
                 src="/thealternativef1-cloudflare/Season4/Images/Baku/josh1.png",
                 width="100%",
@@ -427,7 +427,7 @@ article = {
             margin_y="4",
         ),
         rx.vstack(
-            rx.text("Josh2", color="#888888", font_size="xs", margin_bottom="1"),
+            rx.text("Jelly2", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
                 src="/thealternativef1-cloudflare/Season4/Images/Baku/josh2.png",
                 width="100%",

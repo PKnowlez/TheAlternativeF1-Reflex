@@ -91,7 +91,7 @@ def get_active_drivers(season_num: int = 5) -> list[str]:
             return sorted([str(d).strip() for d in df["Driver"].dropna().unique() if str(d).strip()])
     except Exception:
         pass
-    return ['Boz', 'Brently', 'Del', 'Eddie', 'Evelo', 'Grayson', 'Jaden', 'Jairo', 'Josh', 'Josh C.', 'Joshua', 'Leo', 'Matthew', 'Nick', 'Patrick', 'Randy']
+    return ['Boz', 'Brently', 'Del', 'Eddie', 'Evelo', 'Grayson', 'Jaden', 'Jairo', 'Jelly', 'Josh C.', 'Joshua', 'Leo', 'Matthew', 'Nick', 'Patrick', 'Randy']
 
 
 def get_driver_constructor(driver_name: str, season_num: int = 5) -> str:
@@ -439,15 +439,39 @@ def _run_settle_completed_predictions(season_num: int = 5):
 
             highest_team = max(team_weekend_pts.keys(), key=lambda t: team_weekend_pts[t]) if team_weekend_pts else None
             sorted_teams_by_pts = sorted(teams, key=lambda t: team_weekend_pts.get(t, 0), reverse=True)
-            podium_teams = sorted_teams_by_pts[:3]
+            p_top3 = df_season[pd.to_numeric(df_season[place_col], errors="coerce").isin([1, 2, 3])] if place_col in df_season.columns else pd.DataFrame()
+            podium_finish_teams = set(p_top3["Team"].dropna().astype(str).str.strip().tolist()) if not p_top3.empty else set()
+            podium_teams = set(sorted_teams_by_pts[:3]) | podium_finish_teams
 
-            # Fastest Lap team (either driver)
-            fl_col = f"{main_race}FL" if f"{main_race}FL" in df_season.columns else (f"{main_race}FastestLap" if f"{main_race}FastestLap" in df_season.columns else None)
-            fl_team = None
-            if fl_col:
-                fl_df = df_season[df_season[fl_col].astype(str).str.strip().isin(["1", "Yes", "Y", "True"])]
-                if not fl_df.empty:
-                    fl_team = str(fl_df.iloc[0]["Team"]).strip()
+            def _is_truthy(val) -> bool:
+                if isinstance(val, bool):
+                    return val
+                if val is None or pd.isna(val):
+                    return False
+                return str(val).strip().upper() in ("Y", "YES", "TRUE", "1")
+
+            def _find_accolade_col(candidates: list[str]) -> str | None:
+                for c in candidates:
+                    if c in df_season.columns:
+                        return c
+                return None
+
+            fl_col = _find_accolade_col([f"{main_race}FastestLap", f"{main_race}FL", f"{main_race} FastestLap", f"{main_race} FL"])
+            dotd_col = _find_accolade_col([f"{main_race}DOTD", f"{main_race} DriverOfTheDay", f"{main_race} DOTD"])
+            mot_col = _find_accolade_col([f"{main_race}MOT", f"{main_race} MostOvertakes", f"{main_race} MOT"])
+            cd_col = _find_accolade_col([f"{main_race}CD", f"{main_race} CleanestDriver", f"{main_race} CD"])
+
+            fl_teams = set(df_season.loc[df_season[fl_col].apply(_is_truthy), "Team"].dropna().astype(str).str.strip().tolist()) if fl_col else set()
+            fl_drivers = set(df_season.loc[df_season[fl_col].apply(_is_truthy), "Driver"].dropna().astype(str).str.strip().tolist()) if fl_col else set()
+
+            dotd_teams = set(df_season.loc[df_season[dotd_col].apply(_is_truthy), "Team"].dropna().astype(str).str.strip().tolist()) if dotd_col else set()
+            dotd_drivers = set(df_season.loc[df_season[dotd_col].apply(_is_truthy), "Driver"].dropna().astype(str).str.strip().tolist()) if dotd_col else set()
+
+            mot_teams = set(df_season.loc[df_season[mot_col].apply(_is_truthy), "Team"].dropna().astype(str).str.strip().tolist()) if mot_col else set()
+            mot_drivers = set(df_season.loc[df_season[mot_col].apply(_is_truthy), "Driver"].dropna().astype(str).str.strip().tolist()) if mot_col else set()
+
+            cd_teams = set(df_season.loc[df_season[cd_col].apply(_is_truthy), "Team"].dropna().astype(str).str.strip().tolist()) if cd_col else set()
+            cd_drivers = set(df_season.loc[df_season[cd_col].apply(_is_truthy), "Driver"].dropna().astype(str).str.strip().tolist()) if cd_col else set()
 
             race_preds = [
                 p for p in open_preds 
@@ -483,8 +507,17 @@ def _run_settle_completed_predictions(season_num: int = 5):
                         line = float(p.get("line_value", 0.0) or 0.0)
                         actual = team_weekend_pts.get(target, 0.0)
                         is_correct = (actual > line) if "OVER" in stance else (actual < line)
-                    elif cat == "Fastest Lap" and fl_team:
-                        matched = (fl_team == target)
+                    elif cat == "Fastest Lap":
+                        matched = (target in fl_teams or target in fl_drivers)
+                        is_correct = (matched if "FOR" in stance else not matched)
+                    elif cat == "Driver of the Day":
+                        matched = (target in dotd_teams or target in dotd_drivers)
+                        is_correct = (matched if "FOR" in stance else not matched)
+                    elif cat == "Most Overtakes":
+                        matched = (target in mot_teams or target in mot_drivers)
+                        is_correct = (matched if "FOR" in stance else not matched)
+                    elif cat == "Cleanest Driver":
+                        matched = (target in cd_teams or target in cd_drivers)
                         is_correct = (matched if "FOR" in stance else not matched)
 
                     p["_is_correct"] = is_correct
@@ -545,8 +578,17 @@ def _run_settle_completed_predictions(season_num: int = 5):
                         line = float(leg.get("line_value", 0.0) or 0.0)
                         actual = team_weekend_pts.get(l_target, 0.0)
                         leg_hit = (actual > line) if "OVER" in l_stance else (actual < line)
-                    elif l_cat == "Fastest Lap" and fl_team:
-                        matched = (fl_team == l_target)
+                    elif l_cat == "Fastest Lap":
+                        matched = (l_target in fl_teams or l_target in fl_drivers)
+                        leg_hit = (matched if "FOR" in l_stance else not matched)
+                    elif l_cat == "Driver of the Day":
+                        matched = (l_target in dotd_teams or l_target in dotd_drivers)
+                        leg_hit = (matched if "FOR" in l_stance else not matched)
+                    elif l_cat == "Most Overtakes":
+                        matched = (l_target in mot_teams or l_target in mot_drivers)
+                        leg_hit = (matched if "FOR" in l_stance else not matched)
+                    elif l_cat == "Cleanest Driver":
+                        matched = (l_target in cd_teams or l_target in cd_drivers)
                         leg_hit = (matched if "FOR" in l_stance else not matched)
 
                     if not leg_hit:
@@ -2030,16 +2072,29 @@ class PredictionsMarketState(rx.State):
             item["can_delete"] = (p.get("username") == self.current_user and p.get("status") == "open" and not self.is_locked)
 
             cat = str(p.get("category", ""))
+            raw_race = str(p.get("race", "")).strip()
             is_full_season = (
                 cat.startswith("[Full Season]")
                 or p.get("scope") == "full_season"
-                or str(p.get("race", "")).lower() in ("season 5", "full season")
+                or raw_race.lower() in ("season", "season 5", "full season")
                 or any(fsc in cat for fsc in ["Constructor Champion", "Driver Champion", "Top 3 Constructor", "Top 3 Driver", "Win Margin"])
             )
             if is_full_season and not cat.startswith("[Full Season]"):
                 cat = f"[Full Season] {cat}"
             item["category"] = cat
             item["is_full_season"] = is_full_season
+
+            if is_full_season or raw_race.lower() in ("season", "season 5", "full season"):
+                item["race_display"] = "Season"
+                item["race_badge_color"] = "#C084FC"
+                item["race_badge_bg"] = "rgba(192, 132, 252, 0.15)"
+            else:
+                clean_race = _extract_track_name(raw_race) if raw_race else "Upcoming"
+                if not clean_race or clean_race.lower() == "upcoming race":
+                    clean_race = "Upcoming"
+                item["race_display"] = clean_race
+                item["race_badge_color"] = "#00b4da"
+                item["race_badge_bg"] = "rgba(0, 180, 218, 0.12)"
 
             stance = str(p.get("stance", "FOR")).upper()
             is_parlay = (stance == "PARLAY" or "Parlay" in cat)
@@ -2357,11 +2412,12 @@ class PredictionsMarketState(rx.State):
             rem_races = len(get_remaining_feature_races(5))
 
             if is_fs:
-                race_name = "Season 5"
+                race_name = "Season"
                 lines = {}
             else:
                 proj = compute_season_projections(5)
-                race_name = proj.get("next_main_race", proj.get("next_race", "Upcoming Race"))
+                raw_race = proj.get("next_main_race", proj.get("next_race", "Upcoming Race"))
+                race_name = _extract_track_name(raw_race) if raw_race else "Upcoming"
                 lines = proj.get("team_expected_lines", {})
 
             import time
@@ -3362,6 +3418,7 @@ def predictions_market_tab_view() -> rx.Component:
                     rx.table.header(
                         rx.table.row(
                             rx.table.column_header_cell("STATUS", color="#00b4da", font_size="11px", font_weight="800"),
+                            rx.table.column_header_cell("RACE", color="#00b4da", font_size="11px", font_weight="800"),
                             rx.table.column_header_cell("USER", color="#00b4da", font_size="11px", font_weight="800"),
                             rx.table.column_header_cell("CATEGORY", color="#00b4da", font_size="11px", font_weight="800"),
                             rx.table.column_header_cell("TARGET", color="#00b4da", font_size="11px", font_weight="800"),
@@ -3382,6 +3439,19 @@ def predictions_market_tab_view() -> rx.Component:
                                         bg=p["status_bg"],
                                         color=p["status_color"],
                                         border=p["status_border"],
+                                        font_size="10px",
+                                        font_weight="800",
+                                        padding_x="6px",
+                                        padding_y="2px",
+                                        border_radius="md",
+                                    )
+                                ),
+                                rx.table.cell(
+                                    rx.badge(
+                                        p["race_display"],
+                                        bg=p["race_badge_bg"],
+                                        color=p["race_badge_color"],
+                                        border=f"1px solid {p['race_badge_color']}44",
                                         font_size="10px",
                                         font_weight="800",
                                         padding_x="6px",
@@ -3421,6 +3491,14 @@ def predictions_market_tab_view() -> rx.Component:
                                     )
                                 ),
                                 rx.table.cell(rx.text(p["line_display"], font_size="xs", color="#AAAAAA")),
+                                rx.table.cell(
+                                    rx.text(
+                                        p["points_display"],
+                                        font_size="xs",
+                                        color="#D0D0D5",
+                                        font_weight="600",
+                                    )
+                                ),
                                 rx.table.cell(
                                     rx.text(
                                         p["payout_display"],

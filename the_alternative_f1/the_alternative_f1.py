@@ -262,9 +262,9 @@ def warm_up_caches():
 
         drivers, teams = get_entity_lists(len(seasons))
         for d in drivers:
-            compute_entity_detailed_metrics(len(seasons), "driver", d)
+            compute_entity_detailed_metrics(len(seasons), "Driver", d)
         for t in teams:
-            compute_entity_detailed_metrics(len(seasons), "constructor", t)
+            compute_entity_detailed_metrics(len(seasons), "Constructor", t)
 
         precompute_all_power_rankings()
         precompute_all_season_projections()

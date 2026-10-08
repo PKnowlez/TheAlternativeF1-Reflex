@@ -17,7 +17,7 @@ article = {
                 margin_bottom="2",
             ),
             rx.list_item(
-                "Newman, Josh, Patrick, and Brently all did laps on wet weather tires...in the dry.",
+                "Newman, Jelly, Patrick, and Brently all did laps on wet weather tires...in the dry.",
                 margin_bottom="2",
             ),
             rx.list_item(

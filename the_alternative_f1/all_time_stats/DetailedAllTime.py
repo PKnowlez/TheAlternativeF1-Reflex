@@ -373,8 +373,9 @@ def compute_all_time_avg_pos_change(num_seasons: int, entity_type: str, active_e
 def compute_entity_detailed_metrics(num_seasons: int, entity_type: str, entity_name: str):
     """Compute detailed race-by-race metrics for a single Driver or Constructor."""
     global _detailed_cache, _detailed_mtime
+    norm_entity_type = "Driver" if str(entity_type).strip().lower() == "driver" else "Constructor"
     curr_mtime = _get_mtime()
-    cache_key = ("compute_entity_detailed_metrics", num_seasons, entity_type, entity_name)
+    cache_key = ("compute_entity_detailed_metrics", num_seasons, norm_entity_type, str(entity_name).strip())
     if _detailed_mtime == curr_mtime and cache_key in _detailed_cache:
         return _detailed_cache[cache_key]
 
@@ -392,7 +393,7 @@ def compute_entity_detailed_metrics(num_seasons: int, entity_type: str, entity_n
         df_copy["Driver"] = df_copy["Driver"].astype(str).str.strip()
         df_copy["Team"] = df_copy["Team"].astype(str).str.strip()
 
-        col_key = "Driver" if entity_type == "Driver" else "Team"
+        col_key = "Driver" if norm_entity_type == "Driver" else "Team"
         entity_rows = df_copy[df_copy[col_key] == entity_name]
 
         if entity_rows.empty:

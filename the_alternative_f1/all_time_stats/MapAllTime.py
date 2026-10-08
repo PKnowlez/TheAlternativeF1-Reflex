@@ -63,7 +63,7 @@ DRIVER_LOCATIONS = {
     },
     "Jaden": {"current": ("New York", "NY", "Northeast"), "seasons": {}},
     "Brently": {"current": ("Detroit", "MI", "Midwest"), "seasons": {}},
-    "Josh": {"current": ("Los Angeles", "CA", "Mountain West"), "seasons": {}},
+    "Jelly": {"current": ("Los Angeles", "CA", "Mountain West"), "seasons": {}},
     "Travis": {"current": ("Austin", "TX", "Great Plains"), "seasons": {}},
     "David": {"current": ("New York", "NY", "Northeast"), "seasons": {}},
     "Yeti": {"current": ("Richmond", "VA", "The South"), "seasons": {}},

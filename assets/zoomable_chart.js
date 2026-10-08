@@ -494,7 +494,7 @@
         if (el.querySelector) {
             const p = el.querySelector('.recharts-line-curve, path');
             if (p) targets.push(p);
-            const c = el.querySelector('circle, .recharts-dot');
+            const c = el.querySelector('circle, .recharts-dot, rect, .recharts-rectangle');
             if (c) targets.push(c);
         }
         for (const target of targets) {
@@ -614,10 +614,6 @@
                     const cleanLine = extractEntityName(rawLineName);
 
                     // Strict matching:
-                    // If name is resolved from fiber, match entity name strictly.
-                    // If name is not found, match by normalized stroke color.
-                    // NEVER fallback to index because multi-series charts (actual + projected)
-                    // have more lines than items in the key!
                     let isMatch = false;
                     if (cleanActive && cleanLine) {
                         isMatch = (cleanLine === cleanActive);
@@ -721,6 +717,45 @@
                 }
             });
 
+            // 3. Update Bar Groups in Chart Containers (e.g. User Wagers Stacked Bar Chart)
+            const barGroups = chartContainer.querySelectorAll('.recharts-bar');
+            barGroups.forEach((bg) => {
+                const sampleShape = bg.querySelector('path, rect');
+                const fillVal = sampleShape ? (sampleShape.getAttribute('fill') || sampleShape.style.fill) : null;
+                const normFill = normalizeColor(fillVal);
+                const rawBarName = getRechartsLineName(bg);
+                const cleanBar = extractEntityName(rawBarName);
+
+                if (!cleanActive) {
+                    bg.style.opacity = '1.0';
+                    bg.style.transition = 'opacity 0.2s ease';
+                    bg.querySelectorAll('path, rect').forEach(shape => {
+                        shape.style.filter = '';
+                    });
+                } else {
+                    let isBarMatch = false;
+                    if (cleanActive && cleanBar) {
+                        isBarMatch = (cleanBar === cleanActive);
+                    } else if (normActiveColor && normFill) {
+                        isBarMatch = (normFill === normActiveColor);
+                    }
+
+                    if (isBarMatch) {
+                        bg.style.opacity = '1.0';
+                        bg.style.transition = 'opacity 0.2s ease';
+                        bg.querySelectorAll('path, rect').forEach(shape => {
+                            shape.style.filter = `drop-shadow(0 0 6px ${activeColor || fillVal || '#00b4da'})`;
+                        });
+                    } else {
+                        bg.style.opacity = '0.25';
+                        bg.style.transition = 'opacity 0.2s ease';
+                        bg.querySelectorAll('path, rect').forEach(shape => {
+                            shape.style.filter = '';
+                        });
+                    }
+                }
+            });
+
             // Elevate the highlighted line group to the top layer in SVG
             matchedGroups.forEach(mg => {
                 if (mg && mg.parentElement) {
@@ -747,22 +782,23 @@
             return;
         }
 
-        // B. Clicked a Line Curve or Dot in a Chart
-        const lineCurve = ev.target ? ev.target.closest('.recharts-line, .recharts-line-curve, .recharts-dot, .recharts-line-dots') : null;
-        if (lineCurve) {
-            const chartContainer = lineCurve.closest('[data-chart-id], [id^="card-"], .zoomable-chart-popout-container');
+        // B. Clicked a Line Curve, Dot, or Bar in a Chart
+        const lineOrBar = ev.target ? ev.target.closest('.recharts-line, .recharts-line-curve, .recharts-dot, .recharts-line-dots, .recharts-bar, .recharts-bar-rectangle, .recharts-rectangle') : null;
+        if (lineOrBar) {
+            const chartContainer = lineOrBar.closest('[data-chart-id], [id^="card-"], .zoomable-chart-popout-container');
             if (chartContainer) {
                 let chartId = chartContainer.getAttribute('data-chart-id') || chartContainer.id;
                 if (chartId && chartId.startsWith('card-')) chartId = chartId.replace('card-', '');
-                const g = lineCurve.closest('.recharts-line') || lineCurve.closest('.recharts-line-dots');
+                const g = lineOrBar.closest('.recharts-line, .recharts-line-dots, .recharts-bar');
                 if (g && chartId) {
-                    const path = g.querySelector('.recharts-line-curve, path');
+                    const path = g.querySelector('.recharts-line-curve, path, rect');
                     const stroke = path ? (path.getAttribute('stroke') || path.style.stroke) : null;
                     const sampleCircle = g.querySelector('circle');
                     const dotColor = sampleCircle ? (sampleCircle.getAttribute('fill') || sampleCircle.getAttribute('stroke')) : null;
+                    const fillColor = path ? (path.getAttribute('fill') || path.style.fill) : null;
                     const rawLineName = getRechartsLineName(g);
                     const cleanLineName = extractEntityName(rawLineName);
-                    const normColor = normalizeColor(stroke || dotColor);
+                    const normColor = normalizeColor(stroke || dotColor || fillColor);
 
                     // Find key item by strict entity name or exact normalized color
                     const keyItems = Array.from(document.querySelectorAll(`[data-key-for-chart="${chartId}"] .taf1-chart-key-item`));
@@ -781,7 +817,7 @@
                         const idx = idxStr !== null ? parseInt(idxStr, 10) : null;
                         toggleLineHighlight(chartId, name, color, idx);
                     } else if (cleanLineName) {
-                        toggleLineHighlight(chartId, cleanLineName, stroke, null);
+                        toggleLineHighlight(chartId, cleanLineName, stroke || fillColor, null);
                     }
                 }
             }

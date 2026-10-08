@@ -266,7 +266,7 @@ article = {
             margin_bottom="4",
         ),
         rx.vstack(
-            rx.text("Josh Newman", color="#888888", font_size="xs", margin_bottom="1"),
+            rx.text("Jelly, Newman", color="#888888", font_size="xs", margin_bottom="1"),
             zoomable_image(
                 src="/thealternativef1-cloudflare/Season4/Images/Monaco/josh_newman.png",
                 width="100%",

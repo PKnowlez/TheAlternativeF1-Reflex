@@ -191,7 +191,7 @@ article = {
             margin_bottom="4",
         ),
         rx.text(
-            r"""Once the FIA stopped being the no fun police and let the drivers race again, Nick and Alpine's Joshua got into a side-by-side battle for a lap. The way those two shut up the second they started racing each other was music to the rest of the grid's ears. With them up at the front, the two VCARBs were surprisingly in 3rd and 4th. Rookie Josh helped his teammate create a reasonable gap to the likes of Aston Martin's Del and Ferrari's Erick.""",
+            r"""Once the FIA stopped being the no fun police and let the drivers race again, Nick and Alpine's Joshua got into a side-by-side battle for a lap. The way those two shut up the second they started racing each other was music to the rest of the grid's ears. With them up at the front, the two VCARBs were surprisingly in 3rd and 4th. Rookie Jelly helped his teammate create a reasonable gap to the likes of Aston Martin's Del and Ferrari's Erick.""",
             color="#E0E0E0",
             font_size="md",
             line_height="1.7",

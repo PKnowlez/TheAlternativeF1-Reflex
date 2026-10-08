@@ -50,7 +50,7 @@ season = {
     "schedule_sheet": "S4Schedule",
 
     # Rookies: drivers not present in Season 3
-    "rookies": {"Josh", "Matthew", "Leo", "Jaden", "Jairo"},
+    "rookies": {"Jelly", "Matthew", "Leo", "Jaden", "Jairo"},
 
     "articles": [
         LiveryRanking2026_Article,
@@ -123,7 +123,7 @@ season = {
         "Nick": "#FF6A00",
         "Travis": "#FFAE00",
         "Patrick": "#0050FF",
-        "Josh": "#6699FF",
+        "Jelly": "#6699FF",
         "Jaden": "#00D2BE",
         "Jairo": "#70ECE0",
         "Brently": "darkblue",
@@ -140,7 +140,7 @@ season = {
         "Nick": [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         "Travis": [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         "Patrick": [0] * 17,
-        "Josh": [0] * 17,
+        "Jelly": [0] * 17,
         "Brently": [0] * 17,
         "Matthew": [0] * 17,
         "Del": [0] * 17,
@@ -166,7 +166,7 @@ season = {
                 {"place": "9", "driver": "Travis", "team": "McLaren", "qualifying": "12", "points": 3, "FL": "-", "DOTD": "-", "MOT": "-", "CD": "-"},
                 {"place": "10", "driver": "Matthew", "team": "Red Bull", "qualifying": "11", "points": 2, "FL": "-", "DOTD": "Yes", "MOT": "-", "CD": "-"},
                 {"place": "11", "driver": "Erick", "team": "Ferrari", "qualifying": "8", "points": 1, "FL": "-", "DOTD": "-", "MOT": "-", "CD": "-"},
-                {"place": "12", "driver": "Josh", "team": "VCARB", "qualifying": "10", "points": 1, "FL": "-", "DOTD": "-", "MOT": "Yes", "CD": "-"},
+                {"place": "12", "driver": "Jelly", "team": "VCARB", "qualifying": "10", "points": 1, "FL": "-", "DOTD": "-", "MOT": "Yes", "CD": "-"},
                 {"place": "DNF", "driver": "Leo", "team": "Ferrari", "qualifying": "14", "points": 0, "FL": "-", "DOTD": "-", "MOT": "-", "CD": "-"},
                 {"place": "DNF/S", "driver": "Boz", "team": "Aston Martin", "qualifying": "13", "points": 0, "FL": "-", "DOTD": "-", "MOT": "-", "CD": "-"},
             ]
@@ -176,7 +176,7 @@ season = {
         {
             "name": "Post-Season: Monaco",
             "results": [
-                {"place": "1", "driver": "Josh", "team": "VCARB", "qualifying": "8", "points": 25, "FL": "Yes", "DOTD": "Yes", "MOT": "Yes", "CD": "Yes"},
+                {"place": "1", "driver": "Jelly", "team": "VCARB", "qualifying": "8", "points": 25, "FL": "Yes", "DOTD": "Yes", "MOT": "Yes", "CD": "Yes"},
                 {"place": "2", "driver": "Matthew", "team": "Haas", "qualifying": "12", "points": 18, "FL": "-", "DOTD": "-", "MOT": "-", "CD": "-"},
                 {"place": "DNF", "driver": "Patrick", "team": "VCARB", "qualifying": "6", "points": 0, "FL": "-", "DOTD": "-", "MOT": "-", "CD": "-"},
                 {"place": "DNF", "driver": "Erick", "team": "McLaren", "qualifying": "9", "points": 0, "FL": "-", "DOTD": "-", "MOT": "-", "CD": "-"},

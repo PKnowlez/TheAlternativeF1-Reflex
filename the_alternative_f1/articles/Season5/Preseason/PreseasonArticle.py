@@ -22,7 +22,7 @@ article = {
                 box_shadow="0 4px 12px rgba(0,0,0,0.3)"
             ),
             rx.text(
-                "Get ready to rumble folks, because every time these bafoons have taken Mexico or Vegas, drama has ensued. And guess what twin, it isn't always fun racing drama. Mexico last season was a truly dominant outing by the Mercs. So much so that the maFIA linked up with those politicians that have all those weather controlling machines and shut down any chance of rain for the rest of the season. But that wasn't all, we were also delivered a first podium for rookie Josh, Nick's 1000th point, and the first 1-2 since Season 1. The Tavera bros also ghosted their teammates...let's hope for all of our sakes, Eddie doesn't ghost Joshua...I am sure many of you can already hear him whining about it...",
+                "Get ready to rumble folks, because every time these bafoons have taken Mexico or Vegas, drama has ensued. And guess what twin, it isn't always fun racing drama. Mexico last season was a truly dominant outing by the Mercs. So much so that the maFIA linked up with those politicians that have all those weather controlling machines and shut down any chance of rain for the rest of the season. But that wasn't all, we were also delivered a first podium for rookie Jelly, Nick's 1000th point, and the first 1-2 since Season 1. The Tavera bros also ghosted their teammates...let's hope for all of our sakes, Eddie doesn't ghost Joshua...I am sure many of you can already hear him whining about it...",
                 color="#E0E0E0",
                 font_size="md",
                 line_height="1.7",

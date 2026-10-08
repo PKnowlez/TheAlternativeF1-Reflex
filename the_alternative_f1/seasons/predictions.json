@@ -1,5 +1,19 @@
 [
   {
+    "id": 1791432194108,
+    "username": "Jatthew Newman",
+    "season": 5,
+    "race": "Season",
+    "category": "[Full Season] Constructor Champion",
+    "target": "Audi",
+    "line_value": 10.0,
+    "stance": "AGAINST",
+    "points": 100,
+    "status": "open",
+    "payout": 0,
+    "created_at": "2026-10-08T04:03:14.108861+00:00"
+  },
+  {
     "id": 1791414622653,
     "username": "Jatthew Newman",
     "season": 5,
@@ -51,8 +65,8 @@
     "line_value": null,
     "stance": "FOR",
     "points": 20,
-    "status": "incorrect",
-    "payout": 0,
+    "status": "correct",
+    "payout": 23,
     "created_at": "2026-10-07T21:48:48.482109+00:00"
   },
   {
@@ -93,8 +107,8 @@
     "line_value": null,
     "stance": "PARLAY",
     "points": 40,
-    "status": "incorrect",
-    "payout": 0,
+    "status": "correct",
+    "payout": 54,
     "created_at": "2026-10-07T21:47:58.005503+00:00"
   },
   {
@@ -107,8 +121,8 @@
     "line_value": null,
     "stance": "FOR",
     "points": 20,
-    "status": "incorrect",
-    "payout": 0,
+    "status": "correct",
+    "payout": 23,
     "created_at": "2026-10-07T21:47:23.617997+00:00"
   },
   {
@@ -149,8 +163,8 @@
     "line_value": null,
     "stance": "AGAINST",
     "points": 10,
-    "status": "incorrect",
-    "payout": 0,
+    "status": "correct",
+    "payout": 12,
     "created_at": "2026-10-05T14:13:07.981642+00:00"
   },
   {
@@ -163,8 +177,8 @@
     "line_value": null,
     "stance": "FOR",
     "points": 10,
-    "status": "incorrect",
-    "payout": 0,
+    "status": "correct",
+    "payout": 12,
     "created_at": "2026-10-05T14:12:48.737982+00:00"
   },
   {
@@ -177,8 +191,8 @@
     "line_value": null,
     "stance": "FOR",
     "points": 10,
-    "status": "incorrect",
-    "payout": 0,
+    "status": "correct",
+    "payout": 12,
     "created_at": "2026-10-05T14:12:41.345104+00:00"
   },
   {
@@ -191,8 +205,8 @@
     "line_value": null,
     "stance": "FOR",
     "points": 10,
-    "status": "incorrect",
-    "payout": 0,
+    "status": "correct",
+    "payout": 12,
     "created_at": "2026-10-05T14:12:31.877879+00:00"
   },
   {
@@ -213,7 +227,7 @@
     "id": 1791209452677,
     "username": "PK",
     "season": 5,
-    "race": "Season 5",
+    "race": "Season",
     "category": "[Full Season] Parlay (3 Legs)",
     "target": "[{\"leg_num\": \"1\", \"category\": \"Constructor Champion Win Margin\", \"target\": \"21-30 pts\", \"stance\": \"\\u2014\", \"line_value\": null}, {\"leg_num\": \"2\", \"category\": \"Top 3 Constructor\", \"target\": \"Cadillac\", \"stance\": \"FOR\", \"line_value\": null}, {\"leg_num\": \"3\", \"category\": \"Constructor Champion\", \"target\": \"Cadillac\", \"stance\": \"FOR\", \"line_value\": null}]",
     "line_value": 11.0,
@@ -233,8 +247,8 @@
     "line_value": 27.5,
     "stance": "OVER",
     "points": 10,
-    "status": "incorrect",
-    "payout": 0,
+    "status": "correct",
+    "payout": 12,
     "created_at": "2026-10-05T14:09:34.383256+00:00"
   },
   {
@@ -247,8 +261,8 @@
     "line_value": null,
     "stance": "PARLAY",
     "points": 10,
-    "status": "incorrect",
-    "payout": 0,
+    "status": "correct",
+    "payout": 14,
     "created_at": "2026-10-02T04:54:51.718429+00:00"
   },
   {
@@ -297,7 +311,7 @@
     "id": 1790787017195,
     "username": "Jellywaffles37",
     "season": 5,
-    "race": "Season 5",
+    "race": "Season",
     "category": "[Full Season] Driver Champion",
     "target": "Josh",
     "line_value": 12.0,
@@ -311,7 +325,7 @@
     "id": 1790786926597,
     "username": "Jellywaffles37",
     "season": 5,
-    "race": "Season 5",
+    "race": "Season",
     "category": "[Full Season] Constructor Champion",
     "target": "Cadillac",
     "line_value": 12.0,
@@ -339,7 +353,7 @@
     "id": 1790733428382,
     "username": "Nat",
     "season": 5,
-    "race": "Season 5",
+    "race": "Season",
     "category": "[Full Season] Top 3 Driver",
     "target": "Josh",
     "line_value": 12.0,
@@ -353,7 +367,7 @@
     "id": 1790733327807,
     "username": "Nat",
     "season": 5,
-    "race": "Season 5",
+    "race": "Season",
     "category": "[Full Season] Constructor Champion",
     "target": "Cadillac",
     "line_value": 12.0,
@@ -395,7 +409,7 @@
     "id": 1790733090558,
     "username": "PK",
     "season": 5,
-    "race": "Season 5",
+    "race": "Season",
     "category": "[Full Season] Parlay (3 Legs)",
     "target": "[{\"leg_num\": \"1\", \"category\": \"Constructor Champion\", \"target\": \"Cadillac\", \"stance\": \"FOR\", \"line_value\": null}, {\"leg_num\": \"2\", \"category\": \"Top 3 Driver\", \"target\": \"Josh\", \"stance\": \"FOR\", \"line_value\": null}, {\"leg_num\": \"3\", \"category\": \"Top 3 Constructor\", \"target\": \"McLaren\", \"stance\": \"FOR\", \"line_value\": null}]",
     "line_value": 12.0,
@@ -409,7 +423,7 @@
     "id": 1790733038123,
     "username": "PK",
     "season": 5,
-    "race": "Season 5",
+    "race": "Season",
     "category": "[Full Season] Constructor Champion",
     "target": "Cadillac",
     "line_value": 12.0,
@@ -499,8 +513,8 @@
     "line_value": null,
     "stance": "FOR",
     "points": 10,
-    "status": "incorrect",
-    "payout": 0,
+    "status": "correct",
+    "payout": 12,
     "created_at": "2026-09-20T22:20:23.174088+00:00"
   },
   {
