@@ -6085,13 +6085,15 @@ def alternative_intelligence_drawer() -> rx.Component:
                 # Bottom Search Bar (Anchored comfortably at bottom with safe-area support and luminous card)
                 rx.box(
                     rx.cond(
-                        AlternativeIntelligenceState.messages.length() > 0,
+                        (AlternativeIntelligenceState.messages.length() > 0)
+                        | (AlternativeIntelligenceState.active_skill_badge != ""),
                         rx.hstack(
                             rx.hstack(
                                 rx.icon("sparkles", size=13, color="#00b4da"),
                                 rx.text("Skill:", font_size="11px", color="#A1A1AA", font_weight="semibold"),
                                 spacing="1",
                                 align="center",
+                                flex_shrink="0",
                             ),
                             rx.select(
                                 SKILL_OPTIONS,
@@ -6104,35 +6106,26 @@ def alternative_intelligence_drawer() -> rx.Component:
                                 height="28px",
                                 font_size="11px",
                                 cursor="pointer",
-                                flex="1",
+                                flex_shrink="0",
                                 _hover={"border_color": "#00b4da"},
                             ),
-                            spacing="2",
-                            align="center",
-                            width="100%",
-                            margin_bottom="2",
-                        ),
-                        rx.fragment(),
-                    ),
-                    rx.hstack(
-                        rx.hstack(
                             rx.cond(
                                 AlternativeIntelligenceState.active_skill_badge != "",
                                 rx.hstack(
                                     rx.text(
                                         AlternativeIntelligenceState.active_skill_badge,
                                         class_name="ai-skill-badge-full",
-                                        display=["none", "none", "inline", "inline", "inline"],
                                         font_size="11px",
                                         font_weight="bold",
                                         color="white",
                                         text_shadow="0 1px 3px rgba(0, 0, 0, 0.8)",
                                         white_space="nowrap",
+                                        overflow="hidden",
+                                        text_overflow="ellipsis",
                                     ),
                                     rx.text(
                                         AlternativeIntelligenceState.active_skill_badge_short,
                                         class_name="ai-skill-badge-short",
-                                        display=["inline", "inline", "none", "none", "none"],
                                         font_size="11px",
                                         font_weight="bold",
                                         color="white",
@@ -6153,16 +6146,28 @@ def alternative_intelligence_drawer() -> rx.Component:
                                         title="Clear selected skill",
                                     ),
                                     title=AlternativeIntelligenceState.active_skill_badge,
-                                    background="radial-gradient(circle at 20% 25%, rgba(230, 0, 73, 0.55) 0%, transparent 55%), radial-gradient(circle at 80% 25%, rgba(255, 140, 0, 0.55) 0%, transparent 50%), radial-gradient(circle at 20% 80%, rgba(123, 0, 255, 0.55) 0%, transparent 55%), radial-gradient(circle at 80% 80%, rgba(0, 153, 255, 0.55) 0%, transparent 50%), rgba(18, 18, 20, 0.55)",
+                                    background="radial-gradient(circle at 10% 30%, rgba(230, 0, 73, 0.75) 0%, transparent 55%), radial-gradient(circle at 35% 20%, rgba(255, 140, 0, 0.7) 0%, transparent 50%), radial-gradient(circle at 65% 80%, rgba(123, 0, 255, 0.75) 0%, transparent 55%), radial-gradient(circle at 90% 40%, rgba(0, 153, 255, 0.75) 0%, transparent 50%), #111113",
                                     border="1px solid rgba(255, 255, 255, 0.3)",
                                     box_shadow="0 0 8px rgba(0, 180, 218, 0.3)",
                                     border_radius="md",
-                                    padding="3px 8px",
+                                    padding="2px 8px",
+                                    height="28px",
                                     align="center",
                                     spacing="1",
+                                    flex_shrink="0",
+                                    max_width=["150px", "190px", "240px"],
                                 ),
                                 rx.fragment(),
                             ),
+                            spacing="2",
+                            align="center",
+                            width="100%",
+                            margin_bottom="2",
+                        ),
+                        rx.fragment(),
+                    ),
+                    rx.hstack(
+                        rx.hstack(
                             rx.input(
                                 id="ai-search-input",
                                 class_name="ai-search-input",

@@ -26,6 +26,7 @@ from the_alternative_f1.articles.Season5.Race_Week.miami_race_week import articl
 from the_alternative_f1.articles.Season5.Race_Recap.miami_race_recap import article as Miami_Race_Recap_Article
 from the_alternative_f1.articles.Season5.Race_Week.monza_race_week import article as Monza_Race_Week_Article
 from the_alternative_f1.articles.Season5.Race_Recap.monza_race_recap import article as Monza_Race_Recap_Article
+from the_alternative_f1.articles.Season5.Race_Recap.monza_red_bull import article as Monza_RedBull_Article
 
 season = {
     "season_number": 5,
@@ -35,7 +36,8 @@ season = {
     # Rookies: drivers not present in Season 4
     "rookies": {"Grayson", "Josh C.", "Randy", "Evelo"},
 
-    "articles": [Monza_Race_Recap_Article, Monza_Race_Week_Article, Miami_Race_Recap_Article, 
+    "articles": [Monza_RedBull_Article, 
+    Monza_Race_Recap_Article, Monza_Race_Week_Article, Miami_Race_Recap_Article, 
     Miami_Race_Week_Article, Bye_Week_Article1, Imola_Race_Recap_Article, 
     Imola_Race_Week_Article, Australia_Race_Recap_Article, Australia_Race_Week_Article, 
     TrophyReveal_Article, Hungary_Recap_Article, TrophyTeaser_Article, 
