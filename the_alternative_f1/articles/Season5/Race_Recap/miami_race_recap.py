@@ -178,7 +178,7 @@ article = {
                     line_height="1.6",
                     white_space="pre-line",
                 ),
-                rx.divider(border_color="#848482", margin_y="3", width="100%"),
+                rx.divider(border_color="#363635", margin_y="3", width="100%"),
                 rx.text(
                     "Upon petition by McLaren, the FIA has reviewed the incident between Del and Leo during the opening lap of last night's race. \
                         The review entailed analyzing onboard video feeds and telemetry of multiple vehicles, including but not limited to both cars involved, \
@@ -238,7 +238,7 @@ article = {
                     font_size="md",
                     line_height="1.6",
                 ),
-                rx.divider(border_color="#848482", margin_y="3", width="100%"),
+                rx.divider(border_color="#363635", margin_y="3", width="100%"),
                 rx.text(
                     "THE ALTERNATIVE F1 LEAGUE",
                     color="black",

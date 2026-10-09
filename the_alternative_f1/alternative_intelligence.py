@@ -1001,6 +1001,475 @@ def _format_comprehensive_statistical_matrix(excel_p: Path, seasons_list: list) 
     return res
 
 
+def _format_accolades_matrix(seasons_list: list, all_season_calcs: dict) -> list:
+    """Format comprehensive Accolades statistics (Fastest Laps, Driver of the Day, Most Overtakes, Cleanest Driver)
+    both total and per-race breakdown for drivers and constructors (TAF1APP-SDDREQ-239)."""
+    res = []
+    try:
+        from collections import defaultdict
+        from the_alternative_f1.constructor_colors import CONSTRUCTOR_COLORS
+
+        # Driver trackers
+        driver_fl_total = defaultdict(int)
+        driver_dotd_total = defaultdict(int)
+        driver_mot_total = defaultdict(int)
+        driver_cd_total = defaultdict(int)
+        driver_accolades_by_season = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
+        driver_latest_team = {}
+        all_known_drivers = set()
+
+        # Constructor trackers
+        constructor_fl_total = defaultdict(int)
+        constructor_dotd_total = defaultdict(int)
+        constructor_mot_total = defaultdict(int)
+        constructor_cd_total = defaultdict(int)
+        constructor_accolades_by_season = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
+        constructor_drivers_contributors = defaultdict(set)
+        all_known_teams = set(CONSTRUCTOR_COLORS.keys())
+
+        # Seasonal detailed logs: round_accolades[season_num] = list of dicts
+        season_round_accolades = defaultdict(list)
+        season_races_map = {}
+
+        def _is_true(val):
+            if val is None:
+                return False
+            return str(val).strip().lower() in ("y", "yes", "true", "1", "1.0")
+
+        for s in seasons_list:
+            s_num = s.get("season_number")
+            calc = all_season_calcs.get(s_num)
+            if calc is None:
+                from the_alternative_f1.seasons.Calculations import Calculations
+                calc = Calculations(s)
+
+            raw_df = calc.get("df")
+            races = calc.get("races", [])
+            index_x = calc.get("index_x", 0)
+            num_completed = max(0, int(index_x + 0.5)) if s_num == 5 else len(races)
+            active_races = races[:num_completed] if s_num == 5 else races
+            season_races_map[s_num] = active_races
+
+            if raw_df is None or raw_df.empty:
+                continue
+
+            # Map drivers to teams
+            d_to_team = {}
+            for _, r in raw_df.iterrows():
+                d = str(r.get("Driver", "")).strip()
+                t = str(r.get("Team", "")).strip()
+                if d:
+                    d_to_team[d] = t
+                    driver_latest_team[d] = t
+                    all_known_drivers.add(d)
+                if t:
+                    all_known_teams.add(t)
+
+            for r_name in active_races:
+                c_pre = r_name.replace(" Sprint", "Sprint")
+                fl_col = next((c for c in [f"{r_name}FastestLap", f"{c_pre}FastestLap"] if c in raw_df.columns), None)
+                dotd_col = next((c for c in [f"{r_name}DOTD", f"{c_pre}DOTD"] if c in raw_df.columns), None)
+                mot_col = next((c for c in [f"{r_name}MOT", f"{c_pre}MOT"] if c in raw_df.columns), None)
+                cd_col = next((c for c in [f"{r_name}CD", f"{c_pre}CD"] if c in raw_df.columns), None)
+
+                # Find recipients
+                fl_winners = []
+                dotd_winners = []
+                mot_winners = []
+                cd_winners = []
+
+                if fl_col:
+                    fl_rows = raw_df[raw_df[fl_col].apply(_is_true)]
+                    for _, row in fl_rows.iterrows():
+                        dr = str(row.get("Driver", "")).strip()
+                        tm = d_to_team.get(dr, str(row.get("Team", "")).strip())
+                        if dr:
+                            fl_winners.append((dr, tm))
+                            driver_fl_total[dr] += 1
+                            driver_accolades_by_season[dr][s_num]["FL"] += 1
+                            if tm:
+                                constructor_fl_total[tm] += 1
+                                constructor_accolades_by_season[tm][s_num]["FL"] += 1
+                                constructor_drivers_contributors[tm].add(dr)
+
+                if dotd_col:
+                    dotd_rows = raw_df[raw_df[dotd_col].apply(_is_true)]
+                    for _, row in dotd_rows.iterrows():
+                        dr = str(row.get("Driver", "")).strip()
+                        tm = d_to_team.get(dr, str(row.get("Team", "")).strip())
+                        if dr:
+                            dotd_winners.append((dr, tm))
+                            driver_dotd_total[dr] += 1
+                            driver_accolades_by_season[dr][s_num]["DOTD"] += 1
+                            if tm:
+                                constructor_dotd_total[tm] += 1
+                                constructor_accolades_by_season[tm][s_num]["DOTD"] += 1
+                                constructor_drivers_contributors[tm].add(dr)
+
+                if mot_col:
+                    mot_rows = raw_df[raw_df[mot_col].apply(_is_true)]
+                    for _, row in mot_rows.iterrows():
+                        dr = str(row.get("Driver", "")).strip()
+                        tm = d_to_team.get(dr, str(row.get("Team", "")).strip())
+                        if dr:
+                            mot_winners.append((dr, tm))
+                            driver_mot_total[dr] += 1
+                            driver_accolades_by_season[dr][s_num]["MOT"] += 1
+                            if tm:
+                                constructor_mot_total[tm] += 1
+                                constructor_accolades_by_season[tm][s_num]["MOT"] += 1
+                                constructor_drivers_contributors[tm].add(dr)
+
+                if cd_col:
+                    cd_rows = raw_df[raw_df[cd_col].apply(_is_true)]
+                    for _, row in cd_rows.iterrows():
+                        dr = str(row.get("Driver", "")).strip()
+                        tm = d_to_team.get(dr, str(row.get("Team", "")).strip())
+                        if dr:
+                            cd_winners.append((dr, tm))
+                            driver_cd_total[dr] += 1
+                            driver_accolades_by_season[dr][s_num]["CD"] += 1
+                            if tm:
+                                constructor_cd_total[tm] += 1
+                                constructor_accolades_by_season[tm][s_num]["CD"] += 1
+                                constructor_drivers_contributors[tm].add(dr)
+
+                season_round_accolades[s_num].append({
+                    "race": r_name,
+                    "fl": fl_winners,
+                    "dotd": dotd_winners,
+                    "mot": mot_winners,
+                    "cd": cd_winners,
+                })
+
+        res.append("## OFFICIAL LEAGUE ACCOLADES DATABASE (FASTEST LAPS, DOTD, MOT, CD)")
+        res.append("Official Accolade Scoring & Regulatory Context:")
+        res.append("- Fastest Lap (FL): 1 championship point awarded to the driver with the fastest lap in the race.")
+        res.append("- Driver of the Day (DOTD): 1 championship point awarded by official league vote (inaugurated in Season 4).")
+        res.append("- Most Overtakes (MOT): 1 championship point awarded to the driver with the most overtakes (inaugurated in Season 4).")
+        res.append("- Cleanest Driver (CD): 1 championship point awarded to the cleanest driver (inaugurated in Season 4).")
+        res.append("- Maximum possible base race points = 25 pts (P1) + 4 accolade points = 29 pts in Grand Prix feature races.")
+        res.append("- CRITICAL HISTORICAL TIMELINE RULE: Seasons 1, 2, and 3 officially tracked Fastest Laps only (FL). Driver of the Day (DOTD), Most Overtakes (MOT), and Cleanest Driver (CD) were inaugurated in Season 4 and are tracked for all races in Season 4 and Season 5.\n")
+
+        # ── 1. DRIVER ALL-TIME ACCOLADES LEADERBOARD ──
+        res.append("### Official All-Time Driver Accolades Leaderboard:")
+        res.append("| Driver | Current / Last Team | Total Accolades | Fastest Laps (FL) | Driver of the Day (DOTD) | Most Overtakes (MOT) | Cleanest Driver (CD) | Accolade Breakdown by Season |")
+        res.append("| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |")
+
+        def driver_tot(d):
+            return driver_fl_total[d] + driver_dotd_total[d] + driver_mot_total[d] + driver_cd_total[d]
+
+        sorted_drivers = sorted(all_known_drivers, key=lambda d: (-driver_tot(d), d))
+        for d in sorted_drivers:
+            tot = driver_tot(d)
+            fl = driver_fl_total[d]
+            dotd = driver_dotd_total[d]
+            mot = driver_mot_total[d]
+            cd = driver_cd_total[d]
+            tm = driver_latest_team.get(d, "—")
+
+            s_breakdowns = []
+            for sn in range(1, 6):
+                sn_dict = driver_accolades_by_season[d].get(sn, {})
+                sn_items = []
+                if sn_dict.get("FL"): sn_items.append(f"{sn_dict['FL']} FL")
+                if sn_dict.get("DOTD"): sn_items.append(f"{sn_dict['DOTD']} DOTD")
+                if sn_dict.get("MOT"): sn_items.append(f"{sn_dict['MOT']} MOT")
+                if sn_dict.get("CD"): sn_items.append(f"{sn_dict['CD']} CD")
+                if sn_items:
+                    s_breakdowns.append(f"S{sn}: {', '.join(sn_items)}")
+            s_str = "; ".join(s_breakdowns) if s_breakdowns else "None"
+            res.append(f"| {d} | {tm} | {tot} | {fl} | {dotd} | {mot} | {cd} | {s_str} |")
+        res.append("")
+
+        # ── 2. CONSTRUCTOR ALL-TIME ACCOLADES LEADERBOARD ──
+        res.append("### Official All-Time Constructor Accolades Leaderboard:")
+        res.append("| Constructor | Total Accolades | Fastest Laps (FL) | Driver of the Day (DOTD) | Most Overtakes (MOT) | Cleanest Driver (CD) | Contributing Drivers & Season Breakdown |")
+        res.append("| :--- | :--- | :--- | :--- | :--- | :--- | :--- |")
+
+        def const_tot(t):
+            return constructor_fl_total[t] + constructor_dotd_total[t] + constructor_mot_total[t] + constructor_cd_total[t]
+
+        sorted_teams = sorted(all_known_teams, key=lambda t: (-const_tot(t), t))
+        for t in sorted_teams:
+            tot = const_tot(t)
+            fl = constructor_fl_total[t]
+            dotd = constructor_dotd_total[t]
+            mot = constructor_mot_total[t]
+            cd = constructor_cd_total[t]
+            contribs = sorted(constructor_drivers_contributors[t])
+            contrib_str = f"Drivers: {', '.join(contribs)}" if contribs else "None"
+
+            s_breakdowns = []
+            for sn in range(1, 6):
+                sn_dict = constructor_accolades_by_season[t].get(sn, {})
+                sn_tot = sn_dict.get("FL", 0) + sn_dict.get("DOTD", 0) + sn_dict.get("MOT", 0) + sn_dict.get("CD", 0)
+                if sn_tot > 0:
+                    s_breakdowns.append(f"S{sn}: {sn_tot}")
+            s_str = f" ({'; '.join(s_breakdowns)})" if s_breakdowns else ""
+            res.append(f"| {t} | {tot} | {fl} | {dotd} | {mot} | {cd} | {contrib_str}{s_str} |")
+        res.append("")
+
+        # ── 3. SEASON 5 ROUND-BY-ROUND BREAKDOWN (ACTIVE SEASON) ──
+        res.append("### Season 5 Round-by-Round Accolade Winners (Active Season):")
+        res.append("| Round / Race | Fastest Lap (FL) | Driver of the Day (DOTD) | Most Overtakes (MOT) | Cleanest Driver (CD) | Constructor Accolades Won in Round |")
+        res.append("| :--- | :--- | :--- | :--- | :--- | :--- |")
+        for round_item in season_round_accolades.get(5, []):
+            rn = round_item["race"]
+            fl_str = ", ".join(f"{d} ({t})" for d, t in round_item["fl"]) or "None"
+            dotd_str = ", ".join(f"{d} ({t})" for d, t in round_item["dotd"]) or "None"
+            mot_str = ", ".join(f"{d} ({t})" for d, t in round_item["mot"]) or "None"
+            cd_str = ", ".join(f"{d} ({t})" for d, t in round_item["cd"]) or "None"
+
+            round_tm_counts = defaultdict(int)
+            for _, tm in round_item["fl"] + round_item["dotd"] + round_item["mot"] + round_item["cd"]:
+                if tm: round_tm_counts[tm] += 1
+            tm_str = ", ".join(f"{tm}: {cnt}" for tm, cnt in sorted(round_tm_counts.items(), key=lambda x: -x[1])) or "None"
+            res.append(f"| {rn} | {fl_str} | {dotd_str} | {mot_str} | {cd_str} | {tm_str} |")
+        res.append("")
+
+        # ── 4. SEASON 4 ROUND-BY-ROUND BREAKDOWN ──
+        res.append("### Season 4 Round-by-Round Accolade Winners:")
+        res.append("| Round / Race | Fastest Lap (FL) | Driver of the Day (DOTD) | Most Overtakes (MOT) | Cleanest Driver (CD) | Constructor Accolades Won in Round |")
+        res.append("| :--- | :--- | :--- | :--- | :--- | :--- |")
+        for round_item in season_round_accolades.get(4, []):
+            rn = round_item["race"]
+            fl_str = ", ".join(f"{d} ({t})" for d, t in round_item["fl"]) or "None"
+            dotd_str = ", ".join(f"{d} ({t})" for d, t in round_item["dotd"]) or "None"
+            mot_str = ", ".join(f"{d} ({t})" for d, t in round_item["mot"]) or "None"
+            cd_str = ", ".join(f"{d} ({t})" for d, t in round_item["cd"]) or "None"
+
+            round_tm_counts = defaultdict(int)
+            for _, tm in round_item["fl"] + round_item["dotd"] + round_item["mot"] + round_item["cd"]:
+                if tm: round_tm_counts[tm] += 1
+            tm_str = ", ".join(f"{tm}: {cnt}" for tm, cnt in sorted(round_tm_counts.items(), key=lambda x: -x[1])) or "None"
+            res.append(f"| {rn} | {fl_str} | {dotd_str} | {mot_str} | {cd_str} | {tm_str} |")
+        res.append("")
+
+        # ── 5. SEASONS 1, 2, AND 3 FASTEST LAP WINNERS ──
+        res.append("### Seasons 1, 2, and 3 Round-by-Round Fastest Lap Winners:")
+        res.append("| Season | Round / Race | Fastest Lap Winner | Constructor |")
+        res.append("| :--- | :--- | :--- | :--- |")
+        for sn in [1, 2, 3]:
+            for round_item in season_round_accolades.get(sn, []):
+                rn = round_item["race"]
+                for dr, tm in round_item["fl"]:
+                    res.append(f"| Season {sn} | {rn} | {dr} | {tm} |")
+        res.append("Historical Note: DOTD, MOT, and CD awards were not tracked or awarded in Seasons 1, 2, and 3; only Fastest Laps were officially recorded.\n")
+
+    except Exception as e:
+        res.append(f"Note: Error formatting Accolades matrix: {str(e)}\n")
+
+    return res
+
+
+def _format_super_license_matrix(seasons_list: list, all_season_calcs: dict) -> list:
+    """Format Super License penalty points per driver and constructor (both total and per-race breakdown)."""
+    res = []
+    try:
+        from collections import defaultdict
+        from the_alternative_f1.constructor_colors import CONSTRUCTOR_COLORS
+
+        driver_season_points = defaultdict(dict)
+        driver_season_totals = defaultdict(lambda: defaultdict(int))
+        driver_career_totals = defaultdict(int)
+        driver_incidents = defaultdict(list)
+        driver_latest_team = {}
+        all_known_drivers = set()
+
+        constructor_season_points = defaultdict(dict)
+        constructor_season_totals = defaultdict(lambda: defaultdict(int))
+        constructor_career_totals = defaultdict(int)
+        constructor_incidents = defaultdict(list)
+        all_known_teams = set(CONSTRUCTOR_COLORS.keys())
+
+        season_races_map = {}
+
+        for s in seasons_list:
+            s_num = s.get("season_number")
+            sl_data = s.get("super_license_points", {})
+            calc = all_season_calcs.get(s_num)
+            if calc is None:
+                from the_alternative_f1.seasons.Calculations import Calculations
+                calc = Calculations(s)
+
+            raw_df = calc.get("df")
+            races = calc.get("races", [])
+            season_races_map[s_num] = races
+
+            # Map drivers to teams for this season
+            d_to_team = {}
+            if raw_df is not None and not raw_df.empty:
+                for _, r in raw_df.iterrows():
+                    d = str(r.get("Driver", "")).strip()
+                    t = str(r.get("Team", "")).strip()
+                    if d:
+                        d_to_team[d] = t
+                        driver_latest_team[d] = t
+                        all_known_drivers.add(d)
+                    if t:
+                        all_known_teams.add(t)
+
+            for d in sl_data:
+                all_known_drivers.add(d)
+
+            # Initialize constructor race arrays for this season
+            team_r_points = defaultdict(lambda: [0] * len(races))
+
+            for d, pts_list in sl_data.items():
+                if len(pts_list) < len(races):
+                    pts_padded = list(pts_list) + [0] * (len(races) - len(pts_list))
+                else:
+                    pts_padded = list(pts_list[:len(races)])
+
+                driver_season_points[d][s_num] = pts_padded
+                s_tot = sum(pts_padded)
+                driver_season_totals[d][s_num] = s_tot
+                driver_career_totals[d] += s_tot
+
+                t_name = d_to_team.get(d)
+                for r_idx, p_val in enumerate(pts_padded):
+                    if p_val > 0:
+                        r_name = races[r_idx] if r_idx < len(races) else f"Round {r_idx+1}"
+                        driver_incidents[d].append((s_num, r_name, p_val))
+                        if t_name:
+                            team_r_points[t_name][r_idx] += p_val
+                            constructor_incidents[t_name].append((s_num, r_name, d, p_val))
+
+            for t_name in all_known_teams:
+                r_pts = team_r_points.get(t_name, [0] * len(races))
+                constructor_season_points[t_name][s_num] = r_pts
+                c_s_tot = sum(r_pts)
+                constructor_season_totals[t_name][s_num] = c_s_tot
+                constructor_career_totals[t_name] += c_s_tot
+
+        res.append("## OFFICIAL SUPER LICENSE PENALTY POINTS DATABASE (DRIVERS & CONSTRUCTORS)")
+        res.append("Super License penalty points are awarded by the FIA for causing collisions, reckless driving, or race start incidents (Regulations 10, 13, 14).")
+        res.append("Constructors inherit the penalty points of their drivers for each race, providing a cumulative constructor discipline record.\n")
+
+        # ── 1. DRIVER ALL-TIME STANDINGS ──
+        res.append("### Official All-Time Driver Super License Penalty Points Standings:")
+        res.append("| Driver | Current / Last Team | Career Total Penalty Points | S1 | S2 | S3 | S4 | S5 | Specific Incident Races & Penalties |")
+        res.append("| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |")
+
+        sorted_drivers = sorted(all_known_drivers, key=lambda d: (-driver_career_totals[d], d))
+        for d in sorted_drivers:
+            c_tot = driver_career_totals[d]
+            s1 = driver_season_totals[d].get(1, 0)
+            s2 = driver_season_totals[d].get(2, 0)
+            s3 = driver_season_totals[d].get(3, 0)
+            s4 = driver_season_totals[d].get(4, 0)
+            s5 = driver_season_totals[d].get(5, 0)
+            tm = driver_latest_team.get(d, "—")
+
+            inc_list = driver_incidents.get(d, [])
+            if inc_list:
+                inc_desc = "; ".join(f"S{sn} {rn} (+{p} pt)" for sn, rn, p in inc_list)
+            else:
+                inc_desc = "None (Clean record)"
+            res.append(f"| {d} | {tm} | {c_tot} | {s1} | {s2} | {s3} | {s4} | {s5} | {inc_desc} |")
+        res.append("")
+
+        # ── 2. CONSTRUCTOR ALL-TIME STANDINGS ──
+        res.append("### Official All-Time Constructor Super License Penalty Points Standings:")
+        res.append("| Constructor | Career Total Penalty Points | S1 | S2 | S3 | S4 | S5 | Contributing Drivers & Incident Races |")
+        res.append("| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |")
+
+        sorted_teams = sorted(all_known_teams, key=lambda t: (-constructor_career_totals[t], t))
+        for t in sorted_teams:
+            c_tot = constructor_career_totals[t]
+            s1 = constructor_season_totals[t].get(1, 0)
+            s2 = constructor_season_totals[t].get(2, 0)
+            s3 = constructor_season_totals[t].get(3, 0)
+            s4 = constructor_season_totals[t].get(4, 0)
+            s5 = constructor_season_totals[t].get(5, 0)
+
+            inc_list = constructor_incidents.get(t, [])
+            if inc_list:
+                inc_desc = "; ".join(f"S{sn} {rn} ({dr}: +{p} pt)" for sn, rn, dr, p in inc_list)
+            else:
+                inc_desc = "None (Clean record)"
+            res.append(f"| {t} | {c_tot} | {s1} | {s2} | {s3} | {s4} | {s5} | {inc_desc} |")
+        res.append("")
+
+        # ── 3. SEASON 5 ROUND-BY-ROUND BREAKDOWN (ACTIVE SEASON) ──
+        s5_races = season_races_map.get(5, [])
+        if s5_races:
+            res.append("### Season 5 Driver Super License Penalty Points (Round-by-Round Breakdown):")
+            s5_header = "| Driver | Team | Season Total | " + " | ".join(s5_races) + " |"
+            s5_sep = "| :--- | :--- | :--- | " + " | ".join([":---:"] * len(s5_races)) + " |"
+            res.append(s5_header)
+            res.append(s5_sep)
+
+            s5_drivers = [d for d in sorted_drivers if 5 in driver_season_totals[d] or (d in driver_season_points and 5 in driver_season_points[d])]
+            s5_drivers.sort(key=lambda d: (-driver_season_totals[d].get(5, 0), d))
+            for d in s5_drivers:
+                pts_arr = driver_season_points[d].get(5, [0] * len(s5_races))
+                tot = driver_season_totals[d].get(5, 0)
+                tm = driver_latest_team.get(d, "—")
+                pts_cells = " | ".join(str(p) if p > 0 else "-" for p in pts_arr)
+                res.append(f"| {d} | {tm} | {tot} | {pts_cells} |")
+            res.append("")
+
+            res.append("### Season 5 Constructor Super License Penalty Points (Round-by-Round Sum):")
+            s5_c_header = "| Constructor | Season Total | " + " | ".join(s5_races) + " |"
+            s5_c_sep = "| :--- | :--- | " + " | ".join([":---:"] * len(s5_races)) + " |"
+            res.append(s5_c_header)
+            res.append(s5_c_sep)
+
+            s5_teams = [t for t in sorted_teams if 5 in constructor_season_totals[t] or (t in constructor_season_points and 5 in constructor_season_points[t])]
+            s5_teams.sort(key=lambda t: (-constructor_season_totals[t].get(5, 0), t))
+            for t in s5_teams:
+                pts_arr = constructor_season_points[t].get(5, [0] * len(s5_races))
+                tot = constructor_season_totals[t].get(5, 0)
+                pts_cells = " | ".join(str(p) if p > 0 else "-" for p in pts_arr)
+                res.append(f"| {t} | {tot} | {pts_cells} |")
+            res.append("")
+
+        # ── 4. SEASON 4 ROUND-BY-ROUND BREAKDOWN ──
+        s4_races = season_races_map.get(4, [])
+        if s4_races:
+            res.append("### Season 4 Driver Super License Penalty Points (Round-by-Round Breakdown):")
+            s4_header = "| Driver | Season Total | " + " | ".join(s4_races) + " |"
+            s4_sep = "| :--- | :--- | " + " | ".join([":---:"] * len(s4_races)) + " |"
+            res.append(s4_header)
+            res.append(s4_sep)
+
+            s4_drivers = [d for d in sorted_drivers if 4 in driver_season_totals[d] or (d in driver_season_points and 4 in driver_season_points[d])]
+            s4_drivers.sort(key=lambda d: (-driver_season_totals[d].get(4, 0), d))
+            for d in s4_drivers:
+                pts_arr = driver_season_points[d].get(4, [0] * len(s4_races))
+                tot = driver_season_totals[d].get(4, 0)
+                pts_cells = " | ".join(str(p) if p > 0 else "-" for p in pts_arr)
+                res.append(f"| {d} | {tot} | {pts_cells} |")
+            res.append("")
+
+            res.append("### Season 4 Constructor Super License Penalty Points (Round-by-Round Sum):")
+            s4_c_header = "| Constructor | Season Total | " + " | ".join(s4_races) + " |"
+            s4_c_sep = "| :--- | :--- | " + " | ".join([":---:"] * len(s4_races)) + " |"
+            res.append(s4_c_header)
+            res.append(s4_c_sep)
+
+            s4_teams = [t for t in sorted_teams if 4 in constructor_season_totals[t] or (t in constructor_season_points and 4 in constructor_season_points[t])]
+            s4_teams.sort(key=lambda t: (-constructor_season_totals[t].get(4, 0), t))
+            for t in s4_teams:
+                pts_arr = constructor_season_points[t].get(4, [0] * len(s4_races))
+                tot = constructor_season_totals[t].get(4, 0)
+                pts_cells = " | ".join(str(p) if p > 0 else "-" for p in pts_arr)
+                res.append(f"| {t} | {tot} | {pts_cells} |")
+            res.append("")
+
+        # ── 5. SEASONS 1–3 HISTORICAL SUMMARY ──
+        res.append("### Seasons 1, 2, and 3 Super License Historical Summary:")
+        res.append("- Across Season 1 (19 rounds), Season 2 (10 rounds), and Season 3 (15 rounds), exactly 0 Super License penalty points were assessed across all drivers and constructors.")
+        res.append("- Super License penalty points were first introduced/assessed in Season 4.\n")
+
+    except Exception as e:
+        res.append(f"Note: Error formatting Super License penalty points matrix: {str(e)}\n")
+
+    return res
+
+
 def build_grounded_league_context() -> str:
     """Build a comprehensive, structured text summary of all deployed league data.
     
@@ -1632,6 +2101,12 @@ def build_grounded_league_context() -> str:
     # Comprehensive Driver & Constructor Statistical Matrix (TAF1APP-SDDREQ-239)
     lines.extend(_format_comprehensive_statistical_matrix(excel_path, seasons))
 
+    # Super License Penalty Points Matrix (Drivers & Constructors)
+    lines.extend(_format_super_license_matrix(seasons, all_season_calcs))
+
+    # Comprehensive Accolades Database (TAF1APP-SDDREQ-239)
+    lines.extend(_format_accolades_matrix(seasons, all_season_calcs))
+
     # Official Championship Historical Archive (TAF1APP-SDDREQ-250)
     lines.append("## OFFICIAL CHAMPIONSHIP HISTORICAL ARCHIVE (SEASONS 1 - 5)")
     lines.append("| Season | Champion Entity | Type | Wins | Podiums | Accolades (Poles, FL, CD, DOTD, MOT) | Win Margin | Runner-Up | Races Led Championship |")
@@ -2096,6 +2571,49 @@ METS FAN LORE & INQUIRIES:
 25. If asked about "Mets fan" or someone asks about who is a Mets fan:
     - You MUST respond with:
       "Joshua, Season 4 World Driver Champion is the biggest Mets fan in the world and he hates the Yankees."
+
+SUPER LICENSE PENALTY POINTS (DRIVERS & CONSTRUCTORS):
+26. When asked about Super License penalty points for drivers or constructors (career totals, season totals, or per-race breakdown):
+    - Ground all answers strictly in the "OFFICIAL SUPER LICENSE PENALTY POINTS DATABASE" provided in the League Grounded Context.
+    - DRIVER PENALTY POINTS SUMMARY:
+      * All-Time Career Leaderboard:
+        - Eddie: 2 penalty points (All in Season 4: 1 pt at Round 1 Bahrain, 1 pt at Round 6 Baku)
+        - Jaden: 2 penalty points (All in Season 4: 1 pt at Round 3 Miami, 1 pt at Round 12 Austria)
+        - Joshua: 2 penalty points (1 pt in Season 4 at Round 9 Spa; 1 pt in Season 5 at Round 5 Monza)
+        - Leo: 2 penalty points (1 pt in Season 4 at Round 9 Spa; 1 pt in Season 5 at Round 4 Miami GP)
+        - Nick: 1 penalty point (All in Season 4: 1 pt at Round 4 Spain)
+        - Travis: 1 penalty point (All in Season 4: 1 pt at Round 6 Baku)
+        - All other drivers: 0 penalty points across their entire careers.
+    - CONSTRUCTOR PENALTY POINTS SUMMARY:
+      * Constructor penalty points are calculated by summing the penalty points of all drivers competing for that constructor in each race and season.
+      * All-Time Career Leaderboard:
+        - Alpine: 3 penalty points (All in Season 4: Eddie 2 pts, Joshua 1 pt)
+        - Ferrari: 2 penalty points (1 pt in Season 4 [Leo at Spa]; 1 pt in Season 5 [Leo at Miami GP])
+        - McLaren: 2 penalty points (All in Season 4: Nick 1 pt, Travis 1 pt)
+        - Mercedes: 2 penalty points (All in Season 4: Jaden 2 pts)
+        - Red Bull: 1 penalty point (All in Season 5: Joshua 1 pt at Monza)
+        - Williams, Cadillac, Haas, Audi, VCARB, Aston Martin, Alfa Romeo, AlphaTauri: 0 penalty points.
+    - SEASONS 1, 2, AND 3:
+      * Exactly 0 Super License penalty points were assessed in Seasons 1, 2, and 3 for any driver or constructor.
+    - ACTIVE SEASON (SEASON 5):
+      * Drivers with points: Joshua (1 pt at Monza), Leo (1 pt at Miami GP). All other drivers have 0 points.
+      * Constructors with points: Red Bull (1 pt from Joshua at Monza), Ferrari (1 pt from Leo at Miami GP). All other constructors have 0 points.
+
+ACCOLADES DATABASE (FASTEST LAPS, DRIVER OF THE DAY, MOST OVERTAKES, CLEANEST DRIVER):
+27. When asked about accolades (Fastest Laps, Driver of the Day, Most Overtakes, Cleanest Driver) for drivers or constructors (career totals, season totals, or per-race breakdown):
+    - Ground all answers strictly in the "OFFICIAL LEAGUE ACCOLADES DATABASE" provided in the League Grounded Context.
+    - NEVER claim that individual round-by-round accolade statistics or driver multi-season tallies are absent from the records.
+    - ACCOLADE SCORING CONTEXT:
+      * Fastest Lap (FL): 1 championship point (all seasons).
+      * Driver of the Day (DOTD): 1 championship point (inaugurated in Season 4).
+      * Most Overtakes (MOT): 1 championship point (inaugurated in Season 4).
+      * Cleanest Driver (CD): 1 championship point (inaugurated in Season 4).
+      * Sprint races do NOT award accolade bonus points.
+    - HISTORICAL ERA TIMELINE:
+      * Seasons 1, 2, and 3 officially tracked Fastest Laps only (FL).
+      * Driver of the Day (DOTD), Most Overtakes (MOT), and Cleanest Driver (CD) were inaugurated in Season 4 and are tracked for all races in Season 4 and Season 5.
+    - CONSTRUCTOR ACCOLADES:
+      * Constructors inherit the accolades earned by their active drivers in each race and season.
 """
 
 
