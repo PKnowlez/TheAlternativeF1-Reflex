@@ -255,6 +255,10 @@ def warm_up_caches():
         from the_alternative_f1.seasons import seasons
         from the_alternative_f1.seasons.Calculations import Calculations
         from the_alternative_f1.all_time_stats.DetailedAllTime import get_entity_lists, compute_entity_detailed_metrics
+        from the_alternative_f1.all_time_stats.Functions import get_all_time_highest_positions, CalculateAllTime, PointTotals
+        from the_alternative_f1.all_time_stats.MapAllTime import precompute_all_map_data
+        from the_alternative_f1.all_time_stats.SummaryAllTime import precompute_summary_data
+        from the_alternative_f1.all_time_stats.TeammateNetwork import build_teammate_network_data
 
         for s in seasons:
             Calculations(s, sprint_only=False)
@@ -270,6 +274,14 @@ def warm_up_caches():
         precompute_all_season_projections()
         precompute_all_predictions()
         precompute_leaderboard_cache(force=True)
+        get_all_time_highest_positions(num_seasons=len(seasons))
+        precompute_all_map_data()
+        precompute_summary_data(num_seasons=len(seasons))
+        build_teammate_network_data()
+        CalculateAllTime(len(seasons), "Driver")
+        CalculateAllTime(len(seasons), "Team")
+        for s_idx in range(1, len(seasons) + 1):
+            PointTotals(s_idx)
     except Exception:
         pass
 
