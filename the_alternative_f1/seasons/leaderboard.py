@@ -341,20 +341,47 @@ class LeaderboardState(rx.State):
 
         from the_alternative_f1.seasons.projections import compute_season_projections
         proj = compute_season_projections(5)
-        next_race_name = proj.get("next_main_race", proj.get("next_race", "Australia"))
-        current_race = next_race_name if next_race_name else "Australia"
+        next_race_name = proj.get("next_main_race", proj.get("next_race", "Spa"))
+        current_race = next_race_name if next_race_name else "Spa"
 
-        data = []
-        # Preseason / Starting point: 100 base pts for each user
-        base_pt = {"race": "Preseason"}
-        for r in rows:
-            base_pt[r["user"]] = 100
-        data.append(base_pt)
+        all_preds = get_all_predictions(5)
+        users = [r["user"] for r in rows]
 
-        # Plot active remaining points at the upcoming race
+        # 1. Start milestone (0 points)
+        start_pt = {"race": "Start"}
+        for u in users:
+            start_pt[u] = 0
+
+        # 2. Preseason milestone (100 free base points)
+        preseason_pt = {"race": "Preseason"}
+        user_running = {}
+        for u in users:
+            preseason_pt[u] = 100
+            user_running[u] = 100
+
+        data = [start_pt, preseason_pt]
+
+        # 3. Completed races in chronological order
+        completed_races = ["Australia", "Imola", "Miami", "Monza"]
+        for cr in completed_races:
+            race_pt = {"race": cr}
+            for u in users:
+                # Add any settled payouts won at this race
+                payouts = sum(
+                    int(p.get("payout", 0))
+                    for p in all_preds
+                    if normalize_username(str(p.get("username", ""))) == u
+                    and str(p.get("race", "")).strip().lower() == cr.lower()
+                    and str(p.get("status", "")).lower() == "correct"
+                )
+                user_running[u] += payouts
+                race_pt[u] = user_running[u]
+            data.append(race_pt)
+
+        # 4. Upcoming round (e.g. Spa) reflecting active remaining points balance
         end_pt = {"race": current_race}
         for r in rows:
-            end_pt[r["user"]] = r.get("all_time_pts", 100)
+            end_pt[r["user"]] = r.get("all_time_pts", user_running.get(r["user"], 100))
         data.append(end_pt)
 
         return data

@@ -40,5 +40,26 @@
     "season_points": {
       "5": 302
     }
+  },
+  "Prison Mike": {
+    "points": 100,
+    "all_time_points": 100,
+    "season_points": {
+      "5": 100
+    }
+  },
+  "*": {
+    "points": 100,
+    "all_time_points": 100,
+    "season_points": {
+      "5": 100
+    }
+  },
+  "Infms Mantis": {
+    "points": 100,
+    "all_time_points": 100,
+    "season_points": {
+      "5": 100
+    }
   }
 }

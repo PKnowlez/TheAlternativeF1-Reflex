@@ -180,10 +180,17 @@ _HIGHEST_POSITIONS_CACHE = {}
 
 def get_all_time_highest_positions(num_seasons: int = 5, force_refresh: bool = False) -> dict:
     """Retrieve all-time highest positions for constructors and drivers (TAF1APP-SDDREQ-224, 225, 226).
-    Loads from persistent precomputed JSON storage (zero-lag builds).
-    If recalculating, entities not active in the current season sheet are preserved without recalculation.
+    Constructors calculate directly from the All Time Constructor Standings table.
+    Drivers evaluate true cumulative standings rank across race milestones.
+    Automatically reloads whenever the underlying Excel file is updated.
     """
-    global _HIGHEST_POSITIONS_CACHE
+    global _HIGHEST_POSITIONS_CACHE, _excel_mtime
+    excel_path = Path(file)
+    current_mtime = excel_path.stat().st_mtime if excel_path.exists() else 0
+    if _excel_mtime != current_mtime:
+        _HIGHEST_POSITIONS_CACHE = None
+        force_refresh = True
+
     if _HIGHEST_POSITIONS_CACHE and not force_refresh:
         return _HIGHEST_POSITIONS_CACHE
 
@@ -197,11 +204,58 @@ def get_all_time_highest_positions(num_seasons: int = 5, force_refresh: bool = F
         except Exception:
             pass
 
-    # Dynamic calculation with optimization: preserve historical records for inactive entities
-    from the_alternative_f1.all_time_stats.SummaryAllTime import precompute_summary_data
-    ds = precompute_summary_data(num_seasons)
-    team_line = ds.get("team_line_data", [])
-    driver_line = ds.get("driver_line_data", [])
+    # Dynamic calculation: Evaluate true All-Time Standings table rank after each race milestone over time
+    from the_alternative_f1.all_time_stats.SummaryAllTime import _format_race_name
+    from collections import defaultdict
+
+    all_races = []
+    season_dfs = {}
+    for s in range(1, num_seasons + 1):
+        df_s = get_excel_sheet(f"Season{s}")
+        if df_s.empty:
+            continue
+        df_s["Driver"] = df_s["Driver"].astype(str).str.strip()
+        df_s["Team"] = df_s["Team"].astype(str).str.strip()
+        season_dfs[s] = df_s
+        sched = get_excel_sheet(f"S{s}Schedule")
+        if not sched.empty:
+            for r in sched["Race"]:
+                r_str = str(r).strip()
+                if r_str.lower().startswith(("pre", "post")) or not r_str:
+                    continue
+                p_col = f"{r_str}Points"
+                pl_col = f"{r_str}Place"
+                has_occurred = False
+                if p_col in df_s.columns:
+                    pts_sum = pd.to_numeric(df_s[p_col], errors="coerce").fillna(0).sum()
+                    if pts_sum > 0:
+                        has_occurred = True
+                if not has_occurred and pl_col in df_s.columns:
+                    valid_places = df_s[pl_col].dropna().astype(str).str.strip()
+                    valid_places = valid_places[~valid_places.isin(["", "nan", "None", "—", "-", "0"])]
+                    if len(valid_places) > 0:
+                        has_occurred = True
+                if not has_occurred:
+                    continue
+                label = f"S{s} {_format_race_name(r_str)}"
+                all_races.append((s, r_str, label))
+
+    constructor_debut = {}
+    driver_debut = {}
+    for race_idx, (s, r_str, label) in enumerate(all_races):
+        df_s = season_dfs.get(s)
+        p_col = f"{r_str}Points"
+        pl_col = f"{r_str}Place"
+        if df_s is not None and not df_s.empty:
+            for _, row in df_s.iterrows():
+                drv = str(row.get("Driver", "")).strip()
+                tm = str(row.get("Team", "")).strip()
+                if drv and drv.lower() not in ("nan", "none", "—", ""):
+                    if (p_col in df_s.columns or pl_col in df_s.columns) and drv not in driver_debut:
+                        driver_debut[drv] = race_idx
+                if tm and tm.lower() not in ("nan", "none", "—", ""):
+                    if (p_col in df_s.columns or pl_col in df_s.columns) and tm not in constructor_debut:
+                        constructor_debut[tm] = race_idx
 
     def format_pos(rank, race_label):
         if rank == 1:
@@ -214,53 +268,44 @@ def get_all_time_highest_positions(num_seasons: int = 5, force_refresh: bool = F
             suffix = "th" if 11 <= (rank % 100) <= 13 else {1: "st", 2: "nd", 3: "rd"}.get(rank % 10, "th")
             return f"{rank}{suffix} - {race_label}"
 
-    def compute_highest(line_data):
-        highest = {}
-        for entry in line_data:
-            race = entry.get("race", "")
-            pts_map = {k: v for k, v in entry.items() if k != "race" and v is not None}
-            sorted_entities = sorted(pts_map.items(), key=lambda item: item[1], reverse=True)
-            for i, (entity, pts) in enumerate(sorted_entities):
-                rank = i + 1
-                if entity not in highest or rank < highest[entity]["rank"]:
-                    highest[entity] = {
-                        "rank": rank,
-                        "race": race,
-                        "display": format_pos(rank, race)
-                    }
-        return highest
+    running_team_pts = defaultdict(float)
+    running_driver_pts = defaultdict(float)
+    constructor_best = {}
+    driver_best = {}
 
-    # Check active entities in current season
-    current_season_df = get_excel_sheet(f"Season{num_seasons}")
-    active_drivers = set()
-    active_teams = set()
-    if not current_season_df.empty:
-        if "Driver" in current_season_df.columns:
-            active_drivers = set(current_season_df["Driver"].dropna().astype(str).str.strip().unique())
-        if "Team" in current_season_df.columns:
-            active_teams = set(current_season_df["Team"].dropna().astype(str).str.strip().unique())
+    for race_idx, (s, r_str, label) in enumerate(all_races):
+        df_s = season_dfs.get(s)
+        p_col = f"{r_str}Points"
+        if df_s is not None and not df_s.empty and p_col in df_s.columns:
+            for _, row in df_s.iterrows():
+                drv = str(row.get("Driver", "")).strip()
+                tm = str(row.get("Team", "")).strip()
+                try:
+                    val = float(row[p_col]) if row[p_col] is not None and not pd.isna(row[p_col]) else 0.0
+                except Exception:
+                    val = 0.0
+                if val > 0:
+                    if drv and drv.lower() not in ("nan", "none", "—", ""):
+                        running_driver_pts[drv] += val
+                    if tm and tm.lower() not in ("nan", "none", "—", ""):
+                        running_team_pts[tm] += val
 
-    # Load existing stored data if present
-    existing_data = {"constructors": {}, "drivers": {}}
-    if json_file.exists():
-        try:
-            with open(json_file, "r", encoding="utf-8") as f:
-                existing_data = json.load(f)
-        except Exception:
-            pass
+        # Evaluate Standings at this race for all debuted constructors (retaining all debuted entities permanently)
+        standings_c = {c: running_team_pts[c] for c, deb in constructor_debut.items() if deb <= race_idx}
+        sorted_c = sorted(standings_c.items(), key=lambda x: x[1], reverse=True)
+        for r_idx, (c, pts) in enumerate(sorted_c, 1):
+            if c not in constructor_best or r_idx < constructor_best[c]["rank"]:
+                constructor_best[c] = {"rank": r_idx, "race": label, "display": format_pos(r_idx, label)}
 
-    team_h = compute_highest(team_line)
-    driver_h = compute_highest(driver_line)
+        # Evaluate Standings at this race for all debuted drivers (retaining all debuted entities permanently)
+        standings_d = {d: running_driver_pts[d] for d, deb in driver_debut.items() if deb <= race_idx}
+        sorted_d = sorted(standings_d.items(), key=lambda x: x[1], reverse=True)
+        for r_idx, (d, pts) in enumerate(sorted_d, 1):
+            if d not in driver_best or r_idx < driver_best[d]["rank"]:
+                driver_best[d] = {"rank": r_idx, "race": label, "display": format_pos(r_idx, label)}
 
-    constructors_dict = existing_data.get("constructors", {})
-    for k, v in team_h.items():
-        if k in active_teams or k not in constructors_dict:
-            constructors_dict[k] = v["display"]
-
-    drivers_dict = existing_data.get("drivers", {})
-    for k, v in driver_h.items():
-        if k in active_drivers or k not in drivers_dict:
-            drivers_dict[k] = v["display"]
+    constructors_dict = {c: info["display"] for c, info in constructor_best.items()}
+    drivers_dict = {d: info["display"] for d, info in driver_best.items()}
 
     data = {
         "constructors": constructors_dict,

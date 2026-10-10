@@ -705,7 +705,7 @@ class DetailedStatsState(rx.State):
 
         # Requirement 75 & 226: Simple Statistics Bubbles
         highest_pos_dict = get_all_time_highest_positions(num_seasons)
-        pos_map = highest_pos_dict.get("constructors", {}) if entity_type == "Team" else highest_pos_dict.get("drivers", {})
+        pos_map = highest_pos_dict.get("constructors", {}) if entity_type in ("Constructor", "Team") else highest_pos_dict.get("drivers", {})
         highest_pos_str = pos_map.get(active_name, "—")
 
         badges = [
@@ -723,7 +723,7 @@ class DetailedStatsState(rx.State):
             f"Most Overtakes: {mot_count}",
             f"Cleanest Driver: {cd_count}",
             f"Best: {best_pts_str}",
-            f"Highest Position: {highest_pos_str}",
+            f"All-Time Highest Standing: {highest_pos_str}",
         ]
 
         all_pos_change_data = compute_all_time_avg_pos_change(num_seasons, entity_type, active_name)

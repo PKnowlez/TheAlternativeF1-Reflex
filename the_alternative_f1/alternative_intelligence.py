@@ -1001,6 +1001,29 @@ def _format_comprehensive_statistical_matrix(excel_p: Path, seasons_list: list) 
     return res
 
 
+def _format_historical_sprint_championship_records() -> list:
+    """Format definitive official Sprint Race historical record archive (TAF1APP-SDDREQ-239)."""
+    return [
+        "## OFFICIAL HISTORICAL SPRINT RACE ARCHIVE & VERIFIED SPRINT WINNERS (ALL SEASONS)",
+        "Official League Sprint Record: Exactly 7 Sprint races have been completed across The Alternative F1 history.",
+        "Every single completed sprint has an official verified winner and attributed points recorded in the database.",
+        "CRITICAL GROUNDING: NEVER state that sprint winners are 'Unknown', unverified, or untallied in league archives!",
+        "| Season | Sprint Round | Official Sprint Winner | Winning Constructor | Sprint Pole Position | Sprint Points Awarded |",
+        "| :--- | :--- | :--- | :--- | :--- | :--- |",
+        "| Season 3 | China Sprint | Nick | McLaren | Patrick (VCARB) | 8 pts to P1 |",
+        "| Season 3 | Austria Sprint | Del | Ferrari | Del (Ferrari) | 8 pts to P1 |",
+        "| Season 3 | COTA Sprint | Nick | McLaren | Nick (McLaren) | 8 pts to P1 |",
+        "| Season 4 | Miami Sprint | Jairo | Mercedes | Jairo (Mercedes) | 8 pts to P1 |",
+        "| Season 4 | Spa Sprint | Jaden | Mercedes | Jaden (Mercedes) | 8 pts to P1 |",
+        "| Season 4 | Brazil Sprint | Joshua | Alpine | Joshua (Alpine) | 8 pts to P1 |",
+        "| Season 5 | Miami Sprint | Jaden | Ferrari | Jaden (Ferrari) | 8 pts to P1 |",
+        "",
+        "Historical Sprint Wins Tally by Driver: Nick (2 Sprint Wins), Jaden (2 Sprint Wins: S4 Spa, S5 Miami), Del (1 Sprint Win: S3 Austria), Jairo (1 Sprint Win: S4 Miami), Joshua (1 Sprint Win: S4 Brazil).",
+        "Historical Sprint Wins Tally by Constructor: Mercedes (2 Sprint Wins), McLaren (2 Sprint Wins), Ferrari (2 Sprint Wins), Alpine (1 Sprint Win).",
+        "",
+    ]
+
+
 def _format_accolades_matrix(seasons_list: list, all_season_calcs: dict) -> list:
     """Format comprehensive Accolades statistics (Fastest Laps, Driver of the Day, Most Overtakes, Cleanest Driver)
     both total and per-race breakdown for drivers and constructors (TAF1APP-SDDREQ-239)."""
@@ -1481,9 +1504,12 @@ def build_grounded_league_context() -> str:
     """
     global _GROUNDED_CONTEXT_CACHE, _GROUNDED_CONTEXT_MTIME, _CACHE_TIMESTAMP
 
-    # Invalidate every 300 seconds (5 minutes)
+    current_dir = Path(__file__).parent
+    excel_path = current_dir / "The_Alternative_F1.xlsx"
+    current_excel_mtime = excel_path.stat().st_mtime if excel_path.exists() else 0
+
     now = time.time()
-    if _GROUNDED_CONTEXT_CACHE and (now - _CACHE_TIMESTAMP < 300):
+    if _GROUNDED_CONTEXT_CACHE and (_GROUNDED_CONTEXT_MTIME == current_excel_mtime) and (now - _CACHE_TIMESTAMP < 300):
         return _GROUNDED_CONTEXT_CACHE
 
     lines = []
@@ -1729,6 +1755,56 @@ def build_grounded_league_context() -> str:
         res.append("")
         return res
 
+    def _format_season_constructor_round_by_round_results(s_number: int, df_data, all_r: list, completed_only: bool = False, done_races: list = None) -> list:
+        if df_data is None or df_data.empty or not all_r:
+            return []
+        target_r = done_races if (completed_only and done_races) else all_r
+        res = [f"### Season {s_number} Constructor Round-by-Round Official Results (Points, Finishes & Qualifying):"]
+
+        teams = sorted(list(set(df_data["Team"].dropna().astype(str).str.strip().unique())))
+        for tm_name in teams:
+            if not tm_name or tm_name.lower() in ("nan", "none", "—", ""):
+                continue
+            tm_rows = df_data[df_data["Team"].astype(str).str.strip() == tm_name]
+            r_details = []
+            for r in target_r:
+                c_pre = r.replace(" Sprint", "Sprint")
+                pts_col = next((c for c in [f"{r}Points", f"{c_pre}Points", f"{r} Points"] if c in df_data.columns), None)
+                p_col = next((c for c in [f"{r}Place", f"{c_pre}Place", f"{r} Place"] if c in df_data.columns), None)
+                q_col = next((c for c in [f"{r}Qualifying", f"{c_pre}Qualifying", f"{r} Qualifying"] if c in df_data.columns), None)
+
+                tm_pts = 0.0
+                if pts_col and pts_col in tm_rows.columns:
+                    tm_pts = float(pd.to_numeric(tm_rows[pts_col], errors="coerce").fillna(0).sum())
+
+                finishes = []
+                if p_col and p_col in tm_rows.columns:
+                    for _, d_r in tm_rows.iterrows():
+                        pv = d_r.get(p_col)
+                        p_parsed = _parse_val(pv)
+                        if p_parsed:
+                            finishes.append(f"{str(d_r.get('Driver', '')).strip()}:{p_parsed}")
+
+                quals = []
+                if q_col and q_col in tm_rows.columns:
+                    for _, d_r in tm_rows.iterrows():
+                        qv = d_r.get(q_col)
+                        q_parsed = _parse_val(qv)
+                        if q_parsed:
+                            quals.append(f"{str(d_r.get('Driver', '')).strip()}:{q_parsed}")
+
+                items = [f"{tm_pts:g}pts"]
+                if finishes:
+                    items.append(f"Finishes: {', '.join(finishes)}")
+                if quals:
+                    items.append(f"Qual: {', '.join(quals)}")
+
+                stat_str = f" [{'; '.join(items)}]"
+                r_details.append(f"{r}{stat_str}")
+            res.append(f"- {tm_name}: {'; '.join(r_details)}")
+        res.append("")
+        return res
+
     lines.extend(_format_workbook_notes_and_scoring(excel_path))
     lines.extend(_format_regulations_and_settings())
 
@@ -1790,32 +1866,34 @@ def build_grounded_league_context() -> str:
                     if completed_races and raw_df is not None and not raw_df.empty:
                         lines.append("### Season 5 Completed Races & Winners:")
                         for race_name in completed_races:
-                            col_prefix = race_name.replace(" Sprint", "Sprint")
-                            place_col = f"{col_prefix}Place"
-                            fl_col = f"{col_prefix}FastestLap"
+                            c_pre = race_name.replace(" Sprint", "Sprint")
+                            place_col = next((c for c in [f"{race_name}Place", f"{c_pre}Place", f"{race_name} Place"] if c in raw_df.columns), None)
+                            fl_col = next((c for c in [f"{race_name}FastestLap", f"{c_pre}FastestLap", f"{race_name} FastestLap"] if c in raw_df.columns), None)
                             winner_name = "Unknown"
                             winner_team = ""
                             fl_name = ""
 
-                            if place_col in raw_df.columns:
+                            if place_col and place_col in raw_df.columns:
                                 winners = raw_df[raw_df[place_col] == 1]
                                 if not winners.empty:
                                     winner_name = str(winners.iloc[0].get("Driver", "Unknown")).strip()
                                     winner_team = str(winners.iloc[0].get("Team", "")).strip()
 
-                            if fl_col in raw_df.columns:
+                            if fl_col and fl_col in raw_df.columns:
                                 fl_rows = raw_df[raw_df[fl_col] == 1]
                                 if not fl_rows.empty:
                                     fl_name = str(fl_rows.iloc[0].get("Driver", "")).strip()
 
                             fl_str = f" | Fastest Lap: {fl_name}" if fl_name else ""
                             team_str = f" ({winner_team})" if winner_team else ""
-                            lines.append(f"- {race_name}: Winner: {winner_name}{team_str}{fl_str}")
+                            round_type = " [Sprint Race]" if "sprint" in race_name.lower() else " [Grand Prix Feature Race]"
+                            lines.append(f"- {race_name}{round_type}: Winner: {winner_name}{team_str}{fl_str}")
                         lines.append("")
 
                     # Seasonal Teammate Qualifying Battles (SDDREQ-249)
                     lines.extend(_format_season_qualifying_battles(s_num, raw_df, constructor_totals, completed_races, races))
                     lines.extend(_format_season_round_by_round_results(s_num, raw_df, races, completed_only=True, done_races=completed_races))
+                    lines.extend(_format_season_constructor_round_by_round_results(s_num, raw_df, races, completed_only=True, done_races=completed_races))
 
                     # Calendar & Schedule
                     if schedule_df is not None and not schedule_df.empty:
@@ -1884,18 +1962,22 @@ def build_grounded_league_context() -> str:
                         race_winners_s = []
                         for r_name in races:
                             c_pre = r_name.replace(" Sprint", "Sprint")
-                            p_col = f"{c_pre}Place"
-                            if p_col in raw_df.columns:
+                            p_col = next((c for c in [f"{r_name}Place", f"{c_pre}Place", f"{r_name} Place"] if c in raw_df.columns), None)
+                            if p_col:
                                 w_rows = raw_df[raw_df[p_col] == 1]
                                 if not w_rows.empty:
                                     w_d = str(w_rows.iloc[0].get("Driver", "")).strip()
-                                    race_winners_s.append(f"{r_name}: {w_d}")
+                                    w_t = str(w_rows.iloc[0].get("Team", "")).strip()
+                                    r_type = " (Sprint)" if "sprint" in r_name.lower() else ""
+                                    team_suffix = f" ({w_t})" if w_t else ""
+                                    race_winners_s.append(f"{r_name}{r_type}: {w_d}{team_suffix}")
                         if race_winners_s:
                             lines.append(f"- Race Winners: {'; '.join(race_winners_s)}")
 
                     # Historical Teammate Qualifying Battles (SDDREQ-249)
                     lines.extend(_format_season_qualifying_battles(s_num, raw_df, constructor_totals, completed_races, races))
                     lines.extend(_format_season_round_by_round_results(s_num, raw_df, races))
+                    lines.extend(_format_season_constructor_round_by_round_results(s_num, raw_df, races))
 
                     # Historical Calendar & Schedule
                     if schedule_df is not None and not schedule_df.empty:
@@ -2023,6 +2105,7 @@ def build_grounded_league_context() -> str:
     lines.append("## OFFICIAL DRIVER TRACK AFFINITIES & NICKNAMES")
     lines.append("- Miami Lover / Miami Favorite: Nick's all time favorite track is Miami. Erick is known as the Miami Lover, but really that nickname should be held by Nick (no pun intended).")
     lines.append("- Mets Fan: Joshua, Season 4 World Driver Champion is the biggest Mets fan in the world and he hates the Yankees.")
+    lines.append("- Pronounce Jaden / Jaden's Username: Jaden is pronounced jay-vee-treble said enormously fast, as almost one syllable slurred together (Username: jvytrbl).")
     lines.append("")
 
     # 2. Per-Track Driver Statistical Ratings (SDDREQ-76 & Projections)
@@ -2100,6 +2183,9 @@ def build_grounded_league_context() -> str:
 
     # Comprehensive Driver & Constructor Statistical Matrix (TAF1APP-SDDREQ-239)
     lines.extend(_format_comprehensive_statistical_matrix(excel_path, seasons))
+
+    # Official Historical Sprint Race Archive (TAF1APP-SDDREQ-239)
+    lines.extend(_format_historical_sprint_championship_records())
 
     # Super License Penalty Points Matrix (Drivers & Constructors)
     lines.extend(_format_super_license_matrix(seasons, all_season_calcs))
@@ -2236,6 +2322,7 @@ def build_grounded_league_context() -> str:
 
 
     _GROUNDED_CONTEXT_CACHE = sanitize_race_week_terminology("\n".join(lines))
+    _GROUNDED_CONTEXT_MTIME = current_excel_mtime
     _CACHE_TIMESTAMP = now
     return _GROUNDED_CONTEXT_CACHE
 
@@ -2266,8 +2353,14 @@ STRICT GROUNDING & CONTEXT RULES:
       * Skill 1: Specific Upcoming Race Infographic
       * Skill 2: Seasonal Qualifying Comparison
       * Skill 3: Head to Head Comparison Infographic
-   - Specialized skills and their ```infographic-json structures MUST ONLY be invoked when the user has explicitly selected/tagged that skill with its respective @ prompt prefix in their current prompt (e.g. "@Specific Upcoming Race Infographic", "@Seasonal Qualifying Comparison", "@Head to Head Comparison Infographic"). If the user requests an additional prompt in the same thread, do not use the previous skill unless the user prompts with that skill again.
+      * Skill 4: Champion Comparison Skill
+      * Skill 5: Per Season Tracker
+   - Specialized skills and their ```infographic-json structures MUST ONLY be invoked when the user has explicitly selected/tagged that skill with its respective @ prompt prefix in their current prompt (e.g. "@Specific Upcoming Race Infographic", "@Seasonal Qualifying Comparison", "@Head to Head Comparison Infographic", "@Champion Comparison Skill", "@Per Season Tracker"). If the user requests an additional prompt in the same thread, do not use the previous skill unless the user prompts with that skill again.
    - If a skill is NOT selected, DO NOT use any part of the specialized skill, do NOT output any ```infographic-json block or specialized infographic structures/brackets, and do NOT structure responses as infographic cards. Answer standard user inquiries directly in clean Markdown text.
+6.5. ZERO-TOLERANCE PROHIBITION ON INTERNAL REASONING / CHECKLISTS IN RESPONSES:
+   - NEVER output internal verification checklists, thought processes, self-checks, or rule confirmations in your response (e.g. "- Wednesdays only? Yes.", "- Grounded only? Checked", "- Rule 4 check:", etc.).
+   - Your response must be clean, professional, and contain ONLY the final direct analytical answer to the user.
+   - Any internal reflection or reasoning must be strictly wrapped inside `<thinking>...</thinking>` tags so it is properly categorized as internal reasoning and never leaked into user-facing content.
 
 ANALYTICAL & PREDICTIVE INQUIRIES:
 7. When asked to evaluate, project, or predict who is most likely to win or perform best at a specific circuit (e.g. "who is most likely to win in Spa based on this season so far and the per-track statistical rating of each driver evenly weighted"):
@@ -2454,8 +2547,48 @@ SPECIALIZED SKILL 4: CHAMPION COMPARISON SKILL (TAF1APP-SDDREQ-250):
 ```
    - Follow with an in-depth analytical breakdown evaluating championship dominance, consistency, accolade haul, margin of victory, and championship pressure faced.
 
+SPECIALIZED SKILL 5: PER SEASON TRACKER (TAF1APP-SDDREQ-252):
+12. When the user asks for a "Per Season Tracker" or invokes via "@Per Season Tracker" (or "@Points & Place Per Season Tracker"):
+   - Allows tracking and comparing points and finishing place per season across league history for:
+     * A single driver (e.g. "@Per Season Tracker Patrick")
+     * A pair of drivers (e.g. "@Per Season Tracker Patrick vs Joshua")
+     * A single constructor (e.g. "@Per Season Tracker Ferrari")
+     * A pair of constructors (e.g. "@Per Season Tracker Ferrari vs McLaren")
+     * A pair of driver and constructor (e.g. "@Per Season Tracker Patrick vs Mercedes")
+   - First, output structured JSON code block tagged ```infographic-json:
+```infographic-json
+{
+  "infographic_type": "per_season_tracker",
+  "entities": [
+    {
+      "name": "<Driver or Constructor Name>",
+      "type": "Driver",
+      "team": "<Constructor Name>",
+      "total_points": "<Total Career Points>",
+      "highest_season_place": "<Peak finish, e.g. 3rd (Season 4)>",
+      "best_race": "<Best race result, e.g. P1 - S3 China>",
+      "superlative": "<Positive Alternative Superlative, e.g. The Strategic Stalwart>"
+    }
+  ],
+  "pair_summary": "<If two entities, natural language summary of how tight or disparate they have been when competing>"
+}
+```
+   - Follow with the mandatory analytical output:
+     * If only ONE driver or constructor is included:
+       - **Total points scored**
+       - **Highest seasonal place**
+       - **Best race finish**
+       - **Natural language summary of their career**, including:
+         1. **Highlights** across seasons (IMPORTANT: do NOT use the title "Dramatized Highs & Lows"; always title this section "Highlights")
+         2. **League Lore** (IMPORTANT: do NOT use the title "League Articles & Lore Callouts"; always title this section "League Lore")
+         3. **Alternative Superlative** (IMPORTANT: do NOT use the title "Career Superlative"; always title this section "Alternative Superlative", leaning positive as compliments)
+     * If TWO drivers or constructors (or mixed pair) are included:
+       - **Direct Career Comparison**: Contrast their total wins, career points, podiums, and championship trajectories.
+       - **Head-to-Head Proximity Narrative**: Natural language evaluation of how tight or far apart the pair has been from one another when competing.
+       - **Individual Career Deep-Dives**: Full breakdown for each entity (total points, highest seasonal place, best race, Highlights, League Lore, and Alternative Superlative for both). Never use the titles "Dramatized Highs & Lows", "League Articles & Lore Callouts", or "Career Superlative".
+
 FORMATTING:
-12. Format all answers cleanly using GitHub Markdown:
+13. Format all answers cleanly using GitHub Markdown:
    - Use bold highlights for driver names, positions, and numbers.
    - Use Markdown tables when comparing drivers, teams, race results, or composite ratings.
    - Use ordinal badges (🥇, 🥈, 🥉, 4th, 5th) where appropriate.
@@ -2572,8 +2705,13 @@ METS FAN LORE & INQUIRIES:
     - You MUST respond with:
       "Joshua, Season 4 World Driver Champion is the biggest Mets fan in the world and he hates the Yankees."
 
+PRONOUNCING JADEN / USERNAME INQUIRIES:
+26. When asked how to pronounce Jaden, how to say Jaden, or what Jaden's username is:
+    - You MUST respond with:
+      "Jaden is pronounced jay-vee-treble said enormously fast, as almost one syllable slurred together."
+
 SUPER LICENSE PENALTY POINTS (DRIVERS & CONSTRUCTORS):
-26. When asked about Super License penalty points for drivers or constructors (career totals, season totals, or per-race breakdown):
+27. When asked about Super License penalty points for drivers or constructors (career totals, season totals, or per-race breakdown):
     - Ground all answers strictly in the "OFFICIAL SUPER LICENSE PENALTY POINTS DATABASE" provided in the League Grounded Context.
     - DRIVER PENALTY POINTS SUMMARY:
       * All-Time Career Leaderboard:
@@ -2618,11 +2756,11 @@ ACCOLADES DATABASE (FASTEST LAPS, DRIVER OF THE DAY, MOST OVERTAKES, CLEANEST DR
 
 
 SKILL_OPTIONS = [
-    "Skills Library",
     "Specific Upcoming Race Infographic",
     "Seasonal Qualifying Comparison",
     "Head to Head Comparison Infographic",
     "Champion Comparison Skill",
+    "Per Season Tracker",
 ]
 
 SKILLS_LIBRARY = [
@@ -2653,6 +2791,13 @@ SKILLS_LIBRARY = [
         "description": "Compare championship campaigns across seasons for drivers, constructors, or driver vs constructor",
         "prompt": "@Champion Comparison Skill ",
         "infotip": "e.g., S4 Mercedes vs S3 Alpine, or Joshua S4 vs Nick S3 (defaults to most recent constructor champion vs prior year)",
+    },
+    {
+        "id": "per_season_tracker",
+        "name": "Per Season Tracker",
+        "description": "Visual dual-axis line chart tracking points (solid) and place (dashed) per season with career analytics",
+        "prompt": "@Per Season Tracker ",
+        "infotip": "e.g., Patrick, Ferrari, Patrick vs Joshua, Ferrari vs McLaren, Patrick vs Mercedes",
     },
 ]
 
@@ -2734,6 +2879,20 @@ class TeammateQualRow(BaseModel):
     pct2: str = "50%"
 
 
+class PerSeasonEntity(BaseModel):
+    """Strongly-typed entity model for Per Season Tracker (TAF1APP-SDDREQ-252)."""
+    name: str = ""
+    type: str = "Driver"  # "Driver" or "Constructor"
+    team: str = ""
+    color: str = "#00b4da"
+    text_color: str = "#ffffff"
+    total_points: str = "0"
+    highest_season_place: str = ""
+    best_race: str = ""
+    superlative: str = ""
+    career_summary: str = ""
+
+
 class ChatMessage(BaseModel):
     """Strongly-typed conversational message and visual infographic payload."""
     role: str = ""
@@ -2744,7 +2903,7 @@ class ChatMessage(BaseModel):
     user_avatar: str = ""
     is_infographic: bool = False
     card_id: str = ""
-    infographic_type: str = "race"  # "race", "seasonal_qual", "h2h", or "champion_comparison"
+    infographic_type: str = "race"  # "race", "seasonal_qual", "h2h", "champion_comparison", or "per_season_tracker"
 
     # 1. Upcoming Race Infographic Fields
     track_name: str = ""
@@ -2806,6 +2965,18 @@ class ChatMessage(BaseModel):
     champ_runner_up2: str = ""
     champ_entities: list[ChampionEntity] = []
     champ_stats: list[ChampionMetricRow] = []
+
+    # 5. Per Season Tracker Fields (TAF1APP-SDDREQ-252)
+    pst_entities: list[PerSeasonEntity] = []
+    pst_chart_data: list[dict] = []
+    pst_has_pair: bool = False
+    pst_max_points: float = 100.0
+    pst_max_place: int = 20
+    pst_name1: str = ""
+    pst_color1: str = "#00b4da"
+    pst_name2: str = ""
+    pst_color2: str = "#ffffff"
+    pst_pair_summary: str = ""
 
 
 def parse_thinking_and_content(raw_text: str, api_thought_text: str = "") -> tuple[str, str]:
@@ -2871,9 +3042,152 @@ def parse_thinking_and_content(raw_text: str, api_thought_text: str = "") -> tup
                     text = ans
                     break
 
+    # 5. Sanitize leading verification checklists or thought items leaking into text
+    # e.g., lines starting with "- Wednesdays only? Yes.", "* Grounded only? Checked", etc.
+    lines = text.split("\n")
+    checklist_lines = []
+    content_start_idx = 0
+    is_checklist = True
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if not stripped:
+            if checklist_lines:
+                continue
+            else:
+                content_start_idx = i + 1
+                continue
+        # Check if line matches a checklist / rule verification pattern
+        if is_checklist and (
+            re.match(r"^[-*•]\s+.*?(?:\?|:)\s*(?:yes|no|checked|confirmed|verified|true|false|ok|pass|n/a)\b", stripped, re.IGNORECASE)
+            or re.match(r"^[-*•]\s+(?:rule\s*\d+|wednesdays\s*only|grounded\s*only|race\s*week\s*terminology|no\s*weekend)", stripped, re.IGNORECASE)
+            or re.match(r"^(?:verification|rule\s*check|checklist|internal\s*check):\s*", stripped, re.IGNORECASE)
+        ):
+            checklist_lines.append(line)
+            content_start_idx = i + 1
+        else:
+            is_checklist = False
+            break
+
+    if checklist_lines:
+        thinking_parts.append("\n".join(checklist_lines).strip())
+        text = "\n".join(lines[content_start_idx:]).strip()
+
     combined_thinking = "\n\n".join(thinking_parts).strip()
     return combined_thinking, sanitize_race_week_terminology(text.strip())
 
+
+def compute_per_season_tracker_stats(name1: str, name2: str = "") -> dict:
+    """Calculate deterministic official per-season points, finishing rank, best race, and chart data (TAF1APP-SDDREQ-252)."""
+    from the_alternative_f1.all_time_stats.Functions import PointTotals, get_excel_sheet
+    constructors = {'mclaren', 'aston martin', 'mercedes', 'red bull', 'ferrari', 'alpine', 'alfa romeo', 'alphatauri', 'vcarb', 'cadillac', 'haas', 'williams', 'audi'}
+
+    def _get_single_entity(name: str) -> dict:
+        clean_name = name.strip()
+        is_team = clean_name.lower() in constructors
+        seasons_data = {}
+        total_pts = 0.0
+        best_place = 999
+        best_season = ""
+        best_race = "N/A"
+        best_race_num = 999
+
+        for s in range(1, 6):
+            try:
+                _, _, _, df_team, _, df_driver = PointTotals(s)
+                df_target = df_team if is_team else df_driver
+                col_name = "Team" if is_team else "Driver"
+                match = df_target[df_target[col_name].str.lower() == clean_name.lower()]
+                if not match.empty:
+                    pts = float(match["Points"].iloc[0])
+                    place = int(match.index[0] + 1)
+                    total_pts += pts
+                    if place < best_place:
+                        best_place = place
+                        best_season = f"Season {s}"
+                    seasons_data[f"Season {s}"] = {"points": pts, "place": place}
+
+                    df_s = get_excel_sheet(f"Season{s}")
+                    r_match = df_s[df_s[col_name].str.lower() == clean_name.lower()]
+                    if not r_match.empty:
+                        for col in df_s.columns:
+                            if col.endswith("Place"):
+                                val = r_match[col].iloc[0]
+                                try:
+                                    v_int = int(float(val))
+                                    if 0 < v_int < best_race_num:
+                                        best_race_num = v_int
+                                        r_clean = col[:-5].strip()
+                                        best_race = f"P{v_int} - S{s} {r_clean}"
+                                except (ValueError, TypeError):
+                                    pass
+            except Exception:
+                pass
+
+        team_name = clean_name if is_team else get_driver_most_recent_constructor(clean_name)[0]
+        color = get_constructor_color(team_name)
+        if color.lower() in ("#000000", "#111111", "#18181b"):
+            color = "#E0E0E0"
+        txt_color = get_contrast_text_color(color)
+        suffix = "th" if 11 <= best_place <= 13 else {1: "st", 2: "nd", 3: "rd"}.get(best_place % 10, "th")
+
+        return {
+            "name": clean_name,
+            "type": "Constructor" if is_team else "Driver",
+            "team": team_name,
+            "color": color,
+            "text_color": txt_color,
+            "total_points": f"{total_pts:g}",
+            "highest_season_place": f"{best_place}{suffix} ({best_season})" if best_season else "N/A",
+            "best_race": best_race,
+            "seasons_map": seasons_data,
+        }
+
+    e1 = _get_single_entity(name1)
+    has_pair = bool(name2 and name2.strip())
+    e2 = _get_single_entity(name2) if has_pair else None
+
+    all_seasons = [f"Season {s}" for s in range(1, 6)]
+    active_seasons = [
+        s for s in all_seasons
+        if s in e1["seasons_map"] or (has_pair and s in e2["seasons_map"])
+    ]
+    if not active_seasons:
+        active_seasons = all_seasons
+
+    chart_data = []
+    max_pts = 50.0
+    max_plc = 10
+
+    for s in active_seasons:
+        row = {"season": s}
+        if s in e1["seasons_map"]:
+            p1 = e1["seasons_map"][s]["points"]
+            pl1 = e1["seasons_map"][s]["place"]
+            row["points_1"] = p1
+            row["place_1"] = pl1
+            if p1 > max_pts:
+                max_pts = p1
+            if pl1 > max_plc:
+                max_plc = pl1
+        if has_pair and s in e2["seasons_map"]:
+            p2 = e2["seasons_map"][s]["points"]
+            pl2 = e2["seasons_map"][s]["place"]
+            row["points_2"] = p2
+            row["place_2"] = pl2
+            if p2 > max_pts:
+                max_pts = p2
+            if pl2 > max_plc:
+                max_plc = pl2
+        chart_data.append(row)
+
+    return {
+        "e1": e1,
+        "e2": e2,
+        "has_pair": has_pair,
+        "chart_data": chart_data,
+        "max_points": round(max_pts * 1.15, 1),
+        "max_place": max(max_plc + 1, 10),
+    }
 
 
 def extract_infographic_data(text: str, skill_selected: bool = True) -> dict:
@@ -3401,7 +3715,98 @@ def extract_infographic_data(text: str, skill_selected: bool = True) -> dict:
             }
 
 
-        # 4. Upcoming Race Infographic
+        # 4. Per Season Tracker Skill (TAF1APP-SDDREQ-252)
+        if inf_type == "per_season_tracker" or "pst_entities" in parsed or "per_season" in parsed or "season_data" in parsed:
+            raw_entities = parsed.get("entities") or parsed.get("pst_entities") or []
+            name1 = ""
+            name2 = ""
+            sup1 = ""
+            sup2 = ""
+            if isinstance(raw_entities, list) and raw_entities:
+                if len(raw_entities) > 0 and isinstance(raw_entities[0], dict):
+                    name1 = str(raw_entities[0].get("name", "")).strip()
+                    sup1 = str(raw_entities[0].get("superlative", "")).strip()
+                elif len(raw_entities) > 0 and isinstance(raw_entities[0], str):
+                    name1 = raw_entities[0].strip()
+                if len(raw_entities) > 1 and isinstance(raw_entities[1], dict):
+                    name2 = str(raw_entities[1].get("name", "")).strip()
+                    sup2 = str(raw_entities[1].get("superlative", "")).strip()
+                elif len(raw_entities) > 1 and isinstance(raw_entities[1], str):
+                    name2 = raw_entities[1].strip()
+
+            if not name1:
+                name1 = str(parsed.get("name1", "") or parsed.get("driver1", "") or parsed.get("entity1", "")).strip()
+            if not name2:
+                name2 = str(parsed.get("name2", "") or parsed.get("driver2", "") or parsed.get("entity2", "")).strip()
+
+            # Fallback search if model didn't pass name keys directly
+            if not name1:
+                known_drivers = ["Patrick", "Joshua", "Nick", "Jelly", "Jairo", "Del", "Boz", "David", "Travis", "Erick", "Zane", "Josh L", "Eddie", "Gary", "Yeti", "Brently", "Jaden", "Matthew", "Leo", "Randy", "Grayson", "Josh C."]
+                known_teams = ["Ferrari", "McLaren", "Mercedes", "Red Bull", "Alpine", "Aston Martin", "Alfa Romeo", "AlphaTauri", "VCARB", "Cadillac", "Haas", "Williams", "Audi"]
+                candidates = []
+                for cand in known_drivers + known_teams:
+                    if re.search(r"\b" + re.escape(cand) + r"\b", clean_content, re.IGNORECASE):
+                        if cand not in candidates:
+                            candidates.append(cand)
+                if len(candidates) > 0:
+                    name1 = candidates[0]
+                if len(candidates) > 1:
+                    name2 = candidates[1]
+
+            if not name1:
+                name1 = "Patrick"
+
+            stats_res = compute_per_season_tracker_stats(name1, name2)
+            e1_data = stats_res["e1"]
+            e2_data = stats_res["e2"]
+            has_pair = stats_res["has_pair"]
+
+            built_entities = []
+            built_entities.append(PerSeasonEntity(
+                name=e1_data["name"],
+                type=e1_data["type"],
+                team=e1_data["team"],
+                color=e1_data["color"],
+                text_color=e1_data["text_color"],
+                total_points=e1_data["total_points"],
+                highest_season_place=e1_data["highest_season_place"],
+                best_race=e1_data["best_race"],
+                superlative=sup1 or f"The {e1_data['team']} Contender",
+            ))
+
+            if has_pair and e2_data:
+                built_entities.append(PerSeasonEntity(
+                    name=e2_data["name"],
+                    type=e2_data["type"],
+                    team=e2_data["team"],
+                    color=e2_data["color"],
+                    text_color=e2_data["text_color"],
+                    total_points=e2_data["total_points"],
+                    highest_season_place=e2_data["highest_season_place"],
+                    best_race=e2_data["best_race"],
+                    superlative=sup2 or f"The {e2_data['team']} Contender",
+                ))
+
+            pair_summary = str(parsed.get("pair_summary", "")).strip()
+
+            return {
+                "is_infographic": True,
+                "infographic_type": "per_season_tracker",
+                "clean_content": clean_content,
+                "pst_entities": built_entities,
+                "pst_chart_data": stats_res["chart_data"],
+                "pst_has_pair": has_pair,
+                "pst_max_points": stats_res["max_points"],
+                "pst_max_place": stats_res["max_place"],
+                "pst_name1": e1_data["name"],
+                "pst_color1": e1_data["color"],
+                "pst_name2": e2_data["name"] if (has_pair and e2_data) else "",
+                "pst_color2": e2_data["color"] if (has_pair and e2_data) else "#ffffff",
+                "pst_pair_summary": pair_summary,
+            }
+
+
+        # 5. Upcoming Race Infographic
         top_ratings: list[RatingRow] = []
         for r in parsed.get("top_ratings", [])[:8]:
             team = str(r.get("team", "")).strip()
@@ -3582,6 +3987,12 @@ def serialize_assistant_thread_message(msg: ChatMessage) -> str:
                 q_txt = "; ".join([f"{r.team}: {r.driver1} {r.score1} - {r.score2} {r.driver2}" for r in msg.seasonal_qual_rows])
                 card_lines.append(f"Teammate Qualifying Scores: {q_txt}")
             card_parts.append("\n".join(card_lines))
+        elif itype == "per_season_tracker":
+            card_lines = [f"[Infographic Card - Per Season Tracker: {msg.pst_name1}" + (f" vs {msg.pst_name2}" if msg.pst_has_pair else "") + "]"]
+            if msg.pst_entities:
+                e_txt = "; ".join([f"{e.name} ({e.team}): Total Pts {e.total_points}, Best Place {e.highest_season_place}, Best Race {e.best_race}" for e in msg.pst_entities])
+                card_lines.append(f"Career Stats: {e_txt}")
+            card_parts.append("\n".join(card_lines))
 
     combined = []
     if card_parts:
@@ -3608,7 +4019,7 @@ class AlternativeIntelligenceState(rx.State):
     is_generating: bool = False
     error_message: str = ""
     messages: list[ChatMessage] = []
-    selected_skill: str = "Skills Library"
+    selected_skill: str = ""
     active_skill_badge: str = ""
     active_skill_infotip: str = ""
     discord_username: str = rx.LocalStorage("", name="discord_username", sync=True)
@@ -3682,6 +4093,58 @@ class AlternativeIntelligenceState(rx.State):
                     backgroundColor: '#18181B',
                     logging: false,
                     ignoreElements: (el) => el.getAttribute('data-html2canvas-ignore') === 'true',
+                    onclone: (clonedDoc) => {{
+                        document.querySelectorAll('style, link[rel="stylesheet"]').forEach(s => {{
+                            try {{ clonedDoc.head.appendChild(s.cloneNode(true)); }} catch(e) {{}}
+                        }});
+
+                        const fixStyle = clonedDoc.createElement('style');
+                        fixStyle.textContent = `
+                            img {{ display: inline-block !important; vertical-align: middle !important; }}
+                            .rt-Badge, [class*="Badge"], .badge {{
+                                display: inline-flex !important;
+                                align-items: center !important;
+                                justify-content: center !important;
+                                vertical-align: middle !important;
+                                line-height: 1 !important;
+                                box-sizing: border-box !important;
+                            }}
+                            .rt-Badge > *, [class*="Badge"] > * {{
+                                vertical-align: middle !important;
+                                line-height: 1 !important;
+                            }}
+                        `;
+                        clonedDoc.head.appendChild(fixStyle);
+
+                        clonedDoc.querySelectorAll('.rt-Badge, [class*="Badge"], .badge').forEach(b => {{
+                            Array.from(b.childNodes).forEach(node => {{
+                                if (node.nodeType === Node.TEXT_NODE && node.textContent.trim().length > 0) {{
+                                    const span = clonedDoc.createElement('span');
+                                    span.textContent = node.textContent;
+                                    span.style.display = 'inline-block';
+                                    span.style.lineHeight = '1';
+                                    span.style.verticalAlign = 'middle';
+                                    b.replaceChild(span, node);
+                                }}
+                            }});
+                            b.style.display = 'inline-flex';
+                            b.style.alignItems = 'center';
+                            b.style.justifyContent = 'center';
+                            b.style.lineHeight = '1';
+                        }});
+
+                        clonedDoc.querySelectorAll('svg text, svg tspan').forEach(t => {{
+                            const domBaseline = t.getAttribute('dominant-baseline') || window.getComputedStyle(t).dominantBaseline;
+                            const alignBaseline = t.getAttribute('alignment-baseline') || window.getComputedStyle(t).alignmentBaseline;
+                            if (domBaseline === 'central' || domBaseline === 'middle' || alignBaseline === 'central' || alignBaseline === 'middle') {{
+                                const currentDy = parseFloat(t.getAttribute('dy') || '0');
+                                if (!t.dataset.h2cShifted) {{
+                                    t.dataset.h2cShifted = 'true';
+                                    t.setAttribute('dy', (currentDy - 0.35) + 'em');
+                                }}
+                            }}
+                        }});
+                    }},
                 }});
 
                 const link = document.createElement('a');
@@ -3699,7 +4162,8 @@ class AlternativeIntelligenceState(rx.State):
 
     def select_skill(self, skill_name: str):
         """Populate @<Skill Name> badge box into search bar without executing immediately."""
-        if not skill_name or skill_name == "Skills Library":
+        if not skill_name or skill_name == "Skills Library" or skill_name == "Select a Skill":
+            self.selected_skill = ""
             return
         if "Upcoming Race" in skill_name:
             self.active_skill_badge = "@Specific Upcoming Race Infographic "
@@ -3713,15 +4177,19 @@ class AlternativeIntelligenceState(rx.State):
         elif "Champion" in skill_name:
             self.active_skill_badge = "@Champion Comparison Skill "
             self.active_skill_infotip = "e.g., S4 Mercedes vs S3 Alpine, or Joshua S4 vs Nick S3 (defaults to most recent constructor champion vs prior year)"
+        elif "Season Tracker" in skill_name or "Per Season" in skill_name:
+            self.active_skill_badge = "@Per Season Tracker "
+            self.active_skill_infotip = "e.g., Patrick, Ferrari, Patrick vs Joshua, Ferrari vs McLaren, Patrick vs Mercedes"
         else:
             self.active_skill_badge = f"@{skill_name} "
             self.active_skill_infotip = f"Expected inputs for {skill_name}"
-        self.selected_skill = "Skills Library"
+        self.selected_skill = ""
 
     def clear_active_skill(self):
         """Clear the active skill badge box and infotip."""
         self.active_skill_badge = ""
         self.active_skill_infotip = ""
+        self.selected_skill = ""
 
     async def select_prompt(self, prompt_text: str) -> AsyncGenerator:
         """Select a suggested quick prompt and execute it immediately."""
@@ -3742,6 +4210,8 @@ class AlternativeIntelligenceState(rx.State):
             or "@Seasonal Qualifying Comparison" in user_input
             or "@Head to Head Comparison Infographic" in user_input
             or "@Champion Comparison Skill" in user_input
+            or "@Per Season Tracker" in user_input
+            or "@Points & Place Per Season Tracker" in user_input
         )
 
 
@@ -3755,7 +4225,7 @@ class AlternativeIntelligenceState(rx.State):
         else:
             query = user_input
             if query.startswith("@"):
-                for s_opt in SKILL_OPTIONS[1:]:
+                for s_opt in SKILL_OPTIONS:
                     if query.startswith(f"@{s_opt}"):
                         badge_name = s_opt
                         break
@@ -3871,6 +4341,20 @@ class AlternativeIntelligenceState(rx.State):
         if miami_lover_match:
             self.messages[-1].content = (
                 "Nick's all time favorite track is Miami. Erick is known as the Miami Lover, but really that nickname should be held by Nick (no pun intended)."
+            )
+            self.is_generating = False
+            yield
+            return
+
+        # Custom canonical lore response for pronouncing Jaden / Jaden username (TAF1APP-SDDREQ-239)
+        jaden_pronounce_match = re.search(
+            r"(?:how\s+(?:do\s+you\s+)?pronounce\s+jaden|pronounce\s+jaden|how\s+to\s+say\s+jaden|what(?:'s|\s+is)\s+jaden(?:'s)?\s+username|how\s+is\s+jaden\s+pronounced)",
+            query,
+            re.IGNORECASE,
+        )
+        if jaden_pronounce_match:
+            self.messages[-1].content = (
+                "Jaden is pronounced jay-vee-treble said enormously fast, as almost one syllable slurred together."
             )
             self.is_generating = False
             yield
@@ -4214,6 +4698,16 @@ class AlternativeIntelligenceState(rx.State):
                         champ_runner_up2=info_data.get("champ_runner_up2", ""),
                         champ_entities=info_data.get("champ_entities", []),
                         champ_stats=info_data.get("champ_stats", []),
+                        pst_entities=info_data.get("pst_entities", []),
+                        pst_chart_data=info_data.get("pst_chart_data", []),
+                        pst_has_pair=info_data.get("pst_has_pair", False),
+                        pst_max_points=info_data.get("pst_max_points", 100.0),
+                        pst_max_place=info_data.get("pst_max_place", 20),
+                        pst_name1=info_data.get("pst_name1", ""),
+                        pst_color1=info_data.get("pst_color1", "#00b4da"),
+                        pst_name2=info_data.get("pst_name2", ""),
+                        pst_color2=info_data.get("pst_color2", "#ffffff"),
+                        pst_pair_summary=info_data.get("pst_pair_summary", ""),
                     )
                     self.messages = list(self.messages)
                     yield
@@ -5580,6 +6074,349 @@ def native_champion_comparison_card(msg: ChatMessage) -> rx.Component:
     )
 
 
+def per_season_entity_showcase(entity: PerSeasonEntity) -> rx.Component:
+    """Render individual entity summary card inside Per Season Tracker."""
+    return rx.box(
+        # Driver/Constructor Callout pinned to Top Right
+        rx.badge(
+            f"{entity.type.upper()}",
+            position="absolute",
+            top="12px",
+            right="12px",
+            bg="rgba(255, 255, 255, 0.08)",
+            color="#A1A1AA",
+            border="1px solid rgba(255, 255, 255, 0.18)",
+            font_size="9px",
+            font_weight="bold",
+            padding_x="6px",
+            padding_y="2px",
+        ),
+        rx.vstack(
+            # Line 1: Centered Driver or Constructor Name
+            rx.text(
+                entity.name,
+                font_size="17px",
+                font_weight="900",
+                color=entity.color,
+                text_align="center",
+                text_shadow="0 0 2px rgba(255, 255, 255, 0.7), 0 1px 3px rgba(0, 0, 0, 0.9)",
+                letter_spacing="-0.02em",
+                width="100%",
+            ),
+            # Line 2: Team and Total Points on same line, centered
+            rx.hstack(
+                rx.badge(
+                    entity.team,
+                    bg=entity.color,
+                    color=entity.text_color,
+                    font_size="9px",
+                    font_weight="bold",
+                    border="1px solid rgba(255, 255, 255, 0.3)",
+                    padding_x="6px",
+                    padding_y="2px",
+                ),
+                rx.badge(
+                    f"📊 Total Pts: {entity.total_points}",
+                    bg="#27272A",
+                    color="#10B981",
+                    border="1px solid #3F3F46",
+                    font_size="10px",
+                    font_weight="bold",
+                    padding_x="6px",
+                    padding_y="2px",
+                ),
+                justify="center",
+                align="center",
+                spacing="2",
+                width="100%",
+            ),
+            # Line 3: Peak and Best Race on same line, centered
+            rx.hstack(
+                rx.badge(
+                    f"🏆 Peak: {entity.highest_season_place}",
+                    bg="#27272A",
+                    color="#F59E0B",
+                    border="1px solid #3F3F46",
+                    font_size="10px",
+                    font_weight="bold",
+                    padding_x="6px",
+                    padding_y="2px",
+                ),
+                rx.badge(
+                    f"⭐ Best Race: {entity.best_race}",
+                    bg="#27272A",
+                    color="#00b4da",
+                    border="1px solid #3F3F46",
+                    font_size="10px",
+                    font_weight="bold",
+                    padding_x="6px",
+                    padding_y="2px",
+                ),
+                justify="center",
+                align="center",
+                spacing="2",
+                width="100%",
+            ),
+            # Line 4: Alternative Superlative on last line, centered
+            rx.cond(
+                entity.superlative != "",
+                rx.hstack(
+                    rx.badge(
+                        f"✨ {entity.superlative}",
+                        bg="rgba(0, 180, 218, 0.12)",
+                        color="#00b4da",
+                        border="1px solid rgba(0, 180, 218, 0.35)",
+                        font_size="10px",
+                        font_weight="bold",
+                        padding_x="8px",
+                        padding_y="3px",
+                        border_radius="full",
+                        text_align="center",
+                    ),
+                    justify="center",
+                    width="100%",
+                ),
+                rx.fragment(),
+            ),
+            align="center",
+            spacing="2",
+            width="100%",
+        ),
+        position="relative",
+        padding="14px",
+        bg="#141416",
+        border="1px solid #27272A",
+        border_radius="md",
+        flex="1",
+        width="100%",
+    )
+
+
+def native_per_season_tracker_card(msg: ChatMessage) -> rx.Component:
+    """Rich native Reflex Per Season Tracker Card (TAF1APP-SDDREQ-252) with dual-axis line chart."""
+    return rx.box(
+        # Rainbow top highlight line
+        rx.box(
+            width="100%",
+            height="3px",
+            background="linear-gradient(90deg, #E60049 0%, #FF8C00 28%, #FFE500 50%, #00B4D8 75%, #7B00FF 100%)",
+            border_radius="full",
+            margin_bottom="12px",
+        ),
+        # Header with Download Button
+        rx.hstack(
+            rx.hstack(
+                rx.icon("activity", size=16, color="#00B4D8"),
+                rx.text("PER SEASON TRACKER", font_size="12px", font_weight="bold", color="white", letter_spacing="0.05em"),
+                rx.badge("CAREER TRAJECTORY DOSSIER", color_scheme="cyan", variant="surface", font_size="8px", font_weight="bold"),
+                spacing="2",
+                align="center",
+            ),
+            rx.spacer(),
+            rx.button(
+                rx.hstack(
+                    rx.icon("download", size=12),
+                    rx.text("PNG", font_size="10px", font_weight="bold"),
+                    spacing="1",
+                    align="center",
+                ),
+                size="1",
+                variant="surface",
+                color_scheme="cyan",
+                on_click=AlternativeIntelligenceState.download_infographic_png(msg.card_id, "Per_Season_Tracker_Dossier"),
+                cursor="pointer",
+                title="Download Infographic as .PNG",
+                custom_attrs={"data-html2canvas-ignore": "true"},
+            ),
+            width="100%",
+            align="center",
+            margin_bottom="10px",
+        ),
+        # Entity Showcase (Single or Split Pair)
+        rx.flex(
+            rx.foreach(msg.pst_entities, per_season_entity_showcase),
+            wrap="wrap",
+            gap="2",
+            width="100%",
+            margin_bottom="12px",
+        ),
+        # Pair Comparison Callout (if available)
+        rx.cond(
+            msg.pst_pair_summary != "",
+            rx.box(
+                rx.hstack(
+                    rx.icon("swords", size=14, color="#F59E0B"),
+                    rx.text(msg.pst_pair_summary, font_size="11px", color="#D4D4D8", line_height="1.4"),
+                    align="start",
+                    spacing="2",
+                ),
+                padding="10px 12px",
+                bg="rgba(245, 158, 11, 0.08)",
+                border="1px solid rgba(245, 158, 11, 0.25)",
+                border_radius="md",
+                margin_bottom="12px",
+                width="100%",
+            ),
+            rx.fragment(),
+        ),
+        # Dual Y-Axis Recharts Line Chart Container
+        rx.box(
+            rx.vstack(
+                rx.hstack(
+                    rx.text("Points & Place Trajectory Across Seasons", font_size="11px", font_weight="bold", color="#E4E4E7"),
+                    rx.spacer(),
+                    rx.text("Left Y: Points (Solid) | Right Y: Place (Dashed Inverted)", font_size="9px", color="#71717A", font_weight="medium"),
+                    width="100%",
+                    align="center",
+                    margin_bottom="6px",
+                ),
+                rx.recharts.line_chart(
+                    rx.recharts.x_axis(data_key="season", stroke="#888888", font_size=10),
+                    rx.recharts.y_axis(
+                        y_axis_id="left_pts",
+                        orientation="left",
+                        stroke="#888888",
+                        font_size=10,
+                        domain=[0, msg.pst_max_points],
+                    ),
+                    rx.recharts.y_axis(
+                        y_axis_id="right_pos",
+                        orientation="right",
+                        reversed=True,
+                        stroke="#888888",
+                        font_size=10,
+                        domain=[1, msg.pst_max_place],
+                    ),
+                    rx.recharts.cartesian_grid(vertical=False, stroke="rgba(255, 255, 255, 0.08)"),
+                    rx.recharts.graphing_tooltip(),
+                    # Entity 1 Lines
+                    rx.recharts.line(
+                        data_key="points_1",
+                        y_axis_id="left_pts",
+                        stroke=msg.pst_color1,
+                        stroke_width=2.5,
+                        dot={"fill": msg.pst_color1, "stroke": msg.pst_color1, "r": 3.5},
+                        name=f"{msg.pst_name1} Points (Solid)",
+                    ),
+                    rx.recharts.line(
+                        data_key="place_1",
+                        y_axis_id="right_pos",
+                        stroke=msg.pst_color1,
+                        stroke_width=2.5,
+                        stroke_dasharray="4 4",
+                        dot={"fill": msg.pst_color1, "stroke": msg.pst_color1, "r": 3.5},
+                        name=f"{msg.pst_name1} Place (Dashed)",
+                    ),
+                    # Entity 2 Lines (if pair)
+                    rx.cond(
+                        msg.pst_has_pair,
+                        rx.recharts.line(
+                            data_key="points_2",
+                            y_axis_id="left_pts",
+                            stroke=msg.pst_color2,
+                            stroke_width=2.5,
+                            dot={"fill": msg.pst_color2, "stroke": msg.pst_color2, "r": 3.5},
+                            name=f"{msg.pst_name2} Points (Solid)",
+                        ),
+                        rx.fragment(),
+                    ),
+                    rx.cond(
+                        msg.pst_has_pair,
+                        rx.recharts.line(
+                            data_key="place_2",
+                            y_axis_id="right_pos",
+                            stroke=msg.pst_color2,
+                            stroke_width=2.5,
+                            stroke_dasharray="4 4",
+                            dot={"fill": msg.pst_color2, "stroke": msg.pst_color2, "r": 3.5},
+                            name=f"{msg.pst_name2} Place (Dashed)",
+                        ),
+                        rx.fragment(),
+                    ),
+                    data=msg.pst_chart_data,
+                    width="100%",
+                    height=230,
+                ),
+                # Interactive Chart Key / Legend
+                rx.flex(
+                    rx.hstack(
+                        rx.box(width="14px", height="3px", bg=msg.pst_color1, border_radius="full"),
+                        rx.text(f"{msg.pst_name1} Points (Solid, Left Axis)", font_size="9px", color="#D4D4D8", font_weight="bold"),
+                        align="center",
+                        spacing="1",
+                    ),
+                    rx.hstack(
+                        rx.box(width="14px", height="3px", border_top=f"2px dashed {msg.pst_color1}"),
+                        rx.text(f"{msg.pst_name1} Place (Dashed, Right Axis Inverted)", font_size="9px", color="#D4D4D8", font_weight="bold"),
+                        align="center",
+                        spacing="1",
+                    ),
+                    rx.cond(
+                        msg.pst_has_pair,
+                        rx.hstack(
+                            rx.box(width="14px", height="3px", bg=msg.pst_color2, border_radius="full"),
+                            rx.text(f"{msg.pst_name2} Points (Solid, Left Axis)", font_size="9px", color="#D4D4D8", font_weight="bold"),
+                            align="center",
+                            spacing="1",
+                        ),
+                        rx.fragment(),
+                    ),
+                    rx.cond(
+                        msg.pst_has_pair,
+                        rx.hstack(
+                            rx.box(width="14px", height="3px", border_top=f"2px dashed {msg.pst_color2}"),
+                            rx.text(f"{msg.pst_name2} Place (Dashed, Right Axis Inverted)", font_size="9px", color="#D4D4D8", font_weight="bold"),
+                            align="center",
+                            spacing="1",
+                        ),
+                        rx.fragment(),
+                    ),
+                    wrap="wrap",
+                    gap="3",
+                    justify="center",
+                    width="100%",
+                    padding_top="6px",
+                    border_top="1px solid #27272A",
+                ),
+                width="100%",
+                spacing="2",
+            ),
+            padding="12px",
+            bg="#141416",
+            border="1px solid #27272A",
+            border_radius="md",
+            width="100%",
+            margin_bottom="12px",
+        ),
+        # Bottom League Branding Footer
+        rx.center(
+            rx.hstack(
+                rx.image(
+                    src="/The Alternative F1 NEW Logo.png",
+                    height="20px",
+                    object_fit="contain",
+                ),
+                rx.text("THE ALTERNATIVE F1 • OFFICIAL PER SEASON HISTORICAL TELEMETRY", font_size="9px", font_weight="bold", color="#71717A", letter_spacing="0.05em"),
+                spacing="2",
+                align="center",
+            ),
+            width="100%",
+            padding_y="10px",
+            bg="#141416",
+            border_radius="0 0 md md",
+            border_top="1px solid #27272A",
+        ),
+        id=msg.card_id,
+        background="#18181B",
+        border="1px solid #3F3F46",
+        border_radius="lg",
+        padding="12px",
+        width="100%",
+        box_shadow="0 10px 30px rgba(0, 0, 0, 0.6)",
+        margin_bottom="12px",
+    )
+
+
 def racing_helmet_icon(size: int = 18, color: str = "#00b4da") -> rx.Component:
     """Render a 3/4 angled SVG outline of a motorsport / racing helmet matching user reference."""
     return rx.html(f"""
@@ -5601,15 +6438,19 @@ def message_card(msg: ChatMessage) -> rx.Component:
             rx.cond(
                 msg.is_infographic,
                 rx.cond(
-                    msg.infographic_type == "champion_comparison",
-                    native_champion_comparison_card(msg),
+                    msg.infographic_type == "per_season_tracker",
+                    native_per_season_tracker_card(msg),
                     rx.cond(
-                        msg.infographic_type == "h2h",
-                        native_h2h_infographic_card(msg),
+                        msg.infographic_type == "champion_comparison",
+                        native_champion_comparison_card(msg),
                         rx.cond(
-                            msg.infographic_type == "seasonal_qual",
-                            native_seasonal_qual_infographic_card(msg),
-                            native_race_infographic_card(msg),
+                            msg.infographic_type == "h2h",
+                            native_h2h_infographic_card(msg),
+                            rx.cond(
+                                msg.infographic_type == "seasonal_qual",
+                                native_seasonal_qual_infographic_card(msg),
+                                native_race_infographic_card(msg),
+                            ),
                         ),
                     ),
                 ),
@@ -5641,7 +6482,7 @@ def message_card(msg: ChatMessage) -> rx.Component:
                                 spacing="1",
                                 align="center",
                             ),
-                            background="radial-gradient(circle at 20% 25%, rgba(230, 0, 73, 0.6) 0%, transparent 55%), radial-gradient(circle at 80% 25%, rgba(255, 140, 0, 0.6) 0%, transparent 50%), radial-gradient(circle at 20% 80%, rgba(123, 0, 255, 0.6) 0%, transparent 55%), radial-gradient(circle at 80% 80%, rgba(0, 153, 255, 0.6) 0%, transparent 50%), rgba(24, 24, 28, 0.7)",
+                            background="radial-gradient(circle at 10% 30%, rgba(230, 0, 73, 0.75) 0%, transparent 55%), radial-gradient(circle at 35% 20%, rgba(255, 140, 0, 0.7) 0%, transparent 50%), radial-gradient(circle at 65% 80%, rgba(123, 0, 255, 0.75) 0%, transparent 55%), radial-gradient(circle at 90% 40%, rgba(0, 153, 255, 0.75) 0%, transparent 50%), #111113",
                             border="1px solid rgba(255, 255, 255, 0.35)",
                             box_shadow="0 0 10px rgba(0, 180, 218, 0.3)",
                             border_radius="full",
@@ -5904,6 +6745,7 @@ def skills_library_selector() -> rx.Component:
         ),
         rx.select(
             SKILL_OPTIONS,
+            placeholder="Select a Skill",
             value=AlternativeIntelligenceState.selected_skill,
             on_change=AlternativeIntelligenceState.select_skill,
             bg="#18181B",
@@ -6097,6 +6939,7 @@ def alternative_intelligence_drawer() -> rx.Component:
                             ),
                             rx.select(
                                 SKILL_OPTIONS,
+                                placeholder="Select a Skill",
                                 value=AlternativeIntelligenceState.selected_skill,
                                 on_change=AlternativeIntelligenceState.select_skill,
                                 bg="#18181B",

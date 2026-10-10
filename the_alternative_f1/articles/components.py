@@ -267,7 +267,59 @@ class DownloadState(rx.State):
                         backgroundColor: computedBg,
                         useCORS: true,
                         allowTaint: true,
-                        logging: false
+                        logging: false,
+                        onclone: (clonedDoc) => {{
+                            document.querySelectorAll('style, link[rel="stylesheet"]').forEach(s => {{
+                                try {{ clonedDoc.head.appendChild(s.cloneNode(true)); }} catch(e) {{}}
+                            }});
+
+                            const fixStyle = clonedDoc.createElement('style');
+                            fixStyle.textContent = `
+                                img {{ display: inline-block !important; vertical-align: middle !important; }}
+                                .rt-Badge, [class*="Badge"], .badge {{
+                                    display: inline-flex !important;
+                                    align-items: center !important;
+                                    justify-content: center !important;
+                                    vertical-align: middle !important;
+                                    line-height: 1 !important;
+                                    box-sizing: border-box !important;
+                                }}
+                                .rt-Badge > *, [class*="Badge"] > * {{
+                                    vertical-align: middle !important;
+                                    line-height: 1 !important;
+                                }}
+                            `;
+                            clonedDoc.head.appendChild(fixStyle);
+
+                            clonedDoc.querySelectorAll('.rt-Badge, [class*="Badge"], .badge').forEach(b => {{
+                                Array.from(b.childNodes).forEach(node => {{
+                                    if (node.nodeType === Node.TEXT_NODE && node.textContent.trim().length > 0) {{
+                                        const span = clonedDoc.createElement('span');
+                                        span.textContent = node.textContent;
+                                        span.style.display = 'inline-block';
+                                        span.style.lineHeight = '1';
+                                        span.style.verticalAlign = 'middle';
+                                        b.replaceChild(span, node);
+                                    }}
+                                }});
+                                b.style.display = 'inline-flex';
+                                b.style.alignItems = 'center';
+                                b.style.justifyContent = 'center';
+                                b.style.lineHeight = '1';
+                            }});
+
+                            clonedDoc.querySelectorAll('svg text, svg tspan').forEach(t => {{
+                                const domBaseline = t.getAttribute('dominant-baseline') || window.getComputedStyle(t).dominantBaseline;
+                                const alignBaseline = t.getAttribute('alignment-baseline') || window.getComputedStyle(t).alignmentBaseline;
+                                if (domBaseline === 'central' || domBaseline === 'middle' || alignBaseline === 'central' || alignBaseline === 'middle') {{
+                                    const currentDy = parseFloat(t.getAttribute('dy') || '0');
+                                    if (!t.dataset.h2cShifted) {{
+                                        t.dataset.h2cShifted = 'true';
+                                        t.setAttribute('dy', (currentDy - 0.35) + 'em');
+                                    }}
+                                }}
+                            }});
+                        }},
                     }});
                     const pngURL = chartCanvas.toDataURL('image/png');
                     triggerFileDownload(pngURL, targetFilename);
@@ -786,7 +838,59 @@ class DownloadState(rx.State):
                     backgroundColor: computedBg,
                     useCORS: true,
                     allowTaint: true,
-                    logging: false
+                    logging: false,
+                    onclone: (clonedDoc) => {{
+                        document.querySelectorAll('style, link[rel="stylesheet"]').forEach(s => {{
+                            try {{ clonedDoc.head.appendChild(s.cloneNode(true)); }} catch(e) {{}}
+                        }});
+
+                        const fixStyle = clonedDoc.createElement('style');
+                        fixStyle.textContent = `
+                            img {{ display: inline-block !important; vertical-align: middle !important; }}
+                            .rt-Badge, [class*="Badge"], .badge {{
+                                display: inline-flex !important;
+                                align-items: center !important;
+                                justify-content: center !important;
+                                vertical-align: middle !important;
+                                line-height: 1 !important;
+                                box-sizing: border-box !important;
+                            }}
+                            .rt-Badge > *, [class*="Badge"] > * {{
+                                vertical-align: middle !important;
+                                line-height: 1 !important;
+                            }}
+                        `;
+                        clonedDoc.head.appendChild(fixStyle);
+
+                        clonedDoc.querySelectorAll('.rt-Badge, [class*="Badge"], .badge').forEach(b => {{
+                            Array.from(b.childNodes).forEach(node => {{
+                                if (node.nodeType === Node.TEXT_NODE && node.textContent.trim().length > 0) {{
+                                    const span = clonedDoc.createElement('span');
+                                    span.textContent = node.textContent;
+                                    span.style.display = 'inline-block';
+                                    span.style.lineHeight = '1';
+                                    span.style.verticalAlign = 'middle';
+                                    b.replaceChild(span, node);
+                                }}
+                            }});
+                            b.style.display = 'inline-flex';
+                            b.style.alignItems = 'center';
+                            b.style.justifyContent = 'center';
+                            b.style.lineHeight = '1';
+                        }});
+
+                        clonedDoc.querySelectorAll('svg text, svg tspan').forEach(t => {{
+                            const domBaseline = t.getAttribute('dominant-baseline') || window.getComputedStyle(t).dominantBaseline;
+                            const alignBaseline = t.getAttribute('alignment-baseline') || window.getComputedStyle(t).alignmentBaseline;
+                            if (domBaseline === 'central' || domBaseline === 'middle' || alignBaseline === 'central' || alignBaseline === 'middle') {{
+                                const currentDy = parseFloat(t.getAttribute('dy') || '0');
+                                if (!t.dataset.h2cShifted) {{
+                                    t.dataset.h2cShifted = 'true';
+                                    t.setAttribute('dy', (currentDy - 0.35) + 'em');
+                                }}
+                            }}
+                        }});
+                    }},
                 }});
 
                 const finalCanvas = document.createElement('canvas');
