@@ -773,13 +773,12 @@ def _format_comprehensive_statistical_matrix(excel_p: Path, seasons_list: list) 
         # ── 1. DRIVER STATISTICAL ARCHIVE (TAF1APP-SDDREQ-239 TABLE 1) ──
         res.append("## OFFICIAL DRIVER COMPREHENSIVE STATISTICAL MATRIX (TAF1APP-SDDREQ-239)")
         res.append(
-            "| Driver | Total Feature Wins | Feature Wins by Season | Sprint Wins (Total & by Season) | Pre-Season Wins | Post-Season Wins | Win Streaks (Single Season / Cross Season) | "
+            "| Driver | Maiden Race Win (First Win) | Maiden Feature Podium | Chronological Feature Wins List | Chronological Feature Podiums List | "
+            "Total Feature Wins | Feature Wins by Season | Sprint Wins (Total & by Season) | Pre-Season Wins | Post-Season Wins | Win Streaks (Single Season / Cross Season) | "
             "Total Feature Podiums | Feature Podiums by Season | Sprint Podiums (Total & by Season) | Pre-Season Podiums | Post-Season Podiums | Podium Streaks (Single / Cross) | "
             "Career Points | Points by Season | Career Avg Place | Career Avg Qualifying | Career Avg Pos Change | Career Best Race | Career Poles | Career FL | Career DOTD | Career MOT | Career CD | All-Time Standings Peak |"
         )
-        res.append("| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |")
-
-        driver_details_blocks = []
+        res.append("| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |")
 
         for d_name in all_drivers:
             df_races, _ = compute_entity_detailed_metrics(num_seasons, "Driver", d_name)
@@ -799,6 +798,11 @@ def _format_comprehensive_statistical_matrix(excel_p: Path, seasons_list: list) 
             s_win_items = [f"S{r['season']} {r['race']}" for _, r in s_races.iterrows() if r["wins_cnt"] == 1]
             f_pod_items = [f"S{r['season']} {r['race']} (P{int(r['place'])})" for _, r in f_races.iterrows() if r["podiums_cnt"] == 1]
             s_pod_items = [f"S{r['season']} {r['race']} (P{int(r['place'])})" for _, r in s_races.iterrows() if r["podiums_cnt"] == 1]
+
+            maiden_win_str = f"P1 at {f_win_items[0]}" if f_win_items else "None"
+            maiden_pod_str = f_pod_items[0] if f_pod_items else "None"
+            chron_wins_str = ', '.join(f_win_items) if f_win_items else "None"
+            chron_pods_str = ', '.join(f_pod_items) if f_pod_items else "None"
 
             # Seasonal breakdowns
             f_wins_by_s = []
@@ -888,7 +892,6 @@ def _format_comprehensive_statistical_matrix(excel_p: Path, seasons_list: list) 
                 best_race_str = "N/A"
 
             poles_cnt = int(df_races["poles_cnt"].sum())
-            pole_items = [f"S{r['season']} {r['race']}" for _, r in df_races.iterrows() if r["poles_cnt"] == 1]
             fl_cnt = int(df_races["fl_cnt"].sum())
             dotd_cnt = int(df_races["dotd_cnt"].sum())
             mot_cnt = int(df_races["mot_cnt"].sum())
@@ -897,62 +900,22 @@ def _format_comprehensive_statistical_matrix(excel_p: Path, seasons_list: list) 
 
             # Master overview table row
             res.append(
-                f"| {d_name} | {tot_f_wins} | {'; '.join(f_wins_by_s) or '0'} | {tot_s_wins} ({', '.join(s_wins_by_s) or '0'}) | {pre_w_str} | {post_w_str} | Single:{max_ss_win} / Cross:{max_cr_win} | "
+                f"| {d_name} | {maiden_win_str} | {maiden_pod_str} | {chron_wins_str} | {chron_pods_str} | "
+                f"{tot_f_wins} | {'; '.join(f_wins_by_s) or '0'} | {tot_s_wins} ({', '.join(s_wins_by_s) or '0'}) | {pre_w_str} | {post_w_str} | Single:{max_ss_win} / Cross:{max_cr_win} | "
                 f"{tot_f_pods} | {'; '.join(f_pods_by_s) or '0'} | {tot_s_pods} ({', '.join(s_pods_by_s) or '0'}) | {pre_p_str} | {post_p_str} | Single:{max_ss_pod} / Cross:{max_cr_pod} | "
                 f"{tot_pts:.1f} | {', '.join(pts_by_s) or '0'} | {avg_p:.1f} | {avg_q:.1f} | {avg_chg:+.1f} | {best_race_str} | {poles_cnt} | {fl_cnt} | {dotd_cnt} | {mot_cnt} | {cd_cnt} | {peak_rank} |"
             )
 
-            # Detailed itemized profile per driver (Table 1 exhaustive coverage)
-            d_champs = DRIVER_CHAMPIONSHIPS.get(d_name, [])
-            c_champs_on_team = CONSTRUCTOR_CHAMPS_WHILE_ON_TEAM.get(d_name, [])
-            ranks_over_time = [f"S{sn}: P{rk}" for sn, rk in sorted(driver_season_ranks.get(d_name, {}).items())]
-
-            # Chronological per race items
-            pts_per_race_items = [f"S{r['season']} {r['race']}: {r['pts']:g}pts" for _, r in df_races.iterrows() if r.get("competed")]
-            placements_per_race = [f"S{r['season']} {r['race']}: P{int(r['place'])}" for _, r in df_races.iterrows() if r.get("competed") and r["place"] > 0]
-            pos_changes_per_race = [f"S{r['season']} {r['race']}: {r['pos_change']:+g}" for _, r in df_races.iterrows() if r.get("competed") and r.get("pos_change") is not None]
-            qual_per_race = [f"S{r['season']} {r['race']}: P{int(r['qual'])}" for _, r in df_races.iterrows() if r.get("competed") and r["qual"] > 0]
-
-            # Track Ratings (directly from DetailedAllTime Requirement 76)
-            track_ratings_dict = compute_entity_track_ratings(df_races)
-            track_ratings_items = [
-                f"{tr}: (Rating {st['score']:.1f}, TotPts {st['total_points']:.0f}, AvgPts {st['avg_points']:.1f}, AvgPosChg {st['avg_pos_change']:+.1f})"
-                for tr, st in sorted(track_ratings_dict.items())
-            ]
-
-            d_block = [
-                f"### Driver Profile: {d_name}",
-                f"- **All-Time Career Summary**: Points: {tot_pts:.1f} | Feature Wins: {tot_f_wins} | Sprint Wins: {tot_s_wins} | Feature Podiums: {tot_f_pods} | Sprint Podiums: {tot_s_pods} | Poles: {poles_cnt} | FL: {fl_cnt} | DOTD: {dotd_cnt} | MOT: {mot_cnt} | CD: {cd_cnt} | Avg Place: {avg_p:.1f} | Avg Qual: {avg_q:.1f} | Avg Pos Change: {avg_chg:+.1f} | All-Time Standings Peak: {peak_rank} | Best Race All-Time: {best_race_str}",
-                f"- **Championship Titles & Positions**: Driver Championships Won: {len(d_champs)}" + (f" (Seasons: {', '.join(str(s) for s in d_champs)})" if d_champs else "") + f" | Constructor Championships Won While on Team: {len(c_champs_on_team)}" + (f" ({', '.join(f'S{sn} {tm}' for sn, tm in c_champs_on_team)})" if c_champs_on_team else "") + f" | Seasonal Standings Finishes: {'; '.join(ranks_over_time) or 'None'}",
-                f"- **Feature Race Wins**: Total: {tot_f_wins} | Chronological Wins List: {', '.join(f_win_items) if f_win_items else 'None'} | By Season: {'; '.join(f_wins_by_s) or '0'} | Single-Season Win Streaks: {'; '.join(ss_win_list) if ss_win_list else f'Max {max_ss_win}'} | Cross-Season Win Streaks: {'; '.join(cr_win_list) if cr_win_list else f'Max {max_cr_win}'}",
-                f"- **Sprint Race Wins**: Total: {tot_s_wins} | Chronological Sprint Wins List: {', '.join(s_win_items) if s_win_items else 'None'} | By Season: {'; '.join(s_wins_by_s) or '0'} | Single-Season Sprint Streaks: {'; '.join(ss_swin_list) if ss_swin_list else f'Max {max_ss_swin}'} | Cross-Season Sprint Streaks: {'; '.join(cr_swin_list) if cr_swin_list else f'Max {max_cr_swin}'}",
-                f"- **Pre-Season & Post-Season Wins**: Pre-Season Wins ({len(pre_w_items)}): {', '.join(pre_w_items) if pre_w_items else 'None'} | Post-Season Wins ({len(post_w_items)}): {', '.join(post_w_items) if post_w_items else 'None'}",
-                f"- **Feature Race Podiums**: Total: {tot_f_pods} | Chronological Podiums List: {', '.join(f_pod_items) if f_pod_items else 'None'} | By Season: {'; '.join(f_pods_by_s) or '0'} | Single-Season Podium Streaks: {'; '.join(ss_pod_list) if ss_pod_list else f'Max {max_ss_pod}'} | Cross-Season Podium Streaks: {'; '.join(cr_pod_list) if cr_pod_list else f'Max {max_cr_pod}'}",
-                f"- **Sprint Race Podiums**: Total: {tot_s_pods} | Chronological Sprint Podiums List: {', '.join(s_pod_items) if s_pod_items else 'None'} | By Season: {'; '.join(s_pods_by_s) or '0'} | Single-Season Sprint Podium Streaks: {'; '.join(ss_spod_list) if ss_spod_list else f'Max {max_ss_spod}'} | Cross-Season Sprint Podium Streaks: {'; '.join(cr_spod_list) if cr_spod_list else f'Max {max_cr_spod}'}",
-                f"- **Pre-Season & Post-Season Podiums**: Pre-Season Podiums ({len(pre_p_items)}): {', '.join(pre_p_items) if pre_p_items else 'None'} | Post-Season Podiums ({len(post_p_items)}): {', '.join(post_p_items) if post_p_items else 'None'}",
-                f"- **Points Progression**: Total Points: {tot_pts:.1f} | Points by Season: {', '.join(pts_by_s) or '0'} | Chronological Points per Race: {'; '.join(pts_per_race_items)}",
-                f"- **Placements & Positions Gained**: All-Time Avg Place: {avg_p:.1f} | Avg Place by Season: {', '.join(avg_p_by_s)} | Chronological Race Placements: {'; '.join(placements_per_race)} | All-Time Avg Pos Change: {avg_chg:+.1f} | Avg Pos Change by Season: {', '.join(avg_chg_by_s)} | Chronological Pos Gained per Race: {'; '.join(pos_changes_per_race)}",
-                f"- **Qualifying & Poles**: Total Poles: {poles_cnt} | Poles List: {', '.join(pole_items) if pole_items else 'None'} | All-Time Avg Qual: {avg_q:.1f} | Avg Qual by Season: {', '.join(avg_q_by_s)} | Chronological Qualifying: {'; '.join(qual_per_race)}",
-                f"- **Best Race**: Best Race All-Time: {best_race_str} | Best Race per Season: {'; '.join(best_race_by_s) or 'None'}",
-                f"- **Track-by-Track Ratings & Performance (All-Time Stats Requirement 76)**: {'; '.join(track_ratings_items) if track_ratings_items else 'None'}",
-                "",
-            ]
-            driver_details_blocks.extend(d_block)
-
-        res.append("")
-        res.append("### Itemized Driver Career Profiles & Historical Records (TAF1APP-SDDREQ-239):")
-        res.extend(driver_details_blocks)
-
         # ── 2. CONSTRUCTOR STATISTICAL ARCHIVE (TAF1APP-SDDREQ-239 TABLE 2) ──
+        res.append("")
         res.append("## OFFICIAL CONSTRUCTOR COMPREHENSIVE STATISTICAL MATRIX (TAF1APP-SDDREQ-239)")
         res.append(
-            "| Constructor | Total Feature Wins | Feature Wins by Season | Sprint Wins (Total & by Season) | Pre-Season Wins | Post-Season Wins | Win Streaks (Single Season / Cross Season) | "
+            "| Constructor | Maiden Race Win (First Win) | Maiden Feature Podium | Chronological Feature Wins List | Chronological Feature Podiums List | "
+            "Total Feature Wins | Feature Wins by Season | Sprint Wins (Total & by Season) | Pre-Season Wins | Post-Season Wins | Win Streaks (Single Season / Cross Season) | "
             "Total Feature Podiums | Feature Podiums by Season | Sprint Podiums (Total & by Season) | Pre-Season Podiums | Post-Season Podiums | Podium Streaks (Single / Cross) | "
             "Career Points | Points by Season | Career Avg Place | Career Avg Qualifying | Career Avg Pos Change | Career Best Race | Career Poles | Career FL | Career DOTD | Career MOT | Career CD | All-Time Standings Peak |"
         )
-        res.append("| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |")
-
-        constructor_details_blocks = []
+        res.append("| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |")
 
         for c_name in all_teams:
             df_races, _ = compute_entity_detailed_metrics(num_seasons, "Constructor", c_name)
@@ -971,6 +934,11 @@ def _format_comprehensive_statistical_matrix(excel_p: Path, seasons_list: list) 
             s_win_items = [f"S{r['season']} {r['race']}" for _, r in s_races.iterrows() if r["wins_cnt"] >= 1]
             f_pod_items = [f"S{r['season']} {r['race']}" for _, r in f_races.iterrows() if r["podiums_cnt"] >= 1]
             s_pod_items = [f"S{r['season']} {r['race']}" for _, r in s_races.iterrows() if r["podiums_cnt"] >= 1]
+
+            maiden_win_str = f"P1 at {f_win_items[0]}" if f_win_items else "None"
+            maiden_pod_str = f"{f_pod_items[0]}" if f_pod_items else "None"
+            chron_wins_str = ', '.join(f_win_items) if f_win_items else "None"
+            chron_pods_str = ', '.join(f_pod_items) if f_pod_items else "None"
 
             f_wins_by_s = []
             s_wins_by_s = []
@@ -1055,7 +1023,6 @@ def _format_comprehensive_statistical_matrix(excel_p: Path, seasons_list: list) 
                 best_race_str = "N/A"
 
             poles_cnt = int(df_races["poles_cnt"].sum())
-            pole_items = [f"S{r['season']} {r['race']}" for _, r in df_races.iterrows() if r["poles_cnt"] >= 1]
             fl_cnt = int(df_races["fl_cnt"].sum())
             dotd_cnt = int(df_races["dotd_cnt"].sum())
             mot_cnt = int(df_races["mot_cnt"].sum())
@@ -1063,70 +1030,13 @@ def _format_comprehensive_statistical_matrix(excel_p: Path, seasons_list: list) 
             peak_rank = c_peaks.get(c_name, "—")
 
             res.append(
-                f"| {c_name} | {tot_f_wins} | {'; '.join(f_wins_by_s) or '0'} | {tot_s_wins} ({', '.join(s_wins_by_s) or '0'}) | {pre_w_str} | {post_w_str} | Single:{max_ss_win} / Cross:{max_cr_win} | "
+                f"| {c_name} | {maiden_win_str} | {maiden_pod_str} | {chron_wins_str} | {chron_pods_str} | "
+                f"{tot_f_wins} | {'; '.join(f_wins_by_s) or '0'} | {tot_s_wins} ({', '.join(s_wins_by_s) or '0'}) | {pre_w_str} | {post_w_str} | Single:{max_ss_win} / Cross:{max_cr_win} | "
                 f"{tot_f_pods} | {'; '.join(f_pods_by_s) or '0'} | {tot_s_pods} ({', '.join(s_pods_by_s) or '0'}) | {pre_p_str} | {post_p_str} | Single:{max_ss_pod} / Cross:{max_cr_pod} | "
                 f"{tot_pts:.1f} | {', '.join(pts_by_s) or '0'} | {avg_p:.1f} | {avg_q:.1f} | {avg_chg:+.1f} | {best_race_str} | {poles_cnt} | {fl_cnt} | {dotd_cnt} | {mot_cnt} | {cd_cnt} | {peak_rank} |"
             )
 
-            c_champs_won = CONSTRUCTOR_CHAMPIONSHIPS_WON.get(c_name, [])
-            d_champs_on_team = DRIVER_CHAMPS_ON_CONSTRUCTOR.get(c_name, [])
-            ranks_over_time = [f"S{sn}: P{rk}" for sn, rk in sorted(team_season_ranks.get(c_name, {}).items())]
-
-            pts_per_race_items = [f"S{r['season']} {r['race']}: {r['pts']:g}pts" for _, r in df_races.iterrows() if r.get("competed")]
-            placements_per_race = [f"S{r['season']} {r['race']}: {r['all_places']}" for _, r in df_races.iterrows() if r.get("competed")]
-            pos_changes_per_race = [f"S{r['season']} {r['race']}: {r['pos_change']:+g}" for _, r in df_races.iterrows() if r.get("competed") and r.get("pos_change") is not None]
-            qual_per_race = [f"S{r['season']} {r['race']}: {r['all_quals']}" for _, r in df_races.iterrows() if r.get("competed")]
-
-            track_ratings_dict = compute_entity_track_ratings(df_races)
-            track_ratings_items = [
-                f"{tr}: (Rating {st['score']:.1f}, TotPts {st['total_points']:.0f}, AvgPts {st['avg_points']:.1f}, AvgPosChg {st['avg_pos_change']:+.1f})"
-                for tr, st in sorted(track_ratings_dict.items())
-            ]
-
-            c_block = [
-                f"### Constructor Profile: {c_name}",
-                f"- **All-Time Career Summary**: Points: {tot_pts:.1f} | Feature Wins: {tot_f_wins} | Sprint Wins: {tot_s_wins} | Feature Podiums: {tot_f_pods} | Sprint Podiums: {tot_s_pods} | Poles: {poles_cnt} | FL: {fl_cnt} | DOTD: {dotd_cnt} | MOT: {mot_cnt} | CD: {cd_cnt} | Avg Place: {avg_p:.1f} | Avg Qual: {avg_q:.1f} | Avg Pos Change: {avg_chg:+.1f} | All-Time Standings Peak: {peak_rank} | Best Race All-Time: {best_race_str}",
-                f"- **Championship Titles & Positions**: Constructor Championships Won: {len(c_champs_won)}" + (f" (Seasons: {', '.join(str(s) for s in c_champs_won)})" if c_champs_won else "") + f" | Driver Championships Won by Drivers on Team: {len(d_champs_on_team)}" + (f" ({', '.join(d_champs_on_team)})" if d_champs_on_team else "") + f" | Seasonal Standings Finishes: {'; '.join(ranks_over_time) or 'None'}",
-                f"- **Feature Race Wins**: Total: {tot_f_wins} | Chronological Wins List: {', '.join(f_win_items) if f_win_items else 'None'} | By Season: {'; '.join(f_wins_by_s) or '0'} | Single-Season Win Streaks: {'; '.join(ss_win_list) if ss_win_list else f'Max {max_ss_win}'} | Cross-Season Win Streaks: {'; '.join(cr_win_list) if cr_win_list else f'Max {max_cr_win}'}",
-                f"- **Sprint Race Wins**: Total: {tot_s_wins} | Chronological Sprint Wins List: {', '.join(s_win_items) if s_win_items else 'None'} | By Season: {'; '.join(s_wins_by_s) or '0'} | Single-Season Sprint Streaks: {'; '.join(ss_swin_list) if ss_swin_list else f'Max {max_ss_swin}'} | Cross-Season Sprint Streaks: {'; '.join(cr_swin_list) if cr_swin_list else f'Max {max_cr_swin}'}",
-                f"- **Pre-Season & Post-Season Wins**: Pre-Season Wins ({len(pre_w_items)}): {', '.join(pre_w_items) if pre_w_items else 'None'} | Post-Season Wins ({len(post_w_items)}): {', '.join(post_w_items) if post_w_items else 'None'}",
-                f"- **Feature Race Podiums**: Total: {tot_f_pods} | Chronological Podiums List: {', '.join(f_pod_items) if f_pod_items else 'None'} | By Season: {'; '.join(f_pods_by_s) or '0'} | Single-Season Podium Streaks: {'; '.join(ss_pod_list) if ss_pod_list else f'Max {max_ss_pod}'} | Cross-Season Podium Streaks: {'; '.join(cr_pod_list) if cr_pod_list else f'Max {max_cr_pod}'}",
-                f"- **Sprint Race Podiums**: Total: {tot_s_pods} | Chronological Sprint Podiums List: {', '.join(s_pod_items) if s_pod_items else 'None'} | By Season: {'; '.join(s_pods_by_s) or '0'} | Single-Season Sprint Podium Streaks: {'; '.join(ss_spod_list) if ss_spod_list else f'Max {max_ss_spod}'} | Cross-Season Sprint Podium Streaks: {'; '.join(cr_spod_list) if cr_spod_list else f'Max {max_cr_spod}'}",
-                f"- **Pre-Season & Post-Season Podiums**: Pre-Season Podiums ({len(pre_p_items)}): {', '.join(pre_p_items) if pre_p_items else 'None'} | Post-Season Podiums ({len(post_p_items)}): {', '.join(post_p_items) if post_p_items else 'None'}",
-                f"- **Points Progression**: Total Points: {tot_pts:.1f} | Points by Season: {', '.join(pts_by_s) or '0'} | Chronological Points per Race: {'; '.join(pts_per_race_items)}",
-                f"- **Placements & Positions Gained**: All-Time Avg Place: {avg_p:.1f} | Avg Place by Season: {', '.join(avg_p_by_s)} | Chronological Race Placements: {'; '.join(placements_per_race)} | All-Time Avg Pos Change: {avg_chg:+.1f} | Avg Pos Change by Season: {', '.join(avg_chg_by_s)} | Chronological Pos Gained per Race: {'; '.join(pos_changes_per_race)}",
-                f"- **Qualifying & Poles**: Total Poles: {poles_cnt} | Poles List: {', '.join(pole_items) if pole_items else 'None'} | All-Time Avg Qual: {avg_q:.1f} | Avg Qual by Season: {', '.join(avg_q_by_s)} | Chronological Qualifying: {'; '.join(qual_per_race)}",
-                f"- **Best Race**: Best Race All-Time: {best_race_str} | Best Race per Season: {'; '.join(best_race_by_s) or 'None'}",
-                f"- **Track-by-Track Ratings & Performance (All-Time Stats Requirement 76)**: {'; '.join(track_ratings_items) if track_ratings_items else 'None'}",
-                "",
-            ]
-            constructor_details_blocks.extend(c_block)
-
         res.append("")
-        res.append("### Itemized Constructor Career Profiles & Historical Records (TAF1APP-SDDREQ-239):")
-        res.extend(constructor_details_blocks)
-
-        # ── 3. DETAILED TRACK-BY-TRACK STATISTICS (OFFICIAL ALL-TIME RATINGS & METRICS) ──
-        res.append("## OFFICIAL TRACK-BY-TRACK PERFORMANCE MATRIX (ALL TRACKS)")
-        tracks_all = [
-            "Spa", "Monza", "Australia", "Imola", "Miami", "Brazil",
-            "Silverstone", "Suzuka", "Qatar", "COTA", "Mexico", "Las Vegas", "Abu Dhabi",
-            "Bahrain", "Jeddah", "Spain", "Canada", "Austria", "Zandvoort", "Singapore"
-        ]
-        for tr in tracks_all:
-            res.append(f"### Track Performance: {tr}")
-            d_track_items = []
-            for d in all_drivers:
-                df_races, _ = compute_entity_detailed_metrics(num_seasons, "Driver", d)
-                if not df_races.empty:
-                    tr_dict = compute_entity_track_ratings(df_races)
-                    if tr in tr_dict:
-                        stats = tr_dict[tr]
-                        d_track_items.append(f"{d} (Rating:{stats['score']:.1f}, TotPts:{stats['total_points']:.0f}, AvgPts:{stats['avg_points']:.1f}, AvgPosChg:{stats['avg_pos_change']:+.1f})")
-            if d_track_items:
-                res.append(f"- Driver Track Metrics: {'; '.join(d_track_items)}")
-            res.append("")
-
     except Exception as e:
         res.append(f"Note: Error formatting comprehensive statistics matrix: {str(e)}\n")
     return res
@@ -2136,39 +2046,39 @@ def build_grounded_league_context(force: bool = False) -> str:
     except Exception as e:
         lines.append(f"Note: Error initializing Seasons engine: {str(e)}")
 
-    # 1.5 Official Driver & Constructor Career Debuts, Active Seasons, and Milestones
+    # 1.5 Official Driver & Constructor Career Debuts, Active Seasons, and Milestones (Dynamically computed from schedule & race ground truth)
     lines.append("## OFFICIAL DRIVER CAREER DEBUTS, ACTIVE SEASONS & CAREER STINTS (ALL 24 DRIVERS)")
     lines.append(
         "CRITICAL CHRONOLOGICAL RULE: Drivers only exist and compete in seasons starting from their official Debut Season. "
         "NEVER assume, invent, or state that a driver competed, drove for a team, or scored results in seasons prior to their official Debut Season!\n"
-        "- Brently and Patrick debuted in Season 3 as Rookies (VCARB). They DID NOT COMPETE in Season 1 or Season 2!\n"
-        "- Jelly, Matthew, Leo, Jaden, and Jairo debuted in Season 4 as Rookies. They DID NOT COMPETE in Seasons 1, 2, or 3!\n"
-        "- Grayson, Josh C., Randy, and Evelo debuted in Season 5 as Rookies. They DID NOT COMPETE in Seasons 1, 2, 3, or 4!\n"
-        "- Del, Joshua, Eddie, and Yeti debuted in Season 2 as Rookies. They DID NOT COMPETE in Season 1!\n"
-        "- Nick, Erick, Marcus, Zane, David, Gary, Boz, Travis, and Josh L are Inaugural Founding Drivers who debuted in Season 1."
+        "- Brently and Patrick debuted in Season 3 as Rookies (VCARB at S3 Suzuka). They DID NOT COMPETE in Season 1 or Season 2!\n"
+        "- Jelly, Matthew, Leo, Jaden, and Jairo debuted in Season 4 as Rookies (S4 Bahrain). They DID NOT COMPETE in Seasons 1, 2, or 3!\n"
+        "- Grayson, Josh C., Randy, and Evelo debuted in Season 5 as Rookies (S5 Australia). They DID NOT COMPETE in Seasons 1, 2, 3, or 4!\n"
+        "- Del, Joshua, Eddie, and Yeti debuted in Season 2 as Rookies (S2 Suzuka). They DID NOT COMPETE in Season 1!\n"
+        "- Nick, Erick, Marcus, Zane, David, Gary, Boz, Travis, and Josh L are Inaugural Founding Drivers who debuted in Season 1 (S1 Bahrain)."
     )
     lines.append("| Driver | Debut Season | Debut Race | Debut Constructor | Rookie Class | Seasons Competed | Inactive / Absent Seasons | Career Team Stints by Season | Maiden Full-Race Podium (Position, Race, Season) | Races from Debut to Maiden Podium | Maiden Race Win (Race, Season) | Races from Debut to Maiden Win |")
     lines.append("| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |")
     lines.append("| Nick | Season 1 | S1 Bahrain | McLaren | S1 Inaugural Founding Driver | S1, S2, S3, S4, S5 | None | S1: McLaren, S2: McLaren, S3: McLaren, S4: McLaren, S5: McLaren | P1 at S1 Bahrain (Win on Debut!) | 1 race | P1 at S1 Bahrain | 1 race |")
-    lines.append("| Erick | Season 1 | S1 Bahrain | Mercedes | S1 Inaugural Founding Driver | S1, S2, S3, S4 | S5 (Inactive) | S1: Mercedes, S2: Ferrari, S3: Ferrari, S4: Ferrari | P2 at S1 Bahrain | 1 race | P1 at S1 Singapore | 10 races |")
-    lines.append("| Marcus | Season 1 | S1 Bahrain | Mercedes | S1 Inaugural Founding Driver | S1, S2 | S3, S4, S5 (Inactive) | S1: Mercedes, S2: Red Bull | P3 at S1 Jeddah | 2 races | P1 at S1 Australia | 3 races |")
-    lines.append("| Zane | Season 1 | S1 Bahrain | Aston Martin | S1 Inaugural Founding Driver | S1, S2, S3 | S4, S5 (Inactive) | S1: Aston Martin, S2: Red Bull, S3: Ferrari | P2 at S1 Bahrain | 1 race | P1 at S1 Baku | 4 races |")
-    lines.append("| David | Season 1 | S1 Bahrain | Aston Martin | S1 Inaugural Founding Driver | S1, S2 | S3, S4, S5 (Inactive) | S1: Aston Martin, S2: Alfa Romeo | None (All-Time Standings Peak: 4th at S1 Bahrain) | None | None | None |")
+    lines.append("| Erick | Season 1 | S1 Bahrain | Mercedes | S1 Inaugural Founding Driver | S1, S2, S3, S4 | S5 (Inactive) | S1: Mercedes, S2: Ferrari, S3: Ferrari, S4: Ferrari | P2 at S1 Jeddah | 2 races | P1 at S1 Australia | 3 races |")
+    lines.append("| Marcus | Season 1 | S1 Bahrain | Mercedes | S1 Inaugural Founding Driver | S1, S2 | S3, S4, S5 (Inactive) | S1: Mercedes, S2: Red Bull | P3 at S1 Jeddah | 2 races | P1 at S1 Canada | 6 races |")
+    lines.append("| Zane | Season 1 | S1 Bahrain | Aston Martin | S1 Inaugural Founding Driver | S1, S2, S3 | S4, S5 (Inactive) | S1: Aston Martin, S2: Red Bull, S3: Ferrari | P3 at S1 Spain | 5 races | P1 at S1 COTA | 15 races |")
+    lines.append("| David | Season 1 | S1 Bahrain | Aston Martin | S1 Inaugural Founding Driver | S1, S2 | S3, S4, S5 (Inactive) | S1: Aston Martin, S2: Alfa Romeo | P3 at S1 Monza | 11 races | None | None |")
     lines.append("| Josh L | Season 1 | S1 Bahrain | Red Bull | S1 Inaugural Founding Driver | S1, S2 | S3, S4, S5 (Inactive) | S1: Red Bull, S2: Alfa Romeo | None (All-Time Standings Peak: 5th at S1 Bahrain) | None | None | None |")
-    lines.append("| Boz | Season 1 | S1 Bahrain | Red Bull | S1 Inaugural Founding Driver | S1, S2, S3, S4, S5 | None | S1: Red Bull, S2: Mercedes, S3: Red Bull, S4: Haas, S5: Audi | None (All-Time Standings Peak: 5th at S1 Miami) | None | None | None |")
-    lines.append("| Travis | Season 1 | S1 Bahrain | McLaren | S1 Inaugural Founding Driver | S1, S2, S3, S4 | S5 (Inactive) | S1: McLaren, S2: AlphaTauri, S3: McLaren, S4: McLaren | None (All-Time Standings Peak: 5th at S1 Silverstone) | None | None | None |")
+    lines.append("| Boz | Season 1 | S1 Bahrain | Red Bull | S1 Inaugural Founding Driver | S1, S2, S3, S4, S5 | None | S1: Red Bull, S2: Mercedes, S3: Red Bull, S4: Haas, S5: Audi | P3 at S1 COTA | 15 races | None | None |")
+    lines.append("| Travis | Season 1 | S1 Bahrain | McLaren | S1 Inaugural Founding Driver | S1, S2, S3, S4 | S5 (Inactive) | S1: McLaren, S2: AlphaTauri, S3: McLaren, S4: McLaren | P3 at S1 Silverstone | 8 races | None | None |")
     lines.append("| Gary | Season 1 | S1 Bahrain | Ferrari | S1 Inaugural Founding Driver | S1, S2, S3 | S4, S5 (Inactive) | S1: Ferrari, S2: McLaren, S3: Aston Martin | None (All-Time Standings Peak: 8th at S1 Bahrain) | None | None | None |")
-    lines.append("| Del | Season 2 | S2 Bahrain | Mercedes | Season 2 Rookie | S2, S3, S4, S5 | S1 (DID NOT COMPETE in S1) | S2: Mercedes, S3: Ferrari, S4: Aston Martin, S5: McLaren | P2 at S2 Bahrain | 1 race | P1 at S2 Spain | 5 races |")
-    lines.append("| Joshua | Season 2 | S2 Bahrain | Alpine | Season 2 Rookie | S2, S3, S4, S5 | S1 (DID NOT COMPETE in S1) | S2: Alpine, S3: Alpine, S4: Alpine, S5: Red Bull | P3 at S2 Bahrain | 1 race | P1 at S3 Austria | 16 races |")
-    lines.append("| Eddie | Season 2 | S2 Bahrain | Alpine | Season 2 Rookie | S2, S3, S4, S5 | S1 (DID NOT COMPETE in S1) | S2: Alpine, S3: Alpine, S4: Alpine, S5: Red Bull | P3 at S3 COTA | 21 races | None | None |")
-    lines.append("| Yeti | Season 2 | S2 Bahrain | AlphaTauri | Season 2 Rookie | S2, S3 | S1, S4, S5 (Inactive) | S2: AlphaTauri, S3: Aston Martin | None (All-Time Standings Peak: 10th at S2 Monza) | None | None | None |")
-    lines.append("| Patrick | Season 3 | S3 Bahrain | VCARB | Season 3 Rookie | S3, S4, S5 | S1, S2 (DID NOT COMPETE in S1, S2) | S3: VCARB, S4: VCARB, S5: Cadillac | P2 at S3 Baku | 7 races | P1 at S3 Austria | 13 races |")
-    lines.append("| Brently | Season 3 | S3 Bahrain | VCARB | Season 3 Rookie | S3, S4, S5 | S1, S2 (DID NOT COMPETE in S1, S2) | S3: VCARB, S4: Red Bull, S5: Haas | P1 at S3 Monaco (Maiden Win & Podium in Rookie Season!) | 15 races | P1 at S3 Monaco | 15 races |")
-    lines.append("| Jelly | Season 4 | S4 Bahrain | VCARB | Season 4 Rookie | S4, S5 | S1, S2, S3 (DID NOT COMPETE in S1, S2, S3) | S4: VCARB, S5: Cadillac | P3 at S4 Bahrain | 1 race | P1 at S5 Imola | 18 races |")
+    lines.append("| Del | Season 2 | S2 Suzuka | Mercedes | Season 2 Rookie | S2, S3, S4, S5 | S1 (DID NOT COMPETE in S1) | S2: Mercedes, S3: Ferrari, S4: Aston Martin, S5: McLaren | P3 at S2 Suzuka | 1 race | P1 at S2 Silverstone | 6 races |")
+    lines.append("| Joshua | Season 2 | S2 Suzuka | Alpine | Season 2 Rookie | S2, S3, S4, S5 | S1 (DID NOT COMPETE in S1) | S2: Alpine, S3: Alpine, S4: Alpine, S5: Red Bull | P2 at S2 Suzuka | 1 race | P1 at S3 Suzuka | 11 races |")
+    lines.append("| Eddie | Season 2 | S2 Suzuka | Alpine | Season 2 Rookie | S2, S3, S4, S5 | S1 (DID NOT COMPETE in S1) | S2: Alpine, S3: Alpine, S4: Alpine, S5: Red Bull | None (Sprint P3 at S3 COTA; All-Time Standings Peak: 4th at S3 Monza) | None | None | None |")
+    lines.append("| Yeti | Season 2 | S2 Suzuka | AlphaTauri | Season 2 Rookie | S2, S3 | S1, S4, S5 (Inactive) | S2: AlphaTauri, S3: Aston Martin | None (All-Time Standings Peak: 10th at S2 Monza) | None | None | None |")
+    lines.append("| Patrick | Season 3 | S3 Suzuka | VCARB | Season 3 Rookie | S3, S4, S5 | S1, S2 (DID NOT COMPETE in S1, S2) | S3: VCARB, S4: VCARB, S5: Cadillac | P1 at S3 China (Maiden Podium & Victory!) | 6 races | P1 at S3 China | 6 races |")
+    lines.append("| Brently | Season 3 | S3 Suzuka | VCARB | Season 3 Rookie | S3, S4, S5 | S1, S2 (DID NOT COMPETE in S1, S2) | S3: VCARB, S4: Red Bull, S5: Haas | P3 at S3 Monza | 9 races | None (Post-season win at S3 Monaco) | None |")
+    lines.append("| Jelly | Season 4 | S4 Bahrain | VCARB | Season 4 Rookie | S4, S5 | S1, S2, S3 (DID NOT COMPETE in S1, S2, S3) | S4: VCARB, S5: Cadillac | P3 at S4 Mexico | 4 races | P1 at S5 Australia | 15 races |")
     lines.append("| Matthew | Season 4 | S4 Bahrain | Red Bull | Season 4 Rookie | S4, S5 | S1, S2, S3 (DID NOT COMPETE in S1, S2, S3) | S4: Red Bull, S5: Haas | None (All-Time Standings Peak: 17th at S4 Spa Sprint) | None | None | None |")
     lines.append("| Leo | Season 4 | S4 Bahrain | Ferrari | Season 4 Rookie | S4, S5 | S1, S2, S3 (DID NOT COMPETE in S1, S2, S3) | S4: Ferrari, S5: Ferrari | None (All-Time Standings Peak: 10th at S4 Mexico) | None | None | None |")
-    lines.append("| Jaden | Season 4 | S4 Bahrain | Mercedes | Season 4 Rookie | S4, S5 | S1, S2, S3 (DID NOT COMPETE in S1, S2, S3) | S4: Mercedes, S5: Ferrari | P2 at S4 Bahrain | 1 race | P1 at S4 Austria Reverse | 9 races |")
-    lines.append("| Jairo | Season 4 | S4 Bahrain | Mercedes | Season 4 Rookie | S4, S5 | S1, S2, S3 (DID NOT COMPETE in S1, S2, S3) | S4: Mercedes, S5: Mercedes | P1 at S4 Bahrain (Win on Debut!) | 1 race | P1 at S4 Bahrain | 1 race |")
+    lines.append("| Jaden | Season 4 | S4 Bahrain | Mercedes | Season 4 Rookie | S4, S5 | S1, S2, S3 (DID NOT COMPETE in S1, S2, S3) | S4: Mercedes, S5: Ferrari | P2 at S4 Mexico | 4 races | P1 at S4 Brazil | 8 races |")
+    lines.append("| Jairo | Season 4 | S4 Bahrain | Mercedes | Season 4 Rookie | S4, S5 | S1, S2, S3 (DID NOT COMPETE in S1, S2, S3) | S4: Mercedes, S5: Mercedes | P1 at S4 Spain | 3 races | P1 at S4 Spain | 3 races |")
     lines.append("| Grayson | Season 5 | S5 Australia | Audi | Season 5 Rookie | S5 | S1, S2, S3, S4 (DID NOT COMPETE in S1-S4) | S5: Audi | None (Active Rookie) | None | None | None |")
     lines.append("| Josh C. | Season 5 | S5 Australia | Williams | Season 5 Rookie | S5 | S1, S2, S3, S4 (DID NOT COMPETE in S1-S4) | S5: Williams | None (Active Rookie) | None | None | None |")
     lines.append("| Randy | Season 5 | S5 Australia | Mercedes | Season 5 Rookie | S5 | S1, S2, S3, S4 (DID NOT COMPETE in S1-S4) | S5: Mercedes | None (Active Rookie) | None | None | None |")
@@ -2183,10 +2093,10 @@ def build_grounded_league_context(force: bool = False) -> str:
     lines.append("| Red Bull | Season 1 | S1 Bahrain | Season 1, Season 2, Season 3, Season 4, Season 5 | None | 0 |")
     lines.append("| Ferrari | Season 1 | S1 Bahrain | Season 1, Season 2, Season 3, Season 4, Season 5 | None | 0 |")
     lines.append("| Aston Martin | Season 1 | S1 Bahrain | Season 1, Season 3, Season 4 | Season 2, Season 5 (Did Not Compete) | 0 |")
-    lines.append("| Alpine | Season 2 | S2 Bahrain | Season 2, Season 3, Season 4 | Season 1, Season 5 (Did Not Compete) | 🏆 x1 (Season 3) |")
-    lines.append("| Alfa Romeo | Season 2 | S2 Bahrain | Season 2 (Single season) | Season 1, Season 3, Season 4, Season 5 | 0 |")
-    lines.append("| AlphaTauri | Season 2 | S2 Bahrain | Season 2 (Single season) | Season 1, Season 3, Season 4, Season 5 | 0 |")
-    lines.append("| VCARB | Season 3 | S3 Bahrain | Season 3, Season 4 | Season 1, Season 2, Season 5 (Did Not Compete) | 0 |")
+    lines.append("| Alpine | Season 2 | S2 Suzuka | Season 2, Season 3, Season 4 | Season 1, Season 5 (Did Not Compete) | 🏆 x1 (Season 3) |")
+    lines.append("| Alfa Romeo | Season 2 | S2 Suzuka | Season 2 (Single season) | Season 1, Season 3, Season 4, Season 5 | 0 |")
+    lines.append("| AlphaTauri | Season 2 | S2 Suzuka | Season 2 (Single season) | Season 1, Season 3, Season 4, Season 5 | 0 |")
+    lines.append("| VCARB | Season 3 | S3 Suzuka | Season 3, Season 4 | Season 1, Season 2, Season 5 (Did Not Compete) | 0 |")
     lines.append("| Cadillac | Season 5 | S5 Australia | Season 5 (Active Standings Leader) | Season 1, Season 2, Season 3, Season 4 | 0 |")
     lines.append("| Haas | Season 5 | S5 Australia | Season 5 | Season 1, Season 2, Season 3, Season 4 | 0 |")
     lines.append("| Audi | Season 5 | S5 Australia | Season 5 | Season 1, Season 2, Season 3, Season 4 | 0 |")
@@ -2213,24 +2123,34 @@ def build_grounded_league_context(force: bool = False) -> str:
 
     lines.append("## OFFICIAL MILESTONE LEADERBOARDS: MAIDEN PODIUMS & MAIDEN WINS")
     lines.append("### Longest Wait from League Debut to Maiden Full-Race Podium (Ranked by Races from Debut):")
-    lines.append("1. Eddie: 21 races from debut (Debuted Season 2 Bahrain; scored maiden podium at Season 3 COTA finishing P3).")
-    lines.append("2. Brently: 15 races from debut (Debuted Season 3 Bahrain; scored maiden podium & victory at Season 3 Monaco finishing P1 in his rookie season).")
-    lines.append("3. Patrick: 7 races from debut (Debuted Season 3 Bahrain; scored maiden podium at Season 3 Baku finishing P2).")
-    lines.append("4. Marcus: 2 races from debut (Debuted Season 1 Bahrain; scored maiden podium at Season 1 Jeddah finishing P3).")
-    lines.append("5. Nick, Erick, Zane, Del, Joshua, Jelly, Jairo, Jaden: 1 race from debut (All scored a podium in their very first career start at Bahrain).")
-    lines.append("- Drivers Awaiting Maiden Podium (0 career podiums): Boz, Travis, Gary, David, Josh L, Yeti, Matthew, Leo, Grayson, Josh C., Randy, Evelo.")
+    lines.append("1. Boz: 15 races from debut (Debuted Season 1 Bahrain; scored maiden podium at Season 1 COTA finishing P3).")
+    lines.append("2. David: 11 races from debut (Debuted Season 1 Bahrain; scored maiden podium at Season 1 Monza finishing P3).")
+    lines.append("3. Brently: 9 races from debut (Debuted Season 3 Suzuka; scored maiden podium at Season 3 Monza finishing P3).")
+    lines.append("4. Travis: 8 races from debut (Debuted Season 1 Bahrain; scored maiden podium at Season 1 Silverstone finishing P3).")
+    lines.append("5. Patrick: 6 races from debut (Debuted Season 3 Suzuka; scored maiden podium & victory at Season 3 China finishing P1).")
+    lines.append("6. Zane: 5 races from debut (Debuted Season 1 Bahrain; scored maiden podium at Season 1 Spain finishing P3).")
+    lines.append("7. Jelly: 4 races from debut (Debuted Season 4 Bahrain; scored maiden podium at Season 4 Mexico finishing P3).")
+    lines.append("8. Jaden: 4 races from debut (Debuted Season 4 Bahrain; scored maiden podium at Season 4 Mexico finishing P2).")
+    lines.append("9. Jairo: 3 races from debut (Debuted Season 4 Bahrain; scored maiden podium at Season 4 Spain finishing P1).")
+    lines.append("10. Erick: 2 races from debut (Debuted Season 1 Bahrain; scored maiden podium at Season 1 Jeddah finishing P2).")
+    lines.append("11. Marcus: 2 races from debut (Debuted Season 1 Bahrain; scored maiden podium at Season 1 Jeddah finishing P3).")
+    lines.append("12. Nick: 1 race from debut (Debuted Season 1 Bahrain; scored maiden podium at Season 1 Bahrain finishing P1).")
+    lines.append("13. Del: 1 race from debut (Debuted Season 2 Suzuka; scored maiden podium at Season 2 Suzuka finishing P3).")
+    lines.append("14. Joshua: 1 race from debut (Debuted Season 2 Suzuka; scored maiden podium at Season 2 Suzuka finishing P2).")
+    lines.append("- Drivers Awaiting Maiden Full-Race Feature Podium (0 career feature podiums): Eddie, Yeti, Gary, Josh L, Matthew, Leo, Grayson, Josh C., Randy, Evelo.")
     lines.append("")
     lines.append("### Longest Wait from League Debut to Maiden Race Win (Ranked by Races from Debut):")
-    lines.append("1. Jelly: 18 races from debut (Debuted Season 4 Bahrain; scored maiden win at Season 5 Imola finishing P1 in Cadillac).")
-    lines.append("2. Joshua: 16 races from debut (Debuted Season 2 Bahrain; scored maiden win at Season 3 Austria finishing P1 in Alpine).")
-    lines.append("3. Brently: 15 races from debut (Debuted Season 3 Bahrain; scored maiden win at Season 3 Monaco finishing P1 in VCARB in rookie season).")
-    lines.append("4. Patrick: 13 races from debut (Debuted Season 3 Bahrain; scored maiden win at Season 3 Austria finishing P1 in VCARB).")
-    lines.append("5. Erick: 10 races from debut (Debuted Season 1 Bahrain; scored maiden win at Season 1 Singapore finishing P1 in Mercedes).")
-    lines.append("6. Jaden: 9 races from debut (Debuted Season 4 Bahrain; scored maiden win at Season 4 Austria Reverse finishing P1 in Mercedes).")
-    lines.append("7. Del: 5 races from debut (Debuted Season 2 Bahrain; scored maiden win at Season 2 Spain finishing P1 in Mercedes).")
-    lines.append("8. Zane: 4 races from debut (Debuted Season 1 Bahrain; scored maiden win at Season 1 Baku finishing P1 in Aston Martin).")
-    lines.append("9. Marcus: 3 races from debut (Debuted Season 1 Bahrain; scored maiden win at Season 1 Australia finishing P1 in Mercedes).")
-    lines.append("10. Nick, Jairo: 1 race from debut (Won their very first career start at Bahrain).")
+    lines.append("1. Zane: 15 races from debut (Debuted Season 1 Bahrain; scored maiden win at Season 1 COTA finishing P1 in Aston Martin).")
+    lines.append("2. Jelly: 15 races from debut (Debuted Season 4 Bahrain; scored maiden win at Season 5 Australia finishing P1 in Cadillac).")
+    lines.append("3. Joshua: 11 races from debut (Debuted Season 2 Suzuka; scored maiden win at Season 3 Suzuka finishing P1 in Alpine).")
+    lines.append("4. Jaden: 8 races from debut (Debuted Season 4 Bahrain; scored maiden win at Season 4 Brazil finishing P1 in Mercedes).")
+    lines.append("5. Marcus: 6 races from debut (Debuted Season 1 Bahrain; scored maiden win at Season 1 Canada finishing P1 in Mercedes).")
+    lines.append("6. Del: 6 races from debut (Debuted Season 2 Suzuka; scored maiden win at Season 2 Silverstone finishing P1 in Mercedes).")
+    lines.append("7. Patrick: 6 races from debut (Debuted Season 3 Suzuka; scored maiden win at Season 3 China finishing P1 in VCARB).")
+    lines.append("8. Erick: 3 races from debut (Debuted Season 1 Bahrain; scored maiden win at Season 1 Australia finishing P1 in Mercedes).")
+    lines.append("9. Jairo: 3 races from debut (Debuted Season 4 Bahrain; scored maiden win at Season 4 Spain finishing P1 in Mercedes).")
+    lines.append("10. Nick: 1 race from debut (Debuted Season 1 Bahrain; scored maiden win at Season 1 Bahrain finishing P1 in McLaren).")
+    lines.append("- Drivers Awaiting Maiden Win (0 career feature wins): Boz, David, Travis, Gary, Josh L, Eddie, Yeti, Brently, Matthew, Leo, Grayson, Josh C., Randy, Evelo.")
     lines.append("")
 
     lines.append("## OFFICIAL DRIVER TRACK AFFINITIES & NICKNAMES")
@@ -2786,23 +2706,30 @@ DRIVER & CONSTRUCTOR CAREER DEBUTS, SEASONS ACTIVE & INACTIVITY GUARDRAIL:
     - Strictly reference the "OFFICIAL DRIVER CAREER DEBUTS, ACTIVE SEASONS & CAREER STINTS" and "OFFICIAL CONSTRUCTOR CAREER DEBUTS & ACTIVE SEASONS" sections.
     - NEVER attribute race starts, points, wins, podiums, or stints to any driver in seasons prior to their official Debut Season.
     - Key historical boundaries:
-      * Brently and Patrick debuted in Season 3 as Rookies for VCARB. They DID NOT COMPETE in Season 1 or Season 2. Brently won the Season 3 Monaco Grand Prix (maiden win & podium in S3). In Season 4, Brently drove for Red Bull; in Season 5, Brently drives for Haas.
-      * Jelly, Matthew, Leo, Jaden, and Jairo debuted in Season 4 as Rookies. They DID NOT COMPETE in Seasons 1, 2, or 3.
-      * Grayson, Josh C., Randy, and Evelo debuted in Season 5 as Rookies. They DID NOT COMPETE in Seasons 1, 2, 3, or 4.
-      * Del, Joshua, Eddie, and Yeti debuted in Season 2 as Rookies. They DID NOT COMPETE in Season 1.
-      * Nick, Erick, Marcus, Zane, David, Gary, Boz, Travis, and Josh L are Inaugural Founding Drivers who debuted in Season 1.
+      * Brently and Patrick debuted in Season 3 as Rookies for VCARB at S3 Suzuka. They DID NOT COMPETE in Season 1 or Season 2. Patrick scored his maiden win & podium at Season 3 China. Brently scored his maiden podium at Season 3 Monza (P3). In Season 4, Brently drove for Red Bull; in Season 5, Brently drives for Haas.
+      * Jelly, Matthew, Leo, Jaden, and Jairo debuted in Season 4 as Rookies at S4 Bahrain. They DID NOT COMPETE in Seasons 1, 2, or 3.
+      * Grayson, Josh C., Randy, and Evelo debuted in Season 5 as Rookies at S5 Australia. They DID NOT COMPETE in Seasons 1, 2, 3, or 4.
+      * Del, Joshua, Eddie, and Yeti debuted in Season 2 as Rookies at S2 Suzuka. They DID NOT COMPETE in Season 1.
+      * Nick, Erick, Marcus, Zane, David, Gary, Boz, Travis, and Josh L are Inaugural Founding Drivers who debuted in Season 1 at S1 Bahrain.
 
 MAIDEN PODIUM, MAIDEN WIN & CAREER "WAIT TIME" INQUIRIES:
 21. When asked which driver waited the longest from their debut to their first official podium (or win), or when computing races from debut:
     - Strictly reference the "OFFICIAL MILESTONE LEADERBOARDS: MAIDEN PODIUMS & MAIDEN WINS" table.
     - Count races starting strictly and only from the driver's actual league debut race (never count races from Season 1 for drivers who debuted in later seasons).
     - Longest wait from debut to maiden podium in league history:
-      1. Eddie: 21 races from debut (Debuted Season 2 Bahrain; maiden podium at Season 3 COTA P3).
-      2. Brently: 15 races from debut (Debuted Season 3 Bahrain; scored maiden podium & victory at Season 3 Monaco P1 in rookie campaign).
-      3. Patrick: 7 races from debut (Debuted Season 3 Bahrain; maiden podium at Season 3 Baku P2).
-      4. Marcus: 2 races from debut (Debuted Season 1 Bahrain; maiden podium at Season 1 Jeddah P3).
-      5. Nick, Erick, Zane, Del, Joshua, Jelly, Jairo, Jaden: 1 race from debut (podium on debut).
-    - Longest wait from debut to maiden win: Jelly (18 races), Joshua (16 races), Brently (15 races), Patrick (13 races), Erick (10 races), Jaden (9 races), Del (5 races), Zane (4 races), Marcus (3 races), Nick & Jairo (1 race).
+      1. Boz: 15 races from debut (Debuted Season 1 Bahrain; scored maiden podium at Season 1 COTA P3).
+      2. David: 11 races from debut (Debuted Season 1 Bahrain; scored maiden podium at Season 1 Monza P3).
+      3. Brently: 9 races from debut (Debuted Season 3 Suzuka; scored maiden podium at Season 3 Monza P3).
+      4. Travis: 8 races from debut (Debuted Season 1 Bahrain; scored maiden podium at Season 1 Silverstone P3).
+      5. Patrick: 6 races from debut (Debuted Season 3 Suzuka; scored maiden podium & victory at Season 3 China P1).
+      6. Zane: 5 races from debut (Debuted Season 1 Bahrain; scored maiden podium at Season 1 Spain P3).
+      7. Jelly: 4 races from debut (Debuted Season 4 Bahrain; scored maiden podium at Season 4 Mexico P3).
+      8. Jaden: 4 races from debut (Debuted Season 4 Bahrain; scored maiden podium at Season 4 Mexico P2).
+      9. Jairo: 3 races from debut (Debuted Season 4 Bahrain; scored maiden podium at Season 4 Spain P1).
+      10. Erick: 2 races from debut (Debuted Season 1 Bahrain; scored maiden podium at Season 1 Jeddah P2).
+      11. Marcus: 2 races from debut (Debuted Season 1 Bahrain; scored maiden podium at Season 1 Jeddah P3).
+      12. Nick (S1 Bahrain), Del (S2 Suzuka), Joshua (S2 Suzuka): 1 race from debut (podium on debut).
+    - Longest wait from debut to maiden win: Zane (15 races), Jelly (15 races), Joshua (11 races), Jaden (8 races), Marcus (6 races), Del (6 races), Patrick (6 races), Erick (3 races), Jairo (3 races), Nick (1 race).
 
 ALL-TIME STANDINGS PEAK TERMINOLOGY (NOT SINGLE RACE FINISH):
 22. When citing a driver or constructor's peak rank from the all-time records / `all_time_highest_positions.json` (e.g. Matthew at 17th at S4 Spa Sprint, Leo at 10th, Boz at 5th, David at 4th):
@@ -4301,7 +4228,7 @@ class AlternativeIntelligenceState(rx.State):
                                 wrapper.style.width = '100%';
                                 wrapper.style.height = '100%';
                                 wrapper.style.lineHeight = '1';
-                                wrapper.style.transform = 'translateY(-2.5px)';
+                                wrapper.style.transform = 'translateY(-4.5px)';
 
                                 while (b.firstChild) {{
                                     wrapper.appendChild(b.firstChild);
@@ -4792,10 +4719,9 @@ class AlternativeIntelligenceState(rx.State):
                     elif "429" in last_err or "quota" in last_err.lower() or "resource_exhausted" in last_err.lower():
                         self.error_message = f"Gemini Rate Limit (429): {last_err}"
                         self.messages[-1].content = (
-                            "⏳ **Rate Limit / Quota Exceeded (429)**\n\n"
-                            "You have temporarily reached Google Gemini's Free Tier rate limit (Tokens Per Minute). "
-                            "Please wait **30 to 60 seconds** for Google's quota window to reset, then try your request again.\n\n"
-                            "*Tip: Linking a billing account in Google AI Studio (Pay-As-You-Go) increases your rate limits by up to 20x and eliminates these cooldowns.*"
+                            "⏳ **Rate Limit Exceeded (429)**\n\n"
+                            "The system has temporarily reached the model's rate limit. "
+                            "Please wait **30 to 60 seconds** for the rate limit window to reset, then try your request again."
                         )
                     else:
                         self.error_message = f"Could not connect to Gemini model: {last_err}"
