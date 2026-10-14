@@ -279,19 +279,43 @@ class DownloadState(rx.State):
                                 .rt-Badge, [class*="Badge"], .badge {{
                                     display: inline-flex !important;
                                     align-items: center !important;
-                                    justify-content: center !important;
                                     vertical-align: middle !important;
-                                    line-height: 1 !important;
                                     box-sizing: border-box !important;
-                                }}
-                                .rt-Badge > *, [class*="Badge"] > * {{
-                                    vertical-align: middle !important;
-                                    line-height: 1 !important;
                                 }}
                             `;
                             clonedDoc.head.appendChild(fixStyle);
 
-                            clonedDoc.querySelectorAll('.rt-Badge, [class*="Badge"], .badge').forEach(b => {{
+                            const liveBadges = container ? container.querySelectorAll('.rt-Badge, [class*="Badge"], .badge') : [];
+                            const targetScope = (clonedDoc.getElementById('{chart_id}') || clonedDoc);
+                            const clonedBadges = targetScope.querySelectorAll('.rt-Badge, [class*="Badge"], .badge');
+
+                            clonedBadges.forEach((b, idx) => {{
+                                const liveB = liveBadges[idx];
+                                let isCentered = false;
+                                let isRight = false;
+                                if (liveB) {{
+                                    const liveStyle = window.getComputedStyle(liveB);
+                                    const liveJustify = liveStyle.justifyContent;
+                                    const liveAlign = liveStyle.textAlign;
+                                    if (liveJustify === 'center' || liveAlign === 'center' || liveB.classList.contains('rt-r-jc-center') || liveB.getAttribute('justify') === 'center') {{
+                                        isCentered = true;
+                                    }} else if (liveJustify === 'flex-end' || liveJustify === 'end' || liveJustify === 'right' || liveAlign === 'right') {{
+                                        isRight = true;
+                                    }}
+                                }} else {{
+                                    const computedJc = b.style.justifyContent || window.getComputedStyle(b).justifyContent;
+                                    if (computedJc === 'center' || b.getAttribute('justify') === 'center') isCentered = true;
+                                }}
+
+                                const targetJustify = isCentered ? 'center' : (isRight ? 'flex-end' : 'flex-start');
+                                const targetAlign = isCentered ? 'center' : (isRight ? 'right' : 'left');
+
+                                b.style.display = 'inline-flex';
+                                b.style.alignItems = 'center';
+                                b.style.justifyContent = targetJustify;
+                                b.style.textAlign = targetAlign;
+                                b.style.boxSizing = 'border-box';
+
                                 Array.from(b.childNodes).forEach(node => {{
                                     if (node.nodeType === Node.TEXT_NODE && node.textContent.trim().length > 0) {{
                                         const span = clonedDoc.createElement('span');
@@ -299,13 +323,16 @@ class DownloadState(rx.State):
                                         span.style.display = 'inline-block';
                                         span.style.lineHeight = '1';
                                         span.style.verticalAlign = 'middle';
+                                        span.style.textAlign = targetAlign;
+                                        span.style.position = 'relative';
+                                        span.style.top = '-0.14em';
                                         b.replaceChild(span, node);
+                                    }} else if (node.nodeType === Node.ELEMENT_NODE) {{
+                                        node.style.position = 'relative';
+                                        node.style.top = '-0.14em';
+                                        node.style.textAlign = targetAlign;
                                     }}
                                 }});
-                                b.style.display = 'inline-flex';
-                                b.style.alignItems = 'center';
-                                b.style.justifyContent = 'center';
-                                b.style.lineHeight = '1';
                             }});
 
                             clonedDoc.querySelectorAll('svg text, svg tspan').forEach(t => {{
@@ -850,19 +877,43 @@ class DownloadState(rx.State):
                             .rt-Badge, [class*="Badge"], .badge {{
                                 display: inline-flex !important;
                                 align-items: center !important;
-                                justify-content: center !important;
                                 vertical-align: middle !important;
-                                line-height: 1 !important;
                                 box-sizing: border-box !important;
-                            }}
-                            .rt-Badge > *, [class*="Badge"] > * {{
-                                vertical-align: middle !important;
-                                line-height: 1 !important;
                             }}
                         `;
                         clonedDoc.head.appendChild(fixStyle);
 
-                        clonedDoc.querySelectorAll('.rt-Badge, [class*="Badge"], .badge').forEach(b => {{
+                        const liveBadges = tableElement ? tableElement.querySelectorAll('.rt-Badge, [class*="Badge"], .badge') : [];
+                        const targetScope = (clonedDoc.getElementById('{table_id}') || clonedDoc);
+                        const clonedBadges = targetScope.querySelectorAll('.rt-Badge, [class*="Badge"], .badge');
+
+                        clonedBadges.forEach((b, idx) => {{
+                            const liveB = liveBadges[idx];
+                            let isCentered = false;
+                            let isRight = false;
+                            if (liveB) {{
+                                const liveStyle = window.getComputedStyle(liveB);
+                                const liveJustify = liveStyle.justifyContent;
+                                const liveAlign = liveStyle.textAlign;
+                                if (liveJustify === 'center' || liveAlign === 'center' || liveB.classList.contains('rt-r-jc-center') || liveB.getAttribute('justify') === 'center') {{
+                                    isCentered = true;
+                                }} else if (liveJustify === 'flex-end' || liveJustify === 'end' || liveJustify === 'right' || liveAlign === 'right') {{
+                                    isRight = true;
+                                }}
+                            }} else {{
+                                const computedJc = b.style.justifyContent || window.getComputedStyle(b).justifyContent;
+                                if (computedJc === 'center' || b.getAttribute('justify') === 'center') isCentered = true;
+                            }}
+
+                            const targetJustify = isCentered ? 'center' : (isRight ? 'flex-end' : 'flex-start');
+                            const targetAlign = isCentered ? 'center' : (isRight ? 'right' : 'left');
+
+                            b.style.display = 'inline-flex';
+                            b.style.alignItems = 'center';
+                            b.style.justifyContent = targetJustify;
+                            b.style.textAlign = targetAlign;
+                            b.style.boxSizing = 'border-box';
+
                             Array.from(b.childNodes).forEach(node => {{
                                 if (node.nodeType === Node.TEXT_NODE && node.textContent.trim().length > 0) {{
                                     const span = clonedDoc.createElement('span');
@@ -870,13 +921,16 @@ class DownloadState(rx.State):
                                     span.style.display = 'inline-block';
                                     span.style.lineHeight = '1';
                                     span.style.verticalAlign = 'middle';
+                                    span.style.textAlign = targetAlign;
+                                    span.style.position = 'relative';
+                                    span.style.top = '-0.14em';
                                     b.replaceChild(span, node);
+                                }} else if (node.nodeType === Node.ELEMENT_NODE) {{
+                                    node.style.position = 'relative';
+                                    node.style.top = '-0.14em';
+                                    node.style.textAlign = targetAlign;
                                 }}
                             }});
-                            b.style.display = 'inline-flex';
-                            b.style.alignItems = 'center';
-                            b.style.justifyContent = 'center';
-                            b.style.lineHeight = '1';
                         }});
 
                         clonedDoc.querySelectorAll('svg text, svg tspan').forEach(t => {{

@@ -605,13 +605,14 @@ def search_league_articles(query: str, top_k: int = 4) -> list[dict]:
 
 
 def format_all_season_articles() -> list[str]:
-    """Format all published editorial articles across all seasons for grounded context."""
+    """Format a catalog of all published editorial articles across all seasons for grounded context.
+    Full narrative article text is dynamically retrieved and injected for specific queries via search_league_articles.
+    """
     lines = []
-    lines.append("## COMPLETE LEAGUE EDITORIAL NEWS & ARTICLES ARCHIVE (ALL SEASONS)")
+    lines.append("## COMPLETE LEAGUE EDITORIAL NEWS & ARTICLES CATALOG (ALL SEASONS)")
     lines.append(
-        "This archive contains all official editorial articles, race recaps, race week previews, "
-        "investigative reports, and paddock news published in the league. You have full access to the complete "
-        "narrative text, interviews, quotes, driver drama, and lore across all seasons.\n"
+        "This catalog lists all official editorial articles, race recaps, and paddock news published in the league. "
+        "When an inquiry pertains to specific articles, drivers, or races, the relevant full article text is dynamically retrieved and provided below.\n"
     )
 
     articles = get_all_league_articles()
@@ -624,70 +625,152 @@ def format_all_season_articles() -> list[str]:
     for season_name, arts in by_season.items():
         lines.append(f"### {season_name} Published Articles ({len(arts)} Articles):")
         for a in arts:
-            lines.append(f"#### Article: \"{a['title']}\" ({a['season']}, Published: {a['date']} by {a['author']})")
-            if a.get("headliner"):
-                lines.append(f"Headliner: {a['headliner']}")
-            if a["blurb"]:
-                lines.append(f"Blurb: {a['blurb']}")
-            if a["content"]:
-                lines.append(f"Full Article Text:\n{a['content']}")
-            lines.append("")
+            blurb_snippet = a.get("blurb", "") or ""
+            if len(blurb_snippet) > 160:
+                blurb_snippet = blurb_snippet[:157] + "..."
+            blurb_str = f" — Blurb: {blurb_snippet}" if blurb_snippet else ""
+            lines.append(f"- \"{a['title']}\" ({a['season']}, Published: {a['date']} by {a['author']}){blurb_str}")
         lines.append("")
 
     return lines
 
 
 def _format_comprehensive_statistical_matrix(excel_p: Path, seasons_list: list) -> list:
-    """Format exhaustive Driver and Constructor career and seasonal statistics (TAF1APP-SDDREQ-239)."""
+    """Format exhaustive Driver and Constructor career and seasonal statistics (TAF1APP-SDDREQ-239).
+    Copies exact calculations from All-Time Stats pre-flight calculations with zero data gaps.
+    """
     res = []
     try:
         from collections import defaultdict
+        import numpy as np
+        import pandas as pd
+        from the_alternative_f1.seasons.Calculations import Calculations
         from the_alternative_f1.all_time_stats.Functions import get_all_time_highest_positions
-        from the_alternative_f1.all_time_stats.DetailedAllTime import compute_entity_detailed_metrics, get_entity_lists
-        from the_alternative_f1.seasons.projections import _get_driver_track_rating
+        from the_alternative_f1.all_time_stats.DetailedAllTime import compute_entity_detailed_metrics, get_entity_lists, compute_entity_track_ratings
 
-        num_seasons = 5
+        num_seasons = len(seasons_list)
         all_drivers, all_teams = get_entity_lists(num_seasons)
         highest_pos = get_all_time_highest_positions(num_seasons)
         d_peaks = highest_pos.get("drivers", {})
         c_peaks = highest_pos.get("constructors", {})
 
-        # Tally Pre-Season & Post-Season Wins and Podiums
-        driver_pre_wins = defaultdict(int)
-        driver_pre_pods = defaultdict(int)
-        driver_post_wins = defaultdict(int)
-        driver_post_pods = defaultdict(int)
-        team_pre_wins = defaultdict(int)
-        team_pre_pods = defaultdict(int)
-        team_post_wins = defaultdict(int)
-        team_post_pods = defaultdict(int)
+        # Official Historical Driver Championship Titles
+        DRIVER_CHAMPIONSHIPS = {
+            "Gary": [1, 2],
+            "Nick": [3],
+            "Joshua": [4],
+        }
+
+        # Official Historical Constructor Championships Won
+        CONSTRUCTOR_CHAMPIONSHIPS_WON = {
+            "Mercedes": [1, 4],
+            "McLaren": [2],
+            "Alpine": [3],
+        }
+
+        # Constructor Championships Won While Driver was on Team
+        CONSTRUCTOR_CHAMPS_WHILE_ON_TEAM = {
+            "Erick": [(1, "Mercedes")],
+            "Marcus": [(1, "Mercedes")],
+            "Nick": [(2, "McLaren")],
+            "Gary": [(2, "McLaren")],
+            "Joshua": [(3, "Alpine")],
+            "Eddie": [(3, "Alpine")],
+            "Jairo": [(4, "Mercedes")],
+            "Jaden": [(4, "Mercedes")],
+        }
+
+        # Driver Championships Won by Drivers while on Constructor
+        DRIVER_CHAMPS_ON_CONSTRUCTOR = {
+            "McLaren": ["Gary (S1)", "Gary (S2)", "Nick (S3)"],
+            "Alpine": ["Joshua (S4)"],
+        }
+
+        # Pre-Season & Post-Season Wins and Podiums
+        driver_pre_wins = defaultdict(list)
+        driver_pre_pods = defaultdict(list)
+        driver_post_wins = defaultdict(list)
+        driver_post_pods = defaultdict(list)
+        team_pre_wins = defaultdict(list)
+        team_pre_pods = defaultdict(list)
+        team_post_wins = defaultdict(list)
+        team_post_pods = defaultdict(list)
 
         for s_data in seasons_list:
+            s_idx = s_data.get("season_number", 1)
             for pre_r in s_data.get("preseason_races", []):
+                r_name = pre_r.get("race", "Pre-Season Race")
                 for res_row in pre_r.get("results", []):
                     d = str(res_row.get("driver", "")).strip()
                     t = str(res_row.get("team", "")).strip()
                     plc = res_row.get("place")
                     if plc == 1:
-                        if d: driver_pre_wins[d] += 1
-                        if t: team_pre_wins[t] += 1
+                        if d: driver_pre_wins[d].append(f"S{s_idx} {r_name} (Pre-Season)")
+                        if t: team_pre_wins[t].append(f"S{s_idx} {r_name} ({d}) (Pre-Season)")
                     if plc in (1, 2, 3):
-                        if d: driver_pre_pods[d] += 1
-                        if t: team_pre_pods[t] += 1
+                        if d: driver_pre_pods[d].append(f"S{s_idx} {r_name} - P{plc} (Pre-Season)")
+                        if t: team_pre_pods[t].append(f"S{s_idx} {r_name} ({d}: P{plc}) (Pre-Season)")
 
             for post_r in s_data.get("postseason_races", []):
+                r_name = post_r.get("race", "Post-Season Race")
                 for res_row in post_r.get("results", []):
                     d = str(res_row.get("driver", "")).strip()
                     t = str(res_row.get("team", "")).strip()
                     plc = res_row.get("place")
                     if plc == 1:
-                        if d: driver_post_wins[d] += 1
-                        if t: team_post_wins[t] += 1
+                        if d: driver_post_wins[d].append(f"S{s_idx} {r_name} (Post-Season)")
+                        if t: team_post_wins[t].append(f"S{s_idx} {r_name} ({d}) (Post-Season)")
                     if plc in (1, 2, 3):
-                        if d: driver_post_pods[d] += 1
-                        if t: team_post_pods[t] += 1
+                        if d: driver_post_pods[d].append(f"S{s_idx} {r_name} - P{plc} (Post-Season)")
+                        if t: team_post_pods[t].append(f"S{s_idx} {r_name} ({d}: P{plc}) (Post-Season)")
 
-        # ── 1. DRIVER COMPREHENSIVE STATISTICS MATRIX ──
+        # Championship finish position per season
+        driver_season_ranks = defaultdict(dict)
+        team_season_ranks = defaultdict(dict)
+        for s_data in seasons_list:
+            sn = s_data.get("season_number", 1)
+            try:
+                calc = Calculations(s_data)
+                d_df = calc.get("df")
+                if d_df is not None and not d_df.empty:
+                    for rank_idx, (_, r) in enumerate(d_df.iterrows(), start=1):
+                        dr = str(r.get("Driver", "")).strip()
+                        if dr: driver_season_ranks[dr][sn] = rank_idx
+                t_df = calc.get("constructors_df")
+                if t_df is not None and not t_df.empty:
+                    for rank_idx, (_, r) in enumerate(t_df.iterrows(), start=1):
+                        tm = str(r.get("Team", "")).strip()
+                        if tm: team_season_ranks[tm][sn] = rank_idx
+            except Exception:
+                pass
+
+        def _compute_streaks(races_series, condition_fn, cross_season=False):
+            max_streak = 0
+            all_streaks = []
+            curr_streak = []
+            last_season = None
+
+            for _, row in races_series.iterrows():
+                sn = row["season"]
+                if not cross_season and last_season is not None and sn != last_season:
+                    if len(curr_streak) >= 2:
+                        all_streaks.append(f"{len(curr_streak)} in a row ({' -> '.join(curr_streak)})")
+                    curr_streak = []
+
+                if condition_fn(row):
+                    curr_streak.append(f"S{sn} {row['race']}")
+                    max_streak = max(max_streak, len(curr_streak))
+                else:
+                    if len(curr_streak) >= 2:
+                        all_streaks.append(f"{len(curr_streak)} in a row ({' -> '.join(curr_streak)})")
+                    curr_streak = []
+                last_season = sn
+
+            if len(curr_streak) >= 2:
+                all_streaks.append(f"{len(curr_streak)} in a row ({' -> '.join(curr_streak)})")
+            return max_streak, all_streaks
+
+        # ── 1. DRIVER STATISTICAL ARCHIVE (TAF1APP-SDDREQ-239 TABLE 1) ──
         res.append("## OFFICIAL DRIVER COMPREHENSIVE STATISTICAL MATRIX (TAF1APP-SDDREQ-239)")
         res.append(
             "| Driver | Total Feature Wins | Feature Wins by Season | Sprint Wins (Total & by Season) | Pre-Season Wins | Post-Season Wins | Win Streaks (Single Season / Cross Season) | "
@@ -696,12 +779,13 @@ def _format_comprehensive_statistical_matrix(excel_p: Path, seasons_list: list) 
         )
         res.append("| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |")
 
+        driver_details_blocks = []
+
         for d_name in all_drivers:
             df_races, _ = compute_entity_detailed_metrics(num_seasons, "Driver", d_name)
             if df_races.empty:
                 continue
 
-            # Separate Feature Races vs Sprint Races
             f_races = df_races[~df_races["raw_race"].str.lower().str.contains("sprint", na=False)]
             s_races = df_races[df_races["raw_race"].str.lower().str.contains("sprint", na=False)]
 
@@ -710,12 +794,22 @@ def _format_comprehensive_statistical_matrix(excel_p: Path, seasons_list: list) 
             tot_f_pods = int(f_races["podiums_cnt"].sum())
             tot_s_pods = int(s_races["podiums_cnt"].sum())
 
-            # Wins and Podiums by season
+            # Itemized chronological wins & podiums
+            f_win_items = [f"S{r['season']} {r['race']}" for _, r in f_races.iterrows() if r["wins_cnt"] == 1]
+            s_win_items = [f"S{r['season']} {r['race']}" for _, r in s_races.iterrows() if r["wins_cnt"] == 1]
+            f_pod_items = [f"S{r['season']} {r['race']} (P{int(r['place'])})" for _, r in f_races.iterrows() if r["podiums_cnt"] == 1]
+            s_pod_items = [f"S{r['season']} {r['race']} (P{int(r['place'])})" for _, r in s_races.iterrows() if r["podiums_cnt"] == 1]
+
+            # Seasonal breakdowns
             f_wins_by_s = []
             s_wins_by_s = []
             f_pods_by_s = []
             s_pods_by_s = []
             pts_by_s = []
+            avg_p_by_s = []
+            avg_q_by_s = []
+            avg_chg_by_s = []
+            best_race_by_s = []
 
             for s_idx in range(1, num_seasons + 1):
                 s_f = f_races[f_races["season"] == s_idx]
@@ -729,86 +823,62 @@ def _format_comprehensive_statistical_matrix(excel_p: Path, seasons_list: list) 
                 pts = float(s_all["pts"].sum())
 
                 if not s_all.empty:
-                    f_wins_by_s.append(f"S{s_idx}:{w_f}")
-                    if w_s > 0: s_wins_by_s.append(f"S{s_idx}:{w_s}")
-                    f_pods_by_s.append(f"S{s_idx}:{p_f}")
-                    if p_s > 0: s_pods_by_s.append(f"S{s_idx}:{p_s}")
-                    pts_by_s.append(f"S{s_idx}:{pts:g}pts")
+                    s_f_win_list = [r["race"] for _, r in s_f.iterrows() if r["wins_cnt"] == 1]
+                    f_wins_by_s.append(f"S{s_idx}: {w_f}" + (f" ({', '.join(s_f_win_list)})" if s_f_win_list else ""))
+                    if w_s > 0:
+                        s_s_win_list = [r["race"] for _, r in s_s.iterrows() if r["wins_cnt"] == 1]
+                        s_wins_by_s.append(f"S{s_idx}: {w_s} ({', '.join(s_s_win_list)})")
+                    f_pods_by_s.append(f"S{s_idx}: {p_f}")
+                    if p_s > 0: s_pods_by_s.append(f"S{s_idx}: {p_s}")
+                    pts_by_s.append(f"S{s_idx}: {pts:g}pts")
 
-            f_wins_s_str = ", ".join(f_wins_by_s) or "0"
-            s_wins_s_str = f"{tot_s_wins} ({', '.join(s_wins_by_s)})" if tot_s_wins > 0 else "0"
-            f_pods_s_str = ", ".join(f_pods_by_s) or "0"
-            s_pods_s_str = f"{tot_s_pods} ({', '.join(s_pods_by_s)})" if tot_s_pods > 0 else "0"
-            pts_s_str = ", ".join(pts_by_s) or "0"
+                    s_comp = s_all[s_all["competed"] == True] if "competed" in s_all.columns else s_all
+                    s_vp = s_comp[s_comp["place"] > 0]["place"]
+                    if not s_vp.empty: avg_p_by_s.append(f"S{s_idx}: {s_vp.mean():.1f}")
+                    s_vq = s_comp[s_comp["qual"] > 0]["qual"]
+                    if not s_vq.empty: avg_q_by_s.append(f"S{s_idx}: {s_vq.mean():.1f}")
+                    s_chg = [float(c) for c in s_comp["pos_change"].dropna()]
+                    if s_chg: avg_chg_by_s.append(f"S{s_idx}: {np.mean(s_chg):+.1f}")
 
-            # Pre/Post Season wins & podiums (ALWAYS indicated as Pre or Post season)
-            pre_w = driver_pre_wins[d_name]
-            pre_w_str = f"{pre_w} (Pre-Season)" if pre_w > 0 else "0 (Pre-Season)"
-            post_w = driver_post_wins[d_name]
-            post_w_str = f"{post_w} (Post-Season)" if post_w > 0 else "0 (Post-Season)"
-
-            pre_p = driver_pre_pods[d_name]
-            pre_p_str = f"{pre_p} (Pre-Season)" if pre_p > 0 else "0 (Pre-Season)"
-            post_p = driver_post_pods[d_name]
-            post_p_str = f"{post_p} (Post-Season)" if post_p > 0 else "0 (Post-Season)"
+                    if not s_vp.empty:
+                        min_p = int(round(s_vp.min()))
+                        s_best = s_comp[s_comp["place"] == min_p]
+                        s_best_row = s_best.loc[s_best["pts"].idxmax()] if not s_best.empty else s_comp.iloc[0]
+                        best_race_by_s.append(f"S{s_idx}: P{min_p} at {s_best_row['race']} ({s_best_row['pts']:.0f}pts)")
 
             # Streaks
-            max_ss_win = 0
-            curr_ss_win = 0
-            max_cross_win = 0
-            curr_cross_win = 0
-            last_s = None
+            max_ss_win, ss_win_list = _compute_streaks(f_races, lambda r: r["wins_cnt"] == 1, cross_season=False)
+            max_cr_win, cr_win_list = _compute_streaks(f_races, lambda r: r["wins_cnt"] == 1, cross_season=True)
+            max_ss_pod, ss_pod_list = _compute_streaks(f_races, lambda r: r["podiums_cnt"] == 1, cross_season=False)
+            max_cr_pod, cr_pod_list = _compute_streaks(f_races, lambda r: r["podiums_cnt"] == 1, cross_season=True)
 
-            max_ss_pod = 0
-            curr_ss_pod = 0
-            max_cross_pod = 0
-            curr_cross_pod = 0
-            last_pod_s = None
+            max_ss_swin, ss_swin_list = _compute_streaks(s_races, lambda r: r["wins_cnt"] == 1, cross_season=False)
+            max_cr_swin, cr_swin_list = _compute_streaks(s_races, lambda r: r["wins_cnt"] == 1, cross_season=True)
+            max_ss_spod, ss_spod_list = _compute_streaks(s_races, lambda r: r["podiums_cnt"] == 1, cross_season=False)
+            max_cr_spod, cr_spod_list = _compute_streaks(s_races, lambda r: r["podiums_cnt"] == 1, cross_season=True)
 
-            for _, r_item in f_races.iterrows():
-                cur_s = r_item["season"]
-                if last_s is not None and cur_s != last_s:
-                    curr_ss_win = 0
-                if last_pod_s is not None and cur_s != last_pod_s:
-                    curr_ss_pod = 0
+            # Pre/Post Season
+            pre_w_items = driver_pre_wins.get(d_name, [])
+            post_w_items = driver_post_wins.get(d_name, [])
+            pre_p_items = driver_pre_pods.get(d_name, [])
+            post_p_items = driver_post_pods.get(d_name, [])
 
-                is_w = (r_item["wins_cnt"] == 1)
-                is_p = (r_item["podiums_cnt"] == 1)
+            pre_w_str = f"{len(pre_w_items)} (Pre-Season)" if pre_w_items else "0 (Pre-Season)"
+            post_w_str = f"{len(post_w_items)} (Post-Season)" if post_w_items else "0 (Post-Season)"
+            pre_p_str = f"{len(pre_p_items)} (Pre-Season)" if pre_p_items else "0 (Pre-Season)"
+            post_p_str = f"{len(post_p_items)} (Post-Season)" if post_p_items else "0 (Post-Season)"
 
-                if is_w:
-                    curr_ss_win += 1
-                    curr_cross_win += 1
-                    max_ss_win = max(max_ss_win, curr_ss_win)
-                    max_cross_win = max(max_cross_win, curr_cross_win)
-                else:
-                    curr_ss_win = 0
-                    curr_cross_win = 0
-
-                if is_p:
-                    curr_ss_pod += 1
-                    curr_cross_pod += 1
-                    max_ss_pod = max(max_ss_pod, curr_ss_pod)
-                    max_cross_pod = max(max_cross_pod, curr_cross_pod)
-                else:
-                    curr_ss_pod = 0
-                    curr_cross_pod = 0
-
-                last_s = cur_s
-                last_pod_s = cur_s
-
-            win_streaks_str = f"Single:{max_ss_win} / Cross:{max_cross_win}"
-            pod_streaks_str = f"Single:{max_ss_pod} / Cross:{max_cross_pod}"
-
+            # Career Averages & Totals
             tot_pts = float(df_races["pts"].sum())
             comp = df_races[df_races["competed"] == True] if "competed" in df_races.columns else df_races
             valid_p = comp[comp["place"] > 0]["place"]
             avg_p = float(valid_p.mean()) if not valid_p.empty else 0.0
             valid_q = comp[comp["qual"] > 0]["qual"]
             avg_q = float(valid_q.mean()) if not valid_q.empty else 0.0
-            pos_chgs = [float(c) for c in comp["pos_change"].dropna() if c is not None]
+            pos_chgs = [float(c) for c in comp["pos_change"].dropna()]
             avg_chg = float(np.mean(pos_chgs)) if pos_chgs else (avg_q - avg_p)
 
-            # Best Race
+            # Best Race All-Time
             if not valid_p.empty:
                 min_p = int(round(valid_p.min()))
                 best_rows = comp[comp["place"] == min_p]
@@ -817,21 +887,63 @@ def _format_comprehensive_statistical_matrix(excel_p: Path, seasons_list: list) 
             else:
                 best_race_str = "N/A"
 
-            poles = int(df_races["poles_cnt"].sum())
+            poles_cnt = int(df_races["poles_cnt"].sum())
+            pole_items = [f"S{r['season']} {r['race']}" for _, r in df_races.iterrows() if r["poles_cnt"] == 1]
             fl_cnt = int(df_races["fl_cnt"].sum())
             dotd_cnt = int(df_races["dotd_cnt"].sum())
             mot_cnt = int(df_races["mot_cnt"].sum())
             cd_cnt = int(df_races["cd_cnt"].sum())
             peak_rank = d_peaks.get(d_name, "—")
 
+            # Master overview table row
             res.append(
-                f"| {d_name} | {tot_f_wins} | {f_wins_s_str} | {s_wins_s_str} | {pre_w_str} | {post_w_str} | {win_streaks_str} | "
-                f"{tot_f_pods} | {f_pods_s_str} | {s_pods_s_str} | {pre_p_str} | {post_p_str} | {pod_streaks_str} | "
-                f"{tot_pts:.1f} | {pts_s_str} | {avg_p:.1f} | {avg_q:.1f} | {avg_chg:+.1f} | {best_race_str} | {poles} | {fl_cnt} | {dotd_cnt} | {mot_cnt} | {cd_cnt} | {peak_rank} |"
+                f"| {d_name} | {tot_f_wins} | {'; '.join(f_wins_by_s) or '0'} | {tot_s_wins} ({', '.join(s_wins_by_s) or '0'}) | {pre_w_str} | {post_w_str} | Single:{max_ss_win} / Cross:{max_cr_win} | "
+                f"{tot_f_pods} | {'; '.join(f_pods_by_s) or '0'} | {tot_s_pods} ({', '.join(s_pods_by_s) or '0'}) | {pre_p_str} | {post_p_str} | Single:{max_ss_pod} / Cross:{max_cr_pod} | "
+                f"{tot_pts:.1f} | {', '.join(pts_by_s) or '0'} | {avg_p:.1f} | {avg_q:.1f} | {avg_chg:+.1f} | {best_race_str} | {poles_cnt} | {fl_cnt} | {dotd_cnt} | {mot_cnt} | {cd_cnt} | {peak_rank} |"
             )
-        res.append("")
 
-        # ── 2. CONSTRUCTOR COMPREHENSIVE STATISTICS MATRIX ──
+            # Detailed itemized profile per driver (Table 1 exhaustive coverage)
+            d_champs = DRIVER_CHAMPIONSHIPS.get(d_name, [])
+            c_champs_on_team = CONSTRUCTOR_CHAMPS_WHILE_ON_TEAM.get(d_name, [])
+            ranks_over_time = [f"S{sn}: P{rk}" for sn, rk in sorted(driver_season_ranks.get(d_name, {}).items())]
+
+            # Chronological per race items
+            pts_per_race_items = [f"S{r['season']} {r['race']}: {r['pts']:g}pts" for _, r in df_races.iterrows() if r.get("competed")]
+            placements_per_race = [f"S{r['season']} {r['race']}: P{int(r['place'])}" for _, r in df_races.iterrows() if r.get("competed") and r["place"] > 0]
+            pos_changes_per_race = [f"S{r['season']} {r['race']}: {r['pos_change']:+g}" for _, r in df_races.iterrows() if r.get("competed") and r.get("pos_change") is not None]
+            qual_per_race = [f"S{r['season']} {r['race']}: P{int(r['qual'])}" for _, r in df_races.iterrows() if r.get("competed") and r["qual"] > 0]
+
+            # Track Ratings (directly from DetailedAllTime Requirement 76)
+            track_ratings_dict = compute_entity_track_ratings(df_races)
+            track_ratings_items = [
+                f"{tr}: (Rating {st['score']:.1f}, TotPts {st['total_points']:.0f}, AvgPts {st['avg_points']:.1f}, AvgPosChg {st['avg_pos_change']:+.1f})"
+                for tr, st in sorted(track_ratings_dict.items())
+            ]
+
+            d_block = [
+                f"### Driver Profile: {d_name}",
+                f"- **All-Time Career Summary**: Points: {tot_pts:.1f} | Feature Wins: {tot_f_wins} | Sprint Wins: {tot_s_wins} | Feature Podiums: {tot_f_pods} | Sprint Podiums: {tot_s_pods} | Poles: {poles_cnt} | FL: {fl_cnt} | DOTD: {dotd_cnt} | MOT: {mot_cnt} | CD: {cd_cnt} | Avg Place: {avg_p:.1f} | Avg Qual: {avg_q:.1f} | Avg Pos Change: {avg_chg:+.1f} | All-Time Standings Peak: {peak_rank} | Best Race All-Time: {best_race_str}",
+                f"- **Championship Titles & Positions**: Driver Championships Won: {len(d_champs)}" + (f" (Seasons: {', '.join(str(s) for s in d_champs)})" if d_champs else "") + f" | Constructor Championships Won While on Team: {len(c_champs_on_team)}" + (f" ({', '.join(f'S{sn} {tm}' for sn, tm in c_champs_on_team)})" if c_champs_on_team else "") + f" | Seasonal Standings Finishes: {'; '.join(ranks_over_time) or 'None'}",
+                f"- **Feature Race Wins**: Total: {tot_f_wins} | Chronological Wins List: {', '.join(f_win_items) if f_win_items else 'None'} | By Season: {'; '.join(f_wins_by_s) or '0'} | Single-Season Win Streaks: {'; '.join(ss_win_list) if ss_win_list else f'Max {max_ss_win}'} | Cross-Season Win Streaks: {'; '.join(cr_win_list) if cr_win_list else f'Max {max_cr_win}'}",
+                f"- **Sprint Race Wins**: Total: {tot_s_wins} | Chronological Sprint Wins List: {', '.join(s_win_items) if s_win_items else 'None'} | By Season: {'; '.join(s_wins_by_s) or '0'} | Single-Season Sprint Streaks: {'; '.join(ss_swin_list) if ss_swin_list else f'Max {max_ss_swin}'} | Cross-Season Sprint Streaks: {'; '.join(cr_swin_list) if cr_swin_list else f'Max {max_cr_swin}'}",
+                f"- **Pre-Season & Post-Season Wins**: Pre-Season Wins ({len(pre_w_items)}): {', '.join(pre_w_items) if pre_w_items else 'None'} | Post-Season Wins ({len(post_w_items)}): {', '.join(post_w_items) if post_w_items else 'None'}",
+                f"- **Feature Race Podiums**: Total: {tot_f_pods} | Chronological Podiums List: {', '.join(f_pod_items) if f_pod_items else 'None'} | By Season: {'; '.join(f_pods_by_s) or '0'} | Single-Season Podium Streaks: {'; '.join(ss_pod_list) if ss_pod_list else f'Max {max_ss_pod}'} | Cross-Season Podium Streaks: {'; '.join(cr_pod_list) if cr_pod_list else f'Max {max_cr_pod}'}",
+                f"- **Sprint Race Podiums**: Total: {tot_s_pods} | Chronological Sprint Podiums List: {', '.join(s_pod_items) if s_pod_items else 'None'} | By Season: {'; '.join(s_pods_by_s) or '0'} | Single-Season Sprint Podium Streaks: {'; '.join(ss_spod_list) if ss_spod_list else f'Max {max_ss_spod}'} | Cross-Season Sprint Podium Streaks: {'; '.join(cr_spod_list) if cr_spod_list else f'Max {max_cr_spod}'}",
+                f"- **Pre-Season & Post-Season Podiums**: Pre-Season Podiums ({len(pre_p_items)}): {', '.join(pre_p_items) if pre_p_items else 'None'} | Post-Season Podiums ({len(post_p_items)}): {', '.join(post_p_items) if post_p_items else 'None'}",
+                f"- **Points Progression**: Total Points: {tot_pts:.1f} | Points by Season: {', '.join(pts_by_s) or '0'} | Chronological Points per Race: {'; '.join(pts_per_race_items)}",
+                f"- **Placements & Positions Gained**: All-Time Avg Place: {avg_p:.1f} | Avg Place by Season: {', '.join(avg_p_by_s)} | Chronological Race Placements: {'; '.join(placements_per_race)} | All-Time Avg Pos Change: {avg_chg:+.1f} | Avg Pos Change by Season: {', '.join(avg_chg_by_s)} | Chronological Pos Gained per Race: {'; '.join(pos_changes_per_race)}",
+                f"- **Qualifying & Poles**: Total Poles: {poles_cnt} | Poles List: {', '.join(pole_items) if pole_items else 'None'} | All-Time Avg Qual: {avg_q:.1f} | Avg Qual by Season: {', '.join(avg_q_by_s)} | Chronological Qualifying: {'; '.join(qual_per_race)}",
+                f"- **Best Race**: Best Race All-Time: {best_race_str} | Best Race per Season: {'; '.join(best_race_by_s) or 'None'}",
+                f"- **Track-by-Track Ratings & Performance (All-Time Stats Requirement 76)**: {'; '.join(track_ratings_items) if track_ratings_items else 'None'}",
+                "",
+            ]
+            driver_details_blocks.extend(d_block)
+
+        res.append("")
+        res.append("### Itemized Driver Career Profiles & Historical Records (TAF1APP-SDDREQ-239):")
+        res.extend(driver_details_blocks)
+
+        # ── 2. CONSTRUCTOR STATISTICAL ARCHIVE (TAF1APP-SDDREQ-239 TABLE 2) ──
         res.append("## OFFICIAL CONSTRUCTOR COMPREHENSIVE STATISTICAL MATRIX (TAF1APP-SDDREQ-239)")
         res.append(
             "| Constructor | Total Feature Wins | Feature Wins by Season | Sprint Wins (Total & by Season) | Pre-Season Wins | Post-Season Wins | Win Streaks (Single Season / Cross Season) | "
@@ -839,6 +951,8 @@ def _format_comprehensive_statistical_matrix(excel_p: Path, seasons_list: list) 
             "Career Points | Points by Season | Career Avg Place | Career Avg Qualifying | Career Avg Pos Change | Career Best Race | Career Poles | Career FL | Career DOTD | Career MOT | Career CD | All-Time Standings Peak |"
         )
         res.append("| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |")
+
+        constructor_details_blocks = []
 
         for c_name in all_teams:
             df_races, _ = compute_entity_detailed_metrics(num_seasons, "Constructor", c_name)
@@ -853,11 +967,20 @@ def _format_comprehensive_statistical_matrix(excel_p: Path, seasons_list: list) 
             tot_f_pods = int(f_races["podiums_cnt"].sum())
             tot_s_pods = int(s_races["podiums_cnt"].sum())
 
+            f_win_items = [f"S{r['season']} {r['race']}" for _, r in f_races.iterrows() if r["wins_cnt"] >= 1]
+            s_win_items = [f"S{r['season']} {r['race']}" for _, r in s_races.iterrows() if r["wins_cnt"] >= 1]
+            f_pod_items = [f"S{r['season']} {r['race']}" for _, r in f_races.iterrows() if r["podiums_cnt"] >= 1]
+            s_pod_items = [f"S{r['season']} {r['race']}" for _, r in s_races.iterrows() if r["podiums_cnt"] >= 1]
+
             f_wins_by_s = []
             s_wins_by_s = []
             f_pods_by_s = []
             s_pods_by_s = []
             pts_by_s = []
+            avg_p_by_s = []
+            avg_q_by_s = []
+            avg_chg_by_s = []
+            best_race_by_s = []
 
             for s_idx in range(1, num_seasons + 1):
                 s_f = f_races[f_races["season"] == s_idx]
@@ -871,84 +994,58 @@ def _format_comprehensive_statistical_matrix(excel_p: Path, seasons_list: list) 
                 pts = float(s_all["pts"].sum())
 
                 if not s_all.empty:
-                    f_wins_by_s.append(f"S{s_idx}:{w_f}")
-                    if w_s > 0: s_wins_by_s.append(f"S{s_idx}:{w_s}")
-                    f_pods_by_s.append(f"S{s_idx}:{p_f}")
-                    if p_s > 0: s_pods_by_s.append(f"S{s_idx}:{p_s}")
-                    pts_by_s.append(f"S{s_idx}:{pts:g}pts")
+                    s_f_win_list = [r["race"] for _, r in s_f.iterrows() if r["wins_cnt"] >= 1]
+                    f_wins_by_s.append(f"S{s_idx}: {w_f}" + (f" ({', '.join(s_f_win_list)})" if s_f_win_list else ""))
+                    if w_s > 0:
+                        s_s_win_list = [r["race"] for _, r in s_s.iterrows() if r["wins_cnt"] >= 1]
+                        s_wins_by_s.append(f"S{s_idx}: {w_s} ({', '.join(s_s_win_list)})")
+                    f_pods_by_s.append(f"S{s_idx}: {p_f}")
+                    if p_s > 0: s_pods_by_s.append(f"S{s_idx}: {p_s}")
+                    pts_by_s.append(f"S{s_idx}: {pts:g}pts")
 
-            f_wins_s_str = ", ".join(f_wins_by_s) or "0"
-            s_wins_s_str = f"{tot_s_wins} ({', '.join(s_wins_by_s)})" if tot_s_wins > 0 else "0"
-            f_pods_s_str = ", ".join(f_pods_by_s) or "0"
-            s_pods_s_str = f"{tot_s_pods} ({', '.join(s_pods_by_s)})" if tot_s_pods > 0 else "0"
-            pts_s_str = ", ".join(pts_by_s) or "0"
+                    s_comp = s_all[s_all["competed"] == True] if "competed" in s_all.columns else s_all
+                    all_p_s = [p for places in s_comp["all_places"] for p in places if p > 0]
+                    all_q_s = [q for quals in s_comp["all_quals"] for q in quals if q > 0]
+                    if all_p_s: avg_p_by_s.append(f"S{s_idx}: {np.mean(all_p_s):.1f}")
+                    if all_q_s: avg_q_by_s.append(f"S{s_idx}: {np.mean(all_q_s):.1f}")
+                    s_chg = [float(c) for c in s_comp["pos_change"].dropna()]
+                    if s_chg: avg_chg_by_s.append(f"S{s_idx}: {np.mean(s_chg):+.1f}")
 
-            pre_w = team_pre_wins[c_name]
-            pre_w_str = f"{pre_w} (Pre-Season)" if pre_w > 0 else "0 (Pre-Season)"
-            post_w = team_post_wins[c_name]
-            post_w_str = f"{post_w} (Post-Season)" if post_w > 0 else "0 (Post-Season)"
-
-            pre_p = team_pre_pods[c_name]
-            pre_p_str = f"{pre_p} (Pre-Season)" if pre_p > 0 else "0 (Pre-Season)"
-            post_p = team_post_pods[c_name]
-            post_p_str = f"{post_p} (Post-Season)" if post_p > 0 else "0 (Post-Season)"
+                    if all_p_s:
+                        min_p = int(round(min(all_p_s)))
+                        s_best_rows = s_comp[s_comp["all_places"].apply(lambda pl: min_p in [int(round(x)) for x in pl])]
+                        s_best_row = s_best_rows.loc[s_best_rows["pts"].idxmax()] if not s_best_rows.empty else s_comp.iloc[0]
+                        best_race_by_s.append(f"S{s_idx}: P{min_p} at {s_best_row['race']} ({s_best_row['pts']:.0f}pts)")
 
             # Streaks
-            max_ss_win = 0
-            curr_ss_win = 0
-            max_cross_win = 0
-            curr_cross_win = 0
-            last_s = None
+            max_ss_win, ss_win_list = _compute_streaks(f_races, lambda r: r["wins_cnt"] >= 1, cross_season=False)
+            max_cr_win, cr_win_list = _compute_streaks(f_races, lambda r: r["wins_cnt"] >= 1, cross_season=True)
+            max_ss_pod, ss_pod_list = _compute_streaks(f_races, lambda r: r["podiums_cnt"] >= 1, cross_season=False)
+            max_cr_pod, cr_pod_list = _compute_streaks(f_races, lambda r: r["podiums_cnt"] >= 1, cross_season=True)
 
-            max_ss_pod = 0
-            curr_ss_pod = 0
-            max_cross_pod = 0
-            curr_cross_pod = 0
-            last_pod_s = None
+            max_ss_swin, ss_swin_list = _compute_streaks(s_races, lambda r: r["wins_cnt"] >= 1, cross_season=False)
+            max_cr_swin, cr_swin_list = _compute_streaks(s_races, lambda r: r["wins_cnt"] >= 1, cross_season=True)
+            max_ss_spod, ss_spod_list = _compute_streaks(s_races, lambda r: r["podiums_cnt"] >= 1, cross_season=False)
+            max_cr_spod, cr_spod_list = _compute_streaks(s_races, lambda r: r["podiums_cnt"] >= 1, cross_season=True)
 
-            for _, r_item in f_races.iterrows():
-                cur_s = r_item["season"]
-                if last_s is not None and cur_s != last_s:
-                    curr_ss_win = 0
-                if last_pod_s is not None and cur_s != last_pod_s:
-                    curr_ss_pod = 0
+            pre_w_items = team_pre_wins.get(c_name, [])
+            post_w_items = team_post_wins.get(c_name, [])
+            pre_p_items = team_pre_pods.get(c_name, [])
+            post_p_items = team_post_pods.get(c_name, [])
 
-                is_w = (r_item["wins_cnt"] >= 1)
-                is_p = (r_item["podiums_cnt"] >= 1)
-
-                if is_w:
-                    curr_ss_win += 1
-                    curr_cross_win += 1
-                    max_ss_win = max(max_ss_win, curr_ss_win)
-                    max_cross_win = max(max_cross_win, curr_cross_win)
-                else:
-                    curr_ss_win = 0
-                    curr_cross_win = 0
-
-                if is_p:
-                    curr_ss_pod += 1
-                    curr_cross_pod += 1
-                    max_ss_pod = max(max_ss_pod, curr_ss_pod)
-                    max_cross_pod = max(max_cross_pod, curr_cross_pod)
-                else:
-                    curr_ss_pod = 0
-                    curr_cross_pod = 0
-
-                last_s = cur_s
-                last_pod_s = cur_s
-
-            win_streaks_str = f"Single:{max_ss_win} / Cross:{max_cross_win}"
-            pod_streaks_str = f"Single:{max_ss_pod} / Cross:{max_cross_pod}"
+            pre_w_str = f"{len(pre_w_items)} (Pre-Season)" if pre_w_items else "0 (Pre-Season)"
+            post_w_str = f"{len(post_w_items)} (Post-Season)" if post_w_items else "0 (Post-Season)"
+            pre_p_str = f"{len(pre_p_items)} (Pre-Season)" if pre_p_items else "0 (Pre-Season)"
+            post_p_str = f"{len(post_p_items)} (Post-Season)" if post_p_items else "0 (Post-Season)"
 
             tot_pts = float(df_races["pts"].sum())
             all_p_flat = [p for places in df_races["all_places"] for p in places if p > 0]
             all_q_flat = [q for quals in df_races["all_quals"] for q in quals if q > 0]
             avg_p = float(np.mean(all_p_flat)) if all_p_flat else 0.0
             avg_q = float(np.mean(all_q_flat)) if all_q_flat else 0.0
-            pos_chgs = [float(c) for c in df_races["pos_change"].dropna() if c is not None]
+            pos_chgs = [float(c) for c in df_races["pos_change"].dropna()]
             avg_chg = float(np.mean(pos_chgs)) if pos_chgs else (avg_q - avg_p)
 
-            # Best Race
             if all_p_flat:
                 min_p = int(round(min(all_p_flat)))
                 best_rows = df_races[df_races["all_places"].apply(lambda pl: min_p in [int(round(x)) for x in pl])]
@@ -957,7 +1054,8 @@ def _format_comprehensive_statistical_matrix(excel_p: Path, seasons_list: list) 
             else:
                 best_race_str = "N/A"
 
-            poles = int(df_races["poles_cnt"].sum())
+            poles_cnt = int(df_races["poles_cnt"].sum())
+            pole_items = [f"S{r['season']} {r['race']}" for _, r in df_races.iterrows() if r["poles_cnt"] >= 1]
             fl_cnt = int(df_races["fl_cnt"].sum())
             dotd_cnt = int(df_races["dotd_cnt"].sum())
             mot_cnt = int(df_races["mot_cnt"].sum())
@@ -965,13 +1063,50 @@ def _format_comprehensive_statistical_matrix(excel_p: Path, seasons_list: list) 
             peak_rank = c_peaks.get(c_name, "—")
 
             res.append(
-                f"| {c_name} | {tot_f_wins} | {f_wins_s_str} | {s_wins_s_str} | {pre_w_str} | {post_w_str} | {win_streaks_str} | "
-                f"{tot_f_pods} | {f_pods_s_str} | {s_pods_s_str} | {pre_p_str} | {post_p_str} | {pod_streaks_str} | "
-                f"{tot_pts:.1f} | {pts_s_str} | {avg_p:.1f} | {avg_q:.1f} | {avg_chg:+.1f} | {best_race_str} | {poles} | {fl_cnt} | {dotd_cnt} | {mot_cnt} | {cd_cnt} | {peak_rank} |"
+                f"| {c_name} | {tot_f_wins} | {'; '.join(f_wins_by_s) or '0'} | {tot_s_wins} ({', '.join(s_wins_by_s) or '0'}) | {pre_w_str} | {post_w_str} | Single:{max_ss_win} / Cross:{max_cr_win} | "
+                f"{tot_f_pods} | {'; '.join(f_pods_by_s) or '0'} | {tot_s_pods} ({', '.join(s_pods_by_s) or '0'}) | {pre_p_str} | {post_p_str} | Single:{max_ss_pod} / Cross:{max_cr_pod} | "
+                f"{tot_pts:.1f} | {', '.join(pts_by_s) or '0'} | {avg_p:.1f} | {avg_q:.1f} | {avg_chg:+.1f} | {best_race_str} | {poles_cnt} | {fl_cnt} | {dotd_cnt} | {mot_cnt} | {cd_cnt} | {peak_rank} |"
             )
-        res.append("")
 
-        # ── 3. DETAILED TRACK-BY-TRACK STATISTICS (POINTS, AVERAGES, POSITION DELTAS, RATINGS) ──
+            c_champs_won = CONSTRUCTOR_CHAMPIONSHIPS_WON.get(c_name, [])
+            d_champs_on_team = DRIVER_CHAMPS_ON_CONSTRUCTOR.get(c_name, [])
+            ranks_over_time = [f"S{sn}: P{rk}" for sn, rk in sorted(team_season_ranks.get(c_name, {}).items())]
+
+            pts_per_race_items = [f"S{r['season']} {r['race']}: {r['pts']:g}pts" for _, r in df_races.iterrows() if r.get("competed")]
+            placements_per_race = [f"S{r['season']} {r['race']}: {r['all_places']}" for _, r in df_races.iterrows() if r.get("competed")]
+            pos_changes_per_race = [f"S{r['season']} {r['race']}: {r['pos_change']:+g}" for _, r in df_races.iterrows() if r.get("competed") and r.get("pos_change") is not None]
+            qual_per_race = [f"S{r['season']} {r['race']}: {r['all_quals']}" for _, r in df_races.iterrows() if r.get("competed")]
+
+            track_ratings_dict = compute_entity_track_ratings(df_races)
+            track_ratings_items = [
+                f"{tr}: (Rating {st['score']:.1f}, TotPts {st['total_points']:.0f}, AvgPts {st['avg_points']:.1f}, AvgPosChg {st['avg_pos_change']:+.1f})"
+                for tr, st in sorted(track_ratings_dict.items())
+            ]
+
+            c_block = [
+                f"### Constructor Profile: {c_name}",
+                f"- **All-Time Career Summary**: Points: {tot_pts:.1f} | Feature Wins: {tot_f_wins} | Sprint Wins: {tot_s_wins} | Feature Podiums: {tot_f_pods} | Sprint Podiums: {tot_s_pods} | Poles: {poles_cnt} | FL: {fl_cnt} | DOTD: {dotd_cnt} | MOT: {mot_cnt} | CD: {cd_cnt} | Avg Place: {avg_p:.1f} | Avg Qual: {avg_q:.1f} | Avg Pos Change: {avg_chg:+.1f} | All-Time Standings Peak: {peak_rank} | Best Race All-Time: {best_race_str}",
+                f"- **Championship Titles & Positions**: Constructor Championships Won: {len(c_champs_won)}" + (f" (Seasons: {', '.join(str(s) for s in c_champs_won)})" if c_champs_won else "") + f" | Driver Championships Won by Drivers on Team: {len(d_champs_on_team)}" + (f" ({', '.join(d_champs_on_team)})" if d_champs_on_team else "") + f" | Seasonal Standings Finishes: {'; '.join(ranks_over_time) or 'None'}",
+                f"- **Feature Race Wins**: Total: {tot_f_wins} | Chronological Wins List: {', '.join(f_win_items) if f_win_items else 'None'} | By Season: {'; '.join(f_wins_by_s) or '0'} | Single-Season Win Streaks: {'; '.join(ss_win_list) if ss_win_list else f'Max {max_ss_win}'} | Cross-Season Win Streaks: {'; '.join(cr_win_list) if cr_win_list else f'Max {max_cr_win}'}",
+                f"- **Sprint Race Wins**: Total: {tot_s_wins} | Chronological Sprint Wins List: {', '.join(s_win_items) if s_win_items else 'None'} | By Season: {'; '.join(s_wins_by_s) or '0'} | Single-Season Sprint Streaks: {'; '.join(ss_swin_list) if ss_swin_list else f'Max {max_ss_swin}'} | Cross-Season Sprint Streaks: {'; '.join(cr_swin_list) if cr_swin_list else f'Max {max_cr_swin}'}",
+                f"- **Pre-Season & Post-Season Wins**: Pre-Season Wins ({len(pre_w_items)}): {', '.join(pre_w_items) if pre_w_items else 'None'} | Post-Season Wins ({len(post_w_items)}): {', '.join(post_w_items) if post_w_items else 'None'}",
+                f"- **Feature Race Podiums**: Total: {tot_f_pods} | Chronological Podiums List: {', '.join(f_pod_items) if f_pod_items else 'None'} | By Season: {'; '.join(f_pods_by_s) or '0'} | Single-Season Podium Streaks: {'; '.join(ss_pod_list) if ss_pod_list else f'Max {max_ss_pod}'} | Cross-Season Podium Streaks: {'; '.join(cr_pod_list) if cr_pod_list else f'Max {max_cr_pod}'}",
+                f"- **Sprint Race Podiums**: Total: {tot_s_pods} | Chronological Sprint Podiums List: {', '.join(s_pod_items) if s_pod_items else 'None'} | By Season: {'; '.join(s_pods_by_s) or '0'} | Single-Season Sprint Podium Streaks: {'; '.join(ss_spod_list) if ss_spod_list else f'Max {max_ss_spod}'} | Cross-Season Sprint Podium Streaks: {'; '.join(cr_spod_list) if cr_spod_list else f'Max {max_cr_spod}'}",
+                f"- **Pre-Season & Post-Season Podiums**: Pre-Season Podiums ({len(pre_p_items)}): {', '.join(pre_p_items) if pre_p_items else 'None'} | Post-Season Podiums ({len(post_p_items)}): {', '.join(post_p_items) if post_p_items else 'None'}",
+                f"- **Points Progression**: Total Points: {tot_pts:.1f} | Points by Season: {', '.join(pts_by_s) or '0'} | Chronological Points per Race: {'; '.join(pts_per_race_items)}",
+                f"- **Placements & Positions Gained**: All-Time Avg Place: {avg_p:.1f} | Avg Place by Season: {', '.join(avg_p_by_s)} | Chronological Race Placements: {'; '.join(placements_per_race)} | All-Time Avg Pos Change: {avg_chg:+.1f} | Avg Pos Change by Season: {', '.join(avg_chg_by_s)} | Chronological Pos Gained per Race: {'; '.join(pos_changes_per_race)}",
+                f"- **Qualifying & Poles**: Total Poles: {poles_cnt} | Poles List: {', '.join(pole_items) if pole_items else 'None'} | All-Time Avg Qual: {avg_q:.1f} | Avg Qual by Season: {', '.join(avg_q_by_s)} | Chronological Qualifying: {'; '.join(qual_per_race)}",
+                f"- **Best Race**: Best Race All-Time: {best_race_str} | Best Race per Season: {'; '.join(best_race_by_s) or 'None'}",
+                f"- **Track-by-Track Ratings & Performance (All-Time Stats Requirement 76)**: {'; '.join(track_ratings_items) if track_ratings_items else 'None'}",
+                "",
+            ]
+            constructor_details_blocks.extend(c_block)
+
+        res.append("")
+        res.append("### Itemized Constructor Career Profiles & Historical Records (TAF1APP-SDDREQ-239):")
+        res.extend(constructor_details_blocks)
+
+        # ── 3. DETAILED TRACK-BY-TRACK STATISTICS (OFFICIAL ALL-TIME RATINGS & METRICS) ──
         res.append("## OFFICIAL TRACK-BY-TRACK PERFORMANCE MATRIX (ALL TRACKS)")
         tracks_all = [
             "Spa", "Monza", "Australia", "Imola", "Miami", "Brazil",
@@ -982,16 +1117,12 @@ def _format_comprehensive_statistical_matrix(excel_p: Path, seasons_list: list) 
             res.append(f"### Track Performance: {tr}")
             d_track_items = []
             for d in all_drivers:
-                score = _get_driver_track_rating(d, tr)
                 df_races, _ = compute_entity_detailed_metrics(num_seasons, "Driver", d)
                 if not df_races.empty:
-                    t_rows = df_races[df_races["track"].str.lower() == tr.lower()]
-                    t_pts = float(t_rows["pts"].sum()) if not t_rows.empty else 0.0
-                    t_avg_pts = float(t_rows["pts"].mean()) if not t_rows.empty else 0.0
-                    t_pos_chgs = [float(c) for c in t_rows["pos_change"].dropna()] if not t_rows.empty else []
-                    t_avg_chg = float(np.mean(t_pos_chgs)) if t_pos_chgs else 0.0
-                    if not t_rows.empty:
-                        d_track_items.append(f"{d} (Rating:{score:.1f}, TotPts:{t_pts:.0f}, AvgPts:{t_avg_pts:.1f}, AvgPosChg:{t_avg_chg:+.1f})")
+                    tr_dict = compute_entity_track_ratings(df_races)
+                    if tr in tr_dict:
+                        stats = tr_dict[tr]
+                        d_track_items.append(f"{d} (Rating:{stats['score']:.1f}, TotPts:{stats['total_points']:.0f}, AvgPts:{stats['avg_points']:.1f}, AvgPosChg:{stats['avg_pos_change']:+.1f})")
             if d_track_items:
                 res.append(f"- Driver Track Metrics: {'; '.join(d_track_items)}")
             res.append("")
@@ -1493,7 +1624,7 @@ def _format_super_license_matrix(seasons_list: list, all_season_calcs: dict) -> 
     return res
 
 
-def build_grounded_league_context() -> str:
+def build_grounded_league_context(force: bool = False) -> str:
     """Build a comprehensive, structured text summary of all deployed league data.
     
     Includes:
@@ -1509,7 +1640,7 @@ def build_grounded_league_context() -> str:
     current_excel_mtime = excel_path.stat().st_mtime if excel_path.exists() else 0
 
     now = time.time()
-    if _GROUNDED_CONTEXT_CACHE and (_GROUNDED_CONTEXT_MTIME == current_excel_mtime) and (now - _CACHE_TIMESTAMP < 300):
+    if not force and _GROUNDED_CONTEXT_CACHE and (_GROUNDED_CONTEXT_MTIME == current_excel_mtime) and (now - _CACHE_TIMESTAMP < 300):
         return _GROUNDED_CONTEXT_CACHE
 
     lines = []
@@ -4080,6 +4211,14 @@ class AlternativeIntelligenceState(rx.State):
             }});
 
             try {{
+                if (document.fonts) {{
+                    try {{
+                        await document.fonts.load('12px "Outfit"');
+                        await document.fonts.load('bold 12px "Outfit"');
+                        await document.fonts.ready;
+                    }} catch(e) {{}}
+                }}
+
                 const h2c = await loadHtml2Canvas();
                 const card = document.getElementById('{card_id}');
                 if (!card) {{
@@ -4093,47 +4232,109 @@ class AlternativeIntelligenceState(rx.State):
                     backgroundColor: '#18181B',
                     logging: false,
                     ignoreElements: (el) => el.getAttribute('data-html2canvas-ignore') === 'true',
-                    onclone: (clonedDoc) => {{
+                    onclone: async (clonedDoc) => {{
+                        if (window.document.fonts && clonedDoc.fonts) {{
+                            for (const font of window.document.fonts) {{
+                                try {{ clonedDoc.fonts.add(font); }} catch(e) {{}}
+                            }}
+                        }}
+
                         document.querySelectorAll('style, link[rel="stylesheet"]').forEach(s => {{
                             try {{ clonedDoc.head.appendChild(s.cloneNode(true)); }} catch(e) {{}}
                         }});
 
                         const fixStyle = clonedDoc.createElement('style');
                         fixStyle.textContent = `
+                            @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+                            *, *::before, *::after, html, body, div, span, p, h1, h2, h3, h4, h5, h6, text, tspan {{
+                                font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+                            }}
                             img {{ display: inline-block !important; vertical-align: middle !important; }}
-                            .rt-Badge, [class*="Badge"], .badge {{
-                                display: inline-flex !important;
-                                align-items: center !important;
-                                justify-content: center !important;
-                                vertical-align: middle !important;
-                                line-height: 1 !important;
-                                box-sizing: border-box !important;
-                            }}
-                            .rt-Badge > *, [class*="Badge"] > * {{
-                                vertical-align: middle !important;
-                                line-height: 1 !important;
-                            }}
                         `;
                         clonedDoc.head.appendChild(fixStyle);
 
-                        clonedDoc.querySelectorAll('.rt-Badge, [class*="Badge"], .badge').forEach(b => {{
-                            Array.from(b.childNodes).forEach(node => {{
-                                if (node.nodeType === Node.TEXT_NODE && node.textContent.trim().length > 0) {{
-                                    const span = clonedDoc.createElement('span');
-                                    span.textContent = node.textContent;
-                                    span.style.display = 'inline-block';
-                                    span.style.lineHeight = '1';
-                                    span.style.verticalAlign = 'middle';
-                                    b.replaceChild(span, node);
+                        const targetCard = clonedDoc.getElementById('{card_id}');
+                        if (targetCard) {{
+                            targetCard.style.fontFamily = "'Outfit', sans-serif !important";
+                        }}
+                        if (clonedDoc.body) {{
+                            clonedDoc.body.style.fontFamily = "'Outfit', sans-serif !important";
+                        }}
+
+                        const liveBadges = card ? card.querySelectorAll('.rt-Badge, [class*="Badge"], .badge') : [];
+                        const targetScope = targetCard || clonedDoc;
+                        const clonedBadges = targetScope.querySelectorAll('.rt-Badge, [class*="Badge"], .badge');
+
+                        clonedBadges.forEach((b, idx) => {{
+                            const liveB = liveBadges[idx];
+                            if (liveB) {{
+                                const liveRect = liveB.getBoundingClientRect();
+                                const liveStyle = window.getComputedStyle(liveB);
+                                const liveJustify = liveStyle.justifyContent;
+                                const liveAlign = liveStyle.textAlign;
+
+                                let isCentered = liveJustify === 'center' || liveAlign === 'center' || liveB.classList.contains('rt-r-jc-center') || liveB.getAttribute('justify') === 'center';
+                                let isRight = liveJustify === 'flex-end' || liveJustify === 'end' || liveJustify === 'right' || liveAlign === 'right';
+
+                                const targetJustify = isCentered ? 'center' : (isRight ? 'flex-end' : 'flex-start');
+                                const targetAlign = isCentered ? 'center' : (isRight ? 'right' : 'left');
+
+                                b.style.display = 'inline-flex';
+                                b.style.alignItems = 'center';
+                                b.style.justifyContent = targetJustify;
+                                b.style.textAlign = targetAlign;
+                                b.style.boxSizing = 'border-box';
+                                b.style.height = liveRect.height + 'px';
+                                b.style.minHeight = liveRect.height + 'px';
+                                b.style.maxHeight = liveRect.height + 'px';
+                                b.style.paddingTop = '0px';
+                                b.style.paddingBottom = '0px';
+                                b.style.paddingLeft = liveStyle.paddingLeft || '6px';
+                                b.style.paddingRight = liveStyle.paddingRight || '6px';
+                                b.style.lineHeight = '1';
+                                b.style.fontFamily = "'Outfit', sans-serif";
+
+                                const wrapper = clonedDoc.createElement('span');
+                                wrapper.style.display = 'inline-flex';
+                                wrapper.style.alignItems = 'center';
+                                wrapper.style.justifyContent = targetJustify;
+                                wrapper.style.width = '100%';
+                                wrapper.style.height = '100%';
+                                wrapper.style.lineHeight = '1';
+                                wrapper.style.transform = 'translateY(-2.5px)';
+
+                                while (b.firstChild) {{
+                                    wrapper.appendChild(b.firstChild);
                                 }}
-                            }});
-                            b.style.display = 'inline-flex';
-                            b.style.alignItems = 'center';
-                            b.style.justifyContent = 'center';
-                            b.style.lineHeight = '1';
+                                b.appendChild(wrapper);
+                            }}
+                        }});
+
+                        // Align legend items (indicator lines + text) and header title
+                        const allHstacks = targetScope.querySelectorAll('.rt-Flex, [class*="Flex"], [class*="hstack"]');
+                        allHstacks.forEach(h => {{
+                            const indicator = h.querySelector('div[style*="height: 3px"], div[style*="height:3px"], div[style*="border-top"]');
+                            const legendText = h.querySelector('p, span, .rt-Text');
+                            if (indicator && legendText && !legendText.dataset.h2cShifted) {{
+                                legendText.dataset.h2cShifted = 'true';
+                                h.style.display = 'inline-flex';
+                                h.style.alignItems = 'center';
+                                legendText.style.display = 'inline-block';
+                                legendText.style.transform = 'translateY(-2.5px)';
+                                legendText.style.lineHeight = '1';
+                            }}
+
+                            const icon = h.querySelector('svg.lucide, svg');
+                            const headerText = h.querySelector('p, .rt-Text');
+                            if (icon && headerText && !headerText.dataset.h2cShifted) {{
+                                headerText.dataset.h2cShifted = 'true';
+                                headerText.style.display = 'inline-block';
+                                headerText.style.transform = 'translateY(-2px)';
+                            }}
                         }});
 
                         clonedDoc.querySelectorAll('svg text, svg tspan').forEach(t => {{
+                            t.style.fontFamily = "'Outfit', sans-serif";
                             const domBaseline = t.getAttribute('dominant-baseline') || window.getComputedStyle(t).dominantBaseline;
                             const alignBaseline = t.getAttribute('alignment-baseline') || window.getComputedStyle(t).alignmentBaseline;
                             if (domBaseline === 'central' || domBaseline === 'middle' || alignBaseline === 'central' || alignBaseline === 'middle') {{
@@ -4144,6 +4345,11 @@ class AlternativeIntelligenceState(rx.State):
                                 }}
                             }}
                         }});
+
+                        if (clonedDoc.fonts && clonedDoc.fonts.ready) {{
+                            try {{ await clonedDoc.fonts.ready; }} catch(e) {{}}
+                        }}
+                        await new Promise(r => setTimeout(r, 60));
                     }},
                 }});
 
@@ -4574,6 +4780,8 @@ class AlternativeIntelligenceState(rx.State):
                             err_bytes = await resp.aread()
                             last_err = f"{model_candidate} ({resp.status_code}): {err_bytes.decode('utf-8', errors='ignore')[:120]}"
                             await resp.aclose()
+                            if resp.status_code == 429:
+                                break
                     except (httpx.TimeoutException, httpx.HTTPError, Exception) as cand_exc:
                         last_err = f"{model_candidate}: {str(cand_exc)}"
                         continue
@@ -4581,6 +4789,14 @@ class AlternativeIntelligenceState(rx.State):
                 if not active_stream:
                     if "too large" in last_err.lower() or "context" in last_err.lower() or "token" in last_err.lower() or "413" in last_err:
                         self.messages[-1].content = "Please delete this thread and start a new one, as there is too much context to proceed."
+                    elif "429" in last_err or "quota" in last_err.lower() or "resource_exhausted" in last_err.lower():
+                        self.error_message = f"Gemini Rate Limit (429): {last_err}"
+                        self.messages[-1].content = (
+                            "⏳ **Rate Limit / Quota Exceeded (429)**\n\n"
+                            "You have temporarily reached Google Gemini's Free Tier rate limit (Tokens Per Minute). "
+                            "Please wait **30 to 60 seconds** for Google's quota window to reset, then try your request again.\n\n"
+                            "*Tip: Linking a billing account in Google AI Studio (Pay-As-You-Go) increases your rate limits by up to 20x and eliminates these cooldowns.*"
+                        )
                     else:
                         self.error_message = f"Could not connect to Gemini model: {last_err}"
                         self.messages[-1].content = (
@@ -4953,6 +5169,7 @@ def native_race_infographic_card(msg: ChatMessage) -> rx.Component:
                             align_items="center",
                             justify_content="center",
                             box_shadow="0 -3px 10px rgba(148, 163, 184, 0.25)",
+                            class_name="badge",
                         ),
                         align="center",
                         spacing="1",
@@ -4977,6 +5194,7 @@ def native_race_infographic_card(msg: ChatMessage) -> rx.Component:
                             align_items="center",
                             justify_content="center",
                             box_shadow="0 -4px 14px rgba(245, 158, 11, 0.4)",
+                            class_name="badge",
                         ),
                         align="center",
                         spacing="1",
@@ -5000,6 +5218,7 @@ def native_race_infographic_card(msg: ChatMessage) -> rx.Component:
                             align_items="center",
                             justify_content="center",
                             box_shadow="0 -3px 8px rgba(217, 119, 6, 0.25)",
+                            class_name="badge",
                         ),
                         align="center",
                         spacing="1",
@@ -5114,6 +5333,7 @@ def native_race_infographic_card(msg: ChatMessage) -> rx.Component:
             rx.fragment(),
         ),
         id=msg.card_id,
+        font_family="Outfit",
         background="linear-gradient(145deg, #18181B 0%, #1f1f24 100%)",
         border="1px solid #3F3F46",
         border_radius="lg",
@@ -5410,6 +5630,7 @@ def native_h2h_infographic_card(msg: ChatMessage) -> rx.Component:
             border_radius="md",
         ),
         id=msg.card_id,
+        font_family="Outfit",
         background="linear-gradient(145deg, #111113 0%, #18181B 100%)",
         border="1px solid #3F3F46",
         border_radius="lg",
@@ -5467,6 +5688,7 @@ def seasonal_qual_row_item(row: TeammateQualRow) -> rx.Component:
                 align_items="center",
                 justify_content="center",
                 min_width="90px",
+                class_name="badge",
             ),
             # Right: Driver 2 Name + Huge Driver 2 Score
             rx.hstack(
@@ -5614,6 +5836,7 @@ def native_seasonal_qual_infographic_card(msg: ChatMessage) -> rx.Component:
             border_top="1px solid #27272A",
         ),
         id=msg.card_id,
+        font_family="Outfit",
         background="#18181B",
         border="1px solid #3F3F46",
         border_radius="lg",
@@ -5691,6 +5914,7 @@ def champion_metric_segment_box(seg: ChampionMetricSegment) -> rx.Component:
         justify_content="center",
         border_right="2px solid #121214",
         overflow="hidden",
+        class_name="badge",
     )
 
 
@@ -6064,6 +6288,7 @@ def native_champion_comparison_card(msg: ChatMessage) -> rx.Component:
             border_top="1px solid #27272A",
         ),
         id=msg.card_id,
+        font_family="Outfit",
         background="#18181B",
         border="1px solid #3F3F46",
         border_radius="lg",
@@ -6407,6 +6632,7 @@ def native_per_season_tracker_card(msg: ChatMessage) -> rx.Component:
             border_top="1px solid #27272A",
         ),
         id=msg.card_id,
+        font_family="Outfit",
         background="#18181B",
         border="1px solid #3F3F46",
         border_radius="lg",

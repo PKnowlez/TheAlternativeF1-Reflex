@@ -561,6 +561,40 @@ def compute_entity_detailed_metrics(num_seasons: int, entity_type: str, entity_n
     return res
 
 
+def compute_entity_track_ratings(df_races: pd.DataFrame) -> dict:
+    """Compute official All-Time Track Ratings and metrics matching DetailedAllTime Requirement 76.
+    Returns dict: {track_name: {'score': float, 'total_points': float, 'avg_points': float, 'avg_pos_change': float, 'avg_qual': float, 'avg_place': float}}
+    """
+    if df_races is None or df_races.empty:
+        return {}
+    res = {}
+    track_groups = df_races.groupby("track")
+    for tr, t_df in track_groups:
+        t_tot_pts = float(t_df["pts"].sum())
+        t_avg_pts = float(t_df["pts"].mean())
+        t_competed = t_df[t_df["competed"] == True] if "competed" in t_df.columns else t_df
+        t_valid_q = t_competed[t_competed["qual"] > 0]["qual"]
+        t_valid_p = t_competed[t_competed["place"] > 0]["place"]
+        t_avg_q = float(t_valid_q.mean()) if not t_valid_q.empty else 0.0
+        t_avg_p = float(t_valid_p.mean()) if not t_valid_p.empty else 0.0
+        t_pos_changes = [float(c) for c in t_competed["pos_change"].dropna() if c is not None]
+        t_pos_change = float(np.mean(t_pos_changes)) if t_pos_changes else (t_avg_q - t_avg_p)
+
+        # Requirement 76: (((average points scored / 30) * 0.6) + ((0.99 / qualifying position) * 0.2) + ((positions gained/lost / 22) * 0.2)) * 100
+        q_term = (0.99 / t_avg_q * 0.2) if t_avg_q > 0 else 0.0
+        score = (((t_avg_pts / 30.0) * 0.6) + q_term + ((t_pos_change / 22.0) * 0.2)) * 100.0
+        res[tr] = {
+            "score": round(score, 3),
+            "total_points": round(t_tot_pts, 1),
+            "avg_points": round(t_avg_pts, 2),
+            "avg_pos_change": round(t_pos_change, 2),
+            "avg_qual": round(t_avg_q, 2),
+            "avg_place": round(t_avg_p, 2),
+        }
+    return res
+
+
+
 class DetailedStatsState(rx.State):
     """State management for Detailed All Time Statistics."""
     entity_type: str = "Driver"
@@ -803,37 +837,25 @@ class DetailedStatsState(rx.State):
         track_score_data = []
 
         if not df_races.empty:
-            track_groups = df_races.groupby("track")
-            alphabetical_tracks = sorted(list(track_groups.groups.keys()))
+            track_ratings_dict = compute_entity_track_ratings(df_races)
+            alphabetical_tracks = sorted(list(track_ratings_dict.keys()))
 
             for tr in alphabetical_tracks:
-                t_df = track_groups.get_group(tr)
-                t_tot_pts = float(t_df["pts"].sum())
-                t_avg_pts = float(t_df["pts"].mean())
-                t_competed = t_df[t_df["competed"] == True] if "competed" in t_df.columns else t_df
-                t_valid_q = t_competed[t_competed["qual"] > 0]["qual"]
-                t_valid_p = t_competed[t_competed["place"] > 0]["place"]
-                t_avg_q = float(t_valid_q.mean()) if not t_valid_q.empty else 0.0
-                t_avg_p = float(t_valid_p.mean()) if not t_valid_p.empty else 0.0
-                t_pos_changes = [float(c) for c in t_competed["pos_change"].dropna() if c is not None]
-                t_pos_change = float(np.mean(t_pos_changes)) if t_pos_changes else (t_avg_q - t_avg_p)
+                t_stats = track_ratings_dict[tr]
+                track_total_pts_data.append({"track": tr, "total_points": t_stats["total_points"]})
+                track_avg_pts_data.append({"track": tr, "avg_points": t_stats["avg_points"]})
 
-                track_total_pts_data.append({"track": tr, "total_points": round(t_tot_pts, 1)})
-                track_avg_pts_data.append({"track": tr, "avg_points": round(t_avg_pts, 2)})
-
+                t_pos_change = t_stats["avg_pos_change"]
                 t_chg_fill = "#3cb44b" if t_pos_change > 0 else "#e6194b" if t_pos_change < 0 else "#888888"
                 track_pos_change_data.append({
                     "track": tr,
-                    "pos_change": round(t_pos_change, 2),
+                    "pos_change": t_pos_change,
                     "fill": t_chg_fill,
                 })
 
-                # Requirement 76: (((average points scored / 30) * 0.6) + ((0.99 / qualifying position) * 0.2) + ((positions gained/lost / 22) * 0.2)) * 100
-                q_term = (0.99 / t_avg_q * 0.2) if t_avg_q > 0 else 0.0
-                score = (((t_avg_pts / 30.0) * 0.6) + q_term + ((t_pos_change / 22.0) * 0.2)) * 100.0
                 track_score_data.append({
                     "track": tr,
-                    "score": round(score, 3),
+                    "score": t_stats["score"],
                 })
 
             # Sort tracks best to worst (top of Y-axis to bottom)

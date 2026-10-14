@@ -282,6 +282,9 @@ def warm_up_caches():
         CalculateAllTime(len(seasons), "Team")
         for s_idx in range(1, len(seasons) + 1):
             PointTotals(s_idx)
+
+        from the_alternative_f1.alternative_intelligence import build_grounded_league_context
+        build_grounded_league_context(force=True)
     except Exception:
         pass
 
