@@ -625,7 +625,9 @@
       "Imola",
       "Miami Sprint",
       "Miami",
-      "Monza"
+      "Monza",
+      "Spa Sprint",
+      "Spa"
     ],
     "rankings": {
       "Preseason": [
@@ -695,6 +697,26 @@
         "Mercedes",
         "Red Bull",
         "Haas",
+        "Audi",
+        "Williams"
+      ],
+      "Spa Sprint": [
+        "Ferrari",
+        "McLaren",
+        "Cadillac",
+        "Red Bull",
+        "Haas",
+        "Mercedes",
+        "Audi",
+        "Williams"
+      ],
+      "Spa": [
+        "Cadillac",
+        "Ferrari",
+        "Haas",
+        "McLaren",
+        "Red Bull",
+        "Mercedes",
         "Audi",
         "Williams"
       ]

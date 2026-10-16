@@ -40,10 +40,16 @@ _EXCEL_PATH = Path(__file__).parent.parent / "The_Alternative_F1.xlsx"
 
 if PROJECTIONS_DATA_JSON.exists():
     try:
-        with open(PROJECTIONS_DATA_JSON, "r", encoding="utf-8") as f:
-            _PROJECTIONS_CACHE = json.load(f)
-        if _EXCEL_PATH.exists():
-            _PROJECTIONS_MTIME = _EXCEL_PATH.stat().st_mtime
+        json_mtime = PROJECTIONS_DATA_JSON.stat().st_mtime
+        excel_mtime = _EXCEL_PATH.stat().st_mtime if _EXCEL_PATH.exists() else 0.0
+        # If the Excel sheet was modified after projections_data.json was saved, mark cache stale
+        if excel_mtime > json_mtime:
+            _PROJECTIONS_CACHE = {}
+            _PROJECTIONS_MTIME = json_mtime
+        else:
+            with open(PROJECTIONS_DATA_JSON, "r", encoding="utf-8") as f:
+                _PROJECTIONS_CACHE = json.load(f)
+            _PROJECTIONS_MTIME = excel_mtime
     except Exception as e:
         print(f"Error loading projections_data.json: {e}")
         _PROJECTIONS_CACHE = {}
@@ -99,7 +105,7 @@ def compute_season_projections(season_num: int = 5, force: bool = False) -> dict
     excel_path = _EXCEL_PATH
     curr_mtime = excel_path.stat().st_mtime if excel_path.exists() else 0.0
 
-    if not force and cache_key in _PROJECTIONS_CACHE:
+    if not force and curr_mtime <= _PROJECTIONS_MTIME and cache_key in _PROJECTIONS_CACHE:
         return _PROJECTIONS_CACHE[cache_key]
 
 
@@ -436,7 +442,11 @@ def compute_season_projections(season_num: int = 5, force: bool = False) -> dict
 
 def precompute_all_season_projections(force: bool = False) -> dict:
     """Pre-calculates projections for all available seasons and persists to projections_data.json."""
-    global _PROJECTIONS_CACHE
+    global _PROJECTIONS_CACHE, _PROJECTIONS_MTIME
+    excel_mtime = _EXCEL_PATH.stat().st_mtime if _EXCEL_PATH.exists() else 0.0
+    if not force and (excel_mtime > _PROJECTIONS_MTIME or not _PROJECTIONS_CACHE):
+        force = True
+
     from the_alternative_f1.seasons import seasons
     for s in seasons:
         s_num = s["season_number"]

@@ -71,6 +71,30 @@
         "Red Bull": 12.5,
         "Williams": 2.5
       }
+    },
+    "Brazil": {
+      "season": 5,
+      "next_race": "Brazil",
+      "next_main_race": "Brazil",
+      "expected_winner": "Cadillac",
+      "expected_winner_prob": 44.0,
+      "expected_highest_score_team": "Ferrari",
+      "expected_highest_score_pts": 33,
+      "expected_podium": [
+        "Cadillac",
+        "Ferrari",
+        "McLaren"
+      ],
+      "expected_points_lines": {
+        "Audi": 3.5,
+        "Cadillac": 29.5,
+        "Ferrari": 32.5,
+        "Haas": 5.5,
+        "McLaren": 15.5,
+        "Mercedes": 6.5,
+        "Red Bull": 10.5,
+        "Williams": 1.5
+      }
     }
   },
   "4": {

@@ -1,27 +1,27 @@
 [
   {
-    "user": "Nat",
-    "all_time_pts": 262,
-    "s5": 262,
+    "user": "PK",
+    "all_time_pts": 419,
+    "s5": 419,
     "rank": 1,
     "rank_str": "1",
     "rank_color": "#FFD700",
     "rank_bg": "#FFD70022",
     "rank_border": "1px solid #FFD70044",
-    "pts_str": "262 pts",
-    "s5_str": "262 pts"
+    "pts_str": "419 pts",
+    "s5_str": "419 pts"
   },
   {
-    "user": "PK",
-    "all_time_pts": 173,
-    "s5": 173,
+    "user": "Nat",
+    "all_time_pts": 262,
+    "s5": 262,
     "rank": 2,
     "rank_str": "2",
     "rank_color": "#C0C0C0",
     "rank_bg": "#C0C0C022",
     "rank_border": "1px solid #C0C0C044",
-    "pts_str": "173 pts",
-    "s5_str": "173 pts"
+    "pts_str": "262 pts",
+    "s5_str": "262 pts"
   },
   {
     "user": "Jellywaffles37",
