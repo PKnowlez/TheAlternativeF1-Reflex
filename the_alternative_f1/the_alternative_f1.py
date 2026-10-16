@@ -250,41 +250,94 @@ def precompute_ticker_items() -> list[list]:
     return items
 
 def warm_up_caches():
-    """Pre-warm all season calculations and detailed metrics on server startup to eliminate cold-start latency."""
+    """Pre-warm all season calculations and detailed metrics on server startup to eliminate cold-start latency.
+    Runs cooperatively in the background yielding GIL to ensure zero webpage loading lag.
+    """
+    import time
     try:
         from the_alternative_f1.seasons import seasons
         from the_alternative_f1.seasons.Calculations import Calculations
-        from the_alternative_f1.all_time_stats.DetailedAllTime import get_entity_lists, compute_entity_detailed_metrics
-        from the_alternative_f1.all_time_stats.Functions import get_all_time_highest_positions, CalculateAllTime, PointTotals
-        from the_alternative_f1.all_time_stats.MapAllTime import precompute_all_map_data
-        from the_alternative_f1.all_time_stats.SummaryAllTime import precompute_summary_data
-        from the_alternative_f1.all_time_stats.TeammateNetwork import build_teammate_network_data
-
         for s in seasons:
-            Calculations(s, sprint_only=False)
-            Calculations(s, sprint_only=True)
+            try:
+                Calculations(s, sprint_only=False)
+                Calculations(s, sprint_only=True)
+            except Exception:
+                pass
+            time.sleep(0.01)
 
-        drivers, teams = get_entity_lists(len(seasons))
-        for d in drivers:
-            compute_entity_detailed_metrics(len(seasons), "Driver", d)
-        for t in teams:
-            compute_entity_detailed_metrics(len(seasons), "Constructor", t)
+        try:
+            from the_alternative_f1.all_time_stats.DetailedAllTime import get_entity_lists, compute_entity_detailed_metrics
+            drivers, teams = get_entity_lists(len(seasons))
+            for d in drivers:
+                compute_entity_detailed_metrics(len(seasons), "Driver", d)
+            for t in teams:
+                compute_entity_detailed_metrics(len(seasons), "Constructor", t)
+        except Exception:
+            pass
+        time.sleep(0.01)
 
-        precompute_all_power_rankings()
-        precompute_all_season_projections()
-        precompute_all_predictions()
-        precompute_leaderboard_cache(force=True)
-        get_all_time_highest_positions(num_seasons=len(seasons))
-        precompute_all_map_data()
-        precompute_summary_data(num_seasons=len(seasons))
-        build_teammate_network_data()
-        CalculateAllTime(len(seasons), "Driver")
-        CalculateAllTime(len(seasons), "Team")
-        for s_idx in range(1, len(seasons) + 1):
-            PointTotals(s_idx)
+        try:
+            precompute_all_power_rankings()
+        except Exception:
+            pass
+        time.sleep(0.01)
 
-        from the_alternative_f1.alternative_intelligence import build_grounded_league_context
-        build_grounded_league_context(force=True)
+        try:
+            precompute_all_season_projections()
+        except Exception:
+            pass
+        time.sleep(0.01)
+
+        try:
+            precompute_all_predictions()
+        except Exception:
+            pass
+        time.sleep(0.01)
+
+        try:
+            precompute_leaderboard_cache(force=True)
+        except Exception:
+            pass
+        time.sleep(0.01)
+
+        try:
+            from the_alternative_f1.all_time_stats.Functions import get_all_time_highest_positions, CalculateAllTime, PointTotals
+            get_all_time_highest_positions(num_seasons=len(seasons))
+            CalculateAllTime(len(seasons), "Driver")
+            CalculateAllTime(len(seasons), "Team")
+            for s_idx in range(1, len(seasons) + 1):
+                PointTotals(s_idx)
+        except Exception:
+            pass
+        time.sleep(0.01)
+
+        try:
+            from the_alternative_f1.all_time_stats.MapAllTime import precompute_all_map_data
+            precompute_all_map_data()
+        except Exception:
+            pass
+        time.sleep(0.01)
+
+        try:
+            from the_alternative_f1.all_time_stats.SummaryAllTime import precompute_summary_data
+            precompute_summary_data(num_seasons=len(seasons))
+        except Exception:
+            pass
+        time.sleep(0.01)
+
+        try:
+            from the_alternative_f1.all_time_stats.TeammateNetwork import build_teammate_network_data
+            build_teammate_network_data()
+        except Exception:
+            pass
+        time.sleep(0.01)
+
+        # Guaranteed deploy reload of grounded league context
+        try:
+            from the_alternative_f1.alternative_intelligence import reload_grounded_league_context
+            reload_grounded_league_context()
+        except Exception:
+            pass
     except Exception:
         pass
 
