@@ -26,7 +26,7 @@ article = {
             margin_y="4",
         ),
 
-        "So, yeah, for those who are a little lacking in the upstairs department, the qualifing session was POURING RAIN. Brently, absolutely selling \
+        "So, yeah, for those who are a little lacking in the upstairs department, the qualifing session was POURING RAIN. Brently, absolutely selling, \
             probably had some predictions market Alternative Points on the under for his own team or something. Smdh. The rest of quali and the sprint \
                 was also a bit chaotic. Enjoy the memes, we'll catch back up for some race recap chit-chat.",
 
