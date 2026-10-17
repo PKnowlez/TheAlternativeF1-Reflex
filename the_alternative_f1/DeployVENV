@@ -1,8 +1,9 @@
 cmd
-cd"c:\Users\pacma\OneDrive\Documents\Antigravity Coding\TheAlternativeF1-Reflex"
+cd "c:\Users\pacma\OneDrive\Documents\Antigravity Coding\TheAlternativeF1-Reflex"
 .venv\Scripts\activate
+python precompute_cache.py
 reflex deploy
 
-Or
+Or (single command):
 
-.venv\Scripts\reflex.exe deploy --envfile .env
+.venv\Scripts\python.exe precompute_cache.py && .venv\Scripts\reflex.exe deploy --envfile .env

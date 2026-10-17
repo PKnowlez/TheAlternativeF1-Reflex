@@ -23,6 +23,8 @@ os.environ.setdefault("REFLEX_SSR", "false")
 config = rx.Config(
     app_name="the_alternative_f1",
     db_url=os.getenv("DATABASE_URL", "sqlite:////tmp/reflex.db" if os.name != "nt" else "sqlite:///reflex.db"),
+    redis_lock_expiration=60000,
+    redis_lock_warning_threshold=15000,
     plugins=[
         rx.plugins.SitemapPlugin(),
         rx.plugins.TailwindV4Plugin(),

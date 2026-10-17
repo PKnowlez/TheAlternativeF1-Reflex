@@ -5,6 +5,7 @@ dictionary that all tab views consume. No Streamlit or Plotly dependencies.
 """
 
 import math
+import pickle
 from pathlib import Path
 
 import numpy as np
@@ -14,9 +15,39 @@ from the_alternative_f1.all_time_stats.Functions import get_excel_sheet
 
 # Resolve the Excel file path relative to this module
 _EXCEL_PATH = str((Path(__file__).parent.parent / "The_Alternative_F1.xlsx").resolve())
+_CACHE_FILE = Path(__file__).parent / "calculations_cache.pickle"
 
 _calculations_cache = {}
 _calculations_mtime = {}
+
+
+def load_calculations_cache() -> bool:
+    global _calculations_cache, _calculations_mtime
+    if not _calculations_cache and _CACHE_FILE.exists():
+        try:
+            with open(_CACHE_FILE, "rb") as f:
+                data = pickle.load(f)
+                if isinstance(data, dict):
+                    _calculations_cache = data.get("cache", {})
+                    _calculations_mtime = data.get("mtime", {})
+                    return True
+        except Exception as e:
+            print(f"Warning: Failed to load calculations cache: {e}")
+    return False
+
+
+def save_calculations_cache() -> bool:
+    global _calculations_cache, _calculations_mtime
+    try:
+        with open(_CACHE_FILE, "wb") as f:
+            pickle.dump({"cache": _calculations_cache, "mtime": _calculations_mtime}, f)
+        return True
+    except Exception as e:
+        print(f"Warning: Failed to save calculations cache: {e}")
+        return False
+
+
+load_calculations_cache()
 
 
 def Calculations(season_data: dict, sprint_only: bool = False) -> dict:
@@ -26,8 +57,10 @@ def Calculations(season_data: dict, sprint_only: bool = False) -> dict:
     excel_path = Path(_EXCEL_PATH)
     current_mtime = excel_path.stat().st_mtime if excel_path.exists() else 0
     
-    if cache_key in _calculations_cache and _calculations_mtime.get(cache_key) == current_mtime:
-        return _calculations_cache[cache_key]
+    if cache_key in _calculations_cache:
+        cached_mtime = _calculations_mtime.get(cache_key, 0)
+        if cached_mtime == current_mtime or current_mtime == 0:
+            return _calculations_cache[cache_key]
 
     """Run all calculations for the given season and return a results dict.
 

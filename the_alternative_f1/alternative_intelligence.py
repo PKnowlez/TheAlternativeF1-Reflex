@@ -5020,12 +5020,21 @@ def serialize_user_thread_message(msg: ChatMessage) -> str:
     return text
 
 
+_cached_pr_leader: tuple[str, str] = ("", "")
+_cached_pr_leader_time: float = 0.0
+
+
 def get_current_power_ranking_leader() -> tuple[str, str]:
     """Retrieve the current #1 ranked constructor and its car icon URL for the latest season.
     
-    Dynamically loads power rankings which auto-detects changes to The_Alternative_F1.xlsx.
+    Dynamically loads power rankings with 60s in-memory caching to eliminate redundant disk/stat overhead.
     Returns (constructor_name, icon_url).
     """
+    global _cached_pr_leader, _cached_pr_leader_time
+    now = time.time()
+    if _cached_pr_leader != ("", "") and (now - _cached_pr_leader_time < 60.0):
+        return _cached_pr_leader
+
     try:
         from the_alternative_f1.seasons.power_rankings import load_power_rankings
         from the_alternative_f1.seasons import LATEST_SEASON, seasons
@@ -5051,7 +5060,10 @@ def get_current_power_ranking_leader() -> tuple[str, str]:
         if teams:
             leader = teams[0]
             clean_name = leader.replace(" ", "")
-            return leader, f"{r2_domain}/Power Rankings/Car Icons/Icon_{clean_name}.png"
+            res = (leader, f"{r2_domain}/Power Rankings/Car Icons/Icon_{clean_name}.png")
+            _cached_pr_leader = res
+            _cached_pr_leader_time = now
+            return res
     except Exception as e:
         print(f"Error resolving power ranking leader car icon: {e}")
     return "", ""

@@ -3,6 +3,7 @@
 
 import math
 import os
+import pickle
 from pathlib import Path
 import pandas as pd
 import numpy as np
@@ -13,8 +14,43 @@ from the_alternative_f1.constructor_colors import get_constructor_color
 from the_alternative_f1.articles.components import zoomable_chart, DownloadState, chart_header
 from the_alternative_f1.race_metrics import get_race_metrics
 
+_CACHE_FILE = Path(__file__).parent / "detailed_cache.pickle"
 _detailed_cache = {}
 _detailed_mtime = 0
+
+
+def _get_mtime():
+    p = Path(excel_file)
+    return p.stat().st_mtime if p.exists() else 0
+
+
+def load_detailed_cache() -> bool:
+    global _detailed_cache, _detailed_mtime
+    if not _detailed_cache and _CACHE_FILE.exists():
+        try:
+            with open(_CACHE_FILE, "rb") as f:
+                data = pickle.load(f)
+                if isinstance(data, dict):
+                    _detailed_cache = data.get("cache", {})
+                    _detailed_mtime = _get_mtime()
+                    return True
+        except Exception as e:
+            print(f"Warning: Failed to load detailed cache: {e}")
+    return False
+
+
+def save_detailed_cache() -> bool:
+    global _detailed_cache, _detailed_mtime
+    try:
+        with open(_CACHE_FILE, "wb") as f:
+            pickle.dump({"cache": _detailed_cache, "mtime": _get_mtime()}, f)
+        return True
+    except Exception as e:
+        print(f"Warning: Failed to save detailed cache: {e}")
+        return False
+
+
+load_detailed_cache()
 
 RACE_COLORS = [
     "#e6194b", "#3cb44b", "#ffe119", "#4363d8", "#f58231",
@@ -30,11 +66,6 @@ def is_truthy(val) -> bool:
     if val is None:
         return False
     return str(val).strip().upper() in ("Y", "YES", "TRUE", "1")
-
-
-def _get_mtime():
-    p = Path(excel_file)
-    return p.stat().st_mtime if p.exists() else 0
 
 
 def _format_race_name(race_str: str) -> str:

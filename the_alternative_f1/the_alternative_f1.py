@@ -254,51 +254,61 @@ def warm_up_caches():
     Runs cooperatively in the background yielding GIL to ensure zero webpage loading lag.
     """
     import time
+    # Brief initial pause so the web server finishes binding to port 8000 and handles initial traffic
+    time.sleep(3.0)
     try:
         from the_alternative_f1.seasons import seasons
-        from the_alternative_f1.seasons.Calculations import Calculations
-        for s in seasons:
+        from the_alternative_f1.seasons.Calculations import Calculations, _calculations_cache
+        from the_alternative_f1.all_time_stats.DetailedAllTime import get_entity_lists, compute_entity_detailed_metrics, _detailed_cache
+
+        # Only run full calculations if not already loaded from precomputed cache
+        needs_calc = not all((s["sheet_name"], False) in _calculations_cache for s in seasons)
+        if needs_calc:
+            for s in seasons:
+                try:
+                    Calculations(s, sprint_only=False)
+                    Calculations(s, sprint_only=True)
+                except Exception:
+                    pass
+                time.sleep(0.05)
+
+        needs_detailed = len(_detailed_cache) < 10
+        if needs_detailed:
             try:
-                Calculations(s, sprint_only=False)
-                Calculations(s, sprint_only=True)
+                drivers, teams = get_entity_lists(len(seasons))
+                for d in drivers:
+                    compute_entity_detailed_metrics(len(seasons), "Driver", d)
+                    time.sleep(0.02)
+                for t in teams:
+                    compute_entity_detailed_metrics(len(seasons), "Constructor", t)
+                    time.sleep(0.02)
             except Exception:
                 pass
-            time.sleep(0.01)
-
-        try:
-            from the_alternative_f1.all_time_stats.DetailedAllTime import get_entity_lists, compute_entity_detailed_metrics
-            drivers, teams = get_entity_lists(len(seasons))
-            for d in drivers:
-                compute_entity_detailed_metrics(len(seasons), "Driver", d)
-            for t in teams:
-                compute_entity_detailed_metrics(len(seasons), "Constructor", t)
-        except Exception:
-            pass
-        time.sleep(0.01)
+        time.sleep(0.05)
 
         try:
             precompute_all_power_rankings()
         except Exception:
             pass
-        time.sleep(0.01)
+        time.sleep(0.05)
 
         try:
             precompute_all_season_projections()
         except Exception:
             pass
-        time.sleep(0.01)
+        time.sleep(0.05)
 
         try:
             precompute_all_predictions()
         except Exception:
             pass
-        time.sleep(0.01)
+        time.sleep(0.05)
 
         try:
-            precompute_leaderboard_cache(force=True)
+            precompute_leaderboard_cache(force=False)
         except Exception:
             pass
-        time.sleep(0.01)
+        time.sleep(0.05)
 
         try:
             from the_alternative_f1.all_time_stats.Functions import get_all_time_highest_positions, CalculateAllTime, PointTotals
@@ -309,28 +319,28 @@ def warm_up_caches():
                 PointTotals(s_idx)
         except Exception:
             pass
-        time.sleep(0.01)
+        time.sleep(0.05)
 
         try:
             from the_alternative_f1.all_time_stats.MapAllTime import precompute_all_map_data
             precompute_all_map_data()
         except Exception:
             pass
-        time.sleep(0.01)
+        time.sleep(0.05)
 
         try:
             from the_alternative_f1.all_time_stats.SummaryAllTime import precompute_summary_data
             precompute_summary_data(num_seasons=len(seasons))
         except Exception:
             pass
-        time.sleep(0.01)
+        time.sleep(0.05)
 
         try:
             from the_alternative_f1.all_time_stats.TeammateNetwork import build_teammate_network_data
             build_teammate_network_data()
         except Exception:
             pass
-        time.sleep(0.01)
+        time.sleep(0.05)
 
         # Guaranteed deploy reload of grounded league context
         try:
@@ -1352,7 +1362,8 @@ class State(rx.State):
 
     @rx.event(background=True)
     async def on_app_mount(self):
-        yield TickerState.start_ticker_loop
+        # Brief yield to allow initial hydrate_and_load to cleanly complete without lock contention
+        await asyncio.sleep(0.5)
         async with self:
             if self.header_loop_running:
                 return
@@ -3604,7 +3615,7 @@ def index() -> rx.Component:
         width="100%",
         height="100vh",
         overflow="hidden",
-        on_mount=State.on_app_mount,
+        on_mount=[State.on_app_mount, TickerState.start_ticker_loop],
     )
 
 
