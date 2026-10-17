@@ -411,7 +411,7 @@ def CalculateAllTime(NumSeason, tORd):
     
     combined_totals[x] = combined_totals[x].astype(int)
 
-    all_races_winners = []
+    completed_races = []
     for s in range(NumSeason):
         season_num = s + 1
         try:
@@ -422,15 +422,23 @@ def CalculateAllTime(NumSeason, tORd):
             schedule = get_excel_sheet("S" + str(season_num) + "Schedule")
             
             for race in schedule['Race']:
-                if str(race).lower().startswith(('pre', 'post')):
+                race_str = str(race).strip()
+                if race_str.lower().startswith(('pre', 'post')) or 'sprint' in race_str.lower():
                     continue
-                col_name = str(race) + "Place"
-                if col_name in df_season.columns:
-                    winners = df_season[df_season[col_name] == 1]
-                    if not winners.empty:
-                        driver = winners['Driver'].iloc[0]
-                        team = winners['Team'].iloc[0]
-                        all_races_winners.append((season_num, race, driver, team))
+                p_col = race_str + "Place"
+                pts_col = race_str + "Points"
+                has_pts = pts_col in df_season.columns and (pd.to_numeric(df_season[pts_col], errors='coerce').fillna(0) > 0).any()
+                has_plc = p_col in df_season.columns and (pd.to_numeric(df_season[p_col], errors='coerce').fillna(0) > 0).any()
+                if not (has_pts or has_plc):
+                    continue
+                
+                winners = df_season[df_season[p_col] == 1] if p_col in df_season.columns else pd.DataFrame()
+                if not winners.empty:
+                    driver = winners['Driver'].iloc[0]
+                    team = winners['Team'].iloc[0]
+                    completed_races.append((season_num, race_str, driver, team))
+                else:
+                    completed_races.append((season_num, race_str, None, None))
         except Exception:
             pass
 
@@ -441,21 +449,29 @@ def CalculateAllTime(NumSeason, tORd):
     curr_ss_streak = defaultdict(int)
     
     last_season = None
-    for season, race, driver, team in all_races_winners:
-        entity = driver if tORd == 'Driver' else team
+    for season, race, winner_driver, winner_team in completed_races:
+        entity = winner_driver if tORd == 'Driver' else winner_team
         
         if last_season is not None and season != last_season:
             curr_ss_streak.clear()
             
-        curr_streak[entity] += 1
-        for e in list(curr_streak.keys()):
-            if e != entity:
+        if entity:
+            curr_streak[entity] += 1
+            for e in list(curr_streak.keys()):
+                if e != entity:
+                    max_streak[e] = max(max_streak[e], curr_streak[e])
+                    curr_streak[e] = 0
+                    
+            curr_ss_streak[entity] += 1
+            for e in list(curr_ss_streak.keys()):
+                if e != entity:
+                    max_ss_streak[e] = max(max_ss_streak[e], curr_ss_streak[e])
+                    curr_ss_streak[e] = 0
+        else:
+            for e in list(curr_streak.keys()):
                 max_streak[e] = max(max_streak[e], curr_streak[e])
                 curr_streak[e] = 0
-                
-        curr_ss_streak[entity] += 1
-        for e in list(curr_ss_streak.keys()):
-            if e != entity:
+            for e in list(curr_ss_streak.keys()):
                 max_ss_streak[e] = max(max_ss_streak[e], curr_ss_streak[e])
                 curr_ss_streak[e] = 0
                 

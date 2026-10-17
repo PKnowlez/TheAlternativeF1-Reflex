@@ -478,6 +478,10 @@ def Tab4(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
                 except (ValueError, TypeError):
                     p_finish = float(p_val) if p_val is not None and not pd.isnull(p_val) else None
 
+            # Exclude preseason, sprint, and postseason races for streaks
+            if race_name.lower().startswith(("pre", "post")) or "sprint" in race_name.lower():
+                continue
+
             # Single season win streak logic (consecutive 1st place finishes)
             if p_finish == 1.0:
                 curr_ss_win_streak += 1
@@ -485,10 +489,7 @@ def Tab4(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
             else:
                 curr_ss_win_streak = 0
 
-            # Single season podium streak logic (exclude preseason, sprint, and postseason races)
-            if race_name.startswith(("Pre", "Post")) or "Sprint" in race_name:
-                continue
-
+            # Single season podium streak logic
             is_podium = (p_finish is not None and 1.0 <= p_finish <= 3.0)
             if is_podium:
                 curr_ss_podium_streak += 1

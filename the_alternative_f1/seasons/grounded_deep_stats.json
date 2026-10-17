@@ -1,0 +1,6696 @@
+{
+  "metadata": {
+    "generated_at": "2026-10-17T01:21:48Z",
+    "excel_mtime": 1792035343.8060524,
+    "num_seasons": 5,
+    "latest_completed_round": "Season 5 Spa",
+    "total_feature_winners_count": 11
+  },
+  "aggregates": {
+    "feature_race_winners": [
+      {
+        "driver": "Nick",
+        "wins": 23,
+        "maiden_win": "P1 at S1 Bahrain",
+        "seasons_breakdown": "S1: 10 (Bahrain, Jeddah, Miami, Spain, Austria, Spa, Suzuka, Qatar, Brazil, Abu Dhabi); S2: 6 (Suzuka, Abu Dhabi, Monza, Zandvoort, China, Spa); S3: 5 (Australia, Spa, Baku, Monza, Abu Dhabi); S4: 2 (Miami, Spa); S5: 0",
+        "chronological_wins": [
+          "S1 Bahrain",
+          "S1 Jeddah",
+          "S1 Miami",
+          "S1 Spain",
+          "S1 Austria",
+          "S1 Spa",
+          "S1 Suzuka",
+          "S1 Qatar",
+          "S1 Brazil",
+          "S1 Abu Dhabi",
+          "S2 Suzuka",
+          "S2 Abu Dhabi",
+          "S2 Monza",
+          "S2 Zandvoort",
+          "S2 China",
+          "S2 Spa",
+          "S3 Australia",
+          "S3 Spa",
+          "S3 Baku",
+          "S3 Monza",
+          "S3 Abu Dhabi",
+          "S4 Miami",
+          "S4 Spa"
+        ],
+        "single_season_streak": 3,
+        "cross_season_streak": 3,
+        "rank": 1
+      },
+      {
+        "driver": "Jairo",
+        "wins": 8,
+        "maiden_win": "P1 at S4 Spain",
+        "seasons_breakdown": "S4: 7 (Spain, Mexico, Baku, Austria (R), Las Vegas, Abu Dhabi, Monza); S5: 1 (Miami)",
+        "chronological_wins": [
+          "S4 Spain",
+          "S4 Mexico",
+          "S4 Baku",
+          "S4 Austria (R)",
+          "S4 Las Vegas",
+          "S4 Abu Dhabi",
+          "S4 Monza",
+          "S5 Miami"
+        ],
+        "single_season_streak": 4,
+        "cross_season_streak": 4,
+        "rank": 2
+      },
+      {
+        "driver": "Joshua",
+        "wins": 7,
+        "maiden_win": "P1 at S3 Suzuka",
+        "seasons_breakdown": "S2: 0; S3: 5 (Suzuka, Silverstone, Spain, Austria, COTA); S4: 2 (Zandvoort, Jeddah); S5: 0",
+        "chronological_wins": [
+          "S3 Suzuka",
+          "S3 Silverstone",
+          "S3 Spain",
+          "S3 Austria",
+          "S3 COTA",
+          "S4 Zandvoort",
+          "S4 Jeddah"
+        ],
+        "single_season_streak": 2,
+        "cross_season_streak": 2,
+        "rank": 3
+      },
+      {
+        "driver": "Erick",
+        "wins": 6,
+        "maiden_win": "P1 at S1 Australia",
+        "seasons_breakdown": "S1: 5 (Australia, Silverstone, Zandvoort, Singapore, Las Vegas); S2: 1 (COTA); S3: 0; S4: 0",
+        "chronological_wins": [
+          "S1 Australia",
+          "S1 Silverstone",
+          "S1 Zandvoort",
+          "S1 Singapore",
+          "S1 Las Vegas",
+          "S2 COTA"
+        ],
+        "single_season_streak": 1,
+        "cross_season_streak": 1,
+        "rank": 4
+      },
+      {
+        "driver": "Del",
+        "wins": 3,
+        "maiden_win": "P1 at S2 Silverstone",
+        "seasons_breakdown": "S2: 2 (Silverstone, Austria); S3: 1 (Canada); S4: 0; S5: 0",
+        "chronological_wins": [
+          "S2 Silverstone",
+          "S2 Austria",
+          "S3 Canada"
+        ],
+        "single_season_streak": 1,
+        "cross_season_streak": 1,
+        "rank": 5
+      },
+      {
+        "driver": "Jelly",
+        "wins": 3,
+        "maiden_win": "P1 at S5 Australia",
+        "seasons_breakdown": "S4: 0; S5: 3 (Australia, Imola, Monza)",
+        "chronological_wins": [
+          "S5 Australia",
+          "S5 Imola",
+          "S5 Monza"
+        ],
+        "single_season_streak": 2,
+        "cross_season_streak": 2,
+        "rank": 6
+      },
+      {
+        "driver": "Patrick",
+        "wins": 3,
+        "maiden_win": "P1 at S3 China",
+        "seasons_breakdown": "S3: 1 (China); S4: 2 (Bahrain, Austria); S5: 0",
+        "chronological_wins": [
+          "S3 China",
+          "S4 Bahrain",
+          "S4 Austria"
+        ],
+        "single_season_streak": 1,
+        "cross_season_streak": 1,
+        "rank": 7
+      },
+      {
+        "driver": "Marcus",
+        "wins": 2,
+        "maiden_win": "P1 at S1 Canada",
+        "seasons_breakdown": "S1: 2 (Canada, Monza); S2: 0",
+        "chronological_wins": [
+          "S1 Canada",
+          "S1 Monza"
+        ],
+        "single_season_streak": 1,
+        "cross_season_streak": 1,
+        "rank": 8
+      },
+      {
+        "driver": "Zane",
+        "wins": 2,
+        "maiden_win": "P1 at S1 COTA",
+        "seasons_breakdown": "S1: 2 (COTA, Mexico); S2: 0; S3: 0",
+        "chronological_wins": [
+          "S1 COTA",
+          "S1 Mexico"
+        ],
+        "single_season_streak": 2,
+        "cross_season_streak": 2,
+        "rank": 9
+      },
+      {
+        "driver": "Jaden",
+        "wins": 1,
+        "maiden_win": "P1 at S4 Brazil",
+        "seasons_breakdown": "S4: 1 (Brazil); S5: 0",
+        "chronological_wins": [
+          "S4 Brazil"
+        ],
+        "single_season_streak": 1,
+        "cross_season_streak": 1,
+        "rank": 10
+      },
+      {
+        "driver": "Leo",
+        "wins": 1,
+        "maiden_win": "P1 at S5 Spa",
+        "seasons_breakdown": "S4: 0; S5: 1 (Spa)",
+        "chronological_wins": [
+          "S5 Spa"
+        ],
+        "single_season_streak": 1,
+        "cross_season_streak": 1,
+        "rank": 11
+      }
+    ],
+    "zero_feature_win_drivers": [
+      "Boz",
+      "Brently",
+      "David",
+      "Eddie",
+      "Evelo",
+      "Gary",
+      "Grayson",
+      "Josh C.",
+      "Josh L",
+      "Matthew",
+      "Randy",
+      "Travis",
+      "Yeti"
+    ],
+    "sprint_race_winners": [
+      {
+        "driver": "Jaden",
+        "wins": 2,
+        "chronological_wins": [
+          "S4 Spa (S)",
+          "S5 Miami (S)"
+        ],
+        "seasons_breakdown": "S4: 1 (Spa (S)); S5: 1 (Miami (S))"
+      },
+      {
+        "driver": "Joshua",
+        "wins": 2,
+        "chronological_wins": [
+          "S4 Brazil (S)",
+          "S5 Spa (S)"
+        ],
+        "seasons_breakdown": "S4: 1 (Brazil (S)); S5: 1 (Spa (S))"
+      },
+      {
+        "driver": "Nick",
+        "wins": 2,
+        "chronological_wins": [
+          "S3 China (S)",
+          "S3 COTA (S)"
+        ],
+        "seasons_breakdown": "S3: 2 (China (S), COTA (S))"
+      },
+      {
+        "driver": "Jairo",
+        "wins": 1,
+        "chronological_wins": [
+          "S4 Miami (S)"
+        ],
+        "seasons_breakdown": "S4: 1 (Miami (S))"
+      }
+    ],
+    "podium_leaders": [
+      {
+        "driver": "Nick",
+        "podiums": 43,
+        "seasons_breakdown": "S1: 16; S2: 8; S3: 11; S4: 6; S5: 2",
+        "single_season_streak": 11,
+        "cross_season_streak": 15
+      },
+      {
+        "driver": "Joshua",
+        "podiums": 30,
+        "seasons_breakdown": "S2: 6; S3: 9; S4: 11; S5: 4",
+        "single_season_streak": 5,
+        "cross_season_streak": 6
+      },
+      {
+        "driver": "Erick",
+        "podiums": 25,
+        "seasons_breakdown": "S1: 15; S2: 5; S3: 5; S4: 0",
+        "single_season_streak": 8,
+        "cross_season_streak": 8
+      },
+      {
+        "driver": "Del",
+        "podiums": 11,
+        "seasons_breakdown": "S2: 7; S3: 4; S4: 0; S5: 0",
+        "single_season_streak": 5,
+        "cross_season_streak": 6
+      },
+      {
+        "driver": "Patrick",
+        "podiums": 10,
+        "seasons_breakdown": "S3: 2; S4: 8; S5: 0",
+        "single_season_streak": 4,
+        "cross_season_streak": 4
+      },
+      {
+        "driver": "Jairo",
+        "podiums": 9,
+        "seasons_breakdown": "S4: 7; S5: 2",
+        "single_season_streak": 4,
+        "cross_season_streak": 4
+      },
+      {
+        "driver": "Jelly",
+        "podiums": 8,
+        "seasons_breakdown": "S4: 5; S5: 3",
+        "single_season_streak": 2,
+        "cross_season_streak": 4
+      },
+      {
+        "driver": "Marcus",
+        "podiums": 7,
+        "seasons_breakdown": "S1: 7; S2: 0",
+        "single_season_streak": 3,
+        "cross_season_streak": 3
+      },
+      {
+        "driver": "Jaden",
+        "podiums": 6,
+        "seasons_breakdown": "S4: 4; S5: 2",
+        "single_season_streak": 3,
+        "cross_season_streak": 3
+      },
+      {
+        "driver": "Zane",
+        "podiums": 6,
+        "seasons_breakdown": "S1: 5; S2: 1; S3: 0",
+        "single_season_streak": 3,
+        "cross_season_streak": 3
+      },
+      {
+        "driver": "Boz",
+        "podiums": 3,
+        "seasons_breakdown": "S1: 3; S2: 0; S3: 0; S4: 0; S5: 0",
+        "single_season_streak": 3,
+        "cross_season_streak": 3
+      },
+      {
+        "driver": "Brently",
+        "podiums": 3,
+        "seasons_breakdown": "S3: 2; S4: 1; S5: 0",
+        "single_season_streak": 2,
+        "cross_season_streak": 2
+      },
+      {
+        "driver": "Travis",
+        "podiums": 2,
+        "seasons_breakdown": "S1: 2; S2: 0; S3: 0; S4: 0",
+        "single_season_streak": 2,
+        "cross_season_streak": 2
+      },
+      {
+        "driver": "David",
+        "podiums": 1,
+        "seasons_breakdown": "S1: 1; S2: 0",
+        "single_season_streak": 1,
+        "cross_season_streak": 1
+      },
+      {
+        "driver": "Leo",
+        "podiums": 1,
+        "seasons_breakdown": "S4: 0; S5: 1",
+        "single_season_streak": 1,
+        "cross_season_streak": 1
+      },
+      {
+        "driver": "Matthew",
+        "podiums": 1,
+        "seasons_breakdown": "S4: 0; S5: 1",
+        "single_season_streak": 1,
+        "cross_season_streak": 1
+      }
+    ],
+    "win_streaks": [
+      {
+        "driver": "Jairo",
+        "single_season_max": 4,
+        "single_season_details": [
+          "4 in a row (S4 Spain -> S4 Mexico -> S4 Baku -> S4 Austria (R))",
+          "3 in a row (S4 Las Vegas -> S4 Abu Dhabi -> S4 Monza)"
+        ],
+        "cross_season_max": 4,
+        "cross_season_details": [
+          "4 in a row (S4 Spain -> S4 Mexico -> S4 Baku -> S4 Austria (R))",
+          "3 in a row (S4 Las Vegas -> S4 Abu Dhabi -> S4 Monza)"
+        ]
+      },
+      {
+        "driver": "Nick",
+        "single_season_max": 3,
+        "single_season_details": [
+          "2 in a row (S1 Bahrain -> S1 Jeddah)",
+          "2 in a row (S1 Miami -> S1 Spain)",
+          "2 in a row (S1 Suzuka -> S1 Qatar)",
+          "3 in a row (S2 Abu Dhabi -> S2 Monza -> S2 Zandvoort)",
+          "2 in a row (S3 Australia -> S3 Spa)",
+          "2 in a row (S3 Monza -> S3 Abu Dhabi)"
+        ],
+        "cross_season_max": 3,
+        "cross_season_details": [
+          "2 in a row (S1 Bahrain -> S1 Jeddah)",
+          "2 in a row (S1 Miami -> S1 Spain)",
+          "2 in a row (S1 Suzuka -> S1 Qatar)",
+          "2 in a row (S1 Abu Dhabi -> S2 Suzuka)",
+          "3 in a row (S2 Abu Dhabi -> S2 Monza -> S2 Zandvoort)",
+          "2 in a row (S3 Australia -> S3 Spa)",
+          "2 in a row (S3 Monza -> S3 Abu Dhabi)"
+        ]
+      },
+      {
+        "driver": "Jelly",
+        "single_season_max": 2,
+        "single_season_details": [
+          "2 in a row (S5 Australia -> S5 Imola)"
+        ],
+        "cross_season_max": 2,
+        "cross_season_details": [
+          "2 in a row (S5 Australia -> S5 Imola)"
+        ]
+      },
+      {
+        "driver": "Joshua",
+        "single_season_max": 2,
+        "single_season_details": [
+          "2 in a row (S3 Suzuka -> S3 Silverstone)",
+          "2 in a row (S3 Austria -> S3 COTA)",
+          "2 in a row (S4 Zandvoort -> S4 Jeddah)"
+        ],
+        "cross_season_max": 2,
+        "cross_season_details": [
+          "2 in a row (S3 Suzuka -> S3 Silverstone)",
+          "2 in a row (S3 Austria -> S3 COTA)",
+          "2 in a row (S4 Zandvoort -> S4 Jeddah)"
+        ]
+      },
+      {
+        "driver": "Zane",
+        "single_season_max": 2,
+        "single_season_details": [
+          "2 in a row (S1 COTA -> S1 Mexico)"
+        ],
+        "cross_season_max": 2,
+        "cross_season_details": [
+          "2 in a row (S1 COTA -> S1 Mexico)"
+        ]
+      }
+    ],
+    "podium_streaks": [
+      {
+        "driver": "Nick",
+        "single_season_max": 11,
+        "single_season_details": [
+          "5 in a row (S1 Bahrain -> S1 Jeddah -> S1 Australia -> S1 Miami -> S1 Spain)",
+          "4 in a row (S1 Austria -> S1 Silverstone -> S1 Spa -> S1 Zandvoort)",
+          "7 in a row (S1 Suzuka -> S1 Qatar -> S1 COTA -> S1 Mexico -> S1 Brazil -> S1 Las Vegas -> S1 Abu Dhabi)",
+          "3 in a row (S2 Abu Dhabi -> S2 Monza -> S2 Zandvoort)",
+          "4 in a row (S2 China -> S2 COTA -> S2 Spa -> S2 Austria)",
+          "11 in a row (S3 Suzuka -> S3 Silverstone -> S3 Australia -> S3 Spa -> S3 Spain -> S3 China -> S3 Baku -> S3 Canada -> S3 Monza -> S3 Abu Dhabi -> S3 Austria)",
+          "2 in a row (S4 Bahrain -> S4 Miami)",
+          "2 in a row (S4 Spa -> S4 Brazil)",
+          "2 in a row (S5 Imola -> S5 Miami)"
+        ],
+        "cross_season_max": 15,
+        "cross_season_details": [
+          "5 in a row (S1 Bahrain -> S1 Jeddah -> S1 Australia -> S1 Miami -> S1 Spain)",
+          "4 in a row (S1 Austria -> S1 Silverstone -> S1 Spa -> S1 Zandvoort)",
+          "8 in a row (S1 Suzuka -> S1 Qatar -> S1 COTA -> S1 Mexico -> S1 Brazil -> S1 Las Vegas -> S1 Abu Dhabi -> S2 Suzuka)",
+          "3 in a row (S2 Abu Dhabi -> S2 Monza -> S2 Zandvoort)",
+          "15 in a row (S2 China -> S2 COTA -> S2 Spa -> S2 Austria -> S3 Suzuka -> S3 Silverstone -> S3 Australia -> S3 Spa -> S3 Spain -> S3 China -> S3 Baku -> S3 Canada -> S3 Monza -> S3 Abu Dhabi -> S3 Austria)",
+          "2 in a row (S4 Bahrain -> S4 Miami)",
+          "2 in a row (S4 Spa -> S4 Brazil)",
+          "2 in a row (S5 Imola -> S5 Miami)"
+        ]
+      },
+      {
+        "driver": "Erick",
+        "single_season_max": 8,
+        "single_season_details": [
+          "4 in a row (S1 Jeddah -> S1 Australia -> S1 Miami -> S1 Spain)",
+          "8 in a row (S1 Austria -> S1 Silverstone -> S1 Spa -> S1 Zandvoort -> S1 Monza -> S1 Singapore -> S1 Suzuka -> S1 Qatar)",
+          "3 in a row (S1 Brazil -> S1 Las Vegas -> S1 Abu Dhabi)",
+          "2 in a row (S2 Zandvoort -> S2 Silverstone)",
+          "2 in a row (S2 COTA -> S2 Spa)",
+          "2 in a row (S3 Silverstone -> S3 Australia)",
+          "2 in a row (S3 Spain -> S3 China)"
+        ],
+        "cross_season_max": 8,
+        "cross_season_details": [
+          "4 in a row (S1 Jeddah -> S1 Australia -> S1 Miami -> S1 Spain)",
+          "8 in a row (S1 Austria -> S1 Silverstone -> S1 Spa -> S1 Zandvoort -> S1 Monza -> S1 Singapore -> S1 Suzuka -> S1 Qatar)",
+          "3 in a row (S1 Brazil -> S1 Las Vegas -> S1 Abu Dhabi)",
+          "2 in a row (S2 Zandvoort -> S2 Silverstone)",
+          "2 in a row (S2 COTA -> S2 Spa)",
+          "2 in a row (S3 Silverstone -> S3 Australia)",
+          "2 in a row (S3 Spain -> S3 China)"
+        ]
+      },
+      {
+        "driver": "Del",
+        "single_season_max": 5,
+        "single_season_details": [
+          "5 in a row (S2 Silverstone -> S2 China -> S2 COTA -> S2 Spa -> S2 Austria)",
+          "2 in a row (S3 Canada -> S3 Monza)"
+        ],
+        "cross_season_max": 6,
+        "cross_season_details": [
+          "6 in a row (S2 Silverstone -> S2 China -> S2 COTA -> S2 Spa -> S2 Austria -> S3 Suzuka)",
+          "2 in a row (S3 Canada -> S3 Monza)"
+        ]
+      },
+      {
+        "driver": "Joshua",
+        "single_season_max": 5,
+        "single_season_details": [
+          "4 in a row (S2 Abu Dhabi -> S2 Monza -> S2 Zandvoort -> S2 Silverstone)",
+          "5 in a row (S3 Suzuka -> S3 Silverstone -> S3 Australia -> S3 Spa -> S3 Spain)",
+          "3 in a row (S3 Abu Dhabi -> S3 Austria -> S3 COTA)",
+          "3 in a row (S4 Bahrain -> S4 Miami -> S4 Spain)",
+          "2 in a row (S4 Baku -> S4 Austria (R))",
+          "4 in a row (S4 Brazil -> S4 Austria -> S4 Zandvoort -> S4 Jeddah)",
+          "2 in a row (S4 Abu Dhabi -> S4 Monza)",
+          "4 in a row (S5 Imola -> S5 Miami -> S5 Monza -> S5 Spa)"
+        ],
+        "cross_season_max": 6,
+        "cross_season_details": [
+          "4 in a row (S2 Abu Dhabi -> S2 Monza -> S2 Zandvoort -> S2 Silverstone)",
+          "6 in a row (S2 Austria -> S3 Suzuka -> S3 Silverstone -> S3 Australia -> S3 Spa -> S3 Spain)",
+          "6 in a row (S3 Abu Dhabi -> S3 Austria -> S3 COTA -> S4 Bahrain -> S4 Miami -> S4 Spain)",
+          "2 in a row (S4 Baku -> S4 Austria (R))",
+          "4 in a row (S4 Brazil -> S4 Austria -> S4 Zandvoort -> S4 Jeddah)",
+          "2 in a row (S4 Abu Dhabi -> S4 Monza)",
+          "4 in a row (S5 Imola -> S5 Miami -> S5 Monza -> S5 Spa)"
+        ]
+      },
+      {
+        "driver": "Jairo",
+        "single_season_max": 4,
+        "single_season_details": [
+          "4 in a row (S4 Spain -> S4 Mexico -> S4 Baku -> S4 Austria (R))",
+          "3 in a row (S4 Las Vegas -> S4 Abu Dhabi -> S4 Monza)"
+        ],
+        "cross_season_max": 4,
+        "cross_season_details": [
+          "4 in a row (S4 Spain -> S4 Mexico -> S4 Baku -> S4 Austria (R))",
+          "4 in a row (S4 Las Vegas -> S4 Abu Dhabi -> S4 Monza -> S5 Australia)"
+        ]
+      },
+      {
+        "driver": "Jelly",
+        "single_season_max": 2,
+        "single_season_details": [
+          "2 in a row (S4 Abu Dhabi -> S4 Monza)",
+          "2 in a row (S5 Australia -> S5 Imola)"
+        ],
+        "cross_season_max": 4,
+        "cross_season_details": [
+          "4 in a row (S4 Abu Dhabi -> S4 Monza -> S5 Australia -> S5 Imola)"
+        ]
+      },
+      {
+        "driver": "Patrick",
+        "single_season_max": 4,
+        "single_season_details": [
+          "2 in a row (S3 China -> S3 Baku)",
+          "2 in a row (S4 Austria (R) -> S4 Spa)",
+          "4 in a row (S4 Austria -> S4 Zandvoort -> S4 Jeddah -> S4 Las Vegas)"
+        ],
+        "cross_season_max": 4,
+        "cross_season_details": [
+          "2 in a row (S3 China -> S3 Baku)",
+          "2 in a row (S4 Austria (R) -> S4 Spa)",
+          "4 in a row (S4 Austria -> S4 Zandvoort -> S4 Jeddah -> S4 Las Vegas)"
+        ]
+      },
+      {
+        "driver": "Boz",
+        "single_season_max": 3,
+        "single_season_details": [
+          "3 in a row (S1 COTA -> S1 Mexico -> S1 Brazil)"
+        ],
+        "cross_season_max": 3,
+        "cross_season_details": [
+          "3 in a row (S1 COTA -> S1 Mexico -> S1 Brazil)"
+        ]
+      },
+      {
+        "driver": "Jaden",
+        "single_season_max": 3,
+        "single_season_details": [
+          "3 in a row (S4 Brazil -> S4 Austria -> S4 Zandvoort)"
+        ],
+        "cross_season_max": 3,
+        "cross_season_details": [
+          "3 in a row (S4 Brazil -> S4 Austria -> S4 Zandvoort)"
+        ]
+      },
+      {
+        "driver": "Marcus",
+        "single_season_max": 3,
+        "single_season_details": [
+          "3 in a row (S1 Jeddah -> S1 Australia -> S1 Miami)",
+          "2 in a row (S1 Las Vegas -> S1 Abu Dhabi)"
+        ],
+        "cross_season_max": 3,
+        "cross_season_details": [
+          "3 in a row (S1 Jeddah -> S1 Australia -> S1 Miami)",
+          "2 in a row (S1 Las Vegas -> S1 Abu Dhabi)"
+        ]
+      },
+      {
+        "driver": "Zane",
+        "single_season_max": 3,
+        "single_season_details": [
+          "3 in a row (S1 Qatar -> S1 COTA -> S1 Mexico)"
+        ],
+        "cross_season_max": 3,
+        "cross_season_details": [
+          "3 in a row (S1 Qatar -> S1 COTA -> S1 Mexico)"
+        ]
+      },
+      {
+        "driver": "Brently",
+        "single_season_max": 2,
+        "single_season_details": [
+          "2 in a row (S3 Monza -> S3 Abu Dhabi)"
+        ],
+        "cross_season_max": 2,
+        "cross_season_details": [
+          "2 in a row (S3 Monza -> S3 Abu Dhabi)"
+        ]
+      },
+      {
+        "driver": "Travis",
+        "single_season_max": 2,
+        "single_season_details": [
+          "2 in a row (S1 Silverstone -> S1 Spa)"
+        ],
+        "cross_season_max": 2,
+        "cross_season_details": [
+          "2 in a row (S1 Silverstone -> S1 Spa)"
+        ]
+      }
+    ],
+    "pole_sitters": [
+      {
+        "driver": "Nick",
+        "poles": 18,
+        "poles_list": [
+          "S1 Bahrain",
+          "S1 Jeddah",
+          "S1 Australia",
+          "S1 Miami",
+          "S1 Spa",
+          "S1 Suzuka",
+          "S1 Las Vegas",
+          "S1 Abu Dhabi",
+          "S2 Monaco",
+          "S2 Silverstone",
+          "S2 China",
+          "S2 Spa",
+          "S2 Austria",
+          "S3 Silverstone",
+          "S3 Spain",
+          "S3 Baku",
+          "S3 Abu Dhabi",
+          "S5 Spa (S)"
+        ],
+        "avg_qual": 4.2
+      },
+      {
+        "driver": "Joshua",
+        "poles": 14,
+        "poles_list": [
+          "S2 Abu Dhabi",
+          "S2 Monza",
+          "S2 COTA",
+          "S3 Suzuka",
+          "S3 Australia",
+          "S3 Canada",
+          "S3 COTA (S)",
+          "S4 Austria (R)",
+          "S4 Spa (S)",
+          "S4 Brazil (S)",
+          "S4 Austria",
+          "S4 Zandvoort",
+          "S4 Las Vegas",
+          "S5 Australia"
+        ],
+        "avg_qual": 4.5
+      },
+      {
+        "driver": "Jairo",
+        "poles": 7,
+        "poles_list": [
+          "S4 Miami (S)",
+          "S4 Spain",
+          "S4 Mexico",
+          "S4 Baku",
+          "S4 Jeddah",
+          "S4 Abu Dhabi",
+          "S4 Monza"
+        ],
+        "avg_qual": 5.5
+      },
+      {
+        "driver": "Zane",
+        "poles": 6,
+        "poles_list": [
+          "S1 Zandvoort",
+          "S1 Monza",
+          "S1 Singapore",
+          "S1 Qatar",
+          "S1 Mexico",
+          "S1 Brazil"
+        ],
+        "avg_qual": 3.6
+      },
+      {
+        "driver": "Del",
+        "poles": 3,
+        "poles_list": [
+          "S2 Suzuka",
+          "S2 Zandvoort",
+          "S3 Monza"
+        ],
+        "avg_qual": 6.9
+      },
+      {
+        "driver": "Erick",
+        "poles": 3,
+        "poles_list": [
+          "S1 Spain",
+          "S1 Canada",
+          "S1 Austria"
+        ],
+        "avg_qual": 6.7
+      },
+      {
+        "driver": "Jelly",
+        "poles": 3,
+        "poles_list": [
+          "S5 Imola",
+          "S5 Miami (S)",
+          "S5 Monza"
+        ],
+        "avg_qual": 5.8
+      },
+      {
+        "driver": "Travis",
+        "poles": 2,
+        "poles_list": [
+          "S1 Silverstone",
+          "S1 COTA"
+        ],
+        "avg_qual": 8.0
+      },
+      {
+        "driver": "Brently",
+        "poles": 1,
+        "poles_list": [
+          "S5 Miami"
+        ],
+        "avg_qual": 8.1
+      },
+      {
+        "driver": "Eddie",
+        "poles": 1,
+        "poles_list": [
+          "S3 Austria (S)"
+        ],
+        "avg_qual": 9.3
+      },
+      {
+        "driver": "Evelo",
+        "poles": 1,
+        "poles_list": [
+          "S5 Spa"
+        ],
+        "avg_qual": 8.3
+      },
+      {
+        "driver": "Jaden",
+        "poles": 1,
+        "poles_list": [
+          "S4 Bahrain"
+        ],
+        "avg_qual": 6.0
+      },
+      {
+        "driver": "Patrick",
+        "poles": 1,
+        "poles_list": [
+          "S3 China (S)"
+        ],
+        "avg_qual": 5.9
+      }
+    ]
+  },
+  "drivers": {
+    "Boz": {
+      "driver": "Boz",
+      "total_points": 223.0,
+      "feature_wins": 0,
+      "sprint_wins": 0,
+      "feature_podiums": 3,
+      "sprint_podiums": 0,
+      "maiden_win": "None",
+      "maiden_podium": "S1 COTA (P3)",
+      "chronological_feature_wins": [],
+      "chronological_sprint_wins": [],
+      "chronological_feature_podiums": [
+        "S1 COTA (P3)",
+        "S1 Mexico (P2)",
+        "S1 Brazil (P2)"
+      ],
+      "chronological_sprint_podiums": [],
+      "feature_wins_by_season": [
+        "S1: 0",
+        "S2: 0",
+        "S3: 0",
+        "S4: 0",
+        "S5: 0"
+      ],
+      "sprint_wins_by_season": [],
+      "single_season_win_streak": 0,
+      "cross_season_win_streak": 0,
+      "single_season_win_streak_list": [],
+      "cross_season_win_streak_list": [],
+      "single_season_podium_streak": 3,
+      "cross_season_podium_streak": 3,
+      "single_season_podium_streak_list": [
+        "3 in a row (S1 COTA -> S1 Mexico -> S1 Brazil)"
+      ],
+      "cross_season_podium_streak_list": [
+        "3 in a row (S1 COTA -> S1 Mexico -> S1 Brazil)"
+      ],
+      "pre_season_wins": [],
+      "post_season_wins": [],
+      "pre_season_podiums": [],
+      "post_season_podiums": [],
+      "avg_place": 10.3,
+      "avg_qual": 9.5,
+      "avg_pos_change": -0.8,
+      "best_race_all_time": "P2 at S1 Brazil (22pts)",
+      "best_race_by_season": [
+        "S1: P2 at Brazil (22pts)",
+        "S2: P6 at Suzuka (9pts)",
+        "S3: P5 at China (S) (4pts)",
+        "S4: P7 at Bahrain (6pts)"
+      ],
+      "poles_count": 0,
+      "poles_list": [],
+      "fastest_laps": 0,
+      "driver_of_the_day": 0,
+      "most_overtakes": 0,
+      "cleanest_driver": 0,
+      "driver_championships": [],
+      "constructor_championships_on_team": [],
+      "seasonal_standings_finishes": [
+        "S1: P8",
+        "S2: P4",
+        "S3: P11",
+        "S4: P10",
+        "S5: P11"
+      ],
+      "all_time_standings_peak": "5th - S1 Miami",
+      "track_ratings": {
+        "Abu Dhabi": {
+          "score": 11.6,
+          "total_points": 21.0,
+          "avg_points": 5.2,
+          "avg_pos_change": -1.8
+        },
+        "Australia": {
+          "score": 8.3,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 8.0
+        },
+        "Austria": {
+          "score": 6.5,
+          "total_points": 13.0,
+          "avg_points": 2.2,
+          "avg_pos_change": 0.0
+        },
+        "Bahrain": {
+          "score": 9.7,
+          "total_points": 7.0,
+          "avg_points": 3.5,
+          "avg_pos_change": 1.0
+        },
+        "Baku": {
+          "score": 0.4,
+          "total_points": 2.0,
+          "avg_points": 1.0,
+          "avg_pos_change": -4.0
+        },
+        "Brazil": {
+          "score": 24.6,
+          "total_points": 22.0,
+          "avg_points": 7.3,
+          "avg_pos_change": 0.0
+        },
+        "COTA": {
+          "score": 14.2,
+          "total_points": 26.0,
+          "avg_points": 6.4,
+          "avg_pos_change": -0.5
+        },
+        "Canada": {
+          "score": 1.2,
+          "total_points": 2.0,
+          "avg_points": 1.0,
+          "avg_pos_change": -2.5
+        },
+        "China": {
+          "score": 18.5,
+          "total_points": 18.0,
+          "avg_points": 6.0,
+          "avg_pos_change": 5.3
+        },
+        "Imola": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Jeddah": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Las Vegas": {
+          "score": 18.9,
+          "total_points": 14.0,
+          "avg_points": 7.0,
+          "avg_pos_change": 0.0
+        },
+        "Mexico": {
+          "score": 22.4,
+          "total_points": 20.0,
+          "avg_points": 10.0,
+          "avg_pos_change": -0.5
+        },
+        "Miami": {
+          "score": 8.0,
+          "total_points": 13.0,
+          "avg_points": 2.6,
+          "avg_pos_change": 1.0
+        },
+        "Monaco": {
+          "score": 7.4,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 7.0
+        },
+        "Monza": {
+          "score": 5.2,
+          "total_points": 12.0,
+          "avg_points": 2.4,
+          "avg_pos_change": -2.0
+        },
+        "Qatar": {
+          "score": 33.0,
+          "total_points": 14.0,
+          "avg_points": 14.0,
+          "avg_pos_change": 0.0
+        },
+        "Silverstone": {
+          "score": 9.9,
+          "total_points": 15.0,
+          "avg_points": 5.0,
+          "avg_pos_change": -3.3
+        },
+        "Singapore": {
+          "score": -3.1,
+          "total_points": 1.0,
+          "avg_points": 1.0,
+          "avg_pos_change": -10.0
+        },
+        "Spa": {
+          "score": 1.6,
+          "total_points": 8.0,
+          "avg_points": 1.2,
+          "avg_pos_change": -3.4
+        },
+        "Spain": {
+          "score": -0.2,
+          "total_points": 1.0,
+          "avg_points": 0.3,
+          "avg_pos_change": -3.5
+        },
+        "Suzuka": {
+          "score": 5.0,
+          "total_points": 11.0,
+          "avg_points": 3.7,
+          "avg_pos_change": -6.0
+        },
+        "Zandvoort": {
+          "score": 8.0,
+          "total_points": 3.0,
+          "avg_points": 1.0,
+          "avg_pos_change": 5.3
+        }
+      }
+    },
+    "Brently": {
+      "driver": "Brently",
+      "total_points": 180.0,
+      "feature_wins": 0,
+      "sprint_wins": 0,
+      "feature_podiums": 3,
+      "sprint_podiums": 1,
+      "maiden_win": "None",
+      "maiden_podium": "S3 Monza (P3)",
+      "chronological_feature_wins": [],
+      "chronological_sprint_wins": [],
+      "chronological_feature_podiums": [
+        "S3 Monza (P3)",
+        "S3 Abu Dhabi (P3)",
+        "S4 Miami (P2)"
+      ],
+      "chronological_sprint_podiums": [
+        "S3 China (S) (P3)"
+      ],
+      "feature_wins_by_season": [
+        "S3: 0",
+        "S4: 0",
+        "S5: 0"
+      ],
+      "sprint_wins_by_season": [],
+      "single_season_win_streak": 0,
+      "cross_season_win_streak": 0,
+      "single_season_win_streak_list": [],
+      "cross_season_win_streak_list": [],
+      "single_season_podium_streak": 2,
+      "cross_season_podium_streak": 2,
+      "single_season_podium_streak_list": [
+        "2 in a row (S3 Monza -> S3 Abu Dhabi)"
+      ],
+      "cross_season_podium_streak_list": [
+        "2 in a row (S3 Monza -> S3 Abu Dhabi)"
+      ],
+      "pre_season_wins": [],
+      "post_season_wins": [
+        "S3 Post-Season: Monaco (Post-Season)"
+      ],
+      "pre_season_podiums": [],
+      "post_season_podiums": [
+        "S3 Post-Season: Monaco - P1 (Post-Season)"
+      ],
+      "avg_place": 8.3,
+      "avg_qual": 8.1,
+      "avg_pos_change": -0.2,
+      "best_race_all_time": "P2 at S4 Miami (18pts)",
+      "best_race_by_season": [
+        "S3: P3 at Monza (15pts)",
+        "S4: P2 at Miami (18pts)",
+        "S5: P8 at Miami (4pts)"
+      ],
+      "poles_count": 1,
+      "poles_list": [
+        "S5 Miami"
+      ],
+      "fastest_laps": 0,
+      "driver_of_the_day": 0,
+      "most_overtakes": 2,
+      "cleanest_driver": 1,
+      "driver_championships": [],
+      "constructor_championships_on_team": [],
+      "seasonal_standings_finishes": [
+        "S3: P4",
+        "S4: P7",
+        "S5: P7"
+      ],
+      "all_time_standings_peak": "9th - S4 Mexico",
+      "track_ratings": {
+        "Abu Dhabi": {
+          "score": 16.9,
+          "total_points": 15.0,
+          "avg_points": 7.5,
+          "avg_pos_change": -1.5
+        },
+        "Australia": {
+          "score": 13.3,
+          "total_points": 11.0,
+          "avg_points": 5.5,
+          "avg_pos_change": 0.0
+        },
+        "Austria": {
+          "score": 10.8,
+          "total_points": 16.0,
+          "avg_points": 4.0,
+          "avg_pos_change": 0.8
+        },
+        "Bahrain": {
+          "score": 33.4,
+          "total_points": 13.0,
+          "avg_points": 13.0,
+          "avg_pos_change": 6.0
+        },
+        "Baku": {
+          "score": 4.7,
+          "total_points": 4.0,
+          "avg_points": 2.0,
+          "avg_pos_change": -2.0
+        },
+        "Brazil": {
+          "score": 4.8,
+          "total_points": 4.0,
+          "avg_points": 1.8,
+          "avg_pos_change": -1.5
+        },
+        "COTA": {
+          "score": 0.7,
+          "total_points": 2.0,
+          "avg_points": 1.0,
+          "avg_pos_change": -3.5
+        },
+        "Canada": {
+          "score": 9.9,
+          "total_points": 4.0,
+          "avg_points": 4.0,
+          "avg_pos_change": -1.0
+        },
+        "China": {
+          "score": 18.9,
+          "total_points": 12.0,
+          "avg_points": 6.0,
+          "avg_pos_change": 5.5
+        },
+        "Imola": {
+          "score": 6.7,
+          "total_points": 2.0,
+          "avg_points": 2.0,
+          "avg_pos_change": 1.0
+        },
+        "Jeddah": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Las Vegas": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Mexico": {
+          "score": 13.8,
+          "total_points": 5.0,
+          "avg_points": 5.0,
+          "avg_pos_change": 2.0
+        },
+        "Miami": {
+          "score": 12.5,
+          "total_points": 23.0,
+          "avg_points": 5.8,
+          "avg_pos_change": -3.2
+        },
+        "Monza": {
+          "score": 12.8,
+          "total_points": 16.0,
+          "avg_points": 5.3,
+          "avg_pos_change": -1.0
+        },
+        "Silverstone": {
+          "score": 9.5,
+          "total_points": 4.0,
+          "avg_points": 4.0,
+          "avg_pos_change": -2.0
+        },
+        "Spa": {
+          "score": 7.3,
+          "total_points": 16.0,
+          "avg_points": 3.3,
+          "avg_pos_change": -2.4
+        },
+        "Spain": {
+          "score": 24.9,
+          "total_points": 20.0,
+          "avg_points": 10.0,
+          "avg_pos_change": 2.5
+        },
+        "Suzuka": {
+          "score": 31.2,
+          "total_points": 10.0,
+          "avg_points": 10.0,
+          "avg_pos_change": 11.0
+        },
+        "Zandvoort": {
+          "score": 7.3,
+          "total_points": 3.0,
+          "avg_points": 3.0,
+          "avg_pos_change": -1.0
+        }
+      }
+    },
+    "David": {
+      "driver": "David",
+      "total_points": 140.0,
+      "feature_wins": 0,
+      "sprint_wins": 0,
+      "feature_podiums": 1,
+      "sprint_podiums": 0,
+      "maiden_win": "None",
+      "maiden_podium": "S1 Monza (P3)",
+      "chronological_feature_wins": [],
+      "chronological_sprint_wins": [],
+      "chronological_feature_podiums": [
+        "S1 Monza (P3)"
+      ],
+      "chronological_sprint_podiums": [],
+      "feature_wins_by_season": [
+        "S1: 0",
+        "S2: 0"
+      ],
+      "sprint_wins_by_season": [],
+      "single_season_win_streak": 0,
+      "cross_season_win_streak": 0,
+      "single_season_win_streak_list": [],
+      "cross_season_win_streak_list": [],
+      "single_season_podium_streak": 1,
+      "cross_season_podium_streak": 1,
+      "single_season_podium_streak_list": [],
+      "cross_season_podium_streak_list": [],
+      "pre_season_wins": [],
+      "post_season_wins": [],
+      "pre_season_podiums": [],
+      "post_season_podiums": [],
+      "avg_place": 8.7,
+      "avg_qual": 6.4,
+      "avg_pos_change": -2.3,
+      "best_race_all_time": "P3 at S1 Monza (17pts)",
+      "best_race_by_season": [
+        "S1: P3 at Monza (17pts)",
+        "S2: P6 at Zandvoort (13pts)"
+      ],
+      "poles_count": 0,
+      "poles_list": [],
+      "fastest_laps": 0,
+      "driver_of_the_day": 0,
+      "most_overtakes": 0,
+      "cleanest_driver": 0,
+      "driver_championships": [],
+      "constructor_championships_on_team": [],
+      "seasonal_standings_finishes": [
+        "S1: P4",
+        "S2: P6"
+      ],
+      "all_time_standings_peak": "4th - S1 Bahrain",
+      "track_ratings": {
+        "Abu Dhabi": {
+          "score": 15.3,
+          "total_points": 11.0,
+          "avg_points": 5.5,
+          "avg_pos_change": 2.0
+        },
+        "Australia": {
+          "score": 2.6,
+          "total_points": 2.0,
+          "avg_points": 2.0,
+          "avg_pos_change": -7.0
+        },
+        "Austria": {
+          "score": -0.5,
+          "total_points": 1.0,
+          "avg_points": 0.5,
+          "avg_pos_change": -6.0
+        },
+        "Bahrain": {
+          "score": 3.4,
+          "total_points": 2.0,
+          "avg_points": 2.0,
+          "avg_pos_change": -5.0
+        },
+        "Brazil": {
+          "score": 7.1,
+          "total_points": 3.0,
+          "avg_points": 3.0,
+          "avg_pos_change": -6.0
+        },
+        "COTA": {
+          "score": 21.7,
+          "total_points": 19.0,
+          "avg_points": 9.5,
+          "avg_pos_change": -2.5
+        },
+        "Canada": {
+          "score": 1.6,
+          "total_points": 2.0,
+          "avg_points": 2.0,
+          "avg_pos_change": -7.0
+        },
+        "China": {
+          "score": 12.7,
+          "total_points": 5.0,
+          "avg_points": 5.0,
+          "avg_pos_change": 1.0
+        },
+        "Jeddah": {
+          "score": 6.3,
+          "total_points": 3.0,
+          "avg_points": 3.0,
+          "avg_pos_change": -4.0
+        },
+        "Las Vegas": {
+          "score": 2.4,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": -1.0
+        },
+        "Mexico": {
+          "score": 7.1,
+          "total_points": 3.0,
+          "avg_points": 3.0,
+          "avg_pos_change": -6.0
+        },
+        "Miami": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Monaco": {
+          "score": 6.7,
+          "total_points": 1.0,
+          "avg_points": 1.0,
+          "avg_pos_change": 4.0
+        },
+        "Monza": {
+          "score": 30.0,
+          "total_points": 26.0,
+          "avg_points": 13.0,
+          "avg_pos_change": 0.0
+        },
+        "Qatar": {
+          "score": 26.0,
+          "total_points": 11.0,
+          "avg_points": 11.0,
+          "avg_pos_change": 0.0
+        },
+        "Silverstone": {
+          "score": 3.1,
+          "total_points": 3.0,
+          "avg_points": 1.5,
+          "avg_pos_change": -3.0
+        },
+        "Singapore": {
+          "score": -2.0,
+          "total_points": 1.0,
+          "avg_points": 1.0,
+          "avg_pos_change": -8.0
+        },
+        "Spa": {
+          "score": 15.8,
+          "total_points": 13.0,
+          "avg_points": 6.5,
+          "avg_pos_change": -0.5
+        },
+        "Spain": {
+          "score": 30.8,
+          "total_points": 13.0,
+          "avg_points": 13.0,
+          "avg_pos_change": -2.0
+        },
+        "Suzuka": {
+          "score": 7.0,
+          "total_points": 7.0,
+          "avg_points": 3.5,
+          "avg_pos_change": -4.0
+        },
+        "Zandvoort": {
+          "score": 18.4,
+          "total_points": 14.0,
+          "avg_points": 7.0,
+          "avg_pos_change": 3.0
+        }
+      }
+    },
+    "Del": {
+      "driver": "Del",
+      "total_points": 360.0,
+      "feature_wins": 3,
+      "sprint_wins": 0,
+      "feature_podiums": 11,
+      "sprint_podiums": 0,
+      "maiden_win": "P1 at S2 Silverstone",
+      "maiden_podium": "S2 Suzuka (P3)",
+      "chronological_feature_wins": [
+        "S2 Silverstone",
+        "S2 Austria",
+        "S3 Canada"
+      ],
+      "chronological_sprint_wins": [],
+      "chronological_feature_podiums": [
+        "S2 Suzuka (P3)",
+        "S2 Monza (P3)",
+        "S2 Silverstone (P1)",
+        "S2 China (P2)",
+        "S2 COTA (P3)",
+        "S2 Spa (P2)",
+        "S2 Austria (P1)",
+        "S3 Suzuka (P3)",
+        "S3 Spa (P3)",
+        "S3 Canada (P1)",
+        "S3 Monza (P2)"
+      ],
+      "chronological_sprint_podiums": [],
+      "feature_wins_by_season": [
+        "S2: 2 (Silverstone, Austria)",
+        "S3: 1 (Canada)",
+        "S4: 0",
+        "S5: 0"
+      ],
+      "sprint_wins_by_season": [],
+      "single_season_win_streak": 1,
+      "cross_season_win_streak": 1,
+      "single_season_win_streak_list": [],
+      "cross_season_win_streak_list": [],
+      "single_season_podium_streak": 5,
+      "cross_season_podium_streak": 6,
+      "single_season_podium_streak_list": [
+        "5 in a row (S2 Silverstone -> S2 China -> S2 COTA -> S2 Spa -> S2 Austria)",
+        "2 in a row (S3 Canada -> S3 Monza)"
+      ],
+      "cross_season_podium_streak_list": [
+        "6 in a row (S2 Silverstone -> S2 China -> S2 COTA -> S2 Spa -> S2 Austria -> S3 Suzuka)",
+        "2 in a row (S3 Canada -> S3 Monza)"
+      ],
+      "pre_season_wins": [],
+      "post_season_wins": [],
+      "pre_season_podiums": [
+        "S4 Pre-Season: Silverstone - P3 (Pre-Season)"
+      ],
+      "post_season_podiums": [],
+      "avg_place": 5.7,
+      "avg_qual": 6.9,
+      "avg_pos_change": 1.2,
+      "best_race_all_time": "P1 at S2 Silverstone (30pts)",
+      "best_race_by_season": [
+        "S2: P1 at Silverstone (30pts)",
+        "S3: P1 at Canada (0pts)",
+        "S4: P4 at Austria (12pts)",
+        "S5: P5 at Monza (11pts)"
+      ],
+      "poles_count": 3,
+      "poles_list": [
+        "S2 Suzuka",
+        "S2 Zandvoort",
+        "S3 Monza"
+      ],
+      "fastest_laps": 2,
+      "driver_of_the_day": 2,
+      "most_overtakes": 3,
+      "cleanest_driver": 0,
+      "driver_championships": [],
+      "constructor_championships_on_team": [],
+      "seasonal_standings_finishes": [
+        "S2: P3",
+        "S3: P14",
+        "S4: P9",
+        "S5: P4"
+      ],
+      "all_time_standings_peak": "4th - S4 Austria (R)",
+      "track_ratings": {
+        "Abu Dhabi": {
+          "score": 15.9,
+          "total_points": 21.0,
+          "avg_points": 7.0,
+          "avg_pos_change": -1.0
+        },
+        "Australia": {
+          "score": 2.5,
+          "total_points": 2.0,
+          "avg_points": 1.0,
+          "avg_pos_change": -2.0
+        },
+        "Austria": {
+          "score": 33.8,
+          "total_points": 68.0,
+          "avg_points": 13.6,
+          "avg_pos_change": 4.7
+        },
+        "Bahrain": {
+          "score": 25.2,
+          "total_points": 10.0,
+          "avg_points": 10.0,
+          "avg_pos_change": 3.0
+        },
+        "Baku": {
+          "score": 8.8,
+          "total_points": 6.0,
+          "avg_points": 3.0,
+          "avg_pos_change": 0.0
+        },
+        "Brazil": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "COTA": {
+          "score": 33.1,
+          "total_points": 40.0,
+          "avg_points": 13.3,
+          "avg_pos_change": 4.0
+        },
+        "Canada": {
+          "score": 10.8,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 1.0
+        },
+        "China": {
+          "score": 22.8,
+          "total_points": 23.0,
+          "avg_points": 7.7,
+          "avg_pos_change": 1.0
+        },
+        "Imola": {
+          "score": 27.1,
+          "total_points": 10.0,
+          "avg_points": 10.0,
+          "avg_pos_change": 6.0
+        },
+        "Jeddah": {
+          "score": 0.2,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": -7.0
+        },
+        "Las Vegas": {
+          "score": 14.8,
+          "total_points": 6.0,
+          "avg_points": 6.0,
+          "avg_pos_change": 0.0
+        },
+        "Mexico": {
+          "score": 14.8,
+          "total_points": 6.0,
+          "avg_points": 6.0,
+          "avg_pos_change": 0.0
+        },
+        "Miami": {
+          "score": 10.8,
+          "total_points": 15.0,
+          "avg_points": 3.8,
+          "avg_pos_change": 1.0
+        },
+        "Monaco": {
+          "score": 23.0,
+          "total_points": 10.0,
+          "avg_points": 10.0,
+          "avg_pos_change": -4.0
+        },
+        "Monza": {
+          "score": 25.6,
+          "total_points": 41.0,
+          "avg_points": 10.2,
+          "avg_pos_change": 1.2
+        },
+        "Silverstone": {
+          "score": 37.8,
+          "total_points": 30.0,
+          "avg_points": 15.0,
+          "avg_pos_change": 5.0
+        },
+        "Spa": {
+          "score": 13.5,
+          "total_points": 27.0,
+          "avg_points": 4.5,
+          "avg_pos_change": 2.0
+        },
+        "Spain": {
+          "score": 8.4,
+          "total_points": 5.0,
+          "avg_points": 2.5,
+          "avg_pos_change": 1.5
+        },
+        "Suzuka": {
+          "score": 29.0,
+          "total_points": 21.0,
+          "avg_points": 10.5,
+          "avg_pos_change": 6.5
+        },
+        "Zandvoort": {
+          "score": 22.1,
+          "total_points": 19.0,
+          "avg_points": 9.5,
+          "avg_pos_change": -2.0
+        }
+      }
+    },
+    "Eddie": {
+      "driver": "Eddie",
+      "total_points": 204.0,
+      "feature_wins": 0,
+      "sprint_wins": 0,
+      "feature_podiums": 0,
+      "sprint_podiums": 1,
+      "maiden_win": "None",
+      "maiden_podium": "None",
+      "chronological_feature_wins": [],
+      "chronological_sprint_wins": [],
+      "chronological_feature_podiums": [],
+      "chronological_sprint_podiums": [
+        "S3 COTA (S) (P3)"
+      ],
+      "feature_wins_by_season": [
+        "S2: 0",
+        "S3: 0",
+        "S4: 0",
+        "S5: 0"
+      ],
+      "sprint_wins_by_season": [],
+      "single_season_win_streak": 0,
+      "cross_season_win_streak": 0,
+      "single_season_win_streak_list": [],
+      "cross_season_win_streak_list": [],
+      "single_season_podium_streak": 0,
+      "cross_season_podium_streak": 0,
+      "single_season_podium_streak_list": [],
+      "cross_season_podium_streak_list": [],
+      "pre_season_wins": [],
+      "post_season_wins": [],
+      "pre_season_podiums": [],
+      "post_season_podiums": [],
+      "avg_place": 8.5,
+      "avg_qual": 9.3,
+      "avg_pos_change": 0.8,
+      "best_race_all_time": "P3 at S3 COTA (S) (6pts)",
+      "best_race_by_season": [
+        "S2: P5 at Spa (15pts)",
+        "S3: P3 at COTA (S) (6pts)",
+        "S4: P5 at Spa (10pts)",
+        "S5: P6 at Australia (8pts)"
+      ],
+      "poles_count": 1,
+      "poles_list": [
+        "S3 Austria (S)"
+      ],
+      "fastest_laps": 0,
+      "driver_of_the_day": 1,
+      "most_overtakes": 2,
+      "cleanest_driver": 0,
+      "driver_championships": [],
+      "constructor_championships_on_team": [
+        "S3 Alpine"
+      ],
+      "seasonal_standings_finishes": [
+        "S2: P8",
+        "S3: P8",
+        "S4: P2",
+        "S5: P2"
+      ],
+      "all_time_standings_peak": "8th - S3 COTA",
+      "track_ratings": {
+        "Abu Dhabi": {
+          "score": 21.0,
+          "total_points": 22.0,
+          "avg_points": 7.3,
+          "avg_pos_change": 4.5
+        },
+        "Australia": {
+          "score": 13.3,
+          "total_points": 9.0,
+          "avg_points": 4.5,
+          "avg_pos_change": 3.0
+        },
+        "Austria": {
+          "score": 9.2,
+          "total_points": 14.0,
+          "avg_points": 2.8,
+          "avg_pos_change": 1.4
+        },
+        "Bahrain": {
+          "score": 7.7,
+          "total_points": 4.0,
+          "avg_points": 4.0,
+          "avg_pos_change": -4.0
+        },
+        "Baku": {
+          "score": -5.0,
+          "total_points": 1.0,
+          "avg_points": 0.5,
+          "avg_pos_change": -11.0
+        },
+        "Brazil": {
+          "score": 7.8,
+          "total_points": 5.0,
+          "avg_points": 2.5,
+          "avg_pos_change": 0.5
+        },
+        "COTA": {
+          "score": 26.2,
+          "total_points": 29.0,
+          "avg_points": 9.7,
+          "avg_pos_change": 5.3
+        },
+        "Canada": {
+          "score": 14.2,
+          "total_points": 6.0,
+          "avg_points": 6.0,
+          "avg_pos_change": -3.0
+        },
+        "China": {
+          "score": 18.9,
+          "total_points": 19.0,
+          "avg_points": 6.3,
+          "avg_pos_change": 5.0
+        },
+        "Imola": {
+          "score": 2.4,
+          "total_points": 1.0,
+          "avg_points": 1.0,
+          "avg_pos_change": -2.0
+        },
+        "Jeddah": {
+          "score": 19.8,
+          "total_points": 6.0,
+          "avg_points": 6.0,
+          "avg_pos_change": 7.0
+        },
+        "Las Vegas": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Mexico": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Miami": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Monaco": {
+          "score": 3.2,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 2.0
+        },
+        "Monza": {
+          "score": 18.8,
+          "total_points": 30.0,
+          "avg_points": 7.5,
+          "avg_pos_change": 1.8
+        },
+        "Silverstone": {
+          "score": 11.6,
+          "total_points": 10.0,
+          "avg_points": 5.0,
+          "avg_pos_change": -1.0
+        },
+        "Spa": {
+          "score": 14.3,
+          "total_points": 34.0,
+          "avg_points": 5.7,
+          "avg_pos_change": 0.2
+        },
+        "Spain": {
+          "score": -2.9,
+          "total_points": 2.0,
+          "avg_points": 1.0,
+          "avg_pos_change": -9.0
+        },
+        "Suzuka": {
+          "score": 11.3,
+          "total_points": 5.0,
+          "avg_points": 2.5,
+          "avg_pos_change": 5.5
+        },
+        "Zandvoort": {
+          "score": 10.0,
+          "total_points": 7.0,
+          "avg_points": 3.5,
+          "avg_pos_change": 1.5
+        }
+      }
+    },
+    "Erick": {
+      "driver": "Erick",
+      "total_points": 776.0,
+      "feature_wins": 6,
+      "sprint_wins": 0,
+      "feature_podiums": 25,
+      "sprint_podiums": 2,
+      "maiden_win": "P1 at S1 Australia",
+      "maiden_podium": "S1 Jeddah (P2)",
+      "chronological_feature_wins": [
+        "S1 Australia",
+        "S1 Silverstone",
+        "S1 Zandvoort",
+        "S1 Singapore",
+        "S1 Las Vegas",
+        "S2 COTA"
+      ],
+      "chronological_sprint_wins": [],
+      "chronological_feature_podiums": [
+        "S1 Jeddah (P2)",
+        "S1 Australia (P1)",
+        "S1 Miami (P2)",
+        "S1 Spain (P2)",
+        "S1 Austria (P3)",
+        "S1 Silverstone (P1)",
+        "S1 Spa (P2)",
+        "S1 Zandvoort (P1)",
+        "S1 Monza (P2)",
+        "S1 Singapore (P1)",
+        "S1 Suzuka (P2)",
+        "S1 Qatar (P2)",
+        "S1 Brazil (P3)",
+        "S1 Las Vegas (P1)",
+        "S1 Abu Dhabi (P3)",
+        "S2 Abu Dhabi (P3)",
+        "S2 Zandvoort (P2)",
+        "S2 Silverstone (P3)",
+        "S2 COTA (P1)",
+        "S2 Spa (P3)",
+        "S3 Silverstone (P3)",
+        "S3 Australia (P3)",
+        "S3 Spain (P3)",
+        "S3 China (P2)",
+        "S3 COTA (P2)"
+      ],
+      "chronological_sprint_podiums": [
+        "S3 China (S) (P2)",
+        "S3 Austria (S) (P3)"
+      ],
+      "feature_wins_by_season": [
+        "S1: 5 (Australia, Silverstone, Zandvoort, Singapore, Las Vegas)",
+        "S2: 1 (COTA)",
+        "S3: 0",
+        "S4: 0"
+      ],
+      "sprint_wins_by_season": [],
+      "single_season_win_streak": 1,
+      "cross_season_win_streak": 1,
+      "single_season_win_streak_list": [],
+      "cross_season_win_streak_list": [],
+      "single_season_podium_streak": 8,
+      "cross_season_podium_streak": 8,
+      "single_season_podium_streak_list": [
+        "4 in a row (S1 Jeddah -> S1 Australia -> S1 Miami -> S1 Spain)",
+        "8 in a row (S1 Austria -> S1 Silverstone -> S1 Spa -> S1 Zandvoort -> S1 Monza -> S1 Singapore -> S1 Suzuka -> S1 Qatar)",
+        "3 in a row (S1 Brazil -> S1 Las Vegas -> S1 Abu Dhabi)",
+        "2 in a row (S2 Zandvoort -> S2 Silverstone)",
+        "2 in a row (S2 COTA -> S2 Spa)",
+        "2 in a row (S3 Silverstone -> S3 Australia)",
+        "2 in a row (S3 Spain -> S3 China)"
+      ],
+      "cross_season_podium_streak_list": [
+        "4 in a row (S1 Jeddah -> S1 Australia -> S1 Miami -> S1 Spain)",
+        "8 in a row (S1 Austria -> S1 Silverstone -> S1 Spa -> S1 Zandvoort -> S1 Monza -> S1 Singapore -> S1 Suzuka -> S1 Qatar)",
+        "3 in a row (S1 Brazil -> S1 Las Vegas -> S1 Abu Dhabi)",
+        "2 in a row (S2 Zandvoort -> S2 Silverstone)",
+        "2 in a row (S2 COTA -> S2 Spa)",
+        "2 in a row (S3 Silverstone -> S3 Australia)",
+        "2 in a row (S3 Spain -> S3 China)"
+      ],
+      "pre_season_wins": [],
+      "post_season_wins": [],
+      "pre_season_podiums": [],
+      "post_season_podiums": [],
+      "avg_place": 5.0,
+      "avg_qual": 6.7,
+      "avg_pos_change": 1.7,
+      "best_race_all_time": "P1 at S1 Las Vegas (30pts)",
+      "best_race_by_season": [
+        "S1: P1 at Las Vegas (30pts)",
+        "S2: P1 at COTA (30pts)",
+        "S3: P2 at China (18pts)",
+        "S4: P4 at Miami (12pts)"
+      ],
+      "poles_count": 3,
+      "poles_list": [
+        "S1 Spain",
+        "S1 Canada",
+        "S1 Austria"
+      ],
+      "fastest_laps": 12,
+      "driver_of_the_day": 0,
+      "most_overtakes": 0,
+      "cleanest_driver": 0,
+      "driver_championships": [],
+      "constructor_championships_on_team": [
+        "S1 Mercedes"
+      ],
+      "seasonal_standings_finishes": [
+        "S1: P5",
+        "S2: P5",
+        "S3: P5",
+        "S4: P11"
+      ],
+      "all_time_standings_peak": "🥇 S1 Singapore",
+      "track_ratings": {
+        "Abu Dhabi": {
+          "score": 28.1,
+          "total_points": 47.0,
+          "avg_points": 11.8,
+          "avg_pos_change": -0.3
+        },
+        "Australia": {
+          "score": 51.0,
+          "total_points": 44.0,
+          "avg_points": 22.0,
+          "avg_pos_change": 1.5
+        },
+        "Austria": {
+          "score": 18.7,
+          "total_points": 40.0,
+          "avg_points": 6.7,
+          "avg_pos_change": 4.0
+        },
+        "Bahrain": {
+          "score": 18.8,
+          "total_points": 16.0,
+          "avg_points": 8.0,
+          "avg_pos_change": -0.5
+        },
+        "Baku": {
+          "score": 13.6,
+          "total_points": 8.0,
+          "avg_points": 4.0,
+          "avg_pos_change": 4.0
+        },
+        "Brazil": {
+          "score": 12.9,
+          "total_points": 18.0,
+          "avg_points": 6.2,
+          "avg_pos_change": -2.0
+        },
+        "COTA": {
+          "score": 38.9,
+          "total_points": 64.0,
+          "avg_points": 16.0,
+          "avg_pos_change": 5.0
+        },
+        "Canada": {
+          "score": 21.4,
+          "total_points": 18.0,
+          "avg_points": 9.0,
+          "avg_pos_change": -2.5
+        },
+        "China": {
+          "score": 26.8,
+          "total_points": 30.0,
+          "avg_points": 10.0,
+          "avg_pos_change": 5.3
+        },
+        "Jeddah": {
+          "score": 37.3,
+          "total_points": 32.0,
+          "avg_points": 16.0,
+          "avg_pos_change": 1.0
+        },
+        "Las Vegas": {
+          "score": 43.4,
+          "total_points": 38.0,
+          "avg_points": 19.0,
+          "avg_pos_change": 0.5
+        },
+        "Mexico": {
+          "score": 17.9,
+          "total_points": 13.0,
+          "avg_points": 6.5,
+          "avg_pos_change": 1.0
+        },
+        "Miami": {
+          "score": 26.4,
+          "total_points": 34.0,
+          "avg_points": 11.5,
+          "avg_pos_change": 0.3
+        },
+        "Monaco": {
+          "score": 28.0,
+          "total_points": 12.0,
+          "avg_points": 12.0,
+          "avg_pos_change": -1.0
+        },
+        "Monza": {
+          "score": 30.8,
+          "total_points": 48.0,
+          "avg_points": 12.0,
+          "avg_pos_change": 5.5
+        },
+        "Qatar": {
+          "score": 51.5,
+          "total_points": 22.0,
+          "avg_points": 22.0,
+          "avg_pos_change": 1.0
+        },
+        "Silverstone": {
+          "score": 49.3,
+          "total_points": 64.0,
+          "avg_points": 21.3,
+          "avg_pos_change": 1.3
+        },
+        "Singapore": {
+          "score": 63.7,
+          "total_points": 28.0,
+          "avg_points": 28.0,
+          "avg_pos_change": 3.0
+        },
+        "Spa": {
+          "score": 25.6,
+          "total_points": 55.0,
+          "avg_points": 11.0,
+          "avg_pos_change": 0.8
+        },
+        "Spain": {
+          "score": 35.0,
+          "total_points": 45.0,
+          "avg_points": 15.0,
+          "avg_pos_change": 0.0
+        },
+        "Suzuka": {
+          "score": 34.6,
+          "total_points": 45.0,
+          "avg_points": 15.0,
+          "avg_pos_change": 0.0
+        },
+        "Zandvoort": {
+          "score": 41.6,
+          "total_points": 54.0,
+          "avg_points": 18.0,
+          "avg_pos_change": 3.0
+        }
+      }
+    },
+    "Evelo": {
+      "driver": "Evelo",
+      "total_points": 7.5,
+      "feature_wins": 0,
+      "sprint_wins": 0,
+      "feature_podiums": 0,
+      "sprint_podiums": 0,
+      "maiden_win": "None",
+      "maiden_podium": "None",
+      "chronological_feature_wins": [],
+      "chronological_sprint_wins": [],
+      "chronological_feature_podiums": [],
+      "chronological_sprint_podiums": [],
+      "feature_wins_by_season": [
+        "S5: 0"
+      ],
+      "sprint_wins_by_season": [],
+      "single_season_win_streak": 0,
+      "cross_season_win_streak": 0,
+      "single_season_win_streak_list": [],
+      "cross_season_win_streak_list": [],
+      "single_season_podium_streak": 0,
+      "cross_season_podium_streak": 0,
+      "single_season_podium_streak_list": [],
+      "cross_season_podium_streak_list": [],
+      "pre_season_wins": [],
+      "post_season_wins": [],
+      "pre_season_podiums": [],
+      "post_season_podiums": [],
+      "avg_place": 11.1,
+      "avg_qual": 8.3,
+      "avg_pos_change": -2.9,
+      "best_race_all_time": "P9 at S5 Spa (S) (0pts)",
+      "best_race_by_season": [
+        "S5: P9 at Spa (S) (0pts)"
+      ],
+      "poles_count": 1,
+      "poles_list": [
+        "S5 Spa"
+      ],
+      "fastest_laps": 0,
+      "driver_of_the_day": 0,
+      "most_overtakes": 0,
+      "cleanest_driver": 0,
+      "driver_championships": [],
+      "constructor_championships_on_team": [],
+      "seasonal_standings_finishes": [
+        "S5: P12"
+      ],
+      "all_time_standings_peak": "21st - S5 Miami",
+      "track_ratings": {
+        "Australia": {
+          "score": 1.8,
+          "total_points": 1.0,
+          "avg_points": 1.0,
+          "avg_pos_change": -2.0
+        },
+        "Imola": {
+          "score": 2.2,
+          "total_points": 1.0,
+          "avg_points": 1.0,
+          "avg_pos_change": -2.0
+        },
+        "Miami": {
+          "score": 3.1,
+          "total_points": 2.0,
+          "avg_points": 1.0,
+          "avg_pos_change": -1.0
+        },
+        "Monza": {
+          "score": 1.7,
+          "total_points": 1.0,
+          "avg_points": 1.0,
+          "avg_pos_change": -3.0
+        },
+        "Spa": {
+          "score": 2.5,
+          "total_points": 2.0,
+          "avg_points": 1.2,
+          "avg_pos_change": -5.5
+        }
+      }
+    },
+    "Gary": {
+      "driver": "Gary",
+      "total_points": 22.0,
+      "feature_wins": 0,
+      "sprint_wins": 0,
+      "feature_podiums": 0,
+      "sprint_podiums": 0,
+      "maiden_win": "None",
+      "maiden_podium": "None",
+      "chronological_feature_wins": [],
+      "chronological_sprint_wins": [],
+      "chronological_feature_podiums": [],
+      "chronological_sprint_podiums": [],
+      "feature_wins_by_season": [
+        "S1: 0",
+        "S2: 0",
+        "S3: 0"
+      ],
+      "sprint_wins_by_season": [],
+      "single_season_win_streak": 0,
+      "cross_season_win_streak": 0,
+      "single_season_win_streak_list": [],
+      "cross_season_win_streak_list": [],
+      "single_season_podium_streak": 0,
+      "cross_season_podium_streak": 0,
+      "single_season_podium_streak_list": [],
+      "cross_season_podium_streak_list": [],
+      "pre_season_wins": [],
+      "post_season_wins": [],
+      "pre_season_podiums": [],
+      "post_season_podiums": [],
+      "avg_place": 11.1,
+      "avg_qual": 14.4,
+      "avg_pos_change": 3.4,
+      "best_race_all_time": "P7 at S1 Zandvoort (0pts)",
+      "best_race_by_season": [
+        "S1: P7 at Zandvoort (0pts)",
+        "S2: P9 at Spa (0pts)",
+        "S3: P18 at Suzuka (1pts)"
+      ],
+      "poles_count": 0,
+      "poles_list": [],
+      "fastest_laps": 0,
+      "driver_of_the_day": 0,
+      "most_overtakes": 0,
+      "cleanest_driver": 0,
+      "driver_championships": [
+        1,
+        2
+      ],
+      "constructor_championships_on_team": [
+        "S2 McLaren"
+      ],
+      "seasonal_standings_finishes": [
+        "S1: P9",
+        "S2: P2",
+        "S3: P12"
+      ],
+      "all_time_standings_peak": "8th - S1 Mexico",
+      "track_ratings": {
+        "Abu Dhabi": {
+          "score": 6.9,
+          "total_points": 8.0,
+          "avg_points": 2.7,
+          "avg_pos_change": -1.0
+        },
+        "Australia": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Austria": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Bahrain": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Baku": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Brazil": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "COTA": {
+          "score": 7.6,
+          "total_points": 2.0,
+          "avg_points": 0.5,
+          "avg_pos_change": 6.0
+        },
+        "Canada": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "China": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Jeddah": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Las Vegas": {
+          "score": 2.8,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Mexico": {
+          "score": 10.5,
+          "total_points": 4.0,
+          "avg_points": 4.0,
+          "avg_pos_change": 0.0
+        },
+        "Miami": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Monaco": {
+          "score": 5.7,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 5.0
+        },
+        "Monza": {
+          "score": 3.8,
+          "total_points": 2.0,
+          "avg_points": 0.7,
+          "avg_pos_change": 1.0
+        },
+        "Qatar": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Silverstone": {
+          "score": 3.1,
+          "total_points": 4.0,
+          "avg_points": 1.3,
+          "avg_pos_change": -1.0
+        },
+        "Singapore": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Spa": {
+          "score": 8.4,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 8.0
+        },
+        "Spain": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Suzuka": {
+          "score": 6.2,
+          "total_points": 1.0,
+          "avg_points": 0.3,
+          "avg_pos_change": 5.0
+        },
+        "Zandvoort": {
+          "score": 11.6,
+          "total_points": 1.0,
+          "avg_points": 0.5,
+          "avg_pos_change": 10.5
+        }
+      }
+    },
+    "Grayson": {
+      "driver": "Grayson",
+      "total_points": 1.0,
+      "feature_wins": 0,
+      "sprint_wins": 0,
+      "feature_podiums": 0,
+      "sprint_podiums": 0,
+      "maiden_win": "None",
+      "maiden_podium": "None",
+      "chronological_feature_wins": [],
+      "chronological_sprint_wins": [],
+      "chronological_feature_podiums": [],
+      "chronological_sprint_podiums": [],
+      "feature_wins_by_season": [
+        "S5: 0"
+      ],
+      "sprint_wins_by_season": [],
+      "single_season_win_streak": 0,
+      "cross_season_win_streak": 0,
+      "single_season_win_streak_list": [],
+      "cross_season_win_streak_list": [],
+      "single_season_podium_streak": 0,
+      "cross_season_podium_streak": 0,
+      "single_season_podium_streak_list": [],
+      "cross_season_podium_streak_list": [],
+      "pre_season_wins": [],
+      "post_season_wins": [],
+      "pre_season_podiums": [],
+      "post_season_podiums": [],
+      "avg_place": 15.0,
+      "avg_qual": 13.0,
+      "avg_pos_change": -2.0,
+      "best_race_all_time": "P15 at S5 Australia (1pts)",
+      "best_race_by_season": [
+        "S5: P15 at Australia (1pts)"
+      ],
+      "poles_count": 0,
+      "poles_list": [],
+      "fastest_laps": 0,
+      "driver_of_the_day": 0,
+      "most_overtakes": 0,
+      "cleanest_driver": 0,
+      "driver_championships": [],
+      "constructor_championships_on_team": [],
+      "seasonal_standings_finishes": [
+        "S5: P9"
+      ],
+      "all_time_standings_peak": "22nd - S5 Australia",
+      "track_ratings": {
+        "Australia": {
+          "score": 1.7,
+          "total_points": 1.0,
+          "avg_points": 1.0,
+          "avg_pos_change": -2.0
+        },
+        "Imola": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Miami": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Monza": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Spa": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        }
+      }
+    },
+    "Jaden": {
+      "driver": "Jaden",
+      "total_points": 232.0,
+      "feature_wins": 1,
+      "sprint_wins": 2,
+      "feature_podiums": 6,
+      "sprint_podiums": 4,
+      "maiden_win": "P1 at S4 Brazil",
+      "maiden_podium": "S4 Mexico (P2)",
+      "chronological_feature_wins": [
+        "S4 Brazil"
+      ],
+      "chronological_sprint_wins": [
+        "S4 Spa (S)",
+        "S5 Miami (S)"
+      ],
+      "chronological_feature_podiums": [
+        "S4 Mexico (P2)",
+        "S4 Brazil (P1)",
+        "S4 Austria (P3)",
+        "S4 Zandvoort (P3)",
+        "S5 Australia (P2)",
+        "S5 Monza (P2)"
+      ],
+      "chronological_sprint_podiums": [
+        "S4 Miami (S) (P2)",
+        "S4 Spa (S) (P1)",
+        "S5 Miami (S) (P1)",
+        "S5 Spa (S) (P3)"
+      ],
+      "feature_wins_by_season": [
+        "S4: 1 (Brazil)",
+        "S5: 0"
+      ],
+      "sprint_wins_by_season": [
+        "S4: 1 (Spa (S))",
+        "S5: 1 (Miami (S))"
+      ],
+      "single_season_win_streak": 1,
+      "cross_season_win_streak": 1,
+      "single_season_win_streak_list": [],
+      "cross_season_win_streak_list": [],
+      "single_season_podium_streak": 3,
+      "cross_season_podium_streak": 3,
+      "single_season_podium_streak_list": [
+        "3 in a row (S4 Brazil -> S4 Austria -> S4 Zandvoort)"
+      ],
+      "cross_season_podium_streak_list": [
+        "3 in a row (S4 Brazil -> S4 Austria -> S4 Zandvoort)"
+      ],
+      "pre_season_wins": [
+        "S5 Pre-Season: Hungary Sprint (Pre-Season)"
+      ],
+      "post_season_wins": [],
+      "pre_season_podiums": [
+        "S5 Pre-Season: Mexico - P3 (Pre-Season)",
+        "S5 Pre-Season: Hungary Sprint - P1 (Pre-Season)"
+      ],
+      "post_season_podiums": [],
+      "avg_place": 4.3,
+      "avg_qual": 6.0,
+      "avg_pos_change": 1.7,
+      "best_race_all_time": "P1 at S4 Brazil (26pts)",
+      "best_race_by_season": [
+        "S4: P1 at Brazil (26pts)",
+        "S5: P1 at Miami (S) (8pts)"
+      ],
+      "poles_count": 1,
+      "poles_list": [
+        "S4 Bahrain"
+      ],
+      "fastest_laps": 1,
+      "driver_of_the_day": 2,
+      "most_overtakes": 0,
+      "cleanest_driver": 3,
+      "driver_championships": [],
+      "constructor_championships_on_team": [
+        "S4 Mercedes"
+      ],
+      "seasonal_standings_finishes": [
+        "S4: P13",
+        "S5: P13"
+      ],
+      "all_time_standings_peak": "11th - S5 Australia",
+      "track_ratings": {
+        "Abu Dhabi": {
+          "score": 28.9,
+          "total_points": 12.0,
+          "avg_points": 12.0,
+          "avg_pos_change": 1.0
+        },
+        "Australia": {
+          "score": 44.8,
+          "total_points": 19.0,
+          "avg_points": 19.0,
+          "avg_pos_change": 2.0
+        },
+        "Austria": {
+          "score": 31.6,
+          "total_points": 25.0,
+          "avg_points": 12.5,
+          "avg_pos_change": -1.5
+        },
+        "Bahrain": {
+          "score": 21.4,
+          "total_points": 4.0,
+          "avg_points": 4.0,
+          "avg_pos_change": -7.0
+        },
+        "Baku": {
+          "score": 31.7,
+          "total_points": 13.0,
+          "avg_points": 13.0,
+          "avg_pos_change": -1.0
+        },
+        "Brazil": {
+          "score": 34.6,
+          "total_points": 29.0,
+          "avg_points": 14.5,
+          "avg_pos_change": 2.5
+        },
+        "Imola": {
+          "score": 24.0,
+          "total_points": 10.0,
+          "avg_points": 10.0,
+          "avg_pos_change": -1.0
+        },
+        "Jeddah": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Las Vegas": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Mexico": {
+          "score": 46.7,
+          "total_points": 20.0,
+          "avg_points": 20.0,
+          "avg_pos_change": 3.0
+        },
+        "Miami": {
+          "score": 20.5,
+          "total_points": 29.0,
+          "avg_points": 7.2,
+          "avg_pos_change": 3.8
+        },
+        "Monza": {
+          "score": 28.4,
+          "total_points": 24.0,
+          "avg_points": 12.0,
+          "avg_pos_change": 0.5
+        },
+        "Spa": {
+          "score": 20.5,
+          "total_points": 28.0,
+          "avg_points": 7.0,
+          "avg_pos_change": 4.8
+        },
+        "Spain": {
+          "score": 6.3,
+          "total_points": 3.0,
+          "avg_points": 3.0,
+          "avg_pos_change": -4.0
+        },
+        "Zandvoort": {
+          "score": 40.3,
+          "total_points": 16.0,
+          "avg_points": 16.0,
+          "avg_pos_change": 7.0
+        }
+      }
+    },
+    "Jairo": {
+      "driver": "Jairo",
+      "total_points": 310.0,
+      "feature_wins": 8,
+      "sprint_wins": 1,
+      "feature_podiums": 9,
+      "sprint_podiums": 3,
+      "maiden_win": "P1 at S4 Spain",
+      "maiden_podium": "S4 Spain (P1)",
+      "chronological_feature_wins": [
+        "S4 Spain",
+        "S4 Mexico",
+        "S4 Baku",
+        "S4 Austria (R)",
+        "S4 Las Vegas",
+        "S4 Abu Dhabi",
+        "S4 Monza",
+        "S5 Miami"
+      ],
+      "chronological_sprint_wins": [
+        "S4 Miami (S)"
+      ],
+      "chronological_feature_podiums": [
+        "S4 Spain (P1)",
+        "S4 Mexico (P1)",
+        "S4 Baku (P1)",
+        "S4 Austria (R) (P1)",
+        "S4 Las Vegas (P1)",
+        "S4 Abu Dhabi (P1)",
+        "S4 Monza (P1)",
+        "S5 Australia (P3)",
+        "S5 Miami (P1)"
+      ],
+      "chronological_sprint_podiums": [
+        "S4 Miami (S) (P1)",
+        "S4 Spa (S) (P2)",
+        "S4 Brazil (S) (P2)"
+      ],
+      "feature_wins_by_season": [
+        "S4: 7 (Spain, Mexico, Baku, Austria (R), Las Vegas, Abu Dhabi, Monza)",
+        "S5: 1 (Miami)"
+      ],
+      "sprint_wins_by_season": [
+        "S4: 1 (Miami (S))"
+      ],
+      "single_season_win_streak": 4,
+      "cross_season_win_streak": 4,
+      "single_season_win_streak_list": [
+        "4 in a row (S4 Spain -> S4 Mexico -> S4 Baku -> S4 Austria (R))",
+        "3 in a row (S4 Las Vegas -> S4 Abu Dhabi -> S4 Monza)"
+      ],
+      "cross_season_win_streak_list": [
+        "4 in a row (S4 Spain -> S4 Mexico -> S4 Baku -> S4 Austria (R))",
+        "3 in a row (S4 Las Vegas -> S4 Abu Dhabi -> S4 Monza)"
+      ],
+      "single_season_podium_streak": 4,
+      "cross_season_podium_streak": 4,
+      "single_season_podium_streak_list": [
+        "4 in a row (S4 Spain -> S4 Mexico -> S4 Baku -> S4 Austria (R))",
+        "3 in a row (S4 Las Vegas -> S4 Abu Dhabi -> S4 Monza)"
+      ],
+      "cross_season_podium_streak_list": [
+        "4 in a row (S4 Spain -> S4 Mexico -> S4 Baku -> S4 Austria (R))",
+        "4 in a row (S4 Las Vegas -> S4 Abu Dhabi -> S4 Monza -> S5 Australia)"
+      ],
+      "pre_season_wins": [],
+      "post_season_wins": [],
+      "pre_season_podiums": [
+        "S5 Pre-Season: Vegas - P2 (Pre-Season)"
+      ],
+      "post_season_podiums": [],
+      "avg_place": 4.7,
+      "avg_qual": 5.5,
+      "avg_pos_change": 0.8,
+      "best_race_all_time": "P1 at S4 Abu Dhabi (27pts)",
+      "best_race_by_season": [
+        "S4: P1 at Abu Dhabi (27pts)",
+        "S5: P1 at Miami (25pts)"
+      ],
+      "poles_count": 7,
+      "poles_list": [
+        "S4 Miami (S)",
+        "S4 Spain",
+        "S4 Mexico",
+        "S4 Baku",
+        "S4 Jeddah",
+        "S4 Abu Dhabi",
+        "S4 Monza"
+      ],
+      "fastest_laps": 7,
+      "driver_of_the_day": 5,
+      "most_overtakes": 0,
+      "cleanest_driver": 1,
+      "driver_championships": [],
+      "constructor_championships_on_team": [
+        "S4 Mercedes"
+      ],
+      "seasonal_standings_finishes": [
+        "S4: P14",
+        "S5: P15"
+      ],
+      "all_time_standings_peak": "7th - S4 Monza",
+      "track_ratings": {
+        "Abu Dhabi": {
+          "score": 73.8,
+          "total_points": 27.0,
+          "avg_points": 27.0,
+          "avg_pos_change": 0.0
+        },
+        "Australia": {
+          "score": 39.0,
+          "total_points": 15.0,
+          "avg_points": 15.0,
+          "avg_pos_change": -1.0
+        },
+        "Austria": {
+          "score": 39.6,
+          "total_points": 34.0,
+          "avg_points": 17.0,
+          "avg_pos_change": 3.0
+        },
+        "Bahrain": {
+          "score": 1.5,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Baku": {
+          "score": 71.8,
+          "total_points": 26.0,
+          "avg_points": 26.0,
+          "avg_pos_change": 0.0
+        },
+        "Brazil": {
+          "score": 25.3,
+          "total_points": 19.0,
+          "avg_points": 9.5,
+          "avg_pos_change": 4.0
+        },
+        "Imola": {
+          "score": 32.1,
+          "total_points": 12.0,
+          "avg_points": 12.0,
+          "avg_pos_change": -2.0
+        },
+        "Jeddah": {
+          "score": 18.5,
+          "total_points": 3.0,
+          "avg_points": 3.0,
+          "avg_pos_change": -8.0
+        },
+        "Las Vegas": {
+          "score": 62.8,
+          "total_points": 26.0,
+          "avg_points": 26.0,
+          "avg_pos_change": 1.0
+        },
+        "Mexico": {
+          "score": 69.8,
+          "total_points": 25.0,
+          "avg_points": 25.0,
+          "avg_pos_change": 0.0
+        },
+        "Miami": {
+          "score": 23.7,
+          "total_points": 37.0,
+          "avg_points": 9.2,
+          "avg_pos_change": 3.0
+        },
+        "Monza": {
+          "score": 38.6,
+          "total_points": 32.0,
+          "avg_points": 16.0,
+          "avg_pos_change": -1.5
+        },
+        "Spa": {
+          "score": 18.7,
+          "total_points": 27.0,
+          "avg_points": 6.8,
+          "avg_pos_change": 3.5
+        },
+        "Spain": {
+          "score": 69.8,
+          "total_points": 25.0,
+          "avg_points": 25.0,
+          "avg_pos_change": 0.0
+        },
+        "Zandvoort": {
+          "score": 2.6,
+          "total_points": 2.0,
+          "avg_points": 2.0,
+          "avg_pos_change": -7.0
+        }
+      }
+    },
+    "Jelly": {
+      "driver": "Jelly",
+      "total_points": 237.0,
+      "feature_wins": 3,
+      "sprint_wins": 0,
+      "feature_podiums": 8,
+      "sprint_podiums": 1,
+      "maiden_win": "P1 at S5 Australia",
+      "maiden_podium": "S4 Mexico (P3)",
+      "chronological_feature_wins": [
+        "S5 Australia",
+        "S5 Imola",
+        "S5 Monza"
+      ],
+      "chronological_sprint_wins": [],
+      "chronological_feature_podiums": [
+        "S4 Mexico (P3)",
+        "S4 Spa (P2)",
+        "S4 Jeddah (P3)",
+        "S4 Abu Dhabi (P2)",
+        "S4 Monza (P3)",
+        "S5 Australia (P1)",
+        "S5 Imola (P1)",
+        "S5 Monza (P1)"
+      ],
+      "chronological_sprint_podiums": [
+        "S5 Miami (S) (P3)"
+      ],
+      "feature_wins_by_season": [
+        "S4: 0",
+        "S5: 3 (Australia, Imola, Monza)"
+      ],
+      "sprint_wins_by_season": [],
+      "single_season_win_streak": 2,
+      "cross_season_win_streak": 2,
+      "single_season_win_streak_list": [
+        "2 in a row (S5 Australia -> S5 Imola)"
+      ],
+      "cross_season_win_streak_list": [
+        "2 in a row (S5 Australia -> S5 Imola)"
+      ],
+      "single_season_podium_streak": 2,
+      "cross_season_podium_streak": 4,
+      "single_season_podium_streak_list": [
+        "2 in a row (S4 Abu Dhabi -> S4 Monza)",
+        "2 in a row (S5 Australia -> S5 Imola)"
+      ],
+      "cross_season_podium_streak_list": [
+        "4 in a row (S4 Abu Dhabi -> S4 Monza -> S5 Australia -> S5 Imola)"
+      ],
+      "pre_season_wins": [],
+      "post_season_wins": [
+        "S4 Post-Season: Monaco (Post-Season)"
+      ],
+      "pre_season_podiums": [
+        "S5 Pre-Season: Hungary - P2 (Pre-Season)"
+      ],
+      "post_season_podiums": [
+        "S4 Post-Season: Monaco - P1 (Post-Season)"
+      ],
+      "avg_place": 5.6,
+      "avg_qual": 5.8,
+      "avg_pos_change": 0.2,
+      "best_race_all_time": "P1 at S5 Monza (26pts)",
+      "best_race_by_season": [
+        "S4: P2 at Spa (19pts)",
+        "S5: P1 at Monza (26pts)"
+      ],
+      "poles_count": 3,
+      "poles_list": [
+        "S5 Imola",
+        "S5 Miami (S)",
+        "S5 Monza"
+      ],
+      "fastest_laps": 2,
+      "driver_of_the_day": 1,
+      "most_overtakes": 2,
+      "cleanest_driver": 2,
+      "driver_championships": [],
+      "constructor_championships_on_team": [],
+      "seasonal_standings_finishes": [
+        "S4: P6",
+        "S5: P6"
+      ],
+      "all_time_standings_peak": "8th - S5 Monza",
+      "track_ratings": {
+        "Abu Dhabi": {
+          "score": 47.9,
+          "total_points": 19.0,
+          "avg_points": 19.0,
+          "avg_pos_change": 0.0
+        },
+        "Australia": {
+          "score": 57.6,
+          "total_points": 25.0,
+          "avg_points": 25.0,
+          "avg_pos_change": 4.0
+        },
+        "Austria": {
+          "score": 2.9,
+          "total_points": 4.0,
+          "avg_points": 2.0,
+          "avg_pos_change": -6.0
+        },
+        "Bahrain": {
+          "score": 7.0,
+          "total_points": 3.0,
+          "avg_points": 3.0,
+          "avg_pos_change": -2.0
+        },
+        "Baku": {
+          "score": 34.4,
+          "total_points": 12.0,
+          "avg_points": 12.0,
+          "avg_pos_change": 10.0
+        },
+        "Brazil": {
+          "score": 16.7,
+          "total_points": 12.0,
+          "avg_points": 6.0,
+          "avg_pos_change": 2.5
+        },
+        "Imola": {
+          "score": 69.8,
+          "total_points": 25.0,
+          "avg_points": 25.0,
+          "avg_pos_change": 0.0
+        },
+        "Jeddah": {
+          "score": 36.0,
+          "total_points": 15.0,
+          "avg_points": 15.0,
+          "avg_pos_change": 3.0
+        },
+        "Las Vegas": {
+          "score": 0.3,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": -4.0
+        },
+        "Mexico": {
+          "score": 36.6,
+          "total_points": 15.0,
+          "avg_points": 15.0,
+          "avg_pos_change": 0.0
+        },
+        "Miami": {
+          "score": 11.5,
+          "total_points": 18.0,
+          "avg_points": 4.5,
+          "avg_pos_change": -0.8
+        },
+        "Monza": {
+          "score": 50.9,
+          "total_points": 41.0,
+          "avg_points": 20.5,
+          "avg_pos_change": 0.0
+        },
+        "Spa": {
+          "score": 17.5,
+          "total_points": 28.0,
+          "avg_points": 7.0,
+          "avg_pos_change": 1.0
+        },
+        "Spain": {
+          "score": 24.8,
+          "total_points": 10.0,
+          "avg_points": 10.0,
+          "avg_pos_change": -2.0
+        },
+        "Zandvoort": {
+          "score": 25.2,
+          "total_points": 10.0,
+          "avg_points": 10.0,
+          "avg_pos_change": 3.0
+        }
+      }
+    },
+    "Josh C.": {
+      "driver": "Josh C.",
+      "total_points": 1.0,
+      "feature_wins": 0,
+      "sprint_wins": 0,
+      "feature_podiums": 0,
+      "sprint_podiums": 0,
+      "maiden_win": "None",
+      "maiden_podium": "None",
+      "chronological_feature_wins": [],
+      "chronological_sprint_wins": [],
+      "chronological_feature_podiums": [],
+      "chronological_sprint_podiums": [],
+      "feature_wins_by_season": [
+        "S5: 0"
+      ],
+      "sprint_wins_by_season": [],
+      "single_season_win_streak": 0,
+      "cross_season_win_streak": 0,
+      "single_season_win_streak_list": [],
+      "cross_season_win_streak_list": [],
+      "single_season_podium_streak": 0,
+      "cross_season_podium_streak": 0,
+      "single_season_podium_streak_list": [],
+      "cross_season_podium_streak_list": [],
+      "pre_season_wins": [],
+      "post_season_wins": [],
+      "pre_season_podiums": [],
+      "post_season_podiums": [],
+      "avg_place": 13.0,
+      "avg_qual": 11.0,
+      "avg_pos_change": -2.0,
+      "best_race_all_time": "P13 at S5 Australia (1pts)",
+      "best_race_by_season": [
+        "S5: P13 at Australia (1pts)"
+      ],
+      "poles_count": 0,
+      "poles_list": [],
+      "fastest_laps": 0,
+      "driver_of_the_day": 0,
+      "most_overtakes": 0,
+      "cleanest_driver": 0,
+      "driver_championships": [],
+      "constructor_championships_on_team": [],
+      "seasonal_standings_finishes": [
+        "S5: P10"
+      ],
+      "all_time_standings_peak": "23rd - S5 Australia",
+      "track_ratings": {
+        "Australia": {
+          "score": 2.0,
+          "total_points": 1.0,
+          "avg_points": 1.0,
+          "avg_pos_change": -2.0
+        },
+        "Imola": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Miami": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Monza": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Spa": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        }
+      }
+    },
+    "Josh L": {
+      "driver": "Josh L",
+      "total_points": 2.0,
+      "feature_wins": 0,
+      "sprint_wins": 0,
+      "feature_podiums": 0,
+      "sprint_podiums": 0,
+      "maiden_win": "None",
+      "maiden_podium": "None",
+      "chronological_feature_wins": [],
+      "chronological_sprint_wins": [],
+      "chronological_feature_podiums": [],
+      "chronological_sprint_podiums": [],
+      "feature_wins_by_season": [
+        "S1: 0",
+        "S2: 0"
+      ],
+      "sprint_wins_by_season": [],
+      "single_season_win_streak": 0,
+      "cross_season_win_streak": 0,
+      "single_season_win_streak_list": [],
+      "cross_season_win_streak_list": [],
+      "single_season_podium_streak": 0,
+      "cross_season_podium_streak": 0,
+      "single_season_podium_streak_list": [],
+      "cross_season_podium_streak_list": [],
+      "pre_season_wins": [],
+      "post_season_wins": [],
+      "pre_season_podiums": [],
+      "post_season_podiums": [],
+      "avg_place": 12.7,
+      "avg_qual": 13.7,
+      "avg_pos_change": 1.0,
+      "best_race_all_time": "P11 at S1 Bahrain (2pts)",
+      "best_race_by_season": [
+        "S1: P11 at Bahrain (2pts)",
+        "S2: P12 at Monaco (0pts)"
+      ],
+      "poles_count": 0,
+      "poles_list": [],
+      "fastest_laps": 0,
+      "driver_of_the_day": 0,
+      "most_overtakes": 0,
+      "cleanest_driver": 0,
+      "driver_championships": [],
+      "constructor_championships_on_team": [],
+      "seasonal_standings_finishes": [
+        "S1: P7",
+        "S2: P11"
+      ],
+      "all_time_standings_peak": "5th - S1 Bahrain",
+      "track_ratings": {
+        "Abu Dhabi": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Australia": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Austria": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Bahrain": {
+          "score": 2.6,
+          "total_points": 2.0,
+          "avg_points": 2.0,
+          "avg_pos_change": -7.0
+        },
+        "Brazil": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "COTA": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Canada": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "China": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Jeddah": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Las Vegas": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Mexico": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Miami": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Monaco": {
+          "score": 8.3,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 8.0
+        },
+        "Monza": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Qatar": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Silverstone": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Singapore": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Spa": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Spain": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Suzuka": {
+          "score": 3.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 2.0
+        },
+        "Zandvoort": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        }
+      }
+    },
+    "Joshua": {
+      "driver": "Joshua",
+      "total_points": 748.0,
+      "feature_wins": 7,
+      "sprint_wins": 2,
+      "feature_podiums": 30,
+      "sprint_podiums": 4,
+      "maiden_win": "P1 at S3 Suzuka",
+      "maiden_podium": "S2 Suzuka (P2)",
+      "chronological_feature_wins": [
+        "S3 Suzuka",
+        "S3 Silverstone",
+        "S3 Spain",
+        "S3 Austria",
+        "S3 COTA",
+        "S4 Zandvoort",
+        "S4 Jeddah"
+      ],
+      "chronological_sprint_wins": [
+        "S4 Brazil (S)",
+        "S5 Spa (S)"
+      ],
+      "chronological_feature_podiums": [
+        "S2 Suzuka (P2)",
+        "S2 Abu Dhabi (P2)",
+        "S2 Monza (P2)",
+        "S2 Zandvoort (P3)",
+        "S2 Silverstone (P2)",
+        "S2 Austria (P3)",
+        "S3 Suzuka (P1)",
+        "S3 Silverstone (P1)",
+        "S3 Australia (P2)",
+        "S3 Spa (P2)",
+        "S3 Spain (P1)",
+        "S3 Canada (P3)",
+        "S3 Abu Dhabi (P2)",
+        "S3 Austria (P1)",
+        "S3 COTA (P1)",
+        "S4 Bahrain (P2)",
+        "S4 Miami (P3)",
+        "S4 Spain (P2)",
+        "S4 Baku (P2)",
+        "S4 Austria (R) (P2)",
+        "S4 Brazil (P2)",
+        "S4 Austria (P2)",
+        "S4 Zandvoort (P1)",
+        "S4 Jeddah (P1)",
+        "S4 Abu Dhabi (P3)",
+        "S4 Monza (P2)",
+        "S5 Imola (P3)",
+        "S5 Miami (P2)",
+        "S5 Monza (P3)",
+        "S5 Spa (P2)"
+      ],
+      "chronological_sprint_podiums": [
+        "S3 COTA (S) (P2)",
+        "S4 Brazil (S) (P1)",
+        "S5 Miami (S) (P2)",
+        "S5 Spa (S) (P1)"
+      ],
+      "feature_wins_by_season": [
+        "S2: 0",
+        "S3: 5 (Suzuka, Silverstone, Spain, Austria, COTA)",
+        "S4: 2 (Zandvoort, Jeddah)",
+        "S5: 0"
+      ],
+      "sprint_wins_by_season": [
+        "S4: 1 (Brazil (S))",
+        "S5: 1 (Spa (S))"
+      ],
+      "single_season_win_streak": 2,
+      "cross_season_win_streak": 2,
+      "single_season_win_streak_list": [
+        "2 in a row (S3 Suzuka -> S3 Silverstone)",
+        "2 in a row (S3 Austria -> S3 COTA)",
+        "2 in a row (S4 Zandvoort -> S4 Jeddah)"
+      ],
+      "cross_season_win_streak_list": [
+        "2 in a row (S3 Suzuka -> S3 Silverstone)",
+        "2 in a row (S3 Austria -> S3 COTA)",
+        "2 in a row (S4 Zandvoort -> S4 Jeddah)"
+      ],
+      "single_season_podium_streak": 5,
+      "cross_season_podium_streak": 6,
+      "single_season_podium_streak_list": [
+        "4 in a row (S2 Abu Dhabi -> S2 Monza -> S2 Zandvoort -> S2 Silverstone)",
+        "5 in a row (S3 Suzuka -> S3 Silverstone -> S3 Australia -> S3 Spa -> S3 Spain)",
+        "3 in a row (S3 Abu Dhabi -> S3 Austria -> S3 COTA)",
+        "3 in a row (S4 Bahrain -> S4 Miami -> S4 Spain)",
+        "2 in a row (S4 Baku -> S4 Austria (R))",
+        "4 in a row (S4 Brazil -> S4 Austria -> S4 Zandvoort -> S4 Jeddah)",
+        "2 in a row (S4 Abu Dhabi -> S4 Monza)",
+        "4 in a row (S5 Imola -> S5 Miami -> S5 Monza -> S5 Spa)"
+      ],
+      "cross_season_podium_streak_list": [
+        "4 in a row (S2 Abu Dhabi -> S2 Monza -> S2 Zandvoort -> S2 Silverstone)",
+        "6 in a row (S2 Austria -> S3 Suzuka -> S3 Silverstone -> S3 Australia -> S3 Spa -> S3 Spain)",
+        "6 in a row (S3 Abu Dhabi -> S3 Austria -> S3 COTA -> S4 Bahrain -> S4 Miami -> S4 Spain)",
+        "2 in a row (S4 Baku -> S4 Austria (R))",
+        "4 in a row (S4 Brazil -> S4 Austria -> S4 Zandvoort -> S4 Jeddah)",
+        "2 in a row (S4 Abu Dhabi -> S4 Monza)",
+        "4 in a row (S5 Imola -> S5 Miami -> S5 Monza -> S5 Spa)"
+      ],
+      "pre_season_wins": [
+        "S3 Pre-Season: Miami (Pre-Season)",
+        "S5 Pre-Season: Mexico (Pre-Season)",
+        "S5 Pre-Season: Vegas (Pre-Season)",
+        "S5 Pre-Season: Hungary (Pre-Season)"
+      ],
+      "post_season_wins": [],
+      "pre_season_podiums": [
+        "S3 Pre-Season: Miami - P1 (Pre-Season)",
+        "S4 Pre-Season: Silverstone - P2 (Pre-Season)",
+        "S5 Pre-Season: Mexico - P1 (Pre-Season)",
+        "S5 Pre-Season: Vegas - P1 (Pre-Season)",
+        "S5 Pre-Season: Hungary Sprint - P2 (Pre-Season)",
+        "S5 Pre-Season: Hungary - P1 (Pre-Season)"
+      ],
+      "post_season_podiums": [],
+      "avg_place": 2.9,
+      "avg_qual": 4.5,
+      "avg_pos_change": 1.6,
+      "best_race_all_time": "P1 at S3 Suzuka (26pts)",
+      "best_race_by_season": [
+        "S2: P2 at Abu Dhabi (24pts)",
+        "S3: P1 at Suzuka (26pts)",
+        "S4: P1 at Zandvoort (26pts)",
+        "S5: P1 at Spa (S) (8pts)"
+      ],
+      "poles_count": 14,
+      "poles_list": [
+        "S2 Abu Dhabi",
+        "S2 Monza",
+        "S2 COTA",
+        "S3 Suzuka",
+        "S3 Australia",
+        "S3 Canada",
+        "S3 COTA (S)",
+        "S4 Austria (R)",
+        "S4 Spa (S)",
+        "S4 Brazil (S)",
+        "S4 Austria",
+        "S4 Zandvoort",
+        "S4 Las Vegas",
+        "S5 Australia"
+      ],
+      "fastest_laps": 18,
+      "driver_of_the_day": 3,
+      "most_overtakes": 3,
+      "cleanest_driver": 0,
+      "driver_championships": [
+        4
+      ],
+      "constructor_championships_on_team": [
+        "S3 Alpine"
+      ],
+      "seasonal_standings_finishes": [
+        "S2: P7",
+        "S3: P9",
+        "S4: P1",
+        "S5: P1"
+      ],
+      "all_time_standings_peak": "🥉 S3 COTA (S)",
+      "track_ratings": {
+        "Abu Dhabi": {
+          "score": 44.8,
+          "total_points": 57.0,
+          "avg_points": 19.0,
+          "avg_pos_change": 4.0
+        },
+        "Australia": {
+          "score": 47.5,
+          "total_points": 30.0,
+          "avg_points": 15.0,
+          "avg_pos_change": -2.5
+        },
+        "Austria": {
+          "score": 39.6,
+          "total_points": 82.0,
+          "avg_points": 16.4,
+          "avg_pos_change": 4.4
+        },
+        "Bahrain": {
+          "score": 45.5,
+          "total_points": 19.0,
+          "avg_points": 19.0,
+          "avg_pos_change": 1.0
+        },
+        "Baku": {
+          "score": 27.9,
+          "total_points": 18.0,
+          "avg_points": 9.0,
+          "avg_pos_change": 0.0
+        },
+        "Brazil": {
+          "score": 35.4,
+          "total_points": 27.0,
+          "avg_points": 13.5,
+          "avg_pos_change": 6.5
+        },
+        "COTA": {
+          "score": 41.7,
+          "total_points": 52.0,
+          "avg_points": 17.3,
+          "avg_pos_change": 4.7
+        },
+        "Canada": {
+          "score": 50.0,
+          "total_points": 16.0,
+          "avg_points": 16.0,
+          "avg_pos_change": -2.0
+        },
+        "China": {
+          "score": 24.4,
+          "total_points": 30.0,
+          "avg_points": 10.0,
+          "avg_pos_change": -1.7
+        },
+        "Imola": {
+          "score": 36.6,
+          "total_points": 15.0,
+          "avg_points": 15.0,
+          "avg_pos_change": 0.0
+        },
+        "Jeddah": {
+          "score": 62.8,
+          "total_points": 26.0,
+          "avg_points": 26.0,
+          "avg_pos_change": 1.0
+        },
+        "Las Vegas": {
+          "score": 36.2,
+          "total_points": 10.0,
+          "avg_points": 10.0,
+          "avg_pos_change": -4.0
+        },
+        "Mexico": {
+          "score": 27.2,
+          "total_points": 10.0,
+          "avg_points": 10.0,
+          "avg_pos_change": -3.0
+        },
+        "Miami": {
+          "score": 28.0,
+          "total_points": 44.0,
+          "avg_points": 11.0,
+          "avg_pos_change": 3.8
+        },
+        "Monaco": {
+          "score": 14.6,
+          "total_points": 6.0,
+          "avg_points": 6.0,
+          "avg_pos_change": -8.0
+        },
+        "Monza": {
+          "score": 35.5,
+          "total_points": 58.0,
+          "avg_points": 14.5,
+          "avg_pos_change": 1.7
+        },
+        "Silverstone": {
+          "score": 59.4,
+          "total_points": 49.0,
+          "avg_points": 24.5,
+          "avg_pos_change": 0.5
+        },
+        "Spa": {
+          "score": 25.9,
+          "total_points": 60.0,
+          "avg_points": 10.0,
+          "avg_pos_change": 2.6
+        },
+        "Spain": {
+          "score": 52.8,
+          "total_points": 44.0,
+          "avg_points": 22.0,
+          "avg_pos_change": 1.0
+        },
+        "Suzuka": {
+          "score": 59.4,
+          "total_points": 49.0,
+          "avg_points": 24.5,
+          "avg_pos_change": 0.5
+        },
+        "Zandvoort": {
+          "score": 58.7,
+          "total_points": 46.0,
+          "avg_points": 23.0,
+          "avg_pos_change": -0.5
+        }
+      }
+    },
+    "Leo": {
+      "driver": "Leo",
+      "total_points": 106.0,
+      "feature_wins": 1,
+      "sprint_wins": 0,
+      "feature_podiums": 1,
+      "sprint_podiums": 0,
+      "maiden_win": "P1 at S5 Spa",
+      "maiden_podium": "S5 Spa (P1)",
+      "chronological_feature_wins": [
+        "S5 Spa"
+      ],
+      "chronological_sprint_wins": [],
+      "chronological_feature_podiums": [
+        "S5 Spa (P1)"
+      ],
+      "chronological_sprint_podiums": [],
+      "feature_wins_by_season": [
+        "S4: 0",
+        "S5: 1 (Spa)"
+      ],
+      "sprint_wins_by_season": [],
+      "single_season_win_streak": 1,
+      "cross_season_win_streak": 1,
+      "single_season_win_streak_list": [],
+      "cross_season_win_streak_list": [],
+      "single_season_podium_streak": 1,
+      "cross_season_podium_streak": 1,
+      "single_season_podium_streak_list": [],
+      "cross_season_podium_streak_list": [],
+      "pre_season_wins": [],
+      "post_season_wins": [],
+      "pre_season_podiums": [],
+      "post_season_podiums": [],
+      "avg_place": 8.7,
+      "avg_qual": 8.3,
+      "avg_pos_change": -0.4,
+      "best_race_all_time": "P1 at S5 Spa (25pts)",
+      "best_race_by_season": [
+        "S4: P4 at Las Vegas (13pts)",
+        "S5: P1 at Spa (25pts)"
+      ],
+      "poles_count": 0,
+      "poles_list": [],
+      "fastest_laps": 0,
+      "driver_of_the_day": 1,
+      "most_overtakes": 1,
+      "cleanest_driver": 1,
+      "driver_championships": [],
+      "constructor_championships_on_team": [],
+      "seasonal_standings_finishes": [
+        "S4: P12",
+        "S5: P14"
+      ],
+      "all_time_standings_peak": "17th - S5 Monza",
+      "track_ratings": {
+        "Abu Dhabi": {
+          "score": 14.4,
+          "total_points": 6.0,
+          "avg_points": 6.0,
+          "avg_pos_change": -1.0
+        },
+        "Australia": {
+          "score": 1.2,
+          "total_points": 1.0,
+          "avg_points": 1.0,
+          "avg_pos_change": -4.0
+        },
+        "Austria": {
+          "score": 4.7,
+          "total_points": 4.0,
+          "avg_points": 2.0,
+          "avg_pos_change": -2.0
+        },
+        "Bahrain": {
+          "score": 7.0,
+          "total_points": 1.0,
+          "avg_points": 1.0,
+          "avg_pos_change": 4.0
+        },
+        "Baku": {
+          "score": 4.7,
+          "total_points": 2.0,
+          "avg_points": 2.0,
+          "avg_pos_change": -2.0
+        },
+        "Brazil": {
+          "score": 14.2,
+          "total_points": 8.0,
+          "avg_points": 4.0,
+          "avg_pos_change": 5.0
+        },
+        "Imola": {
+          "score": 6.6,
+          "total_points": 3.0,
+          "avg_points": 3.0,
+          "avg_pos_change": -3.0
+        },
+        "Jeddah": {
+          "score": 19.1,
+          "total_points": 8.0,
+          "avg_points": 8.0,
+          "avg_pos_change": -1.0
+        },
+        "Las Vegas": {
+          "score": 32.7,
+          "total_points": 13.0,
+          "avg_points": 13.0,
+          "avg_pos_change": 5.0
+        },
+        "Mexico": {
+          "score": 2.4,
+          "total_points": 1.0,
+          "avg_points": 1.0,
+          "avg_pos_change": -2.0
+        },
+        "Miami": {
+          "score": 4.9,
+          "total_points": 8.0,
+          "avg_points": 2.1,
+          "avg_pos_change": -2.0
+        },
+        "Monza": {
+          "score": 23.3,
+          "total_points": 18.0,
+          "avg_points": 9.0,
+          "avg_pos_change": 3.5
+        },
+        "Spa": {
+          "score": 15.2,
+          "total_points": 28.0,
+          "avg_points": 6.9,
+          "avg_pos_change": -1.5
+        },
+        "Spain": {
+          "score": 2.2,
+          "total_points": 1.0,
+          "avg_points": 1.0,
+          "avg_pos_change": -2.0
+        },
+        "Zandvoort": {
+          "score": 9.2,
+          "total_points": 4.0,
+          "avg_points": 4.0,
+          "avg_pos_change": -3.0
+        }
+      }
+    },
+    "Marcus": {
+      "driver": "Marcus",
+      "total_points": 224.0,
+      "feature_wins": 2,
+      "sprint_wins": 0,
+      "feature_podiums": 7,
+      "sprint_podiums": 0,
+      "maiden_win": "P1 at S1 Canada",
+      "maiden_podium": "S1 Jeddah (P3)",
+      "chronological_feature_wins": [
+        "S1 Canada",
+        "S1 Monza"
+      ],
+      "chronological_sprint_wins": [],
+      "chronological_feature_podiums": [
+        "S1 Jeddah (P3)",
+        "S1 Australia (P3)",
+        "S1 Miami (P3)",
+        "S1 Canada (P1)",
+        "S1 Monza (P1)",
+        "S1 Las Vegas (P3)",
+        "S1 Abu Dhabi (P2)"
+      ],
+      "chronological_sprint_podiums": [],
+      "feature_wins_by_season": [
+        "S1: 2 (Canada, Monza)",
+        "S2: 0"
+      ],
+      "sprint_wins_by_season": [],
+      "single_season_win_streak": 1,
+      "cross_season_win_streak": 1,
+      "single_season_win_streak_list": [],
+      "cross_season_win_streak_list": [],
+      "single_season_podium_streak": 3,
+      "cross_season_podium_streak": 3,
+      "single_season_podium_streak_list": [
+        "3 in a row (S1 Jeddah -> S1 Australia -> S1 Miami)",
+        "2 in a row (S1 Las Vegas -> S1 Abu Dhabi)"
+      ],
+      "cross_season_podium_streak_list": [
+        "3 in a row (S1 Jeddah -> S1 Australia -> S1 Miami)",
+        "2 in a row (S1 Las Vegas -> S1 Abu Dhabi)"
+      ],
+      "pre_season_wins": [],
+      "post_season_wins": [],
+      "pre_season_podiums": [],
+      "post_season_podiums": [],
+      "avg_place": 6.8,
+      "avg_qual": 6.6,
+      "avg_pos_change": -0.1,
+      "best_race_all_time": "P1 at S1 Canada (29pts)",
+      "best_race_by_season": [
+        "S1: P1 at Canada (29pts)",
+        "S2: P4 at Abu Dhabi (17pts)"
+      ],
+      "poles_count": 0,
+      "poles_list": [],
+      "fastest_laps": 0,
+      "driver_of_the_day": 0,
+      "most_overtakes": 0,
+      "cleanest_driver": 0,
+      "driver_championships": [],
+      "constructor_championships_on_team": [
+        "S1 Mercedes"
+      ],
+      "seasonal_standings_finishes": [
+        "S1: P6",
+        "S2: P10"
+      ],
+      "all_time_standings_peak": "🥉 S1 Jeddah",
+      "track_ratings": {
+        "Abu Dhabi": {
+          "score": 42.8,
+          "total_points": 37.0,
+          "avg_points": 18.5,
+          "avg_pos_change": 2.0
+        },
+        "Australia": {
+          "score": 35.8,
+          "total_points": 15.0,
+          "avg_points": 15.0,
+          "avg_pos_change": 2.0
+        },
+        "Austria": {
+          "score": 15.8,
+          "total_points": 11.0,
+          "avg_points": 5.5,
+          "avg_pos_change": -2.0
+        },
+        "Bahrain": {
+          "score": 6.7,
+          "total_points": 1.0,
+          "avg_points": 1.0,
+          "avg_pos_change": 4.0
+        },
+        "Brazil": {
+          "score": -4.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": -8.0
+        },
+        "COTA": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Canada": {
+          "score": 68.8,
+          "total_points": 29.0,
+          "avg_points": 29.0,
+          "avg_pos_change": 1.0
+        },
+        "China": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Jeddah": {
+          "score": 42.6,
+          "total_points": 18.0,
+          "avg_points": 18.0,
+          "avg_pos_change": 0.0
+        },
+        "Las Vegas": {
+          "score": 37.8,
+          "total_points": 16.0,
+          "avg_points": 16.0,
+          "avg_pos_change": 2.0
+        },
+        "Mexico": {
+          "score": 28.0,
+          "total_points": 12.0,
+          "avg_points": 12.0,
+          "avg_pos_change": -1.0
+        },
+        "Miami": {
+          "score": 37.8,
+          "total_points": 16.0,
+          "avg_points": 16.0,
+          "avg_pos_change": 2.0
+        },
+        "Monaco": {
+          "score": 4.9,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 4.0
+        },
+        "Monza": {
+          "score": 36.4,
+          "total_points": 28.0,
+          "avg_points": 14.0,
+          "avg_pos_change": 2.0
+        },
+        "Qatar": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Silverstone": {
+          "score": 6.2,
+          "total_points": 5.0,
+          "avg_points": 2.5,
+          "avg_pos_change": -3.0
+        },
+        "Singapore": {
+          "score": 5.3,
+          "total_points": 3.0,
+          "avg_points": 3.0,
+          "avg_pos_change": -8.0
+        },
+        "Spa": {
+          "score": 3.4,
+          "total_points": 3.0,
+          "avg_points": 1.5,
+          "avg_pos_change": -5.0
+        },
+        "Spain": {
+          "score": 30.9,
+          "total_points": 13.0,
+          "avg_points": 13.0,
+          "avg_pos_change": 1.0
+        },
+        "Suzuka": {
+          "score": -1.1,
+          "total_points": 2.0,
+          "avg_points": 1.0,
+          "avg_pos_change": -6.0
+        },
+        "Zandvoort": {
+          "score": 22.9,
+          "total_points": 15.0,
+          "avg_points": 7.5,
+          "avg_pos_change": 7.0
+        }
+      }
+    },
+    "Matthew": {
+      "driver": "Matthew",
+      "total_points": 90.0,
+      "feature_wins": 0,
+      "sprint_wins": 0,
+      "feature_podiums": 1,
+      "sprint_podiums": 0,
+      "maiden_win": "None",
+      "maiden_podium": "S5 Spa (P3)",
+      "chronological_feature_wins": [],
+      "chronological_sprint_wins": [],
+      "chronological_feature_podiums": [
+        "S5 Spa (P3)"
+      ],
+      "chronological_sprint_podiums": [],
+      "feature_wins_by_season": [
+        "S4: 0",
+        "S5: 0"
+      ],
+      "sprint_wins_by_season": [],
+      "single_season_win_streak": 0,
+      "cross_season_win_streak": 0,
+      "single_season_win_streak_list": [],
+      "cross_season_win_streak_list": [],
+      "single_season_podium_streak": 1,
+      "cross_season_podium_streak": 1,
+      "single_season_podium_streak_list": [],
+      "cross_season_podium_streak_list": [],
+      "pre_season_wins": [],
+      "post_season_wins": [],
+      "pre_season_podiums": [
+        "S5 Pre-Season: Hungary - P3 (Pre-Season)"
+      ],
+      "post_season_podiums": [
+        "S4 Post-Season: Monaco - P2 (Post-Season)"
+      ],
+      "avg_place": 9.0,
+      "avg_qual": 7.3,
+      "avg_pos_change": -1.6,
+      "best_race_all_time": "P3 at S5 Spa (15pts)",
+      "best_race_by_season": [
+        "S4: P4 at Spain (12pts)",
+        "S5: P3 at Spa (15pts)"
+      ],
+      "poles_count": 0,
+      "poles_list": [],
+      "fastest_laps": 0,
+      "driver_of_the_day": 0,
+      "most_overtakes": 1,
+      "cleanest_driver": 0,
+      "driver_championships": [],
+      "constructor_championships_on_team": [],
+      "seasonal_standings_finishes": [
+        "S4: P8",
+        "S5: P8"
+      ],
+      "all_time_standings_peak": "17th - S4 Spa",
+      "track_ratings": {
+        "Abu Dhabi": {
+          "score": 21.6,
+          "total_points": 8.0,
+          "avg_points": 8.0,
+          "avg_pos_change": 4.0
+        },
+        "Australia": {
+          "score": 10.5,
+          "total_points": 4.0,
+          "avg_points": 4.0,
+          "avg_pos_change": 0.0
+        },
+        "Austria": {
+          "score": 14.1,
+          "total_points": 11.0,
+          "avg_points": 5.5,
+          "avg_pos_change": 1.5
+        },
+        "Bahrain": {
+          "score": -3.1,
+          "total_points": 1.0,
+          "avg_points": 1.0,
+          "avg_pos_change": -10.0
+        },
+        "Baku": {
+          "score": 12.5,
+          "total_points": 4.0,
+          "avg_points": 4.0,
+          "avg_pos_change": 3.0
+        },
+        "Brazil": {
+          "score": 0.5,
+          "total_points": 2.0,
+          "avg_points": 1.2,
+          "avg_pos_change": -5.5
+        },
+        "Imola": {
+          "score": 15.4,
+          "total_points": 6.0,
+          "avg_points": 6.0,
+          "avg_pos_change": 1.0
+        },
+        "Jeddah": {
+          "score": 0.6,
+          "total_points": 1.0,
+          "avg_points": 1.0,
+          "avg_pos_change": -7.0
+        },
+        "Las Vegas": {
+          "score": 1.6,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": -1.0
+        },
+        "Mexico": {
+          "score": 7.6,
+          "total_points": 3.0,
+          "avg_points": 3.0,
+          "avg_pos_change": -1.0
+        },
+        "Miami": {
+          "score": -0.7,
+          "total_points": 1.0,
+          "avg_points": 0.2,
+          "avg_pos_change": -5.2
+        },
+        "Monza": {
+          "score": 8.3,
+          "total_points": 7.0,
+          "avg_points": 3.5,
+          "avg_pos_change": -1.5
+        },
+        "Spa": {
+          "score": 13.6,
+          "total_points": 22.0,
+          "avg_points": 5.4,
+          "avg_pos_change": -0.2
+        },
+        "Spain": {
+          "score": 28.9,
+          "total_points": 12.0,
+          "avg_points": 12.0,
+          "avg_pos_change": 0.0
+        },
+        "Zandvoort": {
+          "score": 22.3,
+          "total_points": 8.0,
+          "avg_points": 8.0,
+          "avg_pos_change": 5.0
+        }
+      }
+    },
+    "Nick": {
+      "driver": "Nick",
+      "total_points": 1195.0,
+      "feature_wins": 23,
+      "sprint_wins": 2,
+      "feature_podiums": 43,
+      "sprint_podiums": 5,
+      "maiden_win": "P1 at S1 Bahrain",
+      "maiden_podium": "S1 Bahrain (P1)",
+      "chronological_feature_wins": [
+        "S1 Bahrain",
+        "S1 Jeddah",
+        "S1 Miami",
+        "S1 Spain",
+        "S1 Austria",
+        "S1 Spa",
+        "S1 Suzuka",
+        "S1 Qatar",
+        "S1 Brazil",
+        "S1 Abu Dhabi",
+        "S2 Suzuka",
+        "S2 Abu Dhabi",
+        "S2 Monza",
+        "S2 Zandvoort",
+        "S2 China",
+        "S2 Spa",
+        "S3 Australia",
+        "S3 Spa",
+        "S3 Baku",
+        "S3 Monza",
+        "S3 Abu Dhabi",
+        "S4 Miami",
+        "S4 Spa"
+      ],
+      "chronological_sprint_wins": [
+        "S3 China (S)",
+        "S3 COTA (S)"
+      ],
+      "chronological_feature_podiums": [
+        "S1 Bahrain (P1)",
+        "S1 Jeddah (P1)",
+        "S1 Australia (P2)",
+        "S1 Miami (P1)",
+        "S1 Spain (P1)",
+        "S1 Austria (P1)",
+        "S1 Silverstone (P2)",
+        "S1 Spa (P1)",
+        "S1 Zandvoort (P2)",
+        "S1 Suzuka (P1)",
+        "S1 Qatar (P1)",
+        "S1 COTA (P2)",
+        "S1 Mexico (P3)",
+        "S1 Brazil (P1)",
+        "S1 Las Vegas (P2)",
+        "S1 Abu Dhabi (P1)",
+        "S2 Suzuka (P1)",
+        "S2 Abu Dhabi (P1)",
+        "S2 Monza (P1)",
+        "S2 Zandvoort (P1)",
+        "S2 China (P1)",
+        "S2 COTA (P2)",
+        "S2 Spa (P1)",
+        "S2 Austria (P2)",
+        "S3 Suzuka (P2)",
+        "S3 Silverstone (P2)",
+        "S3 Australia (P1)",
+        "S3 Spa (P1)",
+        "S3 Spain (P2)",
+        "S3 China (P3)",
+        "S3 Baku (P1)",
+        "S3 Canada (P2)",
+        "S3 Monza (P1)",
+        "S3 Abu Dhabi (P1)",
+        "S3 Austria (P2)",
+        "S4 Bahrain (P3)",
+        "S4 Miami (P1)",
+        "S4 Baku (P3)",
+        "S4 Spa (P1)",
+        "S4 Brazil (P3)",
+        "S4 Las Vegas (P3)",
+        "S5 Imola (P2)",
+        "S5 Miami (P3)"
+      ],
+      "chronological_sprint_podiums": [
+        "S3 China (S) (P1)",
+        "S3 Austria (S) (P2)",
+        "S3 COTA (S) (P1)",
+        "S4 Brazil (S) (P3)",
+        "S5 Spa (S) (P2)"
+      ],
+      "feature_wins_by_season": [
+        "S1: 10 (Bahrain, Jeddah, Miami, Spain, Austria, Spa, Suzuka, Qatar, Brazil, Abu Dhabi)",
+        "S2: 6 (Suzuka, Abu Dhabi, Monza, Zandvoort, China, Spa)",
+        "S3: 5 (Australia, Spa, Baku, Monza, Abu Dhabi)",
+        "S4: 2 (Miami, Spa)",
+        "S5: 0"
+      ],
+      "sprint_wins_by_season": [
+        "S3: 2 (China (S), COTA (S))"
+      ],
+      "single_season_win_streak": 3,
+      "cross_season_win_streak": 3,
+      "single_season_win_streak_list": [
+        "2 in a row (S1 Bahrain -> S1 Jeddah)",
+        "2 in a row (S1 Miami -> S1 Spain)",
+        "2 in a row (S1 Suzuka -> S1 Qatar)",
+        "3 in a row (S2 Abu Dhabi -> S2 Monza -> S2 Zandvoort)",
+        "2 in a row (S3 Australia -> S3 Spa)",
+        "2 in a row (S3 Monza -> S3 Abu Dhabi)"
+      ],
+      "cross_season_win_streak_list": [
+        "2 in a row (S1 Bahrain -> S1 Jeddah)",
+        "2 in a row (S1 Miami -> S1 Spain)",
+        "2 in a row (S1 Suzuka -> S1 Qatar)",
+        "2 in a row (S1 Abu Dhabi -> S2 Suzuka)",
+        "3 in a row (S2 Abu Dhabi -> S2 Monza -> S2 Zandvoort)",
+        "2 in a row (S3 Australia -> S3 Spa)",
+        "2 in a row (S3 Monza -> S3 Abu Dhabi)"
+      ],
+      "single_season_podium_streak": 11,
+      "cross_season_podium_streak": 15,
+      "single_season_podium_streak_list": [
+        "5 in a row (S1 Bahrain -> S1 Jeddah -> S1 Australia -> S1 Miami -> S1 Spain)",
+        "4 in a row (S1 Austria -> S1 Silverstone -> S1 Spa -> S1 Zandvoort)",
+        "7 in a row (S1 Suzuka -> S1 Qatar -> S1 COTA -> S1 Mexico -> S1 Brazil -> S1 Las Vegas -> S1 Abu Dhabi)",
+        "3 in a row (S2 Abu Dhabi -> S2 Monza -> S2 Zandvoort)",
+        "4 in a row (S2 China -> S2 COTA -> S2 Spa -> S2 Austria)",
+        "11 in a row (S3 Suzuka -> S3 Silverstone -> S3 Australia -> S3 Spa -> S3 Spain -> S3 China -> S3 Baku -> S3 Canada -> S3 Monza -> S3 Abu Dhabi -> S3 Austria)",
+        "2 in a row (S4 Bahrain -> S4 Miami)",
+        "2 in a row (S4 Spa -> S4 Brazil)",
+        "2 in a row (S5 Imola -> S5 Miami)"
+      ],
+      "cross_season_podium_streak_list": [
+        "5 in a row (S1 Bahrain -> S1 Jeddah -> S1 Australia -> S1 Miami -> S1 Spain)",
+        "4 in a row (S1 Austria -> S1 Silverstone -> S1 Spa -> S1 Zandvoort)",
+        "8 in a row (S1 Suzuka -> S1 Qatar -> S1 COTA -> S1 Mexico -> S1 Brazil -> S1 Las Vegas -> S1 Abu Dhabi -> S2 Suzuka)",
+        "3 in a row (S2 Abu Dhabi -> S2 Monza -> S2 Zandvoort)",
+        "15 in a row (S2 China -> S2 COTA -> S2 Spa -> S2 Austria -> S3 Suzuka -> S3 Silverstone -> S3 Australia -> S3 Spa -> S3 Spain -> S3 China -> S3 Baku -> S3 Canada -> S3 Monza -> S3 Abu Dhabi -> S3 Austria)",
+        "2 in a row (S4 Bahrain -> S4 Miami)",
+        "2 in a row (S4 Spa -> S4 Brazil)",
+        "2 in a row (S5 Imola -> S5 Miami)"
+      ],
+      "pre_season_wins": [
+        "S1 Pre-Season Test Barcelona (Pre-Season)"
+      ],
+      "post_season_wins": [],
+      "pre_season_podiums": [
+        "S1 Pre-Season Test Barcelona - P1 (Pre-Season)",
+        "S3 Pre-Season: Miami - P2 (Pre-Season)",
+        "S5 Pre-Season: Mexico - P2 (Pre-Season)",
+        "S5 Pre-Season: Vegas - P3 (Pre-Season)",
+        "S5 Pre-Season: Hungary Sprint - P3 (Pre-Season)"
+      ],
+      "post_season_podiums": [],
+      "avg_place": 3.2,
+      "avg_qual": 4.2,
+      "avg_pos_change": 0.9,
+      "best_race_all_time": "P1 at S1 Jeddah (31pts)",
+      "best_race_by_season": [
+        "S1: P1 at Jeddah (31pts)",
+        "S2: P1 at Abu Dhabi (31pts)",
+        "S3: P1 at Baku (26pts)",
+        "S4: P1 at Miami (26pts)",
+        "S5: P2 at Imola (18pts)"
+      ],
+      "poles_count": 18,
+      "poles_list": [
+        "S1 Bahrain",
+        "S1 Jeddah",
+        "S1 Australia",
+        "S1 Miami",
+        "S1 Spa",
+        "S1 Suzuka",
+        "S1 Las Vegas",
+        "S1 Abu Dhabi",
+        "S2 Monaco",
+        "S2 Silverstone",
+        "S2 China",
+        "S2 Spa",
+        "S2 Austria",
+        "S3 Silverstone",
+        "S3 Spain",
+        "S3 Baku",
+        "S3 Abu Dhabi",
+        "S5 Spa (S)"
+      ],
+      "fastest_laps": 12,
+      "driver_of_the_day": 1,
+      "most_overtakes": 3,
+      "cleanest_driver": 3,
+      "driver_championships": [
+        3
+      ],
+      "constructor_championships_on_team": [
+        "S2 McLaren"
+      ],
+      "seasonal_standings_finishes": [
+        "S1: P1",
+        "S2: P1",
+        "S3: P1",
+        "S4: P3",
+        "S5: P3"
+      ],
+      "all_time_standings_peak": "🥇 S1 Bahrain",
+      "track_ratings": {
+        "Abu Dhabi": {
+          "score": 51.8,
+          "total_points": 87.0,
+          "avg_points": 21.8,
+          "avg_pos_change": -1.8
+        },
+        "Australia": {
+          "score": 45.4,
+          "total_points": 55.0,
+          "avg_points": 18.3,
+          "avg_pos_change": -1.3
+        },
+        "Austria": {
+          "score": 32.6,
+          "total_points": 83.0,
+          "avg_points": 13.8,
+          "avg_pos_change": 1.2
+        },
+        "Bahrain": {
+          "score": 57.7,
+          "total_points": 45.0,
+          "avg_points": 22.5,
+          "avg_pos_change": -0.5
+        },
+        "Baku": {
+          "score": 48.5,
+          "total_points": 41.0,
+          "avg_points": 20.5,
+          "avg_pos_change": 1.0
+        },
+        "Brazil": {
+          "score": 38.9,
+          "total_points": 48.0,
+          "avg_points": 16.0,
+          "avg_pos_change": 4.3
+        },
+        "COTA": {
+          "score": 36.3,
+          "total_points": 59.0,
+          "avg_points": 14.8,
+          "avg_pos_change": 4.5
+        },
+        "Canada": {
+          "score": 24.4,
+          "total_points": 21.0,
+          "avg_points": 10.5,
+          "avg_pos_change": -2.5
+        },
+        "China": {
+          "score": 44.0,
+          "total_points": 54.0,
+          "avg_points": 18.0,
+          "avg_pos_change": 6.0
+        },
+        "Imola": {
+          "score": 42.7,
+          "total_points": 18.0,
+          "avg_points": 18.0,
+          "avg_pos_change": 3.0
+        },
+        "Jeddah": {
+          "score": 52.5,
+          "total_points": 45.0,
+          "avg_points": 22.5,
+          "avg_pos_change": 5.5
+        },
+        "Las Vegas": {
+          "score": 47.4,
+          "total_points": 38.0,
+          "avg_points": 19.0,
+          "avg_pos_change": -0.5
+        },
+        "Mexico": {
+          "score": 31.4,
+          "total_points": 27.0,
+          "avg_points": 13.5,
+          "avg_pos_change": 0.5
+        },
+        "Miami": {
+          "score": 37.2,
+          "total_points": 79.0,
+          "avg_points": 15.8,
+          "avg_pos_change": 1.0
+        },
+        "Monaco": {
+          "score": 22.7,
+          "total_points": 6.0,
+          "avg_points": 6.0,
+          "avg_pos_change": -10.0
+        },
+        "Monza": {
+          "score": 32.4,
+          "total_points": 70.0,
+          "avg_points": 14.0,
+          "avg_pos_change": 0.6
+        },
+        "Qatar": {
+          "score": 68.8,
+          "total_points": 29.0,
+          "avg_points": 29.0,
+          "avg_pos_change": 1.0
+        },
+        "Silverstone": {
+          "score": 52.3,
+          "total_points": 58.0,
+          "avg_points": 19.3,
+          "avg_pos_change": -1.3
+        },
+        "Singapore": {
+          "score": 14.4,
+          "total_points": 5.0,
+          "avg_points": 5.0,
+          "avg_pos_change": -6.0
+        },
+        "Spa": {
+          "score": 44.0,
+          "total_points": 132.0,
+          "avg_points": 18.9,
+          "avg_pos_change": 1.9
+        },
+        "Spain": {
+          "score": 38.7,
+          "total_points": 51.0,
+          "avg_points": 17.0,
+          "avg_pos_change": 1.3
+        },
+        "Suzuka": {
+          "score": 64.8,
+          "total_points": 79.0,
+          "avg_points": 26.3,
+          "avg_pos_change": 0.3
+        },
+        "Zandvoort": {
+          "score": 51.8,
+          "total_points": 65.0,
+          "avg_points": 21.7,
+          "avg_pos_change": 0.0
+        }
+      }
+    },
+    "Patrick": {
+      "driver": "Patrick",
+      "total_points": 387.5,
+      "feature_wins": 3,
+      "sprint_wins": 0,
+      "feature_podiums": 10,
+      "sprint_podiums": 2,
+      "maiden_win": "P1 at S3 China",
+      "maiden_podium": "S3 China (P1)",
+      "chronological_feature_wins": [
+        "S3 China",
+        "S4 Bahrain",
+        "S4 Austria"
+      ],
+      "chronological_sprint_wins": [],
+      "chronological_feature_podiums": [
+        "S3 China (P1)",
+        "S3 Baku (P2)",
+        "S4 Bahrain (P1)",
+        "S4 Spain (P3)",
+        "S4 Austria (R) (P3)",
+        "S4 Spa (P3)",
+        "S4 Austria (P1)",
+        "S4 Zandvoort (P2)",
+        "S4 Jeddah (P2)",
+        "S4 Las Vegas (P2)"
+      ],
+      "chronological_sprint_podiums": [
+        "S4 Miami (S) (P3)",
+        "S4 Spa (S) (P3)"
+      ],
+      "feature_wins_by_season": [
+        "S3: 1 (China)",
+        "S4: 2 (Bahrain, Austria)",
+        "S5: 0"
+      ],
+      "sprint_wins_by_season": [],
+      "single_season_win_streak": 1,
+      "cross_season_win_streak": 1,
+      "single_season_win_streak_list": [],
+      "cross_season_win_streak_list": [],
+      "single_season_podium_streak": 4,
+      "cross_season_podium_streak": 4,
+      "single_season_podium_streak_list": [
+        "2 in a row (S3 China -> S3 Baku)",
+        "2 in a row (S4 Austria (R) -> S4 Spa)",
+        "4 in a row (S4 Austria -> S4 Zandvoort -> S4 Jeddah -> S4 Las Vegas)"
+      ],
+      "cross_season_podium_streak_list": [
+        "2 in a row (S3 China -> S3 Baku)",
+        "2 in a row (S4 Austria (R) -> S4 Spa)",
+        "4 in a row (S4 Austria -> S4 Zandvoort -> S4 Jeddah -> S4 Las Vegas)"
+      ],
+      "pre_season_wins": [],
+      "post_season_wins": [],
+      "pre_season_podiums": [
+        "S3 Pre-Season: Miami - P3 (Pre-Season)"
+      ],
+      "post_season_podiums": [],
+      "avg_place": 5.6,
+      "avg_qual": 5.9,
+      "avg_pos_change": 0.3,
+      "best_race_all_time": "P1 at S4 Austria (26pts)",
+      "best_race_by_season": [
+        "S3: P1 at China (25pts)",
+        "S4: P1 at Austria (26pts)",
+        "S5: P4 at Miami (13pts)"
+      ],
+      "poles_count": 1,
+      "poles_list": [
+        "S3 China (S)"
+      ],
+      "fastest_laps": 5,
+      "driver_of_the_day": 2,
+      "most_overtakes": 1,
+      "cleanest_driver": 8,
+      "driver_championships": [],
+      "constructor_championships_on_team": [],
+      "seasonal_standings_finishes": [
+        "S3: P3",
+        "S4: P5",
+        "S5: P5"
+      ],
+      "all_time_standings_peak": "5th - S5 Miami",
+      "track_ratings": {
+        "Abu Dhabi": {
+          "score": -4.1,
+          "total_points": 2.0,
+          "avg_points": 1.0,
+          "avg_pos_change": -11.5
+        },
+        "Australia": {
+          "score": 28.9,
+          "total_points": 24.0,
+          "avg_points": 12.0,
+          "avg_pos_change": 1.0
+        },
+        "Austria": {
+          "score": 29.3,
+          "total_points": 47.0,
+          "avg_points": 11.8,
+          "avg_pos_change": 3.8
+        },
+        "Bahrain": {
+          "score": 57.7,
+          "total_points": 25.0,
+          "avg_points": 25.0,
+          "avg_pos_change": 3.0
+        },
+        "Baku": {
+          "score": 20.1,
+          "total_points": 18.0,
+          "avg_points": 9.0,
+          "avg_pos_change": -5.0
+        },
+        "Brazil": {
+          "score": 23.1,
+          "total_points": 17.0,
+          "avg_points": 8.5,
+          "avg_pos_change": 4.0
+        },
+        "COTA": {
+          "score": 21.5,
+          "total_points": 15.0,
+          "avg_points": 7.5,
+          "avg_pos_change": 5.0
+        },
+        "Canada": {
+          "score": 24.0,
+          "total_points": 10.0,
+          "avg_points": 10.0,
+          "avg_pos_change": 0.0
+        },
+        "China": {
+          "score": 28.6,
+          "total_points": 26.0,
+          "avg_points": 12.8,
+          "avg_pos_change": -7.5
+        },
+        "Imola": {
+          "score": 13.9,
+          "total_points": 6.0,
+          "avg_points": 6.0,
+          "avg_pos_change": -1.0
+        },
+        "Jeddah": {
+          "score": 44.7,
+          "total_points": 19.0,
+          "avg_points": 19.0,
+          "avg_pos_change": 3.0
+        },
+        "Las Vegas": {
+          "score": 46.8,
+          "total_points": 20.0,
+          "avg_points": 20.0,
+          "avg_pos_change": 2.0
+        },
+        "Mexico": {
+          "score": 29.1,
+          "total_points": 12.0,
+          "avg_points": 12.0,
+          "avg_pos_change": 2.0
+        },
+        "Miami": {
+          "score": 19.3,
+          "total_points": 29.0,
+          "avg_points": 7.2,
+          "avg_pos_change": 2.2
+        },
+        "Monza": {
+          "score": 13.3,
+          "total_points": 16.0,
+          "avg_points": 5.3,
+          "avg_pos_change": -1.5
+        },
+        "Silverstone": {
+          "score": 30.1,
+          "total_points": 12.0,
+          "avg_points": 12.0,
+          "avg_pos_change": 4.0
+        },
+        "Spa": {
+          "score": 23.9,
+          "total_points": 47.0,
+          "avg_points": 9.4,
+          "avg_pos_change": 2.0
+        },
+        "Spain": {
+          "score": 28.7,
+          "total_points": 24.0,
+          "avg_points": 12.0,
+          "avg_pos_change": 1.5
+        },
+        "Suzuka": {
+          "score": 0.6,
+          "total_points": 1.0,
+          "avg_points": 1.0,
+          "avg_pos_change": -7.0
+        },
+        "Zandvoort": {
+          "score": 43.5,
+          "total_points": 18.0,
+          "avg_points": 18.0,
+          "avg_pos_change": 1.0
+        }
+      }
+    },
+    "Randy": {
+      "driver": "Randy",
+      "total_points": 9.0,
+      "feature_wins": 0,
+      "sprint_wins": 0,
+      "feature_podiums": 0,
+      "sprint_podiums": 0,
+      "maiden_win": "None",
+      "maiden_podium": "None",
+      "chronological_feature_wins": [],
+      "chronological_sprint_wins": [],
+      "chronological_feature_podiums": [],
+      "chronological_sprint_podiums": [],
+      "feature_wins_by_season": [
+        "S5: 0"
+      ],
+      "sprint_wins_by_season": [],
+      "single_season_win_streak": 0,
+      "cross_season_win_streak": 0,
+      "single_season_win_streak_list": [],
+      "cross_season_win_streak_list": [],
+      "single_season_podium_streak": 0,
+      "cross_season_podium_streak": 0,
+      "single_season_podium_streak_list": [],
+      "cross_season_podium_streak_list": [],
+      "pre_season_wins": [],
+      "post_season_wins": [],
+      "pre_season_podiums": [],
+      "post_season_podiums": [],
+      "avg_place": 9.5,
+      "avg_qual": 8.8,
+      "avg_pos_change": -0.8,
+      "best_race_all_time": "P8 at S5 Miami (S) (1pts)",
+      "best_race_by_season": [
+        "S5: P8 at Miami (S) (1pts)"
+      ],
+      "poles_count": 0,
+      "poles_list": [],
+      "fastest_laps": 0,
+      "driver_of_the_day": 1,
+      "most_overtakes": 1,
+      "cleanest_driver": 0,
+      "driver_championships": [],
+      "constructor_championships_on_team": [],
+      "seasonal_standings_finishes": [
+        "S5: P16"
+      ],
+      "all_time_standings_peak": "20th - S5 Australia",
+      "track_ratings": {
+        "Australia": {
+          "score": 16.8,
+          "total_points": 5.0,
+          "avg_points": 5.0,
+          "avg_pos_change": 6.0
+        },
+        "Imola": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Miami": {
+          "score": 4.9,
+          "total_points": 4.0,
+          "avg_points": 2.0,
+          "avg_pos_change": -3.0
+        },
+        "Monza": {
+          "score": -0.5,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": -3.0
+        },
+        "Spa": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        }
+      }
+    },
+    "Travis": {
+      "driver": "Travis",
+      "total_points": 152.5,
+      "feature_wins": 0,
+      "sprint_wins": 0,
+      "feature_podiums": 2,
+      "sprint_podiums": 0,
+      "maiden_win": "None",
+      "maiden_podium": "S1 Silverstone (P3)",
+      "chronological_feature_wins": [],
+      "chronological_sprint_wins": [],
+      "chronological_feature_podiums": [
+        "S1 Silverstone (P3)",
+        "S1 Spa (P3)"
+      ],
+      "chronological_sprint_podiums": [],
+      "feature_wins_by_season": [
+        "S1: 0",
+        "S2: 0",
+        "S3: 0",
+        "S4: 0"
+      ],
+      "sprint_wins_by_season": [],
+      "single_season_win_streak": 0,
+      "cross_season_win_streak": 0,
+      "single_season_win_streak_list": [],
+      "cross_season_win_streak_list": [],
+      "single_season_podium_streak": 2,
+      "cross_season_podium_streak": 2,
+      "single_season_podium_streak_list": [
+        "2 in a row (S1 Silverstone -> S1 Spa)"
+      ],
+      "cross_season_podium_streak_list": [
+        "2 in a row (S1 Silverstone -> S1 Spa)"
+      ],
+      "pre_season_wins": [],
+      "post_season_wins": [],
+      "pre_season_podiums": [
+        "S1 Pre-Season Test Barcelona - P2 (Pre-Season)"
+      ],
+      "post_season_podiums": [],
+      "avg_place": 8.8,
+      "avg_qual": 8.0,
+      "avg_pos_change": -0.8,
+      "best_race_all_time": "P3 at S1 Silverstone (20pts)",
+      "best_race_by_season": [
+        "S1: P3 at Silverstone (20pts)",
+        "S2: P11 at Monza (1pts)",
+        "S3: P6 at Canada (8pts)",
+        "S4: P5 at Miami (10pts)"
+      ],
+      "poles_count": 2,
+      "poles_list": [
+        "S1 Silverstone",
+        "S1 COTA"
+      ],
+      "fastest_laps": 0,
+      "driver_of_the_day": 0,
+      "most_overtakes": 0,
+      "cleanest_driver": 0,
+      "driver_championships": [],
+      "constructor_championships_on_team": [],
+      "seasonal_standings_finishes": [
+        "S1: P2",
+        "S2: P13",
+        "S3: P2",
+        "S4: P4"
+      ],
+      "all_time_standings_peak": "5th - S1 Silverstone",
+      "track_ratings": {
+        "Abu Dhabi": {
+          "score": 7.7,
+          "total_points": 8.0,
+          "avg_points": 2.0,
+          "avg_pos_change": 1.0
+        },
+        "Australia": {
+          "score": 2.2,
+          "total_points": 3.0,
+          "avg_points": 1.5,
+          "avg_pos_change": -4.5
+        },
+        "Austria": {
+          "score": 11.9,
+          "total_points": 20.0,
+          "avg_points": 3.4,
+          "avg_pos_change": 3.7
+        },
+        "Bahrain": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Baku": {
+          "score": -2.7,
+          "total_points": 1.0,
+          "avg_points": 0.5,
+          "avg_pos_change": -7.0
+        },
+        "Brazil": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "COTA": {
+          "score": 15.4,
+          "total_points": 23.0,
+          "avg_points": 5.8,
+          "avg_pos_change": 1.3
+        },
+        "Canada": {
+          "score": 12.3,
+          "total_points": 8.0,
+          "avg_points": 4.0,
+          "avg_pos_change": 2.0
+        },
+        "China": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Jeddah": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Las Vegas": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Mexico": {
+          "score": 13.1,
+          "total_points": 10.0,
+          "avg_points": 5.0,
+          "avg_pos_change": 1.0
+        },
+        "Miami": {
+          "score": 13.3,
+          "total_points": 16.0,
+          "avg_points": 5.3,
+          "avg_pos_change": -0.3
+        },
+        "Monaco": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Monza": {
+          "score": 13.5,
+          "total_points": 17.0,
+          "avg_points": 4.2,
+          "avg_pos_change": 3.5
+        },
+        "Qatar": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Silverstone": {
+          "score": 18.5,
+          "total_points": 23.0,
+          "avg_points": 7.7,
+          "avg_pos_change": -0.5
+        },
+        "Singapore": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Spa": {
+          "score": 13.8,
+          "total_points": 18.0,
+          "avg_points": 3.6,
+          "avg_pos_change": 0.0
+        },
+        "Spain": {
+          "score": -1.3,
+          "total_points": 2.0,
+          "avg_points": 0.7,
+          "avg_pos_change": -5.0
+        },
+        "Suzuka": {
+          "score": -1.3,
+          "total_points": 3.0,
+          "avg_points": 1.0,
+          "avg_pos_change": -6.5
+        },
+        "Zandvoort": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        }
+      }
+    },
+    "Yeti": {
+      "driver": "Yeti",
+      "total_points": 86.0,
+      "feature_wins": 0,
+      "sprint_wins": 0,
+      "feature_podiums": 0,
+      "sprint_podiums": 0,
+      "maiden_win": "None",
+      "maiden_podium": "None",
+      "chronological_feature_wins": [],
+      "chronological_sprint_wins": [],
+      "chronological_feature_podiums": [],
+      "chronological_sprint_podiums": [],
+      "feature_wins_by_season": [
+        "S2: 0",
+        "S3: 0"
+      ],
+      "sprint_wins_by_season": [],
+      "single_season_win_streak": 0,
+      "cross_season_win_streak": 0,
+      "single_season_win_streak_list": [],
+      "cross_season_win_streak_list": [],
+      "single_season_podium_streak": 0,
+      "cross_season_podium_streak": 0,
+      "single_season_podium_streak_list": [],
+      "cross_season_podium_streak_list": [],
+      "pre_season_wins": [],
+      "post_season_wins": [],
+      "pre_season_podiums": [],
+      "post_season_podiums": [],
+      "avg_place": 8.9,
+      "avg_qual": 8.9,
+      "avg_pos_change": -0.1,
+      "best_race_all_time": "P4 at S2 Austria (12pts)",
+      "best_race_by_season": [
+        "S2: P4 at Austria (12pts)",
+        "S3: P5 at Spain (10pts)"
+      ],
+      "poles_count": 0,
+      "poles_list": [],
+      "fastest_laps": 0,
+      "driver_of_the_day": 0,
+      "most_overtakes": 0,
+      "cleanest_driver": 0,
+      "driver_championships": [],
+      "constructor_championships_on_team": [],
+      "seasonal_standings_finishes": [
+        "S2: P12",
+        "S3: P10"
+      ],
+      "all_time_standings_peak": "10th - S2 Monza",
+      "track_ratings": {
+        "Abu Dhabi": {
+          "score": 10.8,
+          "total_points": 8.0,
+          "avg_points": 4.0,
+          "avg_pos_change": 0.0
+        },
+        "Australia": {
+          "score": 9.2,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 9.0
+        },
+        "Austria": {
+          "score": 12.9,
+          "total_points": 12.0,
+          "avg_points": 4.0,
+          "avg_pos_change": 0.0
+        },
+        "Baku": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "COTA": {
+          "score": 6.5,
+          "total_points": 6.0,
+          "avg_points": 2.0,
+          "avg_pos_change": 0.0
+        },
+        "Canada": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "China": {
+          "score": 4.3,
+          "total_points": 5.0,
+          "avg_points": 1.7,
+          "avg_pos_change": -2.0
+        },
+        "Monaco": {
+          "score": 6.8,
+          "total_points": 4.0,
+          "avg_points": 4.0,
+          "avg_pos_change": -4.0
+        },
+        "Monza": {
+          "score": 11.1,
+          "total_points": 8.0,
+          "avg_points": 4.0,
+          "avg_pos_change": 1.0
+        },
+        "Silverstone": {
+          "score": 16.1,
+          "total_points": 14.0,
+          "avg_points": 7.0,
+          "avg_pos_change": -2.0
+        },
+        "Spa": {
+          "score": 4.4,
+          "total_points": 7.0,
+          "avg_points": 3.5,
+          "avg_pos_change": -6.0
+        },
+        "Spain": {
+          "score": 29.6,
+          "total_points": 10.0,
+          "avg_points": 10.0,
+          "avg_pos_change": 9.0
+        },
+        "Suzuka": {
+          "score": 6.6,
+          "total_points": 1.0,
+          "avg_points": 0.5,
+          "avg_pos_change": 5.0
+        },
+        "Zandvoort": {
+          "score": 24.2,
+          "total_points": 11.0,
+          "avg_points": 11.0,
+          "avg_pos_change": -3.0
+        }
+      }
+    },
+    "Zane": {
+      "driver": "Zane",
+      "total_points": 365.0,
+      "feature_wins": 2,
+      "sprint_wins": 0,
+      "feature_podiums": 6,
+      "sprint_podiums": 0,
+      "maiden_win": "P1 at S1 COTA",
+      "maiden_podium": "S1 Spain (P3)",
+      "chronological_feature_wins": [
+        "S1 COTA",
+        "S1 Mexico"
+      ],
+      "chronological_sprint_wins": [],
+      "chronological_feature_podiums": [
+        "S1 Spain (P3)",
+        "S1 Austria (P2)",
+        "S1 Qatar (P3)",
+        "S1 COTA (P1)",
+        "S1 Mexico (P1)",
+        "S2 China (P3)"
+      ],
+      "chronological_sprint_podiums": [],
+      "feature_wins_by_season": [
+        "S1: 2 (COTA, Mexico)",
+        "S2: 0",
+        "S3: 0"
+      ],
+      "sprint_wins_by_season": [],
+      "single_season_win_streak": 2,
+      "cross_season_win_streak": 2,
+      "single_season_win_streak_list": [
+        "2 in a row (S1 COTA -> S1 Mexico)"
+      ],
+      "cross_season_win_streak_list": [
+        "2 in a row (S1 COTA -> S1 Mexico)"
+      ],
+      "single_season_podium_streak": 3,
+      "cross_season_podium_streak": 3,
+      "single_season_podium_streak_list": [
+        "3 in a row (S1 Qatar -> S1 COTA -> S1 Mexico)"
+      ],
+      "cross_season_podium_streak_list": [
+        "3 in a row (S1 Qatar -> S1 COTA -> S1 Mexico)"
+      ],
+      "pre_season_wins": [],
+      "post_season_wins": [],
+      "pre_season_podiums": [],
+      "post_season_podiums": [],
+      "avg_place": 5.7,
+      "avg_qual": 3.6,
+      "avg_pos_change": -2.1,
+      "best_race_all_time": "P1 at S1 Mexico (31pts)",
+      "best_race_by_season": [
+        "S1: P1 at Mexico (31pts)",
+        "S2: P3 at China (20pts)"
+      ],
+      "poles_count": 6,
+      "poles_list": [
+        "S1 Zandvoort",
+        "S1 Monza",
+        "S1 Singapore",
+        "S1 Qatar",
+        "S1 Mexico",
+        "S1 Brazil"
+      ],
+      "fastest_laps": 1,
+      "driver_of_the_day": 0,
+      "most_overtakes": 0,
+      "cleanest_driver": 0,
+      "driver_championships": [],
+      "constructor_championships_on_team": [],
+      "seasonal_standings_finishes": [
+        "S1: P3",
+        "S2: P9",
+        "S3: P13"
+      ],
+      "all_time_standings_peak": "🥈 S1 Bahrain",
+      "track_ratings": {
+        "Abu Dhabi": {
+          "score": 22.0,
+          "total_points": 27.0,
+          "avg_points": 9.0,
+          "avg_pos_change": 0.0
+        },
+        "Australia": {
+          "score": 19.7,
+          "total_points": 14.0,
+          "avg_points": 7.0,
+          "avg_pos_change": -1.0
+        },
+        "Austria": {
+          "score": 17.1,
+          "total_points": 22.0,
+          "avg_points": 5.5,
+          "avg_pos_change": -2.0
+        },
+        "Bahrain": {
+          "score": 36.1,
+          "total_points": 14.0,
+          "avg_points": 14.0,
+          "avg_pos_change": -2.0
+        },
+        "Baku": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0
+        },
+        "Brazil": {
+          "score": 51.1,
+          "total_points": 17.0,
+          "avg_points": 17.0,
+          "avg_pos_change": -3.0
+        },
+        "COTA": {
+          "score": 29.5,
+          "total_points": 44.0,
+          "avg_points": 11.0,
+          "avg_pos_change": -0.5
+        },
+        "Canada": {
+          "score": 3.9,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": -3.0
+        },
+        "China": {
+          "score": 19.4,
+          "total_points": 20.0,
+          "avg_points": 6.7,
+          "avg_pos_change": 3.0
+        },
+        "Jeddah": {
+          "score": -0.3,
+          "total_points": 1.0,
+          "avg_points": 1.0,
+          "avg_pos_change": -8.0
+        },
+        "Las Vegas": {
+          "score": 9.1,
+          "total_points": 4.0,
+          "avg_points": 4.0,
+          "avg_pos_change": -6.0
+        },
+        "Mexico": {
+          "score": 81.8,
+          "total_points": 31.0,
+          "avg_points": 31.0,
+          "avg_pos_change": 0.0
+        },
+        "Miami": {
+          "score": 18.2,
+          "total_points": 8.0,
+          "avg_points": 8.0,
+          "avg_pos_change": -3.0
+        },
+        "Monaco": {
+          "score": 14.3,
+          "total_points": 7.0,
+          "avg_points": 7.0,
+          "avg_pos_change": -4.0
+        },
+        "Monza": {
+          "score": 21.3,
+          "total_points": 26.0,
+          "avg_points": 8.7,
+          "avg_pos_change": -0.5
+        },
+        "Qatar": {
+          "score": 58.0,
+          "total_points": 20.0,
+          "avg_points": 20.0,
+          "avg_pos_change": -2.0
+        },
+        "Silverstone": {
+          "score": 20.7,
+          "total_points": 27.0,
+          "avg_points": 9.0,
+          "avg_pos_change": -1.0
+        },
+        "Singapore": {
+          "score": 22.5,
+          "total_points": 5.0,
+          "avg_points": 5.0,
+          "avg_pos_change": -8.0
+        },
+        "Spa": {
+          "score": 23.6,
+          "total_points": 28.0,
+          "avg_points": 9.3,
+          "avg_pos_change": 0.0
+        },
+        "Spain": {
+          "score": 22.9,
+          "total_points": 17.0,
+          "avg_points": 8.5,
+          "avg_pos_change": 1.0
+        },
+        "Suzuka": {
+          "score": 13.9,
+          "total_points": 21.0,
+          "avg_points": 7.0,
+          "avg_pos_change": -4.5
+        },
+        "Zandvoort": {
+          "score": 13.3,
+          "total_points": 12.0,
+          "avg_points": 6.0,
+          "avg_pos_change": -4.0
+        }
+      }
+    }
+  },
+  "constructors": {
+    "Alfa Romeo": {
+      "constructor": "Alfa Romeo",
+      "total_points": 66.0,
+      "feature_wins": 0,
+      "sprint_wins": 0,
+      "feature_podiums": 0,
+      "sprint_podiums": 0,
+      "maiden_win": "None",
+      "maiden_podium": "None",
+      "chronological_feature_wins": [],
+      "chronological_sprint_wins": [],
+      "feature_wins_by_season": [
+        "S2: 0"
+      ],
+      "single_season_win_streak": 0,
+      "cross_season_win_streak": 0,
+      "single_season_podium_streak": 0,
+      "cross_season_podium_streak": 0,
+      "avg_place": 8.6,
+      "avg_qual": 7.9,
+      "avg_pos_change": -0.7,
+      "constructor_championships": [],
+      "all_time_standings_peak": "7th - S2 Suzuka"
+    },
+    "AlphaTauri": {
+      "constructor": "AlphaTauri",
+      "total_points": 1.0,
+      "feature_wins": 0,
+      "sprint_wins": 0,
+      "feature_podiums": 0,
+      "sprint_podiums": 0,
+      "maiden_win": "None",
+      "maiden_podium": "None",
+      "chronological_feature_wins": [],
+      "chronological_sprint_wins": [],
+      "feature_wins_by_season": [
+        "S2: 0"
+      ],
+      "single_season_win_streak": 0,
+      "cross_season_win_streak": 0,
+      "single_season_podium_streak": 0,
+      "cross_season_podium_streak": 0,
+      "avg_place": 11.0,
+      "avg_qual": 20.0,
+      "avg_pos_change": 9.0,
+      "constructor_championships": [],
+      "all_time_standings_peak": "8th - S2 Suzuka"
+    },
+    "Alpine": {
+      "constructor": "Alpine",
+      "total_points": 844.0,
+      "feature_wins": 7,
+      "sprint_wins": 1,
+      "feature_podiums": 26,
+      "sprint_podiums": 3,
+      "maiden_win": "P1 at S3 Suzuka",
+      "maiden_podium": "S2 Suzuka",
+      "chronological_feature_wins": [
+        "S3 Suzuka",
+        "S3 Silverstone",
+        "S3 Spain",
+        "S3 Austria",
+        "S3 COTA",
+        "S4 Zandvoort",
+        "S4 Jeddah"
+      ],
+      "chronological_sprint_wins": [
+        "S4 Brazil (S)"
+      ],
+      "feature_wins_by_season": [
+        "S2: 0",
+        "S3: 5 (Suzuka, Silverstone, Spain, Austria, COTA)",
+        "S4: 2 (Zandvoort, Jeddah)"
+      ],
+      "single_season_win_streak": 2,
+      "cross_season_win_streak": 2,
+      "single_season_podium_streak": 5,
+      "cross_season_podium_streak": 6,
+      "avg_place": 5.7,
+      "avg_qual": 6.4,
+      "avg_pos_change": 0.8,
+      "constructor_championships": [
+        3
+      ],
+      "all_time_standings_peak": "🥉 S3 Spain"
+    },
+    "Aston Martin": {
+      "constructor": "Aston Martin",
+      "total_points": 496.5,
+      "feature_wins": 3,
+      "sprint_wins": 0,
+      "feature_podiums": 10,
+      "sprint_podiums": 0,
+      "maiden_win": "P1 at S1 COTA",
+      "maiden_podium": "S1 Spain",
+      "chronological_feature_wins": [
+        "S1 COTA",
+        "S1 Mexico",
+        "S3 Canada"
+      ],
+      "chronological_sprint_wins": [],
+      "feature_wins_by_season": [
+        "S1: 2 (COTA, Mexico)",
+        "S3: 1 (Canada)",
+        "S4: 0"
+      ],
+      "single_season_win_streak": 2,
+      "cross_season_win_streak": 2,
+      "single_season_podium_streak": 3,
+      "cross_season_podium_streak": 3,
+      "avg_place": 7.9,
+      "avg_qual": 6.8,
+      "avg_pos_change": -1.1,
+      "constructor_championships": [],
+      "all_time_standings_peak": "🥈 S1 Bahrain"
+    },
+    "Audi": {
+      "constructor": "Audi",
+      "total_points": 7.5,
+      "feature_wins": 0,
+      "sprint_wins": 0,
+      "feature_podiums": 0,
+      "sprint_podiums": 0,
+      "maiden_win": "None",
+      "maiden_podium": "None",
+      "chronological_feature_wins": [],
+      "chronological_sprint_wins": [],
+      "feature_wins_by_season": [
+        "S5: 0"
+      ],
+      "single_season_win_streak": 0,
+      "cross_season_win_streak": 0,
+      "single_season_podium_streak": 0,
+      "cross_season_podium_streak": 0,
+      "avg_place": 11.1,
+      "avg_qual": 8.3,
+      "avg_pos_change": -2.9,
+      "constructor_championships": [],
+      "all_time_standings_peak": "11th - S5 Miami"
+    },
+    "Cadillac": {
+      "constructor": "Cadillac",
+      "total_points": 151.0,
+      "feature_wins": 3,
+      "sprint_wins": 0,
+      "feature_podiums": 3,
+      "sprint_podiums": 1,
+      "maiden_win": "P1 at S5 Australia",
+      "maiden_podium": "S5 Australia",
+      "chronological_feature_wins": [
+        "S5 Australia",
+        "S5 Imola",
+        "S5 Monza"
+      ],
+      "chronological_sprint_wins": [],
+      "feature_wins_by_season": [
+        "S5: 3 (Australia, Imola, Monza)"
+      ],
+      "single_season_win_streak": 2,
+      "cross_season_win_streak": 2,
+      "single_season_podium_streak": 2,
+      "cross_season_podium_streak": 2,
+      "avg_place": 5.0,
+      "avg_qual": 4.9,
+      "avg_pos_change": -0.1,
+      "constructor_championships": [],
+      "all_time_standings_peak": "8th - S5 Imola"
+    },
+    "Ferrari": {
+      "constructor": "Ferrari",
+      "total_points": 719.0,
+      "feature_wins": 3,
+      "sprint_wins": 1,
+      "feature_podiums": 17,
+      "sprint_podiums": 4,
+      "maiden_win": "P1 at S2 COTA",
+      "maiden_podium": "S2 Abu Dhabi",
+      "chronological_feature_wins": [
+        "S2 COTA",
+        "S3 Canada",
+        "S5 Spa"
+      ],
+      "chronological_sprint_wins": [
+        "S5 Miami (S)"
+      ],
+      "feature_wins_by_season": [
+        "S1: 0",
+        "S2: 1 (COTA)",
+        "S3: 1 (Canada)",
+        "S4: 0",
+        "S5: 1 (Spa)"
+      ],
+      "single_season_win_streak": 1,
+      "cross_season_win_streak": 1,
+      "single_season_podium_streak": 6,
+      "cross_season_podium_streak": 6,
+      "avg_place": 6.9,
+      "avg_qual": 8.6,
+      "avg_pos_change": 1.6,
+      "constructor_championships": [],
+      "all_time_standings_peak": "4th - S3 China"
+    },
+    "Haas": {
+      "constructor": "Haas",
+      "total_points": 41.0,
+      "feature_wins": 0,
+      "sprint_wins": 0,
+      "feature_podiums": 1,
+      "sprint_podiums": 0,
+      "maiden_win": "None",
+      "maiden_podium": "S5 Spa",
+      "chronological_feature_wins": [],
+      "chronological_sprint_wins": [],
+      "feature_wins_by_season": [
+        "S5: 0"
+      ],
+      "single_season_win_streak": 0,
+      "cross_season_win_streak": 0,
+      "single_season_podium_streak": 1,
+      "cross_season_podium_streak": 1,
+      "avg_place": 8.8,
+      "avg_qual": 6.5,
+      "avg_pos_change": -2.3,
+      "constructor_championships": [],
+      "all_time_standings_peak": "10th - S5 Australia"
+    },
+    "McLaren": {
+      "constructor": "McLaren",
+      "total_points": 1386.5,
+      "feature_wins": 23,
+      "sprint_wins": 2,
+      "feature_podiums": 45,
+      "sprint_podiums": 5,
+      "maiden_win": "P1 at S1 Bahrain",
+      "maiden_podium": "S1 Bahrain",
+      "chronological_feature_wins": [
+        "S1 Bahrain",
+        "S1 Jeddah",
+        "S1 Miami",
+        "S1 Spain",
+        "S1 Austria",
+        "S1 Spa",
+        "S1 Suzuka",
+        "S1 Qatar",
+        "S1 Brazil",
+        "S1 Abu Dhabi",
+        "S2 Suzuka",
+        "S2 Abu Dhabi",
+        "S2 Monza",
+        "S2 Zandvoort",
+        "S2 China",
+        "S2 Spa",
+        "S3 Australia",
+        "S3 Spa",
+        "S3 Baku",
+        "S3 Monza",
+        "S3 Abu Dhabi",
+        "S4 Miami",
+        "S4 Spa"
+      ],
+      "chronological_sprint_wins": [
+        "S3 China (S)",
+        "S3 COTA (S)"
+      ],
+      "feature_wins_by_season": [
+        "S1: 10 (Bahrain, Jeddah, Miami, Spain, Austria, Spa, Suzuka, Qatar, Brazil, Abu Dhabi)",
+        "S2: 6 (Suzuka, Abu Dhabi, Monza, Zandvoort, China, Spa)",
+        "S3: 5 (Australia, Spa, Baku, Monza, Abu Dhabi)",
+        "S4: 2 (Miami, Spa)",
+        "S5: 0"
+      ],
+      "single_season_win_streak": 3,
+      "cross_season_win_streak": 3,
+      "single_season_podium_streak": 11,
+      "cross_season_podium_streak": 15,
+      "avg_place": 5.0,
+      "avg_qual": 5.7,
+      "avg_pos_change": 0.6,
+      "constructor_championships": [
+        2
+      ],
+      "all_time_standings_peak": "🥇 S1 Bahrain"
+    },
+    "Mercedes": {
+      "constructor": "Mercedes",
+      "total_points": 1277.0,
+      "feature_wins": 18,
+      "sprint_wins": 2,
+      "feature_podiums": 42,
+      "sprint_podiums": 5,
+      "maiden_win": "P1 at S1 Australia",
+      "maiden_podium": "S1 Jeddah",
+      "chronological_feature_wins": [
+        "S1 Australia",
+        "S1 Canada",
+        "S1 Silverstone",
+        "S1 Zandvoort",
+        "S1 Monza",
+        "S1 Singapore",
+        "S1 Las Vegas",
+        "S2 Silverstone",
+        "S2 Austria",
+        "S4 Spain",
+        "S4 Mexico",
+        "S4 Baku",
+        "S4 Austria (R)",
+        "S4 Brazil",
+        "S4 Las Vegas",
+        "S4 Abu Dhabi",
+        "S4 Monza",
+        "S5 Miami"
+      ],
+      "chronological_sprint_wins": [
+        "S4 Miami (S)",
+        "S4 Spa (S)"
+      ],
+      "feature_wins_by_season": [
+        "S1: 7 (Australia, Canada, Silverstone, Zandvoort, Monza, Singapore, Las Vegas)",
+        "S2: 2 (Silverstone, Austria)",
+        "S4: 8 (Spain, Mexico, Baku, Austria (R), Brazil, Las Vegas, Abu Dhabi, Monza)",
+        "S5: 1 (Miami)"
+      ],
+      "single_season_win_streak": 4,
+      "cross_season_win_streak": 4,
+      "single_season_podium_streak": 13,
+      "cross_season_podium_streak": 13,
+      "avg_place": 5.2,
+      "avg_qual": 5.6,
+      "avg_pos_change": 0.4,
+      "constructor_championships": [
+        1,
+        4
+      ],
+      "all_time_standings_peak": "🥇 S1 Australia"
+    },
+    "Red Bull": {
+      "constructor": "Red Bull",
+      "total_points": 561.5,
+      "feature_wins": 0,
+      "sprint_wins": 1,
+      "feature_podiums": 9,
+      "sprint_podiums": 2,
+      "maiden_win": "None",
+      "maiden_podium": "S1 COTA",
+      "chronological_feature_wins": [],
+      "chronological_sprint_wins": [
+        "S5 Spa (S)"
+      ],
+      "feature_wins_by_season": [
+        "S1: 0",
+        "S2: 0",
+        "S3: 0",
+        "S4: 0",
+        "S5: 0"
+      ],
+      "single_season_win_streak": 0,
+      "cross_season_win_streak": 0,
+      "single_season_podium_streak": 4,
+      "cross_season_podium_streak": 4,
+      "avg_place": 8.3,
+      "avg_qual": 7.8,
+      "avg_pos_change": -0.5,
+      "constructor_championships": [],
+      "all_time_standings_peak": "4th - S1 Bahrain"
+    },
+    "VCARB": {
+      "constructor": "VCARB",
+      "total_points": 584.5,
+      "feature_wins": 3,
+      "sprint_wins": 0,
+      "feature_podiums": 17,
+      "sprint_podiums": 3,
+      "maiden_win": "P1 at S3 China",
+      "maiden_podium": "S3 China",
+      "chronological_feature_wins": [
+        "S3 China",
+        "S4 Bahrain",
+        "S4 Austria"
+      ],
+      "chronological_sprint_wins": [],
+      "feature_wins_by_season": [
+        "S3: 1 (China)",
+        "S4: 2 (Bahrain, Austria)"
+      ],
+      "single_season_win_streak": 1,
+      "cross_season_win_streak": 1,
+      "single_season_podium_streak": 6,
+      "cross_season_podium_streak": 6,
+      "avg_place": 5.9,
+      "avg_qual": 6.6,
+      "avg_pos_change": 0.7,
+      "constructor_championships": [],
+      "all_time_standings_peak": "5th - S4 Zandvoort"
+    },
+    "Williams": {
+      "constructor": "Williams",
+      "total_points": 2.0,
+      "feature_wins": 0,
+      "sprint_wins": 0,
+      "feature_podiums": 0,
+      "sprint_podiums": 0,
+      "maiden_win": "None",
+      "maiden_podium": "None",
+      "chronological_feature_wins": [],
+      "chronological_sprint_wins": [],
+      "feature_wins_by_season": [
+        "S5: 0"
+      ],
+      "single_season_win_streak": 0,
+      "cross_season_win_streak": 0,
+      "single_season_podium_streak": 0,
+      "cross_season_podium_streak": 0,
+      "avg_place": 14.0,
+      "avg_qual": 12.0,
+      "avg_pos_change": -2.0,
+      "constructor_championships": [],
+      "all_time_standings_peak": "11th - S5 Australia"
+    }
+  },
+  "circuits": {
+    "Australia": {
+      "track": "Australia",
+      "seasons_results": {
+        "S1 Australia": {
+          "season": 1,
+          "race_name": "Australia",
+          "is_sprint": false,
+          "winner": "Erick (Mercedes)",
+          "winner_driver": "Erick",
+          "winner_team": "Mercedes",
+          "pole": "Nick",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Erick (Mercedes)",
+            "P2: Nick (McLaren)",
+            "P3: Marcus (Mercedes)"
+          ]
+        },
+        "S3 Australia": {
+          "season": 3,
+          "race_name": "Australia",
+          "is_sprint": false,
+          "winner": "Nick (McLaren)",
+          "winner_driver": "Nick",
+          "winner_team": "McLaren",
+          "pole": "Joshua",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Nick (McLaren)",
+            "P2: Joshua (Alpine)",
+            "P3: Erick (Ferrari)"
+          ]
+        },
+        "S5 Australia": {
+          "season": 5,
+          "race_name": "Australia",
+          "is_sprint": false,
+          "winner": "Jelly (Cadillac)",
+          "winner_driver": "Jelly",
+          "winner_team": "Cadillac",
+          "pole": "Joshua",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Jelly (Cadillac)",
+            "P2: Jaden (Ferrari)",
+            "P3: Jairo (Mercedes)"
+          ]
+        }
+      }
+    },
+    "Imola": {
+      "track": "Imola",
+      "seasons_results": {
+        "S5 Imola": {
+          "season": 5,
+          "race_name": "Imola",
+          "is_sprint": false,
+          "winner": "Jelly (Cadillac)",
+          "winner_driver": "Jelly",
+          "winner_team": "Cadillac",
+          "pole": "Jelly",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Jelly (Cadillac)",
+            "P2: Nick (McLaren)",
+            "P3: Joshua (Red Bull)"
+          ]
+        }
+      }
+    },
+    "Miami": {
+      "track": "Miami",
+      "seasons_results": {
+        "S1 Miami": {
+          "season": 1,
+          "race_name": "Miami",
+          "is_sprint": false,
+          "winner": "Nick (McLaren)",
+          "winner_driver": "Nick",
+          "winner_team": "McLaren",
+          "pole": "Nick",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Nick (McLaren)",
+            "P2: Erick (Mercedes)",
+            "P3: Marcus (Mercedes)"
+          ]
+        },
+        "S4 Miami Sprint": {
+          "season": 4,
+          "race_name": "Miami Sprint",
+          "is_sprint": true,
+          "winner": "Jairo (Mercedes)",
+          "winner_driver": "Jairo",
+          "winner_team": "Mercedes",
+          "pole": "Jairo",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Jairo (Mercedes)",
+            "P2: Jaden (Mercedes)",
+            "P3: Patrick (VCARB)"
+          ]
+        },
+        "S4 Miami": {
+          "season": 4,
+          "race_name": "Miami",
+          "is_sprint": false,
+          "winner": "Nick (McLaren)",
+          "winner_driver": "Nick",
+          "winner_team": "McLaren",
+          "pole": "Not Recorded",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Nick (McLaren)",
+            "P2: Brently (Red Bull)",
+            "P3: Joshua (Alpine)"
+          ]
+        },
+        "S5 Miami Sprint": {
+          "season": 5,
+          "race_name": "Miami Sprint",
+          "is_sprint": true,
+          "winner": "Jaden (Ferrari)",
+          "winner_driver": "Jaden",
+          "winner_team": "Ferrari",
+          "pole": "Jelly",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Jaden (Ferrari)",
+            "P2: Joshua (Red Bull)",
+            "P3: Jelly (Cadillac)"
+          ]
+        },
+        "S5 Miami": {
+          "season": 5,
+          "race_name": "Miami",
+          "is_sprint": false,
+          "winner": "Jairo (Mercedes)",
+          "winner_driver": "Jairo",
+          "winner_team": "Mercedes",
+          "pole": "Brently",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Jairo (Mercedes)",
+            "P2: Joshua (Red Bull)",
+            "P3: Nick (McLaren)"
+          ]
+        }
+      }
+    },
+    "Monza": {
+      "track": "Monza",
+      "seasons_results": {
+        "S1 Monza": {
+          "season": 1,
+          "race_name": "Monza",
+          "is_sprint": false,
+          "winner": "Marcus (Mercedes)",
+          "winner_driver": "Marcus",
+          "winner_team": "Mercedes",
+          "pole": "Zane",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Marcus (Mercedes)",
+            "P2: Erick (Mercedes)",
+            "P3: David (Aston Martin)"
+          ]
+        },
+        "S2 Monza": {
+          "season": 2,
+          "race_name": "Monza",
+          "is_sprint": false,
+          "winner": "Nick (McLaren)",
+          "winner_driver": "Nick",
+          "winner_team": "McLaren",
+          "pole": "Joshua",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Nick (McLaren)",
+            "P2: Joshua (Alpine)",
+            "P3: Del (Mercedes)"
+          ]
+        },
+        "S3 Monza": {
+          "season": 3,
+          "race_name": "Monza",
+          "is_sprint": false,
+          "winner": "Nick (McLaren)",
+          "winner_driver": "Nick",
+          "winner_team": "McLaren",
+          "pole": "Del",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Nick (McLaren)",
+            "P2: Del (Aston Martin)",
+            "P3: Brently (VCARB)"
+          ]
+        },
+        "S4 Monza": {
+          "season": 4,
+          "race_name": "Monza",
+          "is_sprint": false,
+          "winner": "Jairo (Mercedes)",
+          "winner_driver": "Jairo",
+          "winner_team": "Mercedes",
+          "pole": "Jairo",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Jairo (Mercedes)",
+            "P2: Joshua (Alpine)",
+            "P3: Jelly (VCARB)"
+          ]
+        },
+        "S5 Monza": {
+          "season": 5,
+          "race_name": "Monza",
+          "is_sprint": false,
+          "winner": "Jelly (Cadillac)",
+          "winner_driver": "Jelly",
+          "winner_team": "Cadillac",
+          "pole": "Jelly",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Jelly (Cadillac)",
+            "P2: Jaden (Ferrari)",
+            "P3: Joshua (Red Bull)"
+          ]
+        }
+      }
+    },
+    "Spa": {
+      "track": "Spa",
+      "seasons_results": {
+        "S1 Spa": {
+          "season": 1,
+          "race_name": "Spa",
+          "is_sprint": false,
+          "winner": "Nick (McLaren)",
+          "winner_driver": "Nick",
+          "winner_team": "McLaren",
+          "pole": "Nick",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Nick (McLaren)",
+            "P2: Erick (Mercedes)",
+            "P3: Travis (McLaren)"
+          ]
+        },
+        "S2 Spa": {
+          "season": 2,
+          "race_name": "Spa",
+          "is_sprint": false,
+          "winner": "Nick (McLaren)",
+          "winner_driver": "Nick",
+          "winner_team": "McLaren",
+          "pole": "Nick",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Nick (McLaren)",
+            "P2: Del (Mercedes)",
+            "P3: Erick (Ferrari)"
+          ]
+        },
+        "S3 Spa": {
+          "season": 3,
+          "race_name": "Spa",
+          "is_sprint": false,
+          "winner": "Nick (McLaren)",
+          "winner_driver": "Nick",
+          "winner_team": "McLaren",
+          "pole": "Not Recorded",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Nick (McLaren)",
+            "P2: Joshua (Alpine)",
+            "P3: Del (Aston Martin)"
+          ]
+        },
+        "S4 Spa Sprint": {
+          "season": 4,
+          "race_name": "Spa Sprint",
+          "is_sprint": true,
+          "winner": "Jaden (Mercedes)",
+          "winner_driver": "Jaden",
+          "winner_team": "Mercedes",
+          "pole": "Joshua",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Jaden (Mercedes)",
+            "P2: Jairo (Mercedes)",
+            "P3: Patrick (VCARB)"
+          ]
+        },
+        "S4 Spa": {
+          "season": 4,
+          "race_name": "Spa",
+          "is_sprint": false,
+          "winner": "Nick (McLaren)",
+          "winner_driver": "Nick",
+          "winner_team": "McLaren",
+          "pole": "Not Recorded",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Nick (McLaren)",
+            "P2: Jelly (VCARB)",
+            "P3: Patrick (VCARB)"
+          ]
+        },
+        "S5 Spa Sprint": {
+          "season": 5,
+          "race_name": "Spa Sprint",
+          "is_sprint": true,
+          "winner": "Joshua (Red Bull)",
+          "winner_driver": "Joshua",
+          "winner_team": "Red Bull",
+          "pole": "Nick",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Joshua (Red Bull)",
+            "P2: Nick (McLaren)",
+            "P3: Jaden (Ferrari)"
+          ]
+        },
+        "S5 Spa": {
+          "season": 5,
+          "race_name": "Spa",
+          "is_sprint": false,
+          "winner": "Leo (Ferrari)",
+          "winner_driver": "Leo",
+          "winner_team": "Ferrari",
+          "pole": "Evelo",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Leo (Ferrari)",
+            "P2: Joshua (Red Bull)",
+            "P3: Matthew (Haas)"
+          ]
+        }
+      }
+    },
+    "Brazil": {
+      "track": "Brazil",
+      "seasons_results": {
+        "S1 Brazil": {
+          "season": 1,
+          "race_name": "Brazil",
+          "is_sprint": false,
+          "winner": "Nick (McLaren)",
+          "winner_driver": "Nick",
+          "winner_team": "McLaren",
+          "pole": "Zane",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Nick (McLaren)",
+            "P2: Boz (Red Bull)",
+            "P3: Erick (Mercedes)"
+          ]
+        },
+        "S4 Brazil Sprint": {
+          "season": 4,
+          "race_name": "Brazil Sprint",
+          "is_sprint": true,
+          "winner": "Joshua (Alpine)",
+          "winner_driver": "Joshua",
+          "winner_team": "Alpine",
+          "pole": "Joshua",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Joshua (Alpine)",
+            "P2: Jairo (Mercedes)",
+            "P3: Nick (McLaren)"
+          ]
+        },
+        "S4 Brazil": {
+          "season": 4,
+          "race_name": "Brazil",
+          "is_sprint": false,
+          "winner": "Jaden (Mercedes)",
+          "winner_driver": "Jaden",
+          "winner_team": "Mercedes",
+          "pole": "Not Recorded",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Jaden (Mercedes)",
+            "P2: Joshua (Alpine)",
+            "P3: Nick (McLaren)"
+          ]
+        }
+      }
+    },
+    "Silverstone": {
+      "track": "Silverstone",
+      "seasons_results": {
+        "S1 Silverstone": {
+          "season": 1,
+          "race_name": "Silverstone",
+          "is_sprint": false,
+          "winner": "Erick (Mercedes)",
+          "winner_driver": "Erick",
+          "winner_team": "Mercedes",
+          "pole": "Travis",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Erick (Mercedes)",
+            "P2: Nick (McLaren)",
+            "P3: Travis (McLaren)"
+          ]
+        },
+        "S2 Silverstone": {
+          "season": 2,
+          "race_name": "Silverstone",
+          "is_sprint": false,
+          "winner": "Del (Mercedes)",
+          "winner_driver": "Del",
+          "winner_team": "Mercedes",
+          "pole": "Nick",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Del (Mercedes)",
+            "P2: Joshua (Alpine)",
+            "P3: Erick (Ferrari)"
+          ]
+        },
+        "S3 Silverstone": {
+          "season": 3,
+          "race_name": "Silverstone",
+          "is_sprint": false,
+          "winner": "Joshua (Alpine)",
+          "winner_driver": "Joshua",
+          "winner_team": "Alpine",
+          "pole": "Nick",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Joshua (Alpine)",
+            "P2: Nick (McLaren)",
+            "P3: Erick (Ferrari)"
+          ]
+        }
+      }
+    },
+    "Suzuka": {
+      "track": "Suzuka",
+      "seasons_results": {
+        "S1 Suzuka": {
+          "season": 1,
+          "race_name": "Suzuka",
+          "is_sprint": false,
+          "winner": "Nick (McLaren)",
+          "winner_driver": "Nick",
+          "winner_team": "McLaren",
+          "pole": "Nick",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Nick (McLaren)",
+            "P2: Erick (Mercedes)",
+            "P9: David (Aston Martin)"
+          ]
+        },
+        "S2 Suzuka": {
+          "season": 2,
+          "race_name": "Suzuka",
+          "is_sprint": false,
+          "winner": "Nick (McLaren)",
+          "winner_driver": "Nick",
+          "winner_team": "McLaren",
+          "pole": "Del",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Nick (McLaren)",
+            "P2: Joshua (Alpine)",
+            "P3: Del (Mercedes)"
+          ]
+        },
+        "S3 Suzuka": {
+          "season": 3,
+          "race_name": "Suzuka",
+          "is_sprint": false,
+          "winner": "Joshua (Alpine)",
+          "winner_driver": "Joshua",
+          "winner_team": "Alpine",
+          "pole": "Joshua",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Joshua (Alpine)",
+            "P2: Nick (McLaren)",
+            "P3: Del (Aston Martin)"
+          ]
+        }
+      }
+    },
+    "Abu Dhabi": {
+      "track": "Abu Dhabi",
+      "seasons_results": {
+        "S1 Abu Dhabi": {
+          "season": 1,
+          "race_name": "Abu Dhabi",
+          "is_sprint": false,
+          "winner": "Nick (McLaren)",
+          "winner_driver": "Nick",
+          "winner_team": "McLaren",
+          "pole": "Nick",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Nick (McLaren)",
+            "P2: Marcus (Mercedes)",
+            "P3: Erick (Mercedes)"
+          ]
+        },
+        "S2 Abu Dhabi": {
+          "season": 2,
+          "race_name": "Abu Dhabi",
+          "is_sprint": false,
+          "winner": "Nick (McLaren)",
+          "winner_driver": "Nick",
+          "winner_team": "McLaren",
+          "pole": "Joshua",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Nick (McLaren)",
+            "P2: Joshua (Alpine)",
+            "P3: Erick (Ferrari)"
+          ]
+        },
+        "S3 Abu Dhabi": {
+          "season": 3,
+          "race_name": "Abu Dhabi",
+          "is_sprint": false,
+          "winner": "Nick (McLaren)",
+          "winner_driver": "Nick",
+          "winner_team": "McLaren",
+          "pole": "Nick",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Nick (McLaren)",
+            "P2: Joshua (Alpine)",
+            "P3: Brently (VCARB)"
+          ]
+        },
+        "S4 Abu Dhabi": {
+          "season": 4,
+          "race_name": "Abu Dhabi",
+          "is_sprint": false,
+          "winner": "Jairo (Mercedes)",
+          "winner_driver": "Jairo",
+          "winner_team": "Mercedes",
+          "pole": "Jairo",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Jairo (Mercedes)",
+            "P2: Jelly (VCARB)",
+            "P3: Joshua (Alpine)"
+          ]
+        }
+      }
+    },
+    "Bahrain": {
+      "track": "Bahrain",
+      "seasons_results": {
+        "S1 Bahrain": {
+          "season": 1,
+          "race_name": "Bahrain",
+          "is_sprint": false,
+          "winner": "Nick (McLaren)",
+          "winner_driver": "Nick",
+          "winner_team": "McLaren",
+          "pole": "Nick",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Nick (McLaren)",
+            "P4: Zane (Aston Martin)",
+            "P7: Erick (Mercedes)"
+          ]
+        },
+        "S4 Bahrain": {
+          "season": 4,
+          "race_name": "Bahrain",
+          "is_sprint": false,
+          "winner": "Patrick (VCARB)",
+          "winner_driver": "Patrick",
+          "winner_team": "VCARB",
+          "pole": "Jaden",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Patrick (VCARB)",
+            "P2: Joshua (Alpine)",
+            "P3: Nick (McLaren)"
+          ]
+        }
+      }
+    },
+    "COTA": {
+      "track": "COTA",
+      "seasons_results": {
+        "S1 COTA": {
+          "season": 1,
+          "race_name": "COTA",
+          "is_sprint": false,
+          "winner": "Zane (Aston Martin)",
+          "winner_driver": "Zane",
+          "winner_team": "Aston Martin",
+          "pole": "Travis",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Zane (Aston Martin)",
+            "P2: Nick (McLaren)",
+            "P3: Boz (Red Bull)"
+          ]
+        },
+        "S2 COTA": {
+          "season": 2,
+          "race_name": "COTA",
+          "is_sprint": false,
+          "winner": "Erick (Ferrari)",
+          "winner_driver": "Erick",
+          "winner_team": "Ferrari",
+          "pole": "Joshua",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Erick (Ferrari)",
+            "P2: Nick (McLaren)",
+            "P3: Del (Mercedes)"
+          ]
+        },
+        "S3 COTA Sprint": {
+          "season": 3,
+          "race_name": "COTA Sprint",
+          "is_sprint": true,
+          "winner": "Nick (McLaren)",
+          "winner_driver": "Nick",
+          "winner_team": "McLaren",
+          "pole": "Joshua",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Nick (McLaren)",
+            "P2: Joshua (Alpine)",
+            "P3: Eddie (Alpine)"
+          ]
+        },
+        "S3 COTA": {
+          "season": 3,
+          "race_name": "COTA",
+          "is_sprint": false,
+          "winner": "Joshua (Alpine)",
+          "winner_driver": "Joshua",
+          "winner_team": "Alpine",
+          "pole": "Not Recorded",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Joshua (Alpine)",
+            "P2: Erick (Ferrari)",
+            "P3: Del (Ferrari)"
+          ]
+        }
+      }
+    },
+    "Zandvoort": {
+      "track": "Zandvoort",
+      "seasons_results": {
+        "S1 Zandvoort": {
+          "season": 1,
+          "race_name": "Zandvoort",
+          "is_sprint": false,
+          "winner": "Erick (Mercedes)",
+          "winner_driver": "Erick",
+          "winner_team": "Mercedes",
+          "pole": "Zane",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Erick (Mercedes)",
+            "P2: Nick (McLaren)",
+            "P8: Zane (Aston Martin)"
+          ]
+        },
+        "S2 Zandvoort": {
+          "season": 2,
+          "race_name": "Zandvoort",
+          "is_sprint": false,
+          "winner": "Nick (McLaren)",
+          "winner_driver": "Nick",
+          "winner_team": "McLaren",
+          "pole": "Del",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Nick (McLaren)",
+            "P2: Erick (Ferrari)",
+            "P3: Joshua (Alpine)"
+          ]
+        },
+        "S4 Zandvoort": {
+          "season": 4,
+          "race_name": "Zandvoort",
+          "is_sprint": false,
+          "winner": "Joshua (Alpine)",
+          "winner_driver": "Joshua",
+          "winner_team": "Alpine",
+          "pole": "Joshua",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Joshua (Alpine)",
+            "P2: Patrick (VCARB)",
+            "P3: Jaden (Mercedes)"
+          ]
+        }
+      }
+    },
+    "Qatar": {
+      "track": "Qatar",
+      "seasons_results": {
+        "S1 Qatar": {
+          "season": 1,
+          "race_name": "Qatar",
+          "is_sprint": false,
+          "winner": "Nick (McLaren)",
+          "winner_driver": "Nick",
+          "winner_team": "McLaren",
+          "pole": "Zane",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Nick (McLaren)",
+            "P2: Erick (Mercedes)",
+            "P3: Zane (Aston Martin)"
+          ]
+        }
+      }
+    },
+    "Singapore": {
+      "track": "Singapore",
+      "seasons_results": {
+        "S1 Singapore": {
+          "season": 1,
+          "race_name": "Singapore",
+          "is_sprint": false,
+          "winner": "Erick (Mercedes)",
+          "winner_driver": "Erick",
+          "winner_team": "Mercedes",
+          "pole": "Zane",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Erick (Mercedes)",
+            "P8: Nick (McLaren)",
+            "P9: Zane (Aston Martin)"
+          ]
+        }
+      }
+    },
+    "Austria": {
+      "track": "Austria",
+      "seasons_results": {
+        "S1 Austria": {
+          "season": 1,
+          "race_name": "Austria",
+          "is_sprint": false,
+          "winner": "Nick (McLaren)",
+          "winner_driver": "Nick",
+          "winner_team": "McLaren",
+          "pole": "Erick",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Nick (McLaren)",
+            "P2: Zane (Aston Martin)",
+            "P3: Erick (Mercedes)"
+          ]
+        },
+        "S2 Austria": {
+          "season": 2,
+          "race_name": "Austria",
+          "is_sprint": false,
+          "winner": "Del (Mercedes)",
+          "winner_driver": "Del",
+          "winner_team": "Mercedes",
+          "pole": "Nick",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Del (Mercedes)",
+            "P2: Nick (McLaren)",
+            "P3: Joshua (Alpine)"
+          ]
+        },
+        "S3 Austria Sprint": {
+          "season": 3,
+          "race_name": "Austria Sprint",
+          "is_sprint": true,
+          "winner": "Del (Ferrari)",
+          "winner_driver": "Del",
+          "winner_team": "Ferrari",
+          "pole": "Eddie",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Del (Ferrari)",
+            "P2: Nick (McLaren)",
+            "P3: Erick (Ferrari)"
+          ]
+        },
+        "S3 Austria": {
+          "season": 3,
+          "race_name": "Austria",
+          "is_sprint": false,
+          "winner": "Joshua (Alpine)",
+          "winner_driver": "Joshua",
+          "winner_team": "Alpine",
+          "pole": "Not Recorded",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Joshua (Alpine)",
+            "P2: Nick (McLaren)",
+            "P3: Del (Ferrari)"
+          ]
+        },
+        "S4 Austria Reverse": {
+          "season": 4,
+          "race_name": "Austria Reverse",
+          "is_sprint": false,
+          "winner": "Jairo (Mercedes)",
+          "winner_driver": "Jairo",
+          "winner_team": "Mercedes",
+          "pole": "Joshua",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Jairo (Mercedes)",
+            "P2: Joshua (Alpine)",
+            "P3: Patrick (VCARB)"
+          ]
+        },
+        "S4 Austria": {
+          "season": 4,
+          "race_name": "Austria",
+          "is_sprint": false,
+          "winner": "Patrick (VCARB)",
+          "winner_driver": "Patrick",
+          "winner_team": "VCARB",
+          "pole": "Joshua",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Patrick (VCARB)",
+            "P2: Joshua (Alpine)",
+            "P3: Jaden (Mercedes)"
+          ]
+        }
+      }
+    },
+    "Spain": {
+      "track": "Spain",
+      "seasons_results": {
+        "S1 Spain": {
+          "season": 1,
+          "race_name": "Spain",
+          "is_sprint": false,
+          "winner": "Nick (McLaren)",
+          "winner_driver": "Nick",
+          "winner_team": "McLaren",
+          "pole": "Erick",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Nick (McLaren)",
+            "P2: Erick (Mercedes)",
+            "P3: Zane (Aston Martin)"
+          ]
+        },
+        "S3 Spain": {
+          "season": 3,
+          "race_name": "Spain",
+          "is_sprint": false,
+          "winner": "Joshua (Alpine)",
+          "winner_driver": "Joshua",
+          "winner_team": "Alpine",
+          "pole": "Nick",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Joshua (Alpine)",
+            "P2: Nick (McLaren)",
+            "P3: Erick (Ferrari)"
+          ]
+        },
+        "S4 Spain": {
+          "season": 4,
+          "race_name": "Spain",
+          "is_sprint": false,
+          "winner": "Jairo (Mercedes)",
+          "winner_driver": "Jairo",
+          "winner_team": "Mercedes",
+          "pole": "Jairo",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Jairo (Mercedes)",
+            "P2: Joshua (Alpine)",
+            "P3: Patrick (VCARB)"
+          ]
+        }
+      }
+    },
+    "Canada": {
+      "track": "Canada",
+      "seasons_results": {
+        "S1 Canada": {
+          "season": 1,
+          "race_name": "Canada",
+          "is_sprint": false,
+          "winner": "Marcus (Mercedes)",
+          "winner_driver": "Marcus",
+          "winner_team": "Mercedes",
+          "pole": "Erick",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Marcus (Mercedes)",
+            "P8: Erick (Mercedes)",
+            "P10: Nick (McLaren)"
+          ]
+        },
+        "S3 Canada": {
+          "season": 3,
+          "race_name": "Canada",
+          "is_sprint": false,
+          "winner": "Del (Aston Martin)",
+          "winner_driver": "Del",
+          "winner_team": "Aston Martin",
+          "pole": "Joshua",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Del (Aston Martin)",
+            "P2: Nick (McLaren)",
+            "P3: Joshua (Alpine)"
+          ]
+        }
+      }
+    },
+    "Las Vegas": {
+      "track": "Las Vegas",
+      "seasons_results": {
+        "S1 Las Vegas": {
+          "season": 1,
+          "race_name": "Las Vegas",
+          "is_sprint": false,
+          "winner": "Erick (Mercedes)",
+          "winner_driver": "Erick",
+          "winner_team": "Mercedes",
+          "pole": "Nick",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Erick (Mercedes)",
+            "P2: Nick (McLaren)",
+            "P3: Marcus (Mercedes)"
+          ]
+        },
+        "S4 Las Vegas": {
+          "season": 4,
+          "race_name": "Las Vegas",
+          "is_sprint": false,
+          "winner": "Jairo (Mercedes)",
+          "winner_driver": "Jairo",
+          "winner_team": "Mercedes",
+          "pole": "Joshua",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Jairo (Mercedes)",
+            "P2: Patrick (VCARB)",
+            "P3: Nick (McLaren)"
+          ]
+        }
+      }
+    },
+    "Jeddah": {
+      "track": "Jeddah",
+      "seasons_results": {
+        "S1 Jeddah": {
+          "season": 1,
+          "race_name": "Jeddah",
+          "is_sprint": false,
+          "winner": "Nick (McLaren)",
+          "winner_driver": "Nick",
+          "winner_team": "McLaren",
+          "pole": "Nick",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Nick (McLaren)",
+            "P2: Erick (Mercedes)",
+            "P3: Marcus (Mercedes)"
+          ]
+        },
+        "S4 Jeddah": {
+          "season": 4,
+          "race_name": "Jeddah",
+          "is_sprint": false,
+          "winner": "Joshua (Alpine)",
+          "winner_driver": "Joshua",
+          "winner_team": "Alpine",
+          "pole": "Jairo",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Joshua (Alpine)",
+            "P2: Patrick (VCARB)",
+            "P3: Jelly (VCARB)"
+          ]
+        }
+      }
+    },
+    "China": {
+      "track": "China",
+      "seasons_results": {
+        "S2 China": {
+          "season": 2,
+          "race_name": "China",
+          "is_sprint": false,
+          "winner": "Nick (McLaren)",
+          "winner_driver": "Nick",
+          "winner_team": "McLaren",
+          "pole": "Nick",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Nick (McLaren)",
+            "P2: Del (Mercedes)",
+            "P3: Zane (Red Bull)"
+          ]
+        },
+        "S3 China Sprint": {
+          "season": 3,
+          "race_name": "China Sprint",
+          "is_sprint": true,
+          "winner": "Nick (McLaren)",
+          "winner_driver": "Nick",
+          "winner_team": "McLaren",
+          "pole": "Patrick",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Nick (McLaren)",
+            "P2: Erick (Ferrari)",
+            "P3: Brently (VCARB)"
+          ]
+        },
+        "S3 China": {
+          "season": 3,
+          "race_name": "China",
+          "is_sprint": false,
+          "winner": "Patrick (VCARB)",
+          "winner_driver": "Patrick",
+          "winner_team": "VCARB",
+          "pole": "Not Recorded",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Patrick (VCARB)",
+            "P2: Erick (Ferrari)",
+            "P3: Nick (McLaren)"
+          ]
+        }
+      }
+    },
+    "Hungary": {
+      "track": "Hungary",
+      "seasons_results": {}
+    },
+    "Monaco": {
+      "track": "Monaco",
+      "seasons_results": {
+        "S2 Monaco": {
+          "season": 2,
+          "race_name": "Monaco",
+          "is_sprint": false,
+          "winner": "Erick (Ferrari)",
+          "winner_driver": "Erick",
+          "winner_team": "Ferrari",
+          "pole": "Nick",
+          "fastest_lap": "None",
+          "podium": [
+            "P5: Erick (Ferrari)",
+            "P7: Del (Mercedes)",
+            "P9: Zane (Red Bull)"
+          ]
+        }
+      }
+    },
+    "Mexico": {
+      "track": "Mexico",
+      "seasons_results": {
+        "S1 Mexico": {
+          "season": 1,
+          "race_name": "Mexico",
+          "is_sprint": false,
+          "winner": "Zane (Aston Martin)",
+          "winner_driver": "Zane",
+          "winner_team": "Aston Martin",
+          "pole": "Zane",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Zane (Aston Martin)",
+            "P2: Boz (Red Bull)",
+            "P3: Nick (McLaren)"
+          ]
+        },
+        "S4 Mexico": {
+          "season": 4,
+          "race_name": "Mexico",
+          "is_sprint": false,
+          "winner": "Jairo (Mercedes)",
+          "winner_driver": "Jairo",
+          "winner_team": "Mercedes",
+          "pole": "Jairo",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Jairo (Mercedes)",
+            "P2: Jaden (Mercedes)",
+            "P3: Jelly (VCARB)"
+          ]
+        }
+      }
+    }
+  }
+}

@@ -113,7 +113,7 @@ article = {
                     it to survive. Newman and Leo survive all the chaos unscathed. Jaden and Patrick have a bit of a back and forth. Jelly limps \
                         his way around the track licking his wounds. Evelo has some stiff defending from the front. Brently loses most of his car's \
                             car parts. Del... well he excommunicates himself. Eddie just no-shows. Joshua makes it all the way to the podium \
-                                again...seriously did my venmos and zelles not go throguh for the take outs? And Jairo meets the swift justice of \
+                                again...seriously did my venmos and zelles not go through for the take outs? And Jairo meets the swift justice of \
                                     the maFIA.",
 
         rx.grid(

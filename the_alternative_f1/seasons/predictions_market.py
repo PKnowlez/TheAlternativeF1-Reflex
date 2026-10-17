@@ -133,6 +133,42 @@ def _get_supabase():
         return None
 
 
+def _is_transient_socket_error(e: Exception) -> bool:
+    """Detects Windows non-blocking socket errors (WSAEWOULDBLOCK / 10035) and transient OS socket errors."""
+    if e is None:
+        return False
+    if isinstance(e, (BlockingIOError, OSError)):
+        return True
+    msg = str(e).lower()
+    if "10035" in msg or "non-blocking socket" in msg or "temporarily unavailable" in msg or "wsaewouldblock" in msg:
+        return True
+    cause = getattr(e, "__cause__", None)
+    if cause and _is_transient_socket_error(cause):
+        return True
+    ctx = getattr(e, "__context__", None)
+    if ctx and _is_transient_socket_error(ctx):
+        return True
+    return False
+
+
+def _sb_update_prediction(sb, pred_id, update_dict: dict, max_retries: int = 3):
+    """Executes a prediction update with resilient retry for non-blocking socket contention."""
+    if not sb:
+        return None
+    for attempt in range(max_retries):
+        try:
+            return sb.table("predictions").update(update_dict).eq("id", pred_id).execute()
+        except Exception as e:
+            if _is_transient_socket_error(e) and attempt < max_retries - 1:
+                time.sleep(0.2 * (attempt + 1))
+                continue
+            if attempt == max_retries - 1 and not _is_transient_socket_error(e):
+                print(f"Supabase prediction update error (ID {pred_id}): {e}")
+            break
+    return None
+
+
+
 # ── Account Normalization & Aliases (SDDREQ-168) ──────────────────────────────
 ACCOUNT_ALIASES = {
     "matthew newman": "Jatthew Newman",
@@ -355,13 +391,20 @@ def update_user_points(username: str, new_points: int):
         return
     sb = _get_supabase()
     if sb:
-        try:
-            sb.table("user_prediction_points").update({
-                "points": new_points,
-                "all_time_points": new_points,
-            }).eq("username", username).execute()
-        except Exception as e:
-            print(f"Supabase update points error: {e}")
+        for attempt in range(3):
+            try:
+                sb.table("user_prediction_points").update({
+                    "points": new_points,
+                    "all_time_points": new_points,
+                }).eq("username", username).execute()
+                break
+            except Exception as e:
+                if _is_transient_socket_error(e) and attempt < 2:
+                    time.sleep(0.2 * (attempt + 1))
+                    continue
+                if not _is_transient_socket_error(e):
+                    print(f"Supabase update points error: {e}")
+                break
 
     local_data = _load_local_user_points()
     if username in local_data:
@@ -391,11 +434,14 @@ def _run_settle_completed_predictions(season_num: int = 5):
             try:
                 res = sb.table("predictions").select("*").eq("season", season_num).eq("status", "open").execute()
                 break
-            except (BlockingIOError, OSError) as se:
-                if attempt < 2:
-                    time.sleep(0.4)
+            except Exception as se:
+                if _is_transient_socket_error(se) and attempt < 2:
+                    time.sleep(0.3 * (attempt + 1))
                     continue
-                print(f"Prediction settlement socket warning: {se}")
+                if not _is_transient_socket_error(se):
+                    print(f"Prediction settlement query error (Season {season_num}): {se}")
+                else:
+                    print(f"Prediction settlement socket warning: {se}")
                 return
 
         open_preds = res.data if res and res.data else []
@@ -533,20 +579,20 @@ def _run_settle_completed_predictions(season_num: int = 5):
                     opposing_split = int(round(losing_pool * (wager / float(total_win_wagers)))) if total_win_wagers > 0 else 0
                     total_payout = base_payout + opposing_split
 
-                    sb.table("predictions").update({
+                    _sb_update_prediction(sb, p["id"], {
                         "status": "correct",
                         "payout": total_payout,
-                    }).eq("id", p["id"]).execute()
+                    })
 
                     u = p["username"]
                     curr_pts = get_user_total_points(u)
                     update_user_points(u, curr_pts + total_payout)
 
                 for p in losers:
-                    sb.table("predictions").update({
+                    _sb_update_prediction(sb, p["id"], {
                         "status": "incorrect",
                         "payout": 0,
-                    }).eq("id", p["id"]).execute()
+                    })
 
             # 2. Settle Parlay Predictions (TAF1APP-SDDREQ-170: All hit -> Wager + (Wager * (0.15 + (legs * 0.1))))
             for p in parlay_preds:
@@ -601,19 +647,19 @@ def _run_settle_completed_predictions(season_num: int = 5):
                     multiplier = 0.15 + (num_legs * 0.1)
                     total_payout = wager + int(round(wager * multiplier))
 
-                    sb.table("predictions").update({
+                    _sb_update_prediction(sb, p["id"], {
                         "status": "correct",
                         "payout": total_payout,
-                    }).eq("id", p["id"]).execute()
+                    })
 
                     u = p["username"]
                     curr_pts = get_user_total_points(u)
                     update_user_points(u, curr_pts + total_payout)
                 else:
-                    sb.table("predictions").update({
+                    _sb_update_prediction(sb, p["id"], {
                         "status": "incorrect",
                         "payout": 0,
-                    }).eq("id", p["id"]).execute()
+                    })
 
         # 3. Settle Full Season Predictions if season has concluded (0 remaining feature races)
         rem_feature_races = get_remaining_feature_races(season_num)
@@ -706,12 +752,12 @@ def _run_settle_completed_predictions(season_num: int = 5):
                         num_legs = len(legs)
                         mult = 0.15 + (num_legs * 0.1) + (races_rem * 0.1)
                         total_payout = wager + int(round(wager * mult))
-                        sb.table("predictions").update({"status": "correct", "payout": total_payout}).eq("id", p["id"]).execute()
+                        _sb_update_prediction(sb, p["id"], {"status": "correct", "payout": total_payout})
                         u = p["username"]
                         curr_pts = get_user_total_points(u)
                         update_user_points(u, curr_pts + total_payout)
                     else:
-                        sb.table("predictions").update({"status": "incorrect", "payout": 0}).eq("id", p["id"]).execute()
+                        _sb_update_prediction(sb, p["id"], {"status": "incorrect", "payout": 0})
                 else:
                     cat_clean = str(p.get("category", "")).replace("[Full Season]", "").strip()
                     target = str(p.get("target", "")).strip()
@@ -736,16 +782,17 @@ def _run_settle_completed_predictions(season_num: int = 5):
                     if is_correct:
                         mult = 0.15 + (races_rem * 0.1)
                         total_payout = wager + int(round(wager * mult))
-                        sb.table("predictions").update({"status": "correct", "payout": total_payout}).eq("id", p["id"]).execute()
+                        _sb_update_prediction(sb, p["id"], {"status": "correct", "payout": total_payout})
                         u = p["username"]
                         curr_pts = get_user_total_points(u)
                         update_user_points(u, curr_pts + total_payout)
                     else:
-                        sb.table("predictions").update({"status": "incorrect", "payout": 0}).eq("id", p["id"]).execute()
-    except (BlockingIOError, OSError) as e:
-        print(f"Prediction settlement socket warning (Season {season_num}): {e}")
+                        _sb_update_prediction(sb, p["id"], {"status": "incorrect", "payout": 0})
     except Exception as e:
-        print(f"Prediction settlement error: {e}")
+        if _is_transient_socket_error(e):
+            print(f"Prediction settlement socket warning (Season {season_num}): {e}")
+        else:
+            print(f"Prediction settlement error: {e}")
 
 
 def settle_completed_predictions(season_num: int = 5, async_run: bool = False):
@@ -775,7 +822,7 @@ def get_all_predictions(season_num: int = 5, force_fetch: bool = False) -> list[
 
     sb = _get_supabase()
     if sb and force_fetch:
-        for attempt in range(2):
+        for attempt in range(3):
             try:
                 res = sb.table("predictions").select("*").eq("season", season_num).order("created_at", desc=True).execute()
                 if res.data is not None:
@@ -791,10 +838,12 @@ def get_all_predictions(season_num: int = 5, force_fetch: bool = False) -> list[
                     _save_local_predictions(combined)
                     return combined
                 break
-            except (BlockingIOError, OSError):
-                time.sleep(0.3)
             except Exception as e:
-                print(f"Supabase get_all_predictions error: {e}")
+                if _is_transient_socket_error(e) and attempt < 2:
+                    time.sleep(0.3 * (attempt + 1))
+                    continue
+                if not _is_transient_socket_error(e):
+                    print(f"Supabase get_all_predictions error: {e}")
                 break
 
     local_preds = _load_local_predictions()
@@ -813,7 +862,7 @@ def precompute_all_predictions(force: bool = False):
     # 1. Sync User Points from Supabase if available
     sb = _get_supabase()
     if sb:
-        for attempt in range(2):
+        for attempt in range(3):
             try:
                 res_pts = sb.table("user_prediction_points").select("*").execute()
                 if res_pts.data:
@@ -829,10 +878,12 @@ def precompute_all_predictions(force: bool = False):
                             }
                     _save_local_user_points(local_data)
                 break
-            except (BlockingIOError, OSError):
-                time.sleep(0.3)
             except Exception as e:
-                print(f"Supabase sync points error: {e}")
+                if _is_transient_socket_error(e) and attempt < 2:
+                    time.sleep(0.3 * (attempt + 1))
+                    continue
+                if not _is_transient_socket_error(e):
+                    print(f"Supabase sync points error: {e}")
                 break
 
     # 2. Settle and cache all predictions
@@ -845,10 +896,11 @@ def precompute_all_predictions(force: bool = False):
                 settle_completed_predictions(s_num, async_run=True)
             except Exception:
                 pass
+            time.sleep(0.05)
 
         season_preds = []
         if sb:
-            for attempt in range(2):
+            for attempt in range(3):
                 try:
                     res = sb.table("predictions").select("*").eq("season", s_num).order("created_at", desc=True).execute()
                     if res.data is not None:
@@ -857,10 +909,12 @@ def precompute_all_predictions(force: bool = False):
                             p["username"] = normalize_username(p.get("username", ""))
                         season_preds = preds
                         break
-                except (BlockingIOError, OSError):
-                    time.sleep(0.3)
                 except Exception as e:
-                    print(f"Supabase get predictions error: {e}")
+                    if _is_transient_socket_error(e) and attempt < 2:
+                        time.sleep(0.3 * (attempt + 1))
+                        continue
+                    if not _is_transient_socket_error(e):
+                        print(f"Supabase get predictions error: {e}")
                     break
 
         local_s_preds = [p for p in _load_local_predictions() if int(p.get("season", 5)) == s_num]

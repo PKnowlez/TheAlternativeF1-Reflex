@@ -699,18 +699,20 @@ class DetailedStatsState(rx.State):
             df_s_copy["Team"] = df_s_copy["Team"].astype(str).str.strip()
             col_k = "Driver" if entity_type == "Driver" else "Team"
             e_rows = df_s_copy[df_s_copy[col_k] == active_name]
-            if e_rows.empty:
-                continue
 
             for r_name in sched_s["Race"]:
                 r_s = str(r_name).strip()
-                if r_s.startswith(("Pre", "Post")) or "Sprint" in r_s:
+                if r_s.lower().startswith(("pre", "post")) or "sprint" in r_s.lower():
                     continue
                 p_col = r_s + "Place"
                 pts_col = r_s + "Points"
                 v_pts = pd.to_numeric(df_s_copy[pts_col], errors='coerce').fillna(0) if pts_col in df_s_copy.columns else pd.Series()
                 v_plc = pd.to_numeric(df_s_copy[p_col], errors='coerce').fillna(0) if p_col in df_s_copy.columns else pd.Series()
                 if not ((not v_pts.empty and (v_pts > 0).any()) or (not v_plc.empty and (v_plc > 0).any())):
+                    continue
+
+                if e_rows.empty:
+                    curr_podium_streak = 0
                     continue
 
                 if entity_type == "Driver":
