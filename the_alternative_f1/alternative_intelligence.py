@@ -18,6 +18,7 @@ from typing import AsyncGenerator
 from pydantic import BaseModel
 import reflex as rx
 import pandas as pd
+from collections import defaultdict
 from the_alternative_f1.constructor_colors import get_constructor_color
 from the_alternative_f1.seasons.grounded_context_builder import load_grounded_deep_stats, sync_grounded_deep_stats
 
@@ -1427,6 +1428,102 @@ def search_league_deep_stats(query: str, skill_name: str = "") -> str:
             "- Historical Penalty Record: Joshua, Eddie, Nick, Patrick, Brently, Erick, Zane, Del, Yeti, Boz, Gary, Jairo, Jaden, Jelly, Matthew, Leo have maintained clean records with zero active race bans under current season regulations."
         )
 
+    # 10. Dynamic Season Rosters & Constructor Lineups Intent
+    roster_keywords = [
+        "who races for", "who drives for", "constructors competing", "teams competing",
+        "driver lineup", "team lineup", "driver roster", "team roster", "rosters",
+        "drivers on each team", "list the constructors", "drivers for each team", "what team", "driver's team"
+    ]
+    if any(k in norm_text for k in roster_keywords):
+        all_rosters = deep_data.get("season_rosters", {})
+        # Detect requested season number (default to latest season, 5)
+        s_matches = [int(m) for m in re.findall(r"(?:season\s*|s)(\d+)", norm_text) if int(m) in (1, 2, 3, 4, 5)]
+        target_s = str(s_matches[0]) if s_matches else str(deep_data.get("metadata", {}).get("latest_season", 5))
+        s_roster = all_rosters.get(target_s, {})
+        if s_roster:
+            active_c = s_roster.get("active_constructors", {})
+            inactive_c = s_roster.get("inactive_constructors", [])
+            r_lines = [
+                f"### OFFICIAL GROUNDED CONSTRUCTOR LINEUPS & DRIVER ROSTERS FOR SEASON {target_s}:",
+                f"- **Active Constructors & Drivers Competing in Season {target_s}**:",
+            ]
+            for tm, drvs in sorted(active_c.items()):
+                r_lines.append(f"  * **{tm}**: {', '.join(drvs)}")
+            if inactive_c:
+                r_lines.append(f"- **Inactive Constructors in Season {target_s} (Did NOT compete in Season {target_s})**: {', '.join(inactive_c)}.")
+            r_lines.append(
+                f"CRITICAL DIRECTIVE: You MUST use these exact constructor-driver pairings for Season {target_s}. "
+                "Never hallucinate inactive constructors or swap driver teams."
+            )
+            matched_blocks.append("\n".join(r_lines))
+
+    # 11. Dynamic Season Calendar & Sequential Schedules Intent
+    sched_keywords = [
+        "schedule", "calendar", "schedule order", "order of races", "what round",
+        "upcoming races", "remaining races", "calendar order", "races in order"
+    ]
+    if any(k in norm_text for k in sched_keywords):
+        all_schedules = deep_data.get("season_schedules", {})
+        s_matches = [int(m) for m in re.findall(r"(?:season\s*|s)(\d+)", norm_text) if int(m) in (1, 2, 3, 4, 5)]
+        target_s = str(s_matches[0]) if s_matches else str(deep_data.get("metadata", {}).get("latest_season", 5))
+        s_sched = all_schedules.get(target_s, [])
+        if s_sched:
+            sch_lines = [f"### OFFICIAL CHRONOLOGICAL CALENDAR SCHEDULE FOR SEASON {target_s}:"]
+            for rnd in s_sched:
+                sch_lines.append(
+                    f"- Round {rnd.get('round_number')}: {rnd.get('race_name')} ({rnd.get('track')}) [{rnd.get('round_type')}] - Date: {rnd.get('date')} [{rnd.get('status')}]"
+                )
+            sch_lines.append(
+                f"CRITICAL DIRECTIVE: Season {target_s} rounds MUST be listed in this exact sequential schedule order (Round 1 to {len(s_sched)}). Sprints are max 8 pts, Grand Prix feature races are max 25 pts."
+            )
+            matched_blocks.append("\n".join(sch_lines))
+
+    # 12. Dynamic Factual Track Ratings Intent
+    rating_keywords = ["track rating", "track ratings", "ratings for", "rating at", "rating leaderboard", "who is good at"]
+    if any(k in norm_text for k in rating_keywords):
+        season_ratings_all = deep_data.get("season_track_ratings", {})
+        default_ratings_mat = deep_data.get("track_ratings_matrix", {})
+        matched_trks = [trk for trk in ALL_KNOWN_TRACKS if re.search(r"\b" + re.escape(trk) + r"\b", combined_text, re.IGNORECASE)]
+        if matched_trks:
+            is_constructor_q = any(k in norm_text for k in ["constructor", "constructors", "team", "teams"])
+            s_matches = [int(m) for m in re.findall(r"(?:season\s*|s)(\d+)", norm_text) if int(m) in (1, 2, 3, 4, 5)]
+            target_s = str(s_matches[0]) if s_matches else str(deep_data.get("metadata", {}).get("latest_season", 5))
+
+            # Retrieve ratings for the target season if available, else fallback to latest/default
+            ratings_mat = season_ratings_all.get(target_s, default_ratings_mat)
+
+            for trk in matched_trks[:2]:
+                trk_data = ratings_mat.get(trk, {})
+                if isinstance(trk_data, dict):
+                    c_list = trk_data.get("constructor_ratings", [])
+                    d_list = trk_data.get("driver_ratings", [])
+                else:
+                    c_list = []
+                    d_list = trk_data if isinstance(trk_data, list) else []
+
+                # If query specifically asks for constructors/teams, prioritize and output the constructor leaderboard for that season
+                if is_constructor_q and c_list:
+                    tr_lines = [
+                        f"### OFFICIAL GROUNDED CONSTRUCTOR TRACK RATINGS FOR {trk.upper()} (SEASON {target_s} COMPOSITE):",
+                        f"CRITICAL DIRECTIVE: The user asked for CONSTRUCTOR track ratings for Season {target_s}. Citing driver ratings or another season's teams is an error. Use the exact constructor numbers below:",
+                    ]
+                    for c_item in c_list:
+                        drv_str = ", ".join(f"{d}: {sc}" for d, sc in c_item.get("drivers", {}).items())
+                        tr_lines.append(f"  * P{c_item.get('rank', '-')}. **{c_item.get('constructor')}**: Track Rating **{c_item.get('rating')}** ({drv_str})")
+                    matched_blocks.append("\n".join(tr_lines))
+                elif d_list:
+                    tr_lines = [
+                        f"### OFFICIAL GROUNDED TRACK RATINGS FOR {trk.upper()} (SEASON {target_s} - Requirement 76 Ground Truth):",
+                        "Formula Scale: Realistically 0.0 to ~60.0. NO DRIVER HAS A RATING IN THE 80s OR 90s.",
+                    ]
+                    for r_item in d_list[:10]:
+                        tr_lines.append(f"  * P{r_item.get('rank', '-')}. **{r_item.get('driver')}** ({r_item.get('team')}): Track Rating **{r_item.get('rating')}**")
+                    if c_list:
+                        tr_lines.append(f"\nConstructor Composite Ratings for {trk.upper()} in Season {target_s}:")
+                        for c_item in c_list:
+                            tr_lines.append(f"  * P{c_item.get('rank')}. {c_item.get('constructor')}: {c_item.get('rating')}")
+                    matched_blocks.append("\n".join(tr_lines))
+
     if not matched_blocks:
         return ""
 
@@ -2781,10 +2878,24 @@ def build_grounded_league_context(force: bool = False) -> str:
                 if s_num == LATEST_SEASON:
                     lines.append(f"## ACTIVE SEASON: SEASON {s_num} (CURRENT OFFICIAL STANDINGS & STATS)")
 
+                    # Dynamic Constructor Lineups & Driver Rosters (100% data-driven)
+                    team_roster_s5 = defaultdict(list)
+                    if raw_df is not None and not raw_df.empty:
+                        for _, r in raw_df.iterrows():
+                            d_val = str(r.get("Driver", "")).strip()
+                            t_val = str(r.get("Team", "")).strip()
+                            if d_val and t_val and d_val not in team_roster_s5[t_val]:
+                                team_roster_s5[t_val].append(d_val)
+
+                    lines.append(f"### Season {s_num} Official Constructor Lineups & Driver Rosters:")
+                    for tm, drvs in sorted(team_roster_s5.items()):
+                        lines.append(f"- **{tm}**: {', '.join(drvs)}")
+                    lines.append("")
+
                     # Driver Standings
                     if driver_totals is not None and not driver_totals.empty:
                         active_drivers = [str(d).strip() for d in driver_totals["Driver"]]
-                        lines.append("### Season 5 Official Driver Championship Standings:")
+                        lines.append(f"### Season {s_num} Official Driver Championship Standings:")
                         for rank, (_, row) in enumerate(driver_totals.iterrows(), start=1):
                             d = str(row.get("Driver", "")).strip()
                             pts = row.get("Points", 0)
@@ -2796,7 +2907,7 @@ def build_grounded_league_context(force: bool = False) -> str:
                     # Constructor Standings
                     if constructor_totals is not None and not constructor_totals.empty:
                         active_teams = [str(t).strip() for t in constructor_totals["Team"]]
-                        lines.append("### Season 5 Official Constructor Championship Standings:")
+                        lines.append(f"### Season {s_num} Official Constructor Championship Standings:")
                         for rank, (_, row) in enumerate(constructor_totals.iterrows(), start=1):
                             team = str(row.get("Team", "")).strip()
                             pts = row.get("Points", 0)
@@ -2806,7 +2917,7 @@ def build_grounded_league_context(force: bool = False) -> str:
 
                     # Completed Race Results & Winners
                     if completed_races and raw_df is not None and not raw_df.empty:
-                        lines.append("### Season 5 Completed Races & Winners:")
+                        lines.append(f"### Season {s_num} Completed Races & Winners:")
                         for race_name in completed_races:
                             c_pre = race_name.replace(" Sprint", "Sprint")
                             place_col = next((c for c in [f"{race_name}Place", f"{c_pre}Place", f"{race_name} Place"] if c in raw_df.columns), None)
@@ -2837,7 +2948,7 @@ def build_grounded_league_context(force: bool = False) -> str:
                     lines.extend(_format_season_round_by_round_results(s_num, raw_df, races, completed_only=True, done_races=completed_races))
                     lines.extend(_format_season_constructor_round_by_round_results(s_num, raw_df, races, completed_only=True, done_races=completed_races))
 
-                    # Calendar & Schedule
+                    # Calendar & Schedule in strict chronological order
                     if schedule_df is not None and not schedule_df.empty:
                         gp_races = [r for r in races if "sprint" not in r.lower()]
                         sprint_races = [r for r in races if "sprint" in r.lower()]
@@ -2846,12 +2957,12 @@ def build_grounded_league_context(force: bool = False) -> str:
                         rem_gp = len(gp_races) - len(done_gp)
                         rem_sprint = len(sprint_races) - len(done_sprint)
 
-                        lines.append("### Season 5 Calendar & Schedule (Qualifying & Races held on Wednesdays; Qualifying immediately precedes Race):")
-                        lines.append(f"Official Season 5 Round Structure: {len(races)} Total Scheduled Rounds ({len(gp_races)} Grand Prix Feature Races + {len(sprint_races)} Sprint Races).")
+                        lines.append(f"### Season {s_num} Calendar & Schedule (Chronological Schedule Order; Races held on Wednesdays):")
+                        lines.append(f"Official Season {s_num} Round Structure: {len(races)} Total Scheduled Rounds ({len(gp_races)} Grand Prix Feature Races + {len(sprint_races)} Sprint Races).")
                         lines.append(f"- Completed to Date: {len(completed_races)} Rounds ({len(done_gp)} Grand Prix Feature Races + {len(done_sprint)} Sprint Races).")
                         lines.append(f"- Remaining on Calendar: {len(races) - len(completed_races)} Rounds ({rem_gp} Grand Prix Feature Races + {rem_sprint} Sprint Races).")
                         lines.append("CRITICAL: Sprints are NOT full races! Sprints award at most 8 points for P1 (Sprint Scoring: 8-7-6-5-4-3-2-1-0.5), while Grand Prix feature races award 25 points for P1 (plus up to 4 accolade points).")
-                        for _, row in schedule_df.iterrows():
+                        for round_idx, (_, row) in enumerate(schedule_df.iterrows(), start=1):
                             r_name = str(row.get("Race", "")).strip()
                             r_track = str(row.get("Track", "")).strip()
                             status = str(row.get("Status", "")).strip()
@@ -2860,7 +2971,7 @@ def build_grounded_league_context(force: bool = False) -> str:
                             status_str = f" [{status}]" if status and status.lower() != "nan" else ""
                             round_type = "[Sprint Race - Max 8 pts]" if "sprint" in r_name.lower() else "[Grand Prix Feature Race - Max 25 pts]"
                             track_desc = f" at {r_track}" if r_track and r_track.lower() != "nan" else ""
-                            lines.append(f"- {r_name}{track_desc} {round_type}{date_str}{status_str}")
+                            lines.append(f"- Round {round_idx}: {r_name}{track_desc} {round_type}{date_str}{status_str}")
                         lines.append("")
 
                     # Rookies
@@ -2881,6 +2992,21 @@ def build_grounded_league_context(force: bool = False) -> str:
                         lines.append("Official Calendar Note: Season 1 and Season 2 occurred in 2023. Races were held on Wednesdays.")
                     elif s_num == 3:
                         lines.append("Official Calendar Note: Season 3 occurred in 2024. Races were held on Wednesdays.")
+
+                    # Dynamic Season Rosters
+                    team_roster_hist = defaultdict(list)
+                    if raw_df is not None and not raw_df.empty:
+                        for _, r in raw_df.iterrows():
+                            d_val = str(r.get("Driver", "")).strip()
+                            t_val = str(r.get("Team", "")).strip()
+                            if d_val and t_val and d_val not in team_roster_hist[t_val]:
+                                team_roster_hist[t_val].append(d_val)
+
+                    lines.append(f"### Season {s_num} Official Constructor Lineups & Driver Rosters:")
+                    for tm, drvs in sorted(team_roster_hist.items()):
+                        lines.append(f"- **{tm}**: {', '.join(drvs)}")
+                    lines.append("")
+
                     if driver_totals is not None and not driver_totals.empty:
                         champ = driver_totals.iloc[0]
                         lines.append(f"- Season {s_num} Champion Driver: {champ.get('Driver')} ({champ.get('Points')} pts)")
@@ -2921,14 +3047,14 @@ def build_grounded_league_context(force: bool = False) -> str:
                     lines.extend(_format_season_round_by_round_results(s_num, raw_df, races))
                     lines.extend(_format_season_constructor_round_by_round_results(s_num, raw_df, races))
 
-                    # Historical Calendar & Schedule
+                    # Historical Calendar & Schedule in strict chronological order
                     if schedule_df is not None and not schedule_df.empty:
                         gp_races_h = [r for r in races if "sprint" not in r.lower()]
                         sprint_races_h = [r for r in races if "sprint" in r.lower()]
                         sprint_info = f" ({len(gp_races_h)} Grand Prix Feature Races + {len(sprint_races_h)} Sprint Races)" if sprint_races_h else f" ({len(gp_races_h)} Grand Prix Feature Races)"
-                        lines.append(f"### Season {s_num} Calendar & Schedule (Qualifying & Races held on Wednesdays; Qualifying immediately precedes Race):")
+                        lines.append(f"### Season {s_num} Calendar & Schedule (Chronological Schedule Order; Races held on Wednesdays):")
                         lines.append(f"Official Season {s_num} Structure: {len(races)} Total Rounds{sprint_info}.")
-                        for _, row in schedule_df.iterrows():
+                        for round_idx, (_, row) in enumerate(schedule_df.iterrows(), start=1):
                             r_name = str(row.get("Race", "")).strip()
                             r_track = str(row.get("Track", "")).strip()
                             status = str(row.get("Status", "")).strip()
@@ -2937,7 +3063,7 @@ def build_grounded_league_context(force: bool = False) -> str:
                             status_str = f" [{status}]" if status and status.lower() != "nan" else ""
                             round_type = "[Sprint Race - Max 8 pts]" if "sprint" in r_name.lower() else "[Grand Prix Feature Race - Max 25 pts]"
                             track_desc = f" at {r_track}" if r_track and r_track.lower() != "nan" else ""
-                            lines.append(f"- {r_name}{track_desc} {round_type}{date_str}{status_str}")
+                            lines.append(f"- Round {round_idx}: {r_name}{track_desc} {round_type}{date_str}{status_str}")
                         lines.append("")
                     lines.append("")
 
@@ -3004,13 +3130,34 @@ def build_grounded_league_context(force: bool = False) -> str:
     lines.append("| Williams | Season 5 | S5 Australia | Season 5 | Season 1, Season 2, Season 3, Season 4 | 0 |")
     lines.append("")
 
-    lines.append("## OFFICIAL SEASON-BY-SEASON ROSTER & ROOKIE CATEGORIZATION")
-    lines.append("- Season 1 (2023, 19 rounds): Inaugural Class (Nick, Travis, Zane, David, Erick, Marcus, Josh L, Boz, Gary). Constructors: McLaren, Mercedes, Red Bull, Ferrari, Aston Martin.")
-    lines.append("- Season 2 (2023, 10 rounds): Rookie Class (Del, Joshua, Eddie, Yeti). Returning: Nick, Gary, Boz, Erick, David, Zane, Marcus, Josh L, Travis. Constructors: McLaren, Mercedes, Ferrari, Alpine, Red Bull, Alfa Romeo, AlphaTauri.")
-    lines.append("- Season 3 (2024, 12 rounds; 3 rounds feature a Sprint: China, Austria, COTA): Rookie Class (Patrick, Brently). Returning: Nick, Travis, Joshua, Eddie, Erick, Zane, Del, Gary, Yeti, Boz. Constructors: McLaren, Alpine, Ferrari, VCARB, Aston Martin, Red Bull.")
-    lines.append("- Season 4 (2025, 14 rounds; 3 rounds feature a Sprint: Miami, Spa, Brazil): Rookie Class (Jelly, Matthew, Leo, Jaden, Jairo). Returning: Joshua, Eddie, Nick, Travis, Patrick, Brently, Erick, Del, Boz. Constructors: Alpine, McLaren, VCARB, Mercedes, Red Bull, Ferrari, Aston Martin.")
-    lines.append("- Season 5 (2026, 14 rounds scheduled; 6 rounds feature a Sprint: Miami, Spa, Silverstone, Bahrain, Zandvoort, Singapore): Rookie Class (Grayson, Josh C., Randy, Evelo). Returning: Joshua, Eddie, Nick, Del, Patrick, Jelly, Matthew, Brently, Boz, Jaden, Leo, Jairo. Constructors: Ferrari, McLaren, Red Bull, Mercedes, Haas, Audi, Cadillac, Williams.")
-    lines.append("")
+    lines.append("## DYNAMIC SEASON-BY-SEASON CONSTRUCTOR ROSTERS & DRIVER PAIRINGS (MANDATORY GROUND TRUTH)")
+    lines.append(
+        "CRITICAL RETRIEVAL INSTRUCTION: Always match drivers strictly to their official constructor for the requested season. "
+        "Drivers frequently switch teams between seasons. For the active season (Season 5), only active constructors compete; "
+        "any other team is INACTIVE."
+    )
+    all_teams_history = set()
+    for s_item in seasons:
+        s_item_num = s_item.get("season_number", 1)
+        s_calc = all_season_calcs.get(s_item_num)
+        if s_calc:
+            s_df = s_calc.get("df")
+            s_teams = defaultdict(list)
+            if s_df is not None:
+                for _, r_item in s_df.iterrows():
+                    d_i = str(r_item.get("Driver", "")).strip()
+                    t_i = str(r_item.get("Team", "")).strip()
+                    if d_i and t_i and d_i not in s_teams[t_i]:
+                        s_teams[t_i].append(d_i)
+            curr_teams = set(s_teams.keys())
+            all_teams_history.update(curr_teams)
+            inact = sorted(list(all_teams_history - curr_teams))
+            lines.append(f"### Season {s_item_num} Constructor Rosters (Official Ground Truth):")
+            for t_k, d_list in sorted(s_teams.items()):
+                lines.append(f"- **{t_k}**: {', '.join(d_list)}")
+            if inact:
+                lines.append(f"- Inactive Constructors (Competed in earlier seasons, but NOT in Season {s_item_num}): {', '.join(inact)}")
+            lines.append("")
 
     lines.append("## OFFICIAL LEAGUE CALENDAR STRUCTURE (SPRINTS ARE PART OF THE FEATURE RACE ROUND)")
     lines.append("- Sprints are part of the feature race round and do NOT count as separate rounds in any season.")
@@ -3037,7 +3184,7 @@ def build_grounded_league_context(force: bool = False) -> str:
         lines.append("## OFFICIAL PER-TRACK DRIVER STATISTICAL RATINGS (SCALE 0 - 100)")
         lines.append(
             "Formula (SDDREQ-76): (((average points scored / 30) * 0.6) + ((0.99 / qualifying position) * 0.2) + ((positions gained/lost / 22) * 0.2)) * 100\n"
-            "This metric measures each driver's historical statistical efficiency and performance specifically for each circuit.\n"
+            "CRITICAL SCALE & GROUNDING RULE: Based on this formula, official ratings in The Alternative F1 realistically range from 0.0 to ~60.0. NO DRIVER HAS A RATING IN THE 80s OR 90s. When citing or displaying track ratings, you must use the exact decimal values below and never invent high numbers.\n"
         )
         tracks_to_compute = [
             "Spa", "Monza", "Australia", "Imola", "Miami", "Brazil",
@@ -3054,9 +3201,49 @@ def build_grounded_league_context(force: bool = False) -> str:
                 score = _get_driver_track_rating(d, track_name)
                 ratings.append((d, score))
             ratings.sort(key=lambda x: x[1], reverse=True)
-            formatted_ratings = [f"{d}: {s:.1f}" for d, s in ratings]
+            formatted_ratings = [f"{d} ({driver_team_map.get(d, 'Independent')}): {s:.1f}" for d, s in ratings]
             lines.append(f"### Track: {track_name}")
             lines.append(f"- Driver Track Ratings (Best to Worst): {', '.join(formatted_ratings)}")
+        lines.append("")
+
+        # 2B. Per-Track Constructor Statistical Ratings (Composite of Active Season 5 Lineup)
+        lines.append("## OFFICIAL PER-TRACK CONSTRUCTOR STATISTICAL RATINGS (SCALE 0 - 100)")
+        lines.append(
+            "Formula & Ground Truth: For active constructors in Season 5, the official constructor track rating is the composite mean of its active Season 5 driver lineup at that circuit.\n"
+            "CRITICAL RETRIEVAL INSTRUCTION: When asked for Constructor Track Ratings or Team Track Ratings for any circuit (e.g. Brazil), use this table (Composite Lineup Rating). Do NOT return individual driver ratings.\n"
+        )
+        try:
+            deep_stats_for_c = load_grounded_deep_stats()
+            t_mat = deep_stats_for_c.get("track_ratings_matrix", {})
+        except Exception:
+            t_mat = {}
+
+        for track_name in tracks_to_compute:
+            trk_obj = t_mat.get(track_name, {})
+            c_ratings_list = trk_obj.get("constructor_ratings", []) if isinstance(trk_obj, dict) else []
+            if c_ratings_list:
+                formatted_c = [
+                    f"{c_item.get('constructor')}: {c_item.get('rating')} ({', '.join(f'{d}: {sc}' for d, sc in c_item.get('drivers', {}).items())})"
+                    for c_item in c_ratings_list
+                ]
+                lines.append(f"### Track: {track_name} - Active Constructor Track Ratings (Highest to Lowest):")
+                for rk_i, c_str in enumerate(formatted_c, start=1):
+                    lines.append(f"  {rk_i}. {c_str}")
+            else:
+                # Fallback calculation if cache not populated yet
+                c_calc_ratings = []
+                c_teams_set = set(driver_team_map.values())
+                for c_t in sorted(c_teams_set):
+                    if c_t in ("Independent", "None", ""): continue
+                    t_drvs = [d for d, tm in driver_team_map.items() if tm == c_t]
+                    if t_drvs:
+                        scs = [_get_driver_track_rating(d, track_name) for d in t_drvs]
+                        c_calc_ratings.append((c_t, float(np.mean(scs)), {d: round(_get_driver_track_rating(d, track_name), 1) for d in t_drvs}))
+                c_calc_ratings.sort(key=lambda x: x[1], reverse=True)
+                lines.append(f"### Track: {track_name} - Active Constructor Track Ratings (Highest to Lowest):")
+                for rk_i, (c_t, sc, drv_dict) in enumerate(c_calc_ratings, start=1):
+                    d_breakdown = ", ".join(f"{d}: {s}" for d, s in drv_dict.items())
+                    lines.append(f"  {rk_i}. {c_t}: {sc:.1f} ({d_breakdown})")
         lines.append("")
     except Exception as e:
         lines.append(f"Note: Error generating track ratings: {str(e)}")
@@ -3362,6 +3549,28 @@ SYSTEM_PROMPT = """You are "Alternative Intelligence", the official analytical A
 
 STRICT GROUNDING & CONTEXT RULES:
 1. You must answer strictly and exclusively based on the provided League Grounded Context below.
+   - ALGORITHMIC RETRIEVAL PROTOCOL FOR CONSTRUCTOR ROSTERS & DRIVER LINEUPS:
+     * When asked who races for each constructor, team lineups, or rosters for any season (e.g. "Who races for each team in Season 5?", "Please list the constructors competing in Season 5 and their drivers"):
+       1. Locate "Official Constructor Lineups & Driver Rosters" for that target season (default to Season 5 if not specified).
+       2. Read the exact constructor-to-driver mappings listed there.
+       3. Note active vs. inactive constructors: In Season 5 (Current Season), only the active constructors compete. Past constructors (such as Alpine, Aston Martin, VCARB, Alfa Romeo, AlphaTauri) are INACTIVE in Season 5.
+       4. Never use a driver's historical team when answering questions about the active season (drivers frequently switch teams across seasons!).
+   - ALGORITHMIC RETRIEVAL PROTOCOL FOR TRACK RATINGS:
+     * When asked for DRIVER track ratings, driver circuit performance, or generating an Upcoming Race Infographic:
+       1. Locate "## OFFICIAL PER-TRACK DRIVER STATISTICAL RATINGS" for the requested circuit.
+       2. Read the exact numerical decimal rating (calculated via Requirement 76: (((avg_pts / 30) * 0.6) + ((0.99 / qual) * 0.2) + ((pos_change / 22) * 0.2)) * 100).
+       3. Scale Ground Truth: In The Alternative F1, this formula produces ratings that realistically range between 0.0 and ~60.0. NO DRIVER HAS A RATING IN THE 80s OR 90s.
+       4. Never invent or hallucinate high ratings (e.g., 90.0, 91.5, 93.0, 94.5). Always cite the exact grounded number from the context table.
+       5. Always pair each driver with their current active season constructor (e.g., Joshua is Red Bull, Nick is McLaren, Jaden is Ferrari, Jairo is Mercedes).
+     * When asked for CONSTRUCTOR or TEAM track ratings (e.g., "list the Brazil track rating for each of the constructors who were competing in season 4 from highest to lowest"):
+       1. Locate "## OFFICIAL PER-TRACK CONSTRUCTOR STATISTICAL RATINGS" (or "Active Constructor Track Ratings") for the requested circuit and target season (e.g. Season 4).
+       2. Official Constructor Track Rating Definition: The constructor track rating for any season is the composite mean of that constructor's active driver lineup in that specific season.
+       3. Cite the exact constructor ratings in the specified order (highest to lowest) for the requested season. DO NOT return individual driver ratings when asked for constructor ratings! Include the driver breakdown in parentheses if helpful.
+   - ALGORITHMIC RETRIEVAL PROTOCOL FOR RACE SCHEDULES & CALENDAR ORDER:
+     * When asked about race schedules, calendar order, or what race is next:
+       1. Locate "### Season [N] Calendar & Schedule".
+       2. All rounds are strictly numbered and ordered sequentially (Round 1, Round 2, Round 3...). Always follow this exact chronological sequence.
+       3. Clearly distinguish between Sprint Races (Max 8 pts) and Grand Prix Feature Races (Max 25 pts).
 2. DO NOT use or retrieve real-world Formula 1 statistics or history under ANY circumstances. The Alternative F1 is an independent private sim racing league with its own drivers (which can be found within the data stored in the application), teams, and race calendar.
 3. If the user asks about an entity or stat completely absent from all seasons, clarify that it is absent from The Alternative F1 records.
 4. SESSION SCHEDULE & "RACE WEEK" TERMINOLOGY (WEDNESDAYS ONLY; NO SATURDAY/SUNDAY; "RACE WEEK" NOT "WEEKEND"):
@@ -4816,21 +5025,48 @@ def extract_infographic_data(text: str, skill_selected: bool = True) -> dict:
 
 
         # 5. Upcoming Race Infographic
+        s5_team_map = {}
+        try:
+            from the_alternative_f1.seasons import seasons
+            from the_alternative_f1.seasons.Calculations import Calculations
+            from the_alternative_f1.seasons.projections import _get_driver_track_rating
+            s5_calc = Calculations(seasons[-1])
+            s5_df = s5_calc.get("df")
+            if s5_df is not None:
+                for _, s_row in s5_df.iterrows():
+                    d_nm = str(s_row.get("Driver", "")).strip()
+                    t_nm = str(s_row.get("Team", "")).strip()
+                    if d_nm and t_nm:
+                        s5_team_map[d_nm] = t_nm
+        except Exception:
+            pass
+
+        track_name_raw = str(parsed.get("track_name", "Grand Prix Preview")).strip()
+
         top_ratings: list[RatingRow] = []
         for r in parsed.get("top_ratings", [])[:8]:
-            team = str(r.get("team", "")).strip()
+            d_name = str(r.get("driver", "")).strip()
+            team = s5_team_map.get(d_name, str(r.get("team", "")).strip())
             try:
                 rating_val = float(r.get("rating", 0.0))
             except Exception:
-
                 rating_val = 0.0
-            pct = min(100, max(0, int(rating_val)))
+
+            # Guard against hallucinated ratings in the 90s (ratings realistically range 0-60)
+            if rating_val > 70.0 or rating_val <= 0.0:
+                try:
+                    from the_alternative_f1.seasons.projections import _get_driver_track_rating
+                    rating_val = _get_driver_track_rating(d_name, track_name_raw)
+                except Exception:
+                    pass
+
+            pct = min(100, max(0, int(round(rating_val))))
             raw_rank = str(r.get("rank", "")).strip()
             rank_str = raw_rank if raw_rank.startswith("P") else f"P{raw_rank}"
             row_c = get_constructor_color(team)
             top_ratings.append(RatingRow(
                 rank=rank_str,
-                driver=str(r.get("driver", "")).strip(),
+                driver=d_name,
                 team=team,
                 rating=f"{rating_val:.1f}",
                 pct=f"{pct}%",
@@ -4838,10 +5074,18 @@ def extract_infographic_data(text: str, skill_selected: bool = True) -> dict:
                 text_color=get_contrast_text_color(row_c),
             ))
 
-        win_team = parsed.get("expected_winner_team", "")
-        p1_team = parsed.get("p1_team", "")
-        p2_team = parsed.get("p2_team", "")
-        p3_team = parsed.get("p3_team", "")
+        win_d = str(parsed.get("expected_winner", "")).strip()
+        win_team = s5_team_map.get(win_d, str(parsed.get("expected_winner_team", "")).strip())
+
+        p1_d = str(parsed.get("p1_driver", "")).strip()
+        p1_team = s5_team_map.get(p1_d, str(parsed.get("p1_team", "")).strip())
+
+        p2_d = str(parsed.get("p2_driver", "")).strip()
+        p2_team = s5_team_map.get(p2_d, str(parsed.get("p2_team", "")).strip())
+
+        p3_d = str(parsed.get("p3_driver", "")).strip()
+        p3_team = s5_team_map.get(p3_d, str(parsed.get("p3_team", "")).strip())
+
         win_c = get_constructor_color(win_team)
         p1_c = get_constructor_color(p1_team)
         p2_c = get_constructor_color(p2_team)
@@ -4851,20 +5095,20 @@ def extract_infographic_data(text: str, skill_selected: bool = True) -> dict:
             "is_infographic": True,
             "infographic_type": "race",
             "clean_content": clean_content,
-            "track_name": parsed.get("track_name", "Grand Prix Preview"),
-            "expected_winner": parsed.get("expected_winner", ""),
+            "track_name": track_name_raw,
+            "expected_winner": win_d,
             "expected_winner_team": win_team,
             "winner_color": win_c,
             "winner_text_color": get_contrast_text_color(win_c),
-            "p1_driver": parsed.get("p1_driver", ""),
+            "p1_driver": p1_d,
             "p1_team": p1_team,
             "p1_color": p1_c,
             "p1_text_color": get_contrast_text_color(p1_c),
-            "p2_driver": parsed.get("p2_driver", ""),
+            "p2_driver": p2_d,
             "p2_team": p2_team,
             "p2_color": p2_c,
             "p2_text_color": get_contrast_text_color(p2_c),
-            "p3_driver": parsed.get("p3_driver", ""),
+            "p3_driver": p3_d,
             "p3_team": p3_team,
             "p3_color": p3_c,
             "p3_text_color": get_contrast_text_color(p3_c),
@@ -5637,6 +5881,77 @@ class AlternativeIntelligenceState(rx.State):
         except Exception:
             pass
 
+        # Check if query requests Upcoming Race Infographic to pre-ground exact factual track ratings and teams
+        race_infographic_grounding_section = ""
+        try:
+            is_race_infographic = (
+                is_skill_request and ("upcoming race" in badge_name.lower() or "race infographic" in badge_name.lower())
+            ) or any(k in query.lower() for k in ["upcoming race infographic", "race infographic", "@upcoming race", "@specific upcoming race", "infographic preview", "race preview"])
+
+            if is_race_infographic:
+                from the_alternative_f1.seasons import seasons
+                from the_alternative_f1.seasons.Calculations import Calculations
+                from the_alternative_f1.seasons.projections import _get_driver_track_rating
+
+                ALL_TRACKS = [
+                    "Australia", "Imola", "Miami", "Monza", "Spa", "Brazil", "Silverstone",
+                    "Suzuka", "Abu Dhabi", "Bahrain", "COTA", "Zandvoort", "Qatar", "Singapore",
+                    "Austria", "Spain", "Canada", "Las Vegas", "Jeddah", "China", "Hungary", "Monaco", "Mexico"
+                ]
+                target_circuit = None
+                for trk in ALL_TRACKS:
+                    if re.search(r"\b" + re.escape(trk) + r"\b", query, re.I):
+                        target_circuit = trk
+                        break
+
+                latest_s = seasons[-1]
+                s_calc = Calculations(latest_s)
+                sched_df = s_calc.get("schedule_df")
+
+                if not target_circuit:
+                    # Dynamically find immediate next upcoming race
+                    if sched_df is not None and not sched_df.empty:
+                        for _, row in sched_df.iterrows():
+                            st = str(row.get("Status", "")).strip().lower()
+                            if st not in ("completed", "final"):
+                                target_circuit = str(row.get("Track", "")).strip()
+                                break
+                    if not target_circuit:
+                        target_circuit = "Brazil"
+
+                d_totals = s_calc.get("driver_totals")
+                active_d = [str(d).strip() for d in d_totals["Driver"]] if d_totals is not None and not d_totals.empty else []
+                s_df = s_calc.get("df")
+                team_map_s5 = {}
+                if s_df is not None:
+                    for _, r in s_df.iterrows():
+                        d_name = str(r.get("Driver", "")).strip()
+                        t_name = str(r.get("Team", "")).strip()
+                        if d_name and t_name:
+                            team_map_s5[d_name] = t_name
+
+                ratings = []
+                for d in active_d:
+                    score = _get_driver_track_rating(d, target_circuit)
+                    ratings.append({"driver": d, "team": team_map_s5.get(d, "Independent"), "rating": score})
+                ratings.sort(key=lambda x: x["rating"], reverse=True)
+
+                r_lines = [
+                    f"### OFFICIAL GROUNDED TRACK RATINGS & PREVIEW DATA FOR {target_circuit.upper()} (SKILL 1 PREVIEW):",
+                    f"- Circuit: {target_circuit} Grand Prix",
+                    "- Authoritative Track Rating Leaderboard (Requirement 76 Scale: 0.0 to ~60.0; NO DRIVER HAS A RATING IN THE 80s OR 90s):",
+                ]
+                for idx, r_item in enumerate(ratings[:8], start=1):
+                    r_lines.append(f"  {idx}. {r_item['driver']} ({r_item['team']}): Rating {r_item['rating']:.1f}")
+                r_lines.append(
+                    "CRITICAL DIRECTIVE: You MUST use these exact ratings and exact constructor affiliations "
+                    f"in your ```infographic-json (e.g. Joshua drives for Red Bull, Nick for McLaren, Jaden for Ferrari, Jairo for Mercedes). "
+                    "Do NOT invent ratings in the 90s or assign drivers to former teams."
+                )
+                race_infographic_grounding_section = "\n\n" + "\n".join(r_lines) + "\n"
+        except Exception:
+            pass
+
         # Dynamic Deep Statistics Retrieval (TAF1APP-SDDREQ-239)
         deep_stats_grounding_section = ""
         try:
@@ -5676,6 +5991,7 @@ class AlternativeIntelligenceState(rx.State):
             f"{retrieved_articles_section}\n"
             f"{h2h_grounding_section}\n"
             f"{seasonal_qual_grounding_section}\n"
+            f"{race_infographic_grounding_section}\n"
             f"{deep_stats_grounding_section}\n"
             f"USER INQUIRY:\n{query}{skill_directive}"
         ).strip()
@@ -7989,7 +8305,7 @@ def alternative_intelligence_drawer() -> rx.Component:
                             AlternativeIntelligenceState.power_ranking_leader_car_icon != "",
                             rx.image(
                                 src=AlternativeIntelligenceState.power_ranking_leader_car_icon,
-                                height="20px",
+                                height="17px",
                                 width="auto",
                                 object_fit="contain",
                                 transform="scaleX(-1)",

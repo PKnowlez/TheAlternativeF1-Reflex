@@ -30,6 +30,7 @@ from the_alternative_f1.articles.Season5.Race_Recap.monza_red_bull import articl
 from the_alternative_f1.articles.Season5.Race_Week.spa_race_week import article as Spa_Race_Week_Article
 from the_alternative_f1.articles.Season5.Race_Recap.spa_race_recap import article as Spa_Race_Recap_Article
 from the_alternative_f1.articles.Season5.Race_Recap.spa_mercedes import article as Spa_Mercedes_Article
+from the_alternative_f1.articles.Season5.Race_Week.brazil_race_week import article as Brazil_Race_Week_Article
 
 season = {
     "season_number": 5,
@@ -39,7 +40,7 @@ season = {
     # Rookies: drivers not present in Season 4
     "rookies": {"Grayson", "Josh C.", "Randy", "Evelo"},
 
-    "articles": [Spa_Mercedes_Article,
+    "articles": [Brazil_Race_Week_Article, Spa_Mercedes_Article,
     Spa_Race_Recap_Article, Spa_Race_Week_Article, Monza_RedBull_Article, 
     Monza_Race_Recap_Article, Monza_Race_Week_Article, Miami_Race_Recap_Article, 
     Miami_Race_Week_Article, Bye_Week_Article1, Imola_Race_Recap_Article, 

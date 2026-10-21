@@ -19,10 +19,11 @@ _CACHE_FILE = Path(__file__).parent / "calculations_cache.pickle"
 
 _calculations_cache = {}
 _calculations_mtime = {}
+_last_excel_mtime = 0
 
 
 def load_calculations_cache() -> bool:
-    global _calculations_cache, _calculations_mtime
+    global _calculations_cache, _calculations_mtime, _last_excel_mtime
     if not _calculations_cache and _CACHE_FILE.exists():
         try:
             with open(_CACHE_FILE, "rb") as f:
@@ -30,6 +31,8 @@ def load_calculations_cache() -> bool:
                 if isinstance(data, dict):
                     _calculations_cache = data.get("cache", {})
                     _calculations_mtime = data.get("mtime", {})
+                    excel_path = Path(_EXCEL_PATH)
+                    _last_excel_mtime = excel_path.stat().st_mtime if excel_path.exists() else 0
                     return True
         except Exception as e:
             print(f"Warning: Failed to load calculations cache: {e}")
@@ -51,16 +54,22 @@ load_calculations_cache()
 
 
 def Calculations(season_data: dict, sprint_only: bool = False) -> dict:
+    global _last_excel_mtime
     # Use sheet_name and sprint_only as the cache key
     cache_key = (season_data["sheet_name"], sprint_only)
     
     excel_path = Path(_EXCEL_PATH)
     current_mtime = excel_path.stat().st_mtime if excel_path.exists() else 0
     
+    # If Excel file was modified on this machine since cache load, invalidate in-memory cache
+    if _last_excel_mtime and current_mtime > _last_excel_mtime:
+        _calculations_cache.clear()
+        _last_excel_mtime = current_mtime
+    elif not _last_excel_mtime and current_mtime:
+        _last_excel_mtime = current_mtime
+
     if cache_key in _calculations_cache:
-        cached_mtime = _calculations_mtime.get(cache_key, 0)
-        if cached_mtime == current_mtime or current_mtime == 0:
-            return _calculations_cache[cache_key]
+        return _calculations_cache[cache_key]
 
     """Run all calculations for the given season and return a results dict.
 

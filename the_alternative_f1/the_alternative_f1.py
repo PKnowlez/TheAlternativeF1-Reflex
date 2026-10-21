@@ -356,6 +356,8 @@ STATIC_TICKER_ITEMS = precompute_ticker_items()
 import threading
 threading.Thread(target=warm_up_caches, daemon=True).start()
 
+_SVG_RAW_DATA_CACHE = {}
+
 
 class State(rx.State):
     """The app state."""
@@ -1065,6 +1067,10 @@ class State(rx.State):
         return result
 
     def _get_svg_raw_data(self) -> dict:
+        season_key = self.selected_season
+        if season_key in _SVG_RAW_DATA_CACHE:
+            return _SVG_RAW_DATA_CACHE[season_key]
+
         from the_alternative_f1.seasons.power_rankings import load_power_rankings
         from the_alternative_f1.seasons import seasons
         
@@ -1182,13 +1188,15 @@ class State(rx.State):
             "teams": chart_teams,
         }
 
-        return {
+        res = {
             "races": x_labels,
             "paths": paths,
             "y_labels": y_labels,
             "view_box": f"0 0 {view_w} {view_h}",
             "chart_json": json.dumps(chart_data_dict),
         }
+        _SVG_RAW_DATA_CACHE[season_key] = res
+        return res
 
     @rx.var(auto_deps=False, deps=["selected_season"])
     def power_rankings_races(self) -> list[dict]:
@@ -1362,8 +1370,8 @@ class State(rx.State):
 
     @rx.event(background=True)
     async def on_app_mount(self):
-        # Brief yield to allow initial hydrate_and_load to cleanly complete without lock contention
-        await asyncio.sleep(0.5)
+        # Yield to allow initial hydrate_and_load to cleanly complete without lock contention
+        await asyncio.sleep(2.0)
         async with self:
             if self.header_loop_running:
                 return
@@ -1443,6 +1451,8 @@ class TickerState(rx.State):
 
     @rx.event(background=True)
     async def start_ticker_loop(self):
+        # Yield to allow initial hydrate_and_load to cleanly complete without lock contention
+        await asyncio.sleep(2.0)
         async with self:
             if self.ticker_loop_running:
                 return

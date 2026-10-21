@@ -302,7 +302,13 @@ def get_entity_lists(num_seasons: int = 5):
     global _detailed_cache, _detailed_mtime
     curr_mtime = _get_mtime()
     cache_key = ("get_entity_lists", num_seasons)
-    if _detailed_mtime == curr_mtime and cache_key in _detailed_cache:
+    if _detailed_mtime and curr_mtime > _detailed_mtime:
+        _detailed_cache.clear()
+        _detailed_mtime = curr_mtime
+    elif not _detailed_mtime and curr_mtime:
+        _detailed_mtime = curr_mtime
+
+    if cache_key in _detailed_cache:
         return _detailed_cache[cache_key]
 
     drivers = set()
@@ -315,9 +321,6 @@ def get_entity_lists(num_seasons: int = 5):
             if "Team" in df.columns:
                 teams.update([str(t).strip() for t in df["Team"].dropna().unique() if str(t).strip() not in ("nan", "—", "")])
     res = (sorted(list(drivers)), sorted(list(teams)))
-    if _detailed_mtime != curr_mtime:
-        _detailed_cache.clear()
-        _detailed_mtime = curr_mtime
     _detailed_cache[cache_key] = res
     return res
 
@@ -329,7 +332,13 @@ def compute_all_time_avg_pos_change(num_seasons: int, entity_type: str, active_e
     global _detailed_cache, _detailed_mtime
     curr_mtime = _get_mtime()
     cache_key = ("compute_all_time_avg_pos_change", num_seasons, entity_type, active_entity)
-    if _detailed_mtime == curr_mtime and cache_key in _detailed_cache:
+    if _detailed_mtime and curr_mtime > _detailed_mtime:
+        _detailed_cache.clear()
+        _detailed_mtime = curr_mtime
+    elif not _detailed_mtime and curr_mtime:
+        _detailed_mtime = curr_mtime
+
+    if cache_key in _detailed_cache:
         return _detailed_cache[cache_key]
 
     all_drivers, all_teams = get_entity_lists(num_seasons)
@@ -407,7 +416,13 @@ def compute_entity_detailed_metrics(num_seasons: int, entity_type: str, entity_n
     norm_entity_type = "Driver" if str(entity_type).strip().lower() == "driver" else "Constructor"
     curr_mtime = _get_mtime()
     cache_key = ("compute_entity_detailed_metrics", num_seasons, norm_entity_type, str(entity_name).strip())
-    if _detailed_mtime == curr_mtime and cache_key in _detailed_cache:
+    if _detailed_mtime and curr_mtime > _detailed_mtime:
+        _detailed_cache.clear()
+        _detailed_mtime = curr_mtime
+    elif not _detailed_mtime and curr_mtime:
+        _detailed_mtime = curr_mtime
+
+    if cache_key in _detailed_cache:
         return _detailed_cache[cache_key]
 
     races_detail = []

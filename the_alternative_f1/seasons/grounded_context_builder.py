@@ -448,6 +448,7 @@ def build_grounded_stats_dict(excel_path: Path = _EXCEL_PATH) -> dict:
         avg_chg = float(np.mean(pos_chgs)) if pos_chgs else (avg_q - avg_p)
 
         c_champs = CONSTRUCTOR_CHAMPIONSHIPS_WON.get(c_name, [])
+        c_track_ratings = compute_entity_track_ratings(df_races)
 
         constructors_dict[c_name] = {
             "constructor": c_name,
@@ -470,6 +471,7 @@ def build_grounded_stats_dict(excel_path: Path = _EXCEL_PATH) -> dict:
             "avg_pos_change": round(avg_chg, 1),
             "constructor_championships": c_champs,
             "all_time_standings_peak": c_peaks.get(c_name, "—"),
+            "track_ratings": c_track_ratings,
         }
 
     # 3. Process Circuit Database (including Season 5 Spa)
@@ -549,6 +551,137 @@ def build_grounded_stats_dict(excel_path: Path = _EXCEL_PATH) -> dict:
 
         circuits_dict[trk] = trk_dict
 
+    # 4. Dynamically compute official Season Rosters & Schedules (100% data-driven, zero hardcoding)
+    from the_alternative_f1.seasons.projections import _get_driver_track_rating
+
+    all_historical_teams_seen = set()
+    season_rosters = {}
+    season_schedules = {}
+
+    for s_data in seasons:
+        sn = s_data.get("season_number", 1)
+        calc = Calculations(s_data)
+        raw_df = calc.get("df")
+        sched_df = calc.get("schedule_df")
+
+        # Dynamic Rosters
+        active_map = defaultdict(list)
+        if raw_df is not None and not raw_df.empty:
+            for _, r in raw_df.iterrows():
+                d = str(r.get("Driver", "")).strip()
+                t = str(r.get("Team", "")).strip()
+                if d and t:
+                    if d not in active_map[t]:
+                        active_map[t].append(d)
+        active_teams = set(active_map.keys())
+        all_historical_teams_seen.update(active_teams)
+        inactive_teams = sorted(list(all_historical_teams_seen - active_teams))
+
+        season_rosters[str(sn)] = {
+            "season": sn,
+            "active_constructors": {t: drivers for t, drivers in sorted(active_map.items())},
+            "inactive_constructors": inactive_teams,
+            "driver_to_team": {d: t for t, drivers in active_map.items() for d in drivers},
+        }
+
+        # Dynamic Schedules in strict chronological order
+        rounds_list = []
+        if sched_df is not None and not sched_df.empty:
+            for round_idx, (_, row) in enumerate(sched_df.iterrows(), start=1):
+                r_name = str(row.get("Race", "")).strip()
+                r_track = str(row.get("Track", "")).strip()
+                status = str(row.get("Status", "")).strip()
+                raw_date = str(row.get("Date", "")).strip().replace(" 00:00:00", "")
+                is_sprint = "sprint" in r_name.lower()
+                rounds_list.append({
+                    "round_number": round_idx,
+                    "race_name": r_name,
+                    "track": r_track,
+                    "is_sprint": is_sprint,
+                    "round_type": "Sprint Race (Max 8 pts)" if is_sprint else "Grand Prix Feature Race (Max 25 pts)",
+                    "date": raw_date if raw_date and raw_date.lower() != "nan" else "Not Recorded",
+                    "status": status if status and status.lower() != "nan" else "Scheduled",
+                })
+        season_schedules[str(sn)] = rounds_list
+
+    # 5. Dynamically precompute Driver & Constructor Track Ratings Matrix across ALL seasons (Requirement 76 & SDDREQ-239)
+    latest_s_num = seasons[-1].get("season_number", num_seasons)
+
+    season_track_ratings = {}
+    for s_item in seasons:
+        s_num_val = s_item.get("season_number", 1)
+        s_key = str(s_num_val)
+        s_calc_obj = Calculations(s_item)
+        s_d_totals = s_calc_obj.get("driver_totals")
+        s_drivers_list = [str(d).strip() for d in s_d_totals["Driver"]] if s_d_totals is not None and not s_d_totals.empty else []
+        s_drv_team = season_rosters.get(s_key, {}).get("driver_to_team", {})
+        s_active_c_map = season_rosters.get(s_key, {}).get("active_constructors", {})
+
+        s_mat = {}
+        for trk in ALL_KNOWN_TRACKS:
+            # Driver Ratings for Season s_num_val
+            d_ratings = []
+            drv_score_map = {}
+            for d in s_drivers_list:
+                score = _get_driver_track_rating(d, trk)
+                drv_score_map[d] = score
+                d_ratings.append({
+                    "driver": d,
+                    "team": s_drv_team.get(d, "Independent"),
+                    "rating": round(score, 1),
+                })
+            d_ratings.sort(key=lambda x: x["rating"], reverse=True)
+            for rk_idx, item in enumerate(d_ratings, start=1):
+                item["rank"] = rk_idx
+
+            # Constructor Composite Ratings for Season s_num_val
+            c_comp_ratings = []
+            for c_team, c_drvs in s_active_c_map.items():
+                drv_scores = [drv_score_map.get(d, _get_driver_track_rating(d, trk)) for d in c_drvs]
+                avg_score = float(np.mean(drv_scores)) if drv_scores else 0.0
+                drv_details = {d: round(drv_score_map.get(d, _get_driver_track_rating(d, trk)), 1) for d in c_drvs}
+                c_comp_ratings.append({
+                    "constructor": c_team,
+                    "rating": round(avg_score, 1),
+                    "drivers": drv_details,
+                })
+            c_comp_ratings.sort(key=lambda x: x["rating"], reverse=True)
+            for rk_idx, item in enumerate(c_comp_ratings, start=1):
+                item["rank"] = rk_idx
+
+            s_mat[trk] = {
+                "driver_ratings": d_ratings,
+                "constructor_ratings": c_comp_ratings,
+            }
+        season_track_ratings[s_key] = s_mat
+
+    # Global/latest track_ratings_matrix for backward compatibility
+    track_ratings_matrix = {}
+    latest_s_key = str(latest_s_num)
+    for trk in ALL_KNOWN_TRACKS:
+        s_latest_trk = season_track_ratings.get(latest_s_key, {}).get(trk, {})
+        d_ratings = s_latest_trk.get("driver_ratings", [])
+        c_ratings = s_latest_trk.get("constructor_ratings", [])
+
+        # Historical franchise constructor track ratings (All-time entity stats)
+        c_hist_ratings = []
+        for c_team, c_data in constructors_dict.items():
+            hist_item = c_data.get("track_ratings", {}).get(trk, 0.0)
+            hist_score = hist_item.get("score", 0.0) if isinstance(hist_item, dict) else (hist_item if isinstance(hist_item, (int, float)) else 0.0)
+            c_hist_ratings.append({
+                "constructor": c_team,
+                "rating": round(float(hist_score), 1),
+            })
+        c_hist_ratings.sort(key=lambda x: x["rating"], reverse=True)
+        for rk_idx, item in enumerate(c_hist_ratings, start=1):
+            item["rank"] = rk_idx
+
+        track_ratings_matrix[trk] = {
+            "driver_ratings": d_ratings,
+            "constructor_ratings": c_ratings,
+            "constructor_historical_ratings": c_hist_ratings,
+        }
+
     mtime = excel_path.stat().st_mtime if excel_path.exists() else time.time()
 
     return {
@@ -556,6 +689,7 @@ def build_grounded_stats_dict(excel_path: Path = _EXCEL_PATH) -> dict:
             "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             "excel_mtime": mtime,
             "num_seasons": num_seasons,
+            "latest_season": latest_s_num,
             "latest_completed_round": "Season 5 Spa",
             "total_feature_winners_count": len(feature_winners_list),
         },
@@ -568,6 +702,10 @@ def build_grounded_stats_dict(excel_path: Path = _EXCEL_PATH) -> dict:
             "podium_streaks": podium_streaks_list,
             "pole_sitters": pole_sitters_list,
         },
+        "season_rosters": season_rosters,
+        "season_schedules": season_schedules,
+        "season_track_ratings": season_track_ratings,
+        "track_ratings_matrix": track_ratings_matrix,
         "drivers": drivers_dict,
         "constructors": constructors_dict,
         "circuits": circuits_dict,
