@@ -109,13 +109,8 @@ from the_alternative_f1.seasons.power_rankings import (
 
 # ── Dynamically derived from seasons __init__.py ─────────────────────────────
 NUM_SEASONS: int = LATEST_SEASON
-try:
-    precompute_all_power_rankings()
-    precompute_all_season_projections()
-    precompute_all_predictions()
-    precompute_leaderboard_cache(force=True)
-except Exception:
-    pass
+# Precomputations are pre-serialized to JSON/pickle via precompute_cache.py;
+# do not block container import/startup with synchronous recalculations.
 # ─────────────────────────────────────────────────────────────────────────────
 
 def find_upcoming_race(schedule_dataframe) -> tuple[str | None, str | None]:
@@ -250,12 +245,12 @@ def precompute_ticker_items() -> list[list]:
     return items
 
 def warm_up_caches():
-    """Pre-warm all season calculations and detailed metrics on server startup to eliminate cold-start latency.
-    Runs cooperatively in the background yielding GIL to ensure zero webpage loading lag.
+    """Pre-warm season calculations and detailed metrics in the background ONLY if not already cached.
+    Runs cooperatively in the background yielding GIL to ensure zero webpage loading lag or health check timeouts.
     """
     import time
-    # Brief initial pause so the web server finishes binding to port 8000 and handles initial traffic
-    time.sleep(3.0)
+    # Generous initial pause so the web server finishes binding to port 8000 and handles initial traffic and health checks
+    time.sleep(20.0)
     try:
         from the_alternative_f1.seasons import seasons
         from the_alternative_f1.seasons.Calculations import Calculations, _calculations_cache
@@ -270,7 +265,7 @@ def warm_up_caches():
                     Calculations(s, sprint_only=True)
                 except Exception:
                     pass
-                time.sleep(0.05)
+                time.sleep(0.1)
 
         needs_detailed = len(_detailed_cache) < 10
         if needs_detailed:
@@ -278,74 +273,16 @@ def warm_up_caches():
                 drivers, teams = get_entity_lists(len(seasons))
                 for d in drivers:
                     compute_entity_detailed_metrics(len(seasons), "Driver", d)
-                    time.sleep(0.02)
+                    time.sleep(0.05)
                 for t in teams:
                     compute_entity_detailed_metrics(len(seasons), "Constructor", t)
-                    time.sleep(0.02)
+                    time.sleep(0.05)
             except Exception:
                 pass
-        time.sleep(0.05)
-
-        try:
-            precompute_all_power_rankings()
-        except Exception:
-            pass
-        time.sleep(0.05)
-
-        try:
-            precompute_all_season_projections()
-        except Exception:
-            pass
-        time.sleep(0.05)
-
-        try:
-            precompute_all_predictions()
-        except Exception:
-            pass
-        time.sleep(0.05)
+        time.sleep(0.1)
 
         try:
             precompute_leaderboard_cache(force=False)
-        except Exception:
-            pass
-        time.sleep(0.05)
-
-        try:
-            from the_alternative_f1.all_time_stats.Functions import get_all_time_highest_positions, CalculateAllTime, PointTotals
-            get_all_time_highest_positions(num_seasons=len(seasons))
-            CalculateAllTime(len(seasons), "Driver")
-            CalculateAllTime(len(seasons), "Team")
-            for s_idx in range(1, len(seasons) + 1):
-                PointTotals(s_idx)
-        except Exception:
-            pass
-        time.sleep(0.05)
-
-        try:
-            from the_alternative_f1.all_time_stats.MapAllTime import precompute_all_map_data
-            precompute_all_map_data()
-        except Exception:
-            pass
-        time.sleep(0.05)
-
-        try:
-            from the_alternative_f1.all_time_stats.SummaryAllTime import precompute_summary_data
-            precompute_summary_data(num_seasons=len(seasons))
-        except Exception:
-            pass
-        time.sleep(0.05)
-
-        try:
-            from the_alternative_f1.all_time_stats.TeammateNetwork import build_teammate_network_data
-            build_teammate_network_data()
-        except Exception:
-            pass
-        time.sleep(0.05)
-
-        # Guaranteed deploy reload of grounded league context
-        try:
-            from the_alternative_f1.alternative_intelligence import reload_grounded_league_context
-            reload_grounded_league_context()
         except Exception:
             pass
     except Exception:
