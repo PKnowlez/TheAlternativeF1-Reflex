@@ -206,7 +206,7 @@ def compute_season_projections(season_num: int = 5, force: bool = False) -> dict
             "lines_record": {},
         }
         _PROJECTIONS_CACHE[cache_key] = result
-        _PROJECTIONS_MTIME = curr_mtime
+        _PROJECTIONS_MTIME = _EXCEL_PATH.stat().st_mtime if _EXCEL_PATH.exists() else 0.0
         try:
             with open(PROJECTIONS_DATA_JSON, "w", encoding="utf-8") as f:
                 json.dump(_PROJECTIONS_CACHE, f, indent=2)
@@ -421,7 +421,7 @@ def compute_season_projections(season_num: int = 5, force: bool = False) -> dict
     }
 
     _PROJECTIONS_CACHE[cache_key] = result
-    _PROJECTIONS_MTIME = curr_mtime
+    _PROJECTIONS_MTIME = _EXCEL_PATH.stat().st_mtime if _EXCEL_PATH.exists() else 0.0
     try:
         with open(PROJECTIONS_DATA_JSON, "w", encoding="utf-8") as f:
             json.dump(_PROJECTIONS_CACHE, f, indent=2)

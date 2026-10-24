@@ -96,8 +96,13 @@ article = {
 
         "While the last rumor mill focused on the more senior Tavera brother, this time we are hearing rumors about Junior. \
             Will Eddie get back in the car? Will the team provide hardware that allows him to succeed? Is this the Red Bull \
-                second seat curse carrying itself out in The Alternative F1 league? As rumors circle, we will be sure to keep \
-                    you posted and bring the latest breaking news here."
+                second seat curse carrying itself out in The Alternative F1 league? We have also heard that parts upgrades are \
+                    imminent for the Audi veteran Boz. Could he surpass rookie Evelo? Or will Evelo hold the D1 title through Brazil, \
+                        or even further?",
+
+        "Finally, we heard rumor of a secret, for points, friendly race. Though the standings have yet to update from it, we were \
+            able to get a reporter there where they witnessed Nick beating Jelly on track in a fierce head-tohead battle. As rumors circle, \
+                we will be sure to keep you posted and bring the latest breaking news here."                
   
     ],
     "image": "/thealternativef1-cloudflare/Season5/Race_Week/Brazil_Cover.jpeg",

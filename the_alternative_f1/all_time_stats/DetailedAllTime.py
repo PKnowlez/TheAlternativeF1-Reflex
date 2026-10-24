@@ -396,9 +396,6 @@ def compute_all_time_avg_pos_change(num_seasons: int, entity_type: str, active_e
         })
 
     results.sort(key=lambda x: x["avg_change"], reverse=True)
-    if _detailed_mtime != curr_mtime:
-        _detailed_cache.clear()
-        _detailed_mtime = curr_mtime
     _detailed_cache[cache_key] = results
     return results
 
@@ -586,9 +583,6 @@ def compute_entity_detailed_metrics(num_seasons: int, entity_type: str, entity_n
 
     df_races = pd.DataFrame(races_detail)
     res = (df_races, season_boundaries)
-    if _detailed_mtime != curr_mtime:
-        _detailed_cache.clear()
-        _detailed_mtime = curr_mtime
     _detailed_cache[cache_key] = res
     return res
 
