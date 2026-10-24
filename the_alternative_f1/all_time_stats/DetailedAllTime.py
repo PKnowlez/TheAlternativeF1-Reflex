@@ -330,14 +330,7 @@ def compute_all_time_avg_pos_change(num_seasons: int, entity_type: str, active_e
     Active entity is blue (#00b4da); positive changes are green (#3cb44b), negative are red (#e6194b).
     """
     global _detailed_cache, _detailed_mtime
-    curr_mtime = _get_mtime()
     cache_key = ("compute_all_time_avg_pos_change", num_seasons, entity_type, active_entity)
-    if _detailed_mtime and curr_mtime > _detailed_mtime:
-        _detailed_cache.clear()
-        _detailed_mtime = curr_mtime
-    elif not _detailed_mtime and curr_mtime:
-        _detailed_mtime = curr_mtime
-
     if cache_key in _detailed_cache:
         return _detailed_cache[cache_key]
 
@@ -414,14 +407,7 @@ def compute_entity_detailed_metrics(num_seasons: int, entity_type: str, entity_n
     """Compute detailed race-by-race metrics for a single Driver or Constructor."""
     global _detailed_cache, _detailed_mtime
     norm_entity_type = "Driver" if str(entity_type).strip().lower() == "driver" else "Constructor"
-    curr_mtime = _get_mtime()
     cache_key = ("compute_entity_detailed_metrics", num_seasons, norm_entity_type, str(entity_name).strip())
-    if _detailed_mtime and curr_mtime > _detailed_mtime:
-        _detailed_cache.clear()
-        _detailed_mtime = curr_mtime
-    elif not _detailed_mtime and curr_mtime:
-        _detailed_mtime = curr_mtime
-
     if cache_key in _detailed_cache:
         return _detailed_cache[cache_key]
 

@@ -58,16 +58,6 @@ def Calculations(season_data: dict, sprint_only: bool = False) -> dict:
     # Use sheet_name and sprint_only as the cache key
     cache_key = (season_data["sheet_name"], sprint_only)
     
-    excel_path = Path(_EXCEL_PATH)
-    current_mtime = excel_path.stat().st_mtime if excel_path.exists() else 0
-    
-    # If Excel file was modified on this machine since cache load, invalidate in-memory cache
-    if _last_excel_mtime and current_mtime > _last_excel_mtime:
-        _calculations_cache.clear()
-        _last_excel_mtime = current_mtime
-    elif not _last_excel_mtime and current_mtime:
-        _last_excel_mtime = current_mtime
-
     if cache_key in _calculations_cache:
         return _calculations_cache[cache_key]
 

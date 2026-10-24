@@ -714,18 +714,15 @@ def build_grounded_stats_dict(excel_path: Path = _EXCEL_PATH) -> dict:
 
 def sync_grounded_deep_stats(force: bool = False, excel_path: Path = _EXCEL_PATH) -> dict:
     """
-    Check if 'grounded_deep_stats.json' exists and matches the Excel file mtime.
-    If outdated, missing, or force=True, re-generates and writes the JSON file.
-    Returns the parsed dictionary.
+    Check if 'grounded_deep_stats.json' exists.
+    If present and force=False, returns the parsed precomputed dictionary immediately.
+    Only re-generates if the file is missing, corrupted, or force=True is explicitly passed.
     """
-    curr_mtime = excel_path.stat().st_mtime if excel_path.exists() else 0
-
     if not force and _JSON_FILE_PATH.exists():
         try:
             with open(_JSON_FILE_PATH, "r", encoding="utf-8") as f:
                 data = json.load(f)
-            stored_mtime = data.get("metadata", {}).get("excel_mtime", 0)
-            if stored_mtime == curr_mtime:
+            if isinstance(data, dict) and data.get("aggregates"):
                 return data
         except Exception:
             pass
