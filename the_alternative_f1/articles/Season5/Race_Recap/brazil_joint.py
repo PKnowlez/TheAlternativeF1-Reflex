@@ -28,8 +28,8 @@ article = {
                 ),
                 rx.text(
                     "Instead of leaving the final result with Jelly claiming victory, the teams determined it was most reasonable to move Jelly to \
-                        third place. This was subsequently reviewed and agreed to by the FIA. All three teams want to praise teh current FIA \
-                            governing body for their willingness to find a solution that still honors teh spirit of the regulations, while still \
+                        third place. This was subsequently reviewed and agreed to by the FIA. All three teams want to praise the current FIA \
+                            governing body for their willingness to find a solution that still honors the spirit of the regulations, while still \
                                 ensuring a fair result for the driver that was wronged.",
                     color="white",
                     font_size="md",
@@ -83,9 +83,9 @@ article = {
                 "width": "4px",
                 "background": (
                     f"linear-gradient(to bottom, "
-                    f"{CONSTRUCTOR_COLORS['Cadillac']} 0%, "
-                    f"{CONSTRUCTOR_COLORS['Red Bull']} 50%, "
-                    f"{CONSTRUCTOR_COLORS['Ferrari']} 100%)"
+                    f"{CONSTRUCTOR_COLORS['Red Bull']} 0%, "
+                    f"{CONSTRUCTOR_COLORS['Ferrari']} 50%, "
+                    f"{CONSTRUCTOR_COLORS['Cadillac']} 100%)"
                 ),
             },
             font_family="sans-serif",
@@ -93,9 +93,9 @@ article = {
             width="100%",
         ),    
     ],
-    "image": "/thealternativef1-cloudflare/Season5/Race_Recap/Spa/OS-mercedes.png",
-    "author": "Mercedes PR & Jairo",
-    "date": "October 16, 2026",
+    "image": "/thealternativef1-cloudflare/Season5/Race_Recap/OS-rb-f-c.png",
+    "author": "Red Bull, Ferrari, and Cadillac PR & Joshua, Jaden, and Jelly",
+    "date": "October 30, 2026",
     "season": 5,
     "fia": False,
 }

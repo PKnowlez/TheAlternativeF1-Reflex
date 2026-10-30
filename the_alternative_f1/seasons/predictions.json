@@ -79,8 +79,8 @@
     "line_value": null,
     "stance": "FOR",
     "points": 10,
-    "status": "correct",
-    "payout": 12,
+    "status": "incorrect",
+    "payout": 0,
     "created_at": "2026-10-28T22:28:48.481746+00:00"
   },
   {
@@ -149,8 +149,8 @@
     "line_value": 29.5,
     "stance": "OVER",
     "points": 10,
-    "status": "correct",
-    "payout": 12,
+    "status": "incorrect",
+    "payout": 0,
     "created_at": "2026-10-28T22:19:40.989492+00:00"
   },
   {
@@ -191,8 +191,8 @@
     "line_value": null,
     "stance": "FOR",
     "points": 25,
-    "status": "correct",
-    "payout": 29,
+    "status": "incorrect",
+    "payout": 0,
     "created_at": "2026-10-28T22:13:37.392185+00:00"
   },
   {
@@ -275,8 +275,8 @@
     "line_value": null,
     "stance": "FOR",
     "points": 62,
-    "status": "correct",
-    "payout": 71,
+    "status": "incorrect",
+    "payout": 0,
     "created_at": "2026-10-28T22:08:40.020894+00:00"
   },
   {
@@ -359,8 +359,8 @@
     "line_value": null,
     "stance": "PARLAY",
     "points": 25,
-    "status": "correct",
-    "payout": 36,
+    "status": "incorrect",
+    "payout": 0,
     "created_at": "2026-10-23T20:10:04.796704+00:00"
   },
   {
@@ -373,8 +373,8 @@
     "line_value": null,
     "stance": "FOR",
     "points": 25,
-    "status": "correct",
-    "payout": 29,
+    "status": "incorrect",
+    "payout": 0,
     "created_at": "2026-10-23T20:09:24.7037+00:00"
   },
   {
@@ -738,7 +738,7 @@
     "stance": "PARLAY",
     "points": 10,
     "status": "correct",
-    "payout": 14,
+    "payout": 15,
     "created_at": "2026-10-02T04:54:51.718429+00:00"
   },
   {

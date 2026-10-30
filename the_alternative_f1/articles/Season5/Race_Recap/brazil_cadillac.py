@@ -8,7 +8,7 @@ article = {
     "content": [
         rx.box(
             rx.vstack(
-                rx.heading("JOINT OFFICIAL STATEMENT", font_size="xl", font_weight="bold", color="white", flex="1"),
+                rx.heading("OFFICIAL STATEMENTS", font_size="xl", font_weight="bold", color="white", flex="1"),
                 rx.divider(border_color="white", margin_y="3", width="100%"),
                 rx.text(
                     "TEAM STATEMENT: ",
@@ -18,11 +18,11 @@ article = {
                     line_height="1.6",
                 ),
                 rx.text(
-                    "The team here in Fishers, Indiana are full of mixed emotions. Pour of our driver Jelly for his accomplishments this season, \
+                    "The team here in Fishers, Indiana are full of mixed emotions. Proud of our driver Jelly for his accomplishments this season, \
                         disappointed in the scenario that unfolded in Brazil, and grateful for competitors willing to have a joint discussion. \
-                            As we proceed forward, we know we have takenthe high road, and appreciate that the FIA was willing to bend the rules \
+                            As we proceed forward, we know we have taken the high road, and appreciate that the FIA was willing to bend the rules \
                                 in such a way that the spirit of competition can remain strong. Regulation 7 saved Jelly's race, but in reality, \
-                                    his great drive earned him the right to employ the regulation. We will never regret this decsion and have no \
+                                    his great drive earned him the right to employ the regulation. We will never regret this decision and have no \
                                         expectation that we will ever look back on this moment with anything other than integrity.",
                     color="white",
                     font_size="md",
@@ -30,7 +30,7 @@ article = {
                 ),
                 rx.divider(border_color="white", margin_y="3", width="100%"),
                 rx.text(
-                    "DRIVER STATEMENTS: ",
+                    "DRIVER STATEMENT: ",
                     color="white",
                     font_weight="bold",
                     font_size="md",
@@ -76,9 +76,9 @@ article = {
             width="100%",
         ),    
     ],
-    "image": "/thealternativef1-cloudflare/Season5/Race_Recap/Spa/OS-mercedes.png",
-    "author": "Mercedes PR & Jairo",
-    "date": "October 16, 2026",
+    "image": "/thealternativef1-cloudflare/Season5/Race_Recap/OS-cadillac.png",
+    "author": "Cadillac PR & Jelly",
+    "date": "October 30, 2026",
     "season": 5,
     "fia": False,
 }

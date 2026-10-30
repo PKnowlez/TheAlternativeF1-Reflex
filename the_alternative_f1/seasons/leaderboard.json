@@ -1,39 +1,39 @@
 [
   {
     "user": "PK",
-    "all_time_pts": 571,
-    "s5": 571,
+    "all_time_pts": 507,
+    "s5": 507,
     "rank": 1,
     "rank_str": "1",
     "rank_color": "#FFD700",
     "rank_bg": "#FFD70022",
     "rank_border": "1px solid #FFD70044",
-    "pts_str": "571 pts",
-    "s5_str": "571 pts"
+    "pts_str": "507 pts",
+    "s5_str": "507 pts"
   },
   {
     "user": "Nat",
-    "all_time_pts": 478,
-    "s5": 478,
+    "all_time_pts": 378,
+    "s5": 378,
     "rank": 2,
     "rank_str": "2",
     "rank_color": "#C0C0C0",
     "rank_bg": "#C0C0C022",
     "rank_border": "1px solid #C0C0C044",
-    "pts_str": "478 pts",
-    "s5_str": "478 pts"
+    "pts_str": "378 pts",
+    "s5_str": "378 pts"
   },
   {
     "user": "Jellywaffles37",
-    "all_time_pts": 267,
-    "s5": 267,
+    "all_time_pts": 243,
+    "s5": 243,
     "rank": 3,
     "rank_str": "3",
     "rank_color": "#CD7F32",
     "rank_bg": "#CD7F3222",
     "rank_border": "1px solid #CD7F3244",
-    "pts_str": "267 pts",
-    "s5_str": "267 pts"
+    "pts_str": "243 pts",
+    "s5_str": "243 pts"
   },
   {
     "user": "uhh_josh",

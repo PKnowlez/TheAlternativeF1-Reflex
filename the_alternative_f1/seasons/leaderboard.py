@@ -362,7 +362,21 @@ class LeaderboardState(rx.State):
         data = [start_pt, preseason_pt]
 
         # 3. Completed races in chronological order
-        completed_races = ["Australia", "Imola", "Miami", "Monza"]
+        try:
+            import pandas as pd
+            df_sched = get_excel_sheet("S5Schedule")
+            df_season = get_excel_sheet("Season5")
+            all_sched_races = [str(r).strip() for r in df_sched["Race"] if pd.notna(r) and not str(r).strip().startswith(("Pre", "Post"))]
+            feature_races = [r for r in all_sched_races if "sprint" not in r.lower()]
+            completed_races = [
+                r for r in feature_races
+                if f"{r}Points" in df_season.columns and (pd.to_numeric(df_season[f"{r}Points"], errors="coerce").fillna(0) > 0).any()
+            ]
+            if not completed_races:
+                completed_races = ["Australia", "Imola", "Miami", "Monza", "Spa", "Brazil"]
+        except Exception:
+            completed_races = ["Australia", "Imola", "Miami", "Monza", "Spa", "Brazil"]
+
         for cr in completed_races:
             race_pt = {"race": cr}
             for u in users:

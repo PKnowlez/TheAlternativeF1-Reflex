@@ -396,6 +396,7 @@ def update_user_points(username: str, new_points: int):
                 sb.table("user_prediction_points").update({
                     "points": new_points,
                     "all_time_points": new_points,
+                    "season_points": {"5": new_points},
                 }).eq("username", username).execute()
                 break
             except Exception as e:
@@ -410,6 +411,7 @@ def update_user_points(username: str, new_points: int):
     if username in local_data:
         local_data[username]["points"] = new_points
         local_data[username]["all_time_points"] = new_points
+        local_data[username]["season_points"] = {"5": new_points}
         _save_local_user_points(local_data)
 
 
@@ -418,7 +420,7 @@ _SETTLEMENT_EXECUTOR = ThreadPoolExecutor(max_workers=2, thread_name_prefix="pre
 
 
 def _run_settle_completed_predictions(season_num: int = 5):
-    """Auto-settles open predictions when race results are uploaded in the Season sheet."""
+    """Auto-settles open predictions and re-evaluates settled predictions when race results are uploaded or revised in the Season sheet (TAF1APP-SDDREQ-150)."""
     sb = _get_supabase()
     if not sb:
         return
@@ -432,7 +434,7 @@ def _run_settle_completed_predictions(season_num: int = 5):
         res = None
         for attempt in range(3):
             try:
-                res = sb.table("predictions").select("*").eq("season", season_num).eq("status", "open").execute()
+                res = sb.table("predictions").select("*").eq("season", season_num).execute()
                 break
             except Exception as se:
                 if _is_transient_socket_error(se) and attempt < 2:
@@ -444,8 +446,8 @@ def _run_settle_completed_predictions(season_num: int = 5):
                     print(f"Prediction settlement socket warning: {se}")
                 return
 
-        open_preds = res.data if res and res.data else []
-        if not open_preds:
+        season_preds = res.data if res and res.data else []
+        if not season_preds:
             return
 
         all_races = [str(r).strip() for r in df_sched["Race"] if pd.notna(r) and not str(r).strip().startswith(("Pre", "Post"))]
@@ -520,7 +522,7 @@ def _run_settle_completed_predictions(season_num: int = 5):
             cd_drivers = set(df_season.loc[df_season[cd_col].apply(_is_truthy), "Driver"].dropna().astype(str).str.strip().tolist()) if cd_col else set()
 
             race_preds = [
-                p for p in open_preds 
+                p for p in season_preds 
                 if str(p.get("race", "")).strip().lower() in (main_race.lower(), (sprint_name or "").lower(), _extract_track_name(main_race).lower())
             ]
             if not race_preds:
@@ -579,20 +581,29 @@ def _run_settle_completed_predictions(season_num: int = 5):
                     opposing_split = int(round(losing_pool * (wager / float(total_win_wagers)))) if total_win_wagers > 0 else 0
                     total_payout = base_payout + opposing_split
 
-                    _sb_update_prediction(sb, p["id"], {
-                        "status": "correct",
-                        "payout": total_payout,
-                    })
-
-                    u = p["username"]
-                    curr_pts = get_user_total_points(u)
-                    update_user_points(u, curr_pts + total_payout)
+                    old_status = str(p.get("status", "open")).lower()
+                    old_payout = int(p.get("payout", 0) or 0) if old_status == "correct" else 0
+                    if old_status != "correct" or old_payout != total_payout:
+                        _sb_update_prediction(sb, p["id"], {
+                            "status": "correct",
+                            "payout": total_payout,
+                        })
+                        u = p["username"]
+                        curr_pts = get_user_total_points(u)
+                        update_user_points(u, curr_pts + (total_payout - old_payout))
 
                 for p in losers:
-                    _sb_update_prediction(sb, p["id"], {
-                        "status": "incorrect",
-                        "payout": 0,
-                    })
+                    old_status = str(p.get("status", "open")).lower()
+                    old_payout = int(p.get("payout", 0) or 0) if old_status == "correct" else 0
+                    if old_status != "incorrect" or int(p.get("payout", 0) or 0) != 0:
+                        _sb_update_prediction(sb, p["id"], {
+                            "status": "incorrect",
+                            "payout": 0,
+                        })
+                        if old_payout != 0:
+                            u = p["username"]
+                            curr_pts = get_user_total_points(u)
+                            update_user_points(u, curr_pts - old_payout)
 
             # 2. Settle Parlay Predictions (TAF1APP-SDDREQ-170: All hit -> Wager + (Wager * (0.15 + (legs * 0.1))))
             for p in parlay_preds:
@@ -643,23 +654,30 @@ def _run_settle_completed_predictions(season_num: int = 5):
 
                 wager = int(p.get("points", 0))
                 num_legs = len(legs)
+                old_status = str(p.get("status", "open")).lower()
+                old_payout = int(p.get("payout", 0) or 0) if old_status == "correct" else 0
                 if all_hit:
                     multiplier = 0.15 + (num_legs * 0.1)
                     total_payout = wager + int(round(wager * multiplier))
 
-                    _sb_update_prediction(sb, p["id"], {
-                        "status": "correct",
-                        "payout": total_payout,
-                    })
-
-                    u = p["username"]
-                    curr_pts = get_user_total_points(u)
-                    update_user_points(u, curr_pts + total_payout)
+                    if old_status != "correct" or old_payout != total_payout:
+                        _sb_update_prediction(sb, p["id"], {
+                            "status": "correct",
+                            "payout": total_payout,
+                        })
+                        u = p["username"]
+                        curr_pts = get_user_total_points(u)
+                        update_user_points(u, curr_pts + (total_payout - old_payout))
                 else:
-                    _sb_update_prediction(sb, p["id"], {
-                        "status": "incorrect",
-                        "payout": 0,
-                    })
+                    if old_status != "incorrect" or int(p.get("payout", 0) or 0) != 0:
+                        _sb_update_prediction(sb, p["id"], {
+                            "status": "incorrect",
+                            "payout": 0,
+                        })
+                        if old_payout != 0:
+                            u = p["username"]
+                            curr_pts = get_user_total_points(u)
+                            update_user_points(u, curr_pts - old_payout)
 
         # 3. Settle Full Season Predictions if season has concluded (0 remaining feature races)
         rem_feature_races = get_remaining_feature_races(season_num)
@@ -705,17 +723,19 @@ def _run_settle_completed_predictions(season_num: int = 5):
                         return False
                 return False
 
-            fs_open_preds = [
-                p for p in open_preds
+            fs_preds = [
+                p for p in season_preds
                 if str(p.get("category", "")).startswith("[Full Season]")
                 or p.get("scope") == "full_season"
-                or str(p.get("race", "")).lower() in ("season 5", "full season")
+                or str(p.get("race", "")).lower() in ("season", "season 5", "full season")
             ]
 
-            for p in fs_open_preds:
+            for p in fs_preds:
                 is_parlay = (p.get("stance") == "PARLAY" or "Parlay" in str(p.get("category", "")))
                 races_rem = int(p.get("line_value", 0) or 0)
                 wager = int(p.get("points", 0))
+                old_status = str(p.get("status", "open")).lower()
+                old_payout = int(p.get("payout", 0) or 0) if old_status == "correct" else 0
 
                 if is_parlay:
                     try:
@@ -752,12 +772,18 @@ def _run_settle_completed_predictions(season_num: int = 5):
                         num_legs = len(legs)
                         mult = 0.15 + (num_legs * 0.1) + (races_rem * 0.1)
                         total_payout = wager + int(round(wager * mult))
-                        _sb_update_prediction(sb, p["id"], {"status": "correct", "payout": total_payout})
-                        u = p["username"]
-                        curr_pts = get_user_total_points(u)
-                        update_user_points(u, curr_pts + total_payout)
+                        if old_status != "correct" or old_payout != total_payout:
+                            _sb_update_prediction(sb, p["id"], {"status": "correct", "payout": total_payout})
+                            u = p["username"]
+                            curr_pts = get_user_total_points(u)
+                            update_user_points(u, curr_pts + (total_payout - old_payout))
                     else:
-                        _sb_update_prediction(sb, p["id"], {"status": "incorrect", "payout": 0})
+                        if old_status != "incorrect" or int(p.get("payout", 0) or 0) != 0:
+                            _sb_update_prediction(sb, p["id"], {"status": "incorrect", "payout": 0})
+                            if old_payout != 0:
+                                u = p["username"]
+                                curr_pts = get_user_total_points(u)
+                                update_user_points(u, curr_pts - old_payout)
                 else:
                     cat_clean = str(p.get("category", "")).replace("[Full Season]", "").strip()
                     target = str(p.get("target", "")).strip()
@@ -782,12 +808,18 @@ def _run_settle_completed_predictions(season_num: int = 5):
                     if is_correct:
                         mult = 0.15 + (races_rem * 0.1)
                         total_payout = wager + int(round(wager * mult))
-                        _sb_update_prediction(sb, p["id"], {"status": "correct", "payout": total_payout})
-                        u = p["username"]
-                        curr_pts = get_user_total_points(u)
-                        update_user_points(u, curr_pts + total_payout)
+                        if old_status != "correct" or old_payout != total_payout:
+                            _sb_update_prediction(sb, p["id"], {"status": "correct", "payout": total_payout})
+                            u = p["username"]
+                            curr_pts = get_user_total_points(u)
+                            update_user_points(u, curr_pts + (total_payout - old_payout))
                     else:
-                        _sb_update_prediction(sb, p["id"], {"status": "incorrect", "payout": 0})
+                        if old_status != "incorrect" or int(p.get("payout", 0) or 0) != 0:
+                            _sb_update_prediction(sb, p["id"], {"status": "incorrect", "payout": 0})
+                            if old_payout != 0:
+                                u = p["username"]
+                                curr_pts = get_user_total_points(u)
+                                update_user_points(u, curr_pts - old_payout)
     except Exception as e:
         if _is_transient_socket_error(e):
             print(f"Prediction settlement socket warning (Season {season_num}): {e}")
@@ -890,10 +922,10 @@ def precompute_all_predictions(force: bool = False):
     all_preds = []
     for s in seasons:
         s_num = s["season_number"]
-        if s_num not in _SETTLED_SEASONS:
+        if force or s_num not in _SETTLED_SEASONS:
             _SETTLED_SEASONS.add(s_num)
             try:
-                settle_completed_predictions(s_num, async_run=True)
+                settle_completed_predictions(s_num, async_run=not force)
             except Exception:
                 pass
             time.sleep(0.05)

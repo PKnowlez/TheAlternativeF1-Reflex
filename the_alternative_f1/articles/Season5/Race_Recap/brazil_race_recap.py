@@ -2,8 +2,8 @@ import reflex as rx
 from the_alternative_f1.articles.components import zoomable_image, image_carousel, fia_badge
 
 article = {
-    "title": "Jelly Wins?",
-    "blurb": "Turmoil, stupidity, and lots of yelling. Viva Brasil!",
+    "title": "Jelly Wins? NO, Joshua Wins!",
+    "blurb": "Turmoil, stupidity, and lots of yelling. Viva Brasil! And Joshua's first win of the season.",
     "content": [        
         rx.vstack(
             zoomable_image(
@@ -267,13 +267,13 @@ article = {
                 ),
                 rx.unordered_list(
                     rx.list_item(
-                        "The Cadillac of Jelly moves from ninth place to first.",
+                        "The Cadillac of Jelly moves from ninth place to third (originally first).",
                     ),
                     rx.list_item(
-                        "The Red Bull of Joshua moves from first place to second.",
+                        "The Red Bull of Joshua has no change (originally moves from first place to second).",
                     ),
                     rx.list_item(
-                        "The Ferrari of Jaden moves from second place to third.",
+                        "The Ferrari of Jaden has no change (originally moves from second place to third).",
                     ),
                     rx.list_item(
                         "The Mercedes of Jairo moves from third place to fourth.",
@@ -421,7 +421,7 @@ article = {
             width="100%",
         ),    
     ],
-    "image": "/thealternativef1-cloudflare/Season5/Race_Recap/Brazil/brazil_title.png",
+    "image": "/thealternativef1-cloudflare/Season5/Race_Recap/Brazil/brazil_title_base.png",
     "author": "The Intern",
     "date": "October 29, 2026",
     "season": 5,
