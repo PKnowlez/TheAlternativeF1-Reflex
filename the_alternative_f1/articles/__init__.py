@@ -32,8 +32,11 @@ from .Season5.Race_Recap.spa_race_recap import article as Spa_Race_Recap_Article
 from .Season5.Race_Recap.spa_mercedes import article as Spa_Mercedes_Article
 from .Season5.Race_Week.brazil_race_week import article as Brazil_Race_Week_Article
 from .Season5.Race_Recap.brazil_race_recap import article as Brazil_Race_Recap_Article
+from .Season5.Race_Recap.brazil_joint import article as Brazil_Joint_Article
+from .Season5.Race_Recap.brazil_cadillac import article as Brazil_Cadillac_Article
 
-articles = [Brazil_Race_Recap_Article, Brazil_Race_Week_Article, 
+articles = [Brazil_Cadillac_Article, 
+Brazil_Joint_Article, Brazil_Race_Recap_Article, Brazil_Race_Week_Article, 
 Spa_Mercedes_Article, Spa_Race_Recap_Article, Spa_Race_Week_Article, 
 Monza_RedBull_Article, Monza_Race_Recap_Article, Monza_Race_Week_Article, 
 Miami_Race_Recap_Article, Miami_Race_Week_Article, Bye_Week_Article1, 
