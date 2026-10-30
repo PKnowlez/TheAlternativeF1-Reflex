@@ -110,24 +110,32 @@ def get_race_metrics(
         p_val = row.get(place_col)
         status_p = parse_status(p_val, season_num)
         if status_p not in ("EMPTY", "DNS"):
-            competitors.append(driver)
+            if driver and driver not in competitors:
+                competitors.append(driver)
 
     n_competed = len(competitors)
     drivers_data: Dict[str, Dict[str, Any]] = {}
 
     for _, row in df.iterrows():
         driver = str(row.get("Driver", "")).strip()
+        if not driver:
+            continue
         p_val = row.get(place_col)
         status_p = parse_status(p_val, season_num)
 
+        # Multi-team driver safeguard: if already recorded as competed in this race, don't overwrite with DNS/EMPTY
+        if driver in drivers_data and drivers_data[driver].get("competed") and status_p in ("EMPTY", "DNS"):
+            continue
+
         if status_p in ("EMPTY", "DNS") or n_competed == 0:
-            drivers_data[driver] = {
-                "competed": False,
-                "effective_place": None,
-                "effective_qual": None,
-                "effective_start": None,
-                "pos_change": None,
-            }
+            if driver not in drivers_data or not drivers_data[driver].get("competed"):
+                drivers_data[driver] = {
+                    "competed": False,
+                    "effective_place": None,
+                    "effective_qual": None,
+                    "effective_start": None,
+                    "pos_change": None,
+                }
             continue
 
         # Finishing place

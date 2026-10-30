@@ -12,7 +12,7 @@ import reflex as rx
 from the_alternative_f1.all_time_stats.Functions import get_excel_sheet, CalculateAllTime, PointTotals, file as excel_file, get_all_time_highest_positions
 from the_alternative_f1.constructor_colors import get_constructor_color
 from the_alternative_f1.articles.components import zoomable_chart, DownloadState, chart_header
-from the_alternative_f1.race_metrics import get_race_metrics
+from the_alternative_f1.race_metrics import get_race_metrics, parse_status
 
 _CACHE_FILE = Path(__file__).parent / "detailed_cache.pickle"
 _detailed_cache = {}
@@ -24,6 +24,12 @@ def _get_mtime():
     return p.stat().st_mtime if p.exists() else 0
 
 
+def clear_detailed_cache():
+    global _detailed_cache, _detailed_mtime
+    _detailed_cache.clear()
+    _detailed_mtime = 0
+
+
 def load_detailed_cache() -> bool:
     global _detailed_cache, _detailed_mtime
     if not _detailed_cache and _CACHE_FILE.exists():
@@ -32,7 +38,7 @@ def load_detailed_cache() -> bool:
                 data = pickle.load(f)
                 if isinstance(data, dict):
                     _detailed_cache = data.get("cache", {})
-                    _detailed_mtime = _get_mtime()
+                    _detailed_mtime = data.get("mtime", 0)
                     return True
         except Exception as e:
             print(f"Warning: Failed to load detailed cache: {e}")
@@ -42,8 +48,9 @@ def load_detailed_cache() -> bool:
 def save_detailed_cache() -> bool:
     global _detailed_cache, _detailed_mtime
     try:
+        _detailed_mtime = _get_mtime()
         with open(_CACHE_FILE, "wb") as f:
-            pickle.dump({"cache": _detailed_cache, "mtime": _get_mtime()}, f)
+            pickle.dump({"cache": _detailed_cache, "mtime": _detailed_mtime}, f)
         return True
     except Exception as e:
         print(f"Warning: Failed to save detailed cache: {e}")
@@ -458,16 +465,39 @@ def compute_entity_detailed_metrics(num_seasons: int, entity_type: str, entity_n
             metrics = get_race_metrics(df_copy, place_col, qual_col if qual_col in df_copy.columns else None, s)
 
             if entity_type == "Driver":
-                row = entity_rows.iloc[0]
+                # Find active row for multi-team drivers (e.g. Del / Zane in Season 3)
+                if len(entity_rows) > 1:
+                    row = entity_rows.iloc[0]
+                    for _, er in entity_rows.iterrows():
+                        er_p = er.get(place_col)
+                        if er_p is not None and not pd.isnull(er_p):
+                            st = parse_status(er_p, s)
+                            if st not in ("EMPTY", "DNS"):
+                                row = er
+                                break
+                        if pts_col in er and pd.to_numeric(er[pts_col], errors='coerce') > 0:
+                            row = er
+                            break
+                    if pts_col in entity_rows.columns:
+                        pts = float(pd.to_numeric(entity_rows[pts_col], errors='coerce').fillna(0).sum())
+                    else:
+                        pts = 0.0
+                    fl = any(is_truthy(er.get(fl_col)) for _, er in entity_rows.iterrows() if fl_col in er)
+                    dotd = any(is_truthy(er.get(dotd_col)) for _, er in entity_rows.iterrows() if dotd_col in er)
+                    mot = any(is_truthy(er.get(mot_col)) for _, er in entity_rows.iterrows() if mot_col in er)
+                    cd = any(is_truthy(er.get(cd_col)) for _, er in entity_rows.iterrows() if cd_col in er)
+                else:
+                    row = entity_rows.iloc[0]
+                    pts = row[pts_col] if pts_col in row and not pd.isnull(row[pts_col]) else 0.0
+                    fl = row[fl_col] if fl_col in row and not pd.isnull(row[fl_col]) else "N"
+                    dotd = row[dotd_col] if dotd_col in row and not pd.isnull(row[dotd_col]) else "N"
+                    mot = row[mot_col] if mot_col in row and not pd.isnull(row[mot_col]) else "N"
+                    cd = row[cd_col] if cd_col in row and not pd.isnull(row[cd_col]) else "N"
+
                 d_info = metrics["drivers"].get(entity_name, {})
                 competed = d_info.get("competed", False)
-                pts = row[pts_col] if pts_col in row and not pd.isnull(row[pts_col]) else 0.0
-                fl = row[fl_col] if fl_col in row and not pd.isnull(row[fl_col]) else "N"
-                dotd = row[dotd_col] if dotd_col in row and not pd.isnull(row[dotd_col]) else "N"
-                mot = row[mot_col] if mot_col in row and not pd.isnull(row[mot_col]) else "N"
-                cd = row[cd_col] if cd_col in row and not pd.isnull(row[cd_col]) else "N"
 
-                if not competed and pd.isnull(pts):
+                if not competed and (pd.isnull(pts) or pts == 0.0):
                     continue
 
                 place_val = float(d_info.get("effective_place")) if d_info.get("effective_place") is not None else 0.0

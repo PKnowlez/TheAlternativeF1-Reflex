@@ -913,8 +913,26 @@ def get_driver_deep_stats_profile(driver_name: str) -> str:
                     s_s_win_list = [r["race"] for _, r in s_s.iterrows() if r["wins_cnt"] == 1]
                     s_wins_by_s.append(f"S{s_idx}: {w_s} ({', '.join(s_s_win_list)})")
                 f_pods_by_s.append(f"S{s_idx}: {p_f}")
-                if p_s > 0: s_pods_by_s.append(f"S{s_idx}: {p_s}")
-                pts_by_s.append(f"S{s_idx}: {pts:g}pts")
+                # Check for mid-season team swap in this season
+                s_teams = []
+                try:
+                    from the_alternative_f1.all_time_stats.Functions import get_excel_sheet
+                    df_s = get_excel_sheet(f"Season{s_idx}")
+                    if not df_s.empty and "Driver" in df_s.columns and "Team" in df_s.columns:
+                        s_teams = df_s[df_s["Driver"].astype(str).str.strip() == driver_name_clean]["Team"].astype(str).str.strip().unique().tolist()
+                except Exception:
+                    pass
+
+                if len(s_teams) > 1:
+                    team_pts_breakdown = []
+                    for tm in s_teams:
+                        tm_row = df_s[(df_s["Driver"].astype(str).str.strip() == driver_name_clean) & (df_s["Team"].astype(str).str.strip() == tm)]
+                        tm_pts_cols = [c for c in tm_row.columns if c.endswith("Points")]
+                        tm_pts = float(pd.to_numeric(tm_row[tm_pts_cols].sum(axis=1), errors='coerce').fillna(0).sum())
+                        team_pts_breakdown.append(f"{tm}: {tm_pts:g}pts")
+                    pts_by_s.append(f"S{s_idx}: {pts:g}pts ({' + '.join(team_pts_breakdown)} - Mid-Season Team Swap)")
+                else:
+                    pts_by_s.append(f"S{s_idx}: {pts:g}pts")
 
                 s_comp = s_all[s_all["competed"] == True] if "competed" in s_all.columns else s_all
                 s_vp = s_comp[s_comp["place"] > 0]["place"]
@@ -3254,6 +3272,13 @@ def build_grounded_league_context(force: bool = False) -> str:
         all_time_drivers = CalculateAllTime(5, "Driver")
         if all_time_drivers is not None and not all_time_drivers.empty:
             lines.append("## ALL-TIME LEAGUE DRIVER CAREER RECORDS (ALL SEASONS CUMULATIVE)")
+            lines.append(
+                "CRITICAL MULTI-TEAM DRIVER DIRECTIVE (DEL SEASON 3 MID-SEASON SWAP):\n"
+                "- In Season 3, Del competed for TWO constructors: Aston Martin (rounds 1–10: 79 pts, including 1st at Canada) and Ferrari (rounds 11–15: 53 pts).\n"
+                "- Del's Season 3 total is exactly 132 points (79 + 53 = 132 pts).\n"
+                "- Del's official All-Time Career Points across his 4 seasons is exactly 442 points (S2: 191 + S3: 132 + S4: 86 + S5: 33 = 442 pts).\n"
+                "- NEVER report 363 points for Del; 363 points is an incomplete partial sum that omits his 79 points scored for Aston Martin in Season 3.\n"
+            )
             lines.append("| Rank | Driver | Career Points | Wins (1st) | 2nd | 3rd | Podiums | Championships | Highest Rank | Single Season Win Streak |")
             lines.append("| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |")
             for _, r in all_time_drivers.iterrows():

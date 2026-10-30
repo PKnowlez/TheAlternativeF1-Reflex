@@ -627,7 +627,8 @@
       "Miami",
       "Monza",
       "Spa Sprint",
-      "Spa"
+      "Spa",
+      "Brazil"
     ],
     "rankings": {
       "Preseason": [
@@ -716,6 +717,16 @@
         "Haas",
         "McLaren",
         "Red Bull",
+        "Mercedes",
+        "Audi",
+        "Williams"
+      ],
+      "Brazil": [
+        "Cadillac",
+        "Ferrari",
+        "Red Bull",
+        "McLaren",
+        "Haas",
         "Mercedes",
         "Audi",
         "Williams"

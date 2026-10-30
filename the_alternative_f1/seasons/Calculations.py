@@ -50,16 +50,27 @@ def save_calculations_cache() -> bool:
         return False
 
 
+def clear_calculations_cache():
+    global _calculations_cache, _calculations_mtime
+    _calculations_cache.clear()
+    _calculations_mtime.clear()
+
+
 load_calculations_cache()
 
 
-def Calculations(season_data: dict, sprint_only: bool = False) -> dict:
-    global _last_excel_mtime
+def Calculations(season_data: dict, sprint_only: bool = False, force: bool = False) -> dict:
+    global _calculations_cache, _calculations_mtime, _last_excel_mtime
     # Use sheet_name and sprint_only as the cache key
     cache_key = (season_data["sheet_name"], sprint_only)
-    
-    if cache_key in _calculations_cache:
-        return _calculations_cache[cache_key]
+
+    excel_path = Path(_EXCEL_PATH)
+    current_mtime = excel_path.stat().st_mtime if excel_path.exists() else 0
+
+    if not force and cache_key in _calculations_cache:
+        cached_mtime = _calculations_mtime.get(cache_key, _last_excel_mtime)
+        if current_mtime <= cached_mtime:
+            return _calculations_cache[cache_key]
 
     """Run all calculations for the given season and return a results dict.
 
@@ -381,4 +392,5 @@ def Calculations(season_data: dict, sprint_only: bool = False) -> dict:
     }
     _calculations_cache[cache_key] = result
     _calculations_mtime[cache_key] = current_mtime
+    _last_excel_mtime = current_mtime
     return result

@@ -24,14 +24,21 @@ def main():
     print("STARTING LOCAL LEAGUE DATA PRECOMPUTATION & CACHING")
     print("=" * 70)
 
+    # 0. Flush any stale in-memory or on-disk caches
+    from the_alternative_f1.all_time_stats.Functions import clear_excel_cache
+    from the_alternative_f1.seasons.Calculations import clear_calculations_cache, Calculations, save_calculations_cache
+    from the_alternative_f1.all_time_stats.DetailedAllTime import clear_detailed_cache
+    clear_excel_cache()
+    clear_calculations_cache()
+    clear_detailed_cache()
+
     # 1. Warm up season calculations
     print("\n[1/5] Calculating Season Results (Seasons 1-5)...")
     t0 = time.time()
     from the_alternative_f1.seasons import seasons
-    from the_alternative_f1.seasons.Calculations import Calculations, save_calculations_cache, _calculations_cache
     for s in seasons:
-        Calculations(s, sprint_only=False)
-        Calculations(s, sprint_only=True)
+        Calculations(s, sprint_only=False, force=True)
+        Calculations(s, sprint_only=True, force=True)
     save_calculations_cache()
     calc_path = Path("the_alternative_f1/seasons/calculations_cache.pickle")
     calc_size = calc_path.stat().st_size // 1024 if calc_path.exists() else 0
@@ -40,6 +47,7 @@ def main():
     # 2. Warm up all-time detailed statistics
     print("\n[2/5] Calculating All-Time Detailed Driver & Constructor Metrics...")
     t0 = time.time()
+    clear_detailed_cache()
     from the_alternative_f1.all_time_stats.DetailedAllTime import (
         get_entity_lists,
         compute_entity_detailed_metrics,
@@ -65,8 +73,8 @@ def main():
         precompute_leaderboard_cache,
     )
     precompute_all_power_rankings(force=True)
-    precompute_all_season_projections()
-    precompute_all_predictions()
+    precompute_all_season_projections(force=True)
+    precompute_all_predictions(force=True)
     precompute_leaderboard_cache(force=True)
     print(f"  -> JSON state datasets synced in {time.time() - t0:.2f}s")
 

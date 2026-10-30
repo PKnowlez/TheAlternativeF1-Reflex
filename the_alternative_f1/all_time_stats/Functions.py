@@ -21,6 +21,12 @@ _excel_sheets_cache = {}
 _excel_mtime = 0
 _func_cache = {}
 
+def clear_excel_cache():
+    global _excel_sheets_cache, _excel_mtime, _func_cache
+    _excel_sheets_cache.clear()
+    _func_cache.clear()
+    _excel_mtime = 0
+
 def get_excel_sheet(sheet_name: str) -> pd.DataFrame:
     global _excel_sheets_cache, _excel_mtime, _func_cache
     excel_path = Path(file)

@@ -213,7 +213,25 @@ def build_grounded_stats_dict(excel_path: Path = _EXCEL_PATH) -> dict:
                 f_pods_by_s.append(f"S{s_idx}: {p_f}")
                 if p_s > 0:
                     s_pods_by_s.append(f"S{s_idx}: {p_s}")
-                pts_by_s.append(f"S{s_idx}: {pts:g}pts")
+                # Check for mid-season team swap in this season
+                s_teams = []
+                try:
+                    df_s = get_excel_sheet(f"Season{s_idx}")
+                    if not df_s.empty and "Driver" in df_s.columns and "Team" in df_s.columns:
+                        s_teams = df_s[df_s["Driver"].astype(str).str.strip() == d_name]["Team"].astype(str).str.strip().unique().tolist()
+                except Exception:
+                    pass
+
+                if len(s_teams) > 1:
+                    team_pts_breakdown = []
+                    for tm in s_teams:
+                        tm_row = df_s[(df_s["Driver"].astype(str).str.strip() == d_name) & (df_s["Team"].astype(str).str.strip() == tm)]
+                        tm_pts_cols = [c for c in tm_row.columns if c.endswith("Points")]
+                        tm_pts = float(pd.to_numeric(tm_row[tm_pts_cols].sum(axis=1), errors='coerce').fillna(0).sum())
+                        team_pts_breakdown.append(f"{tm}: {tm_pts:g}pts")
+                    pts_by_s.append(f"S{s_idx}: {pts:g}pts ({' + '.join(team_pts_breakdown)} - Mid-Season Team Swap)")
+                else:
+                    pts_by_s.append(f"S{s_idx}: {pts:g}pts")
 
                 s_comp = s_all[s_all["competed"] == True] if "competed" in s_all.columns else s_all
                 s_vp = s_comp[s_comp["place"] > 0]["place"]
@@ -269,6 +287,7 @@ def build_grounded_stats_dict(excel_path: Path = _EXCEL_PATH) -> dict:
         driver_obj = {
             "driver": d_name,
             "total_points": round(tot_pts, 1),
+            "points_by_season": pts_by_s,
             "feature_wins": tot_f_wins,
             "sprint_wins": tot_s_wins,
             "feature_podiums": tot_f_pods,

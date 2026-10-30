@@ -1,0 +1,33 @@
+{
+  "id": "/?source=pwa",
+  "name": "The Alternative F1",
+  "short_name": "Alternative F1",
+  "description": "The premier competitive F1 league statistics, telemetry, and race hub.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "categories": ["sports", "entertainment"],
+  "icons": [
+    {
+      "src": "/Icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/Icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/Icons/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
