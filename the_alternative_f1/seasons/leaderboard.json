@@ -97,14 +97,14 @@
   },
   {
     "user": "Jatthew Newman",
-    "all_time_pts": 34,
-    "s5": 34,
+    "all_time_pts": 0,
+    "s5": 0,
     "rank": 9,
     "rank_str": "9",
     "rank_color": "#888888",
     "rank_bg": "#88888822",
     "rank_border": "1px solid #88888844",
-    "pts_str": "34 pts",
-    "s5_str": "34 pts"
+    "pts_str": "0 pts",
+    "s5_str": "0 pts"
   }
 ]

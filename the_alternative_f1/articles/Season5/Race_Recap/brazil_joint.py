@@ -20,7 +20,7 @@ article = {
                 rx.text(
                     "Upon request from Cadillac, the FIA evaluated the on track scenario caused by the VSC delta glitch. While the final ruling was \
                         adjuducated fairly within the regulations, drivers from both Red Bull and Ferrari came forward to protest the change in final results. \
-                            While protestes were being finalized, the FIA connected all three drivers (Jelly, Joshua, and Jaden), for a joint discussion. \
+                            While protests were being finalized, the FIA connected all three drivers (Jelly, Joshua, and Jaden), for a joint discussion. \
                                 During this discussion the drivers and teams came to a joint decision to honor the FIA's ruling, but request a modification.",
                     color="white",
                     font_size="md",
