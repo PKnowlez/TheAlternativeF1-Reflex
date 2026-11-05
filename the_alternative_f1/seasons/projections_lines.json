@@ -119,6 +119,30 @@
         "Red Bull": 28.0,
         "Williams": 2.5
       }
+    },
+    "Suzuka": {
+      "season": 5,
+      "next_race": "Suzuka",
+      "next_main_race": "Suzuka",
+      "expected_winner": "McLaren",
+      "expected_winner_prob": 56.8,
+      "expected_highest_score_team": "McLaren",
+      "expected_highest_score_pts": 40,
+      "expected_podium": [
+        "McLaren",
+        "Red Bull",
+        "Ferrari"
+      ],
+      "expected_points_lines": {
+        "Audi": 1.5,
+        "Cadillac": 11.5,
+        "Ferrari": 19.5,
+        "Haas": 6.5,
+        "McLaren": 39.5,
+        "Mercedes": 4.5,
+        "Red Bull": 20.5,
+        "Williams": 1.5
+      }
     }
   },
   "4": {

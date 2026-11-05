@@ -628,7 +628,9 @@
       "Monza",
       "Spa Sprint",
       "Spa",
-      "Brazil"
+      "Brazil",
+      "Silverstone Sprint",
+      "Silverstone"
     ],
     "rankings": {
       "Preseason": [
@@ -724,6 +726,26 @@
       "Brazil": [
         "Cadillac",
         "Ferrari",
+        "Red Bull",
+        "McLaren",
+        "Haas",
+        "Mercedes",
+        "Audi",
+        "Williams"
+      ],
+      "Silverstone Sprint": [
+        "Cadillac",
+        "Ferrari",
+        "Red Bull",
+        "Mercedes",
+        "Haas",
+        "McLaren",
+        "Williams",
+        "Audi"
+      ],
+      "Silverstone": [
+        "Ferrari",
+        "Cadillac",
         "Red Bull",
         "McLaren",
         "Haas",

@@ -1,5 +1,19 @@
 [
   {
+    "id": 1793665810092,
+    "username": "uhh_josh",
+    "season": 5,
+    "race": "Silverstone",
+    "category": "Parlay (4 Legs)",
+    "target": "[{\"leg_num\": \"1\", \"category\": \"Expected Race Winner\", \"target\": \"Red Bull\", \"stance\": \"FOR\", \"line_value\": null}, {\"leg_num\": \"2\", \"category\": \"Podium Teams\", \"target\": \"Cadillac\", \"stance\": \"FOR\", \"line_value\": null}, {\"leg_num\": \"3\", \"category\": \"Highest Scoring Team\", \"target\": \"Ferrari\", \"stance\": \"FOR\", \"line_value\": null}, {\"leg_num\": \"4\", \"category\": \"Most Overtakes\", \"target\": \"Red Bull\", \"stance\": \"FOR\", \"line_value\": null}]",
+    "line_value": null,
+    "stance": "PARLAY",
+    "points": 10,
+    "status": "incorrect",
+    "payout": 0,
+    "created_at": "2026-11-03T00:30:10.092118+00:00"
+  },
+  {
     "id": 1793502219472,
     "username": "Jatthew Newman",
     "season": 5,
@@ -9,8 +23,8 @@
     "line_value": null,
     "stance": "AGAINST",
     "points": 34,
-    "status": "open",
-    "payout": 0,
+    "status": "correct",
+    "payout": 39,
     "created_at": "2026-11-01T03:03:39.472944+00:00"
   },
   {
