@@ -11,6 +11,7 @@ Implements TAF1APP-SDDFEAT-14 and downstream approved SDD Requirements:
 """
 
 import json
+import pickle
 from collections import defaultdict, deque
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Any
@@ -108,11 +109,41 @@ def build_teammate_network_data() -> Tuple[Dict[str, Any], List[Dict[str, Any]],
                     "color2": drivers_data.get(pair_key[1], {}).get("color", "#888888"),
                 })
 
-    return drivers_data, edges_list, adjacency
+    plain_adjacency = {u: dict(neighbors) for u, neighbors in adjacency.items()}
+    return drivers_data, edges_list, plain_adjacency
 
 
-# Pre-compute static network dataset
-NETWORK_DRIVERS, NETWORK_EDGES, NETWORK_ADJACENCY = build_teammate_network_data()
+_NETWORK_CACHE_FILE = Path(__file__).parent / "network_cache.pickle"
+
+
+def load_network_cache():
+    if _NETWORK_CACHE_FILE.exists():
+        try:
+            with open(_NETWORK_CACHE_FILE, "rb") as f:
+                data = pickle.load(f)
+                if isinstance(data, tuple) and len(data) == 3:
+                    return data
+        except Exception as e:
+            print(f"Warning: Failed to load network cache: {e}")
+    return None
+
+
+def save_network_cache() -> bool:
+    try:
+        with open(_NETWORK_CACHE_FILE, "wb") as f:
+            pickle.dump((NETWORK_DRIVERS, NETWORK_EDGES, NETWORK_ADJACENCY), f)
+        return True
+    except Exception as e:
+        print(f"Warning: Failed to save network cache: {e}")
+        return False
+
+
+# Pre-compute static network dataset (load precomputed pickle first)
+_cached_net = load_network_cache()
+if _cached_net is not None:
+    NETWORK_DRIVERS, NETWORK_EDGES, NETWORK_ADJACENCY = _cached_net
+else:
+    NETWORK_DRIVERS, NETWORK_EDGES, NETWORK_ADJACENCY = build_teammate_network_data()
 ALL_DRIVER_NAMES = sorted(list(NETWORK_DRIVERS.keys()))
 
 

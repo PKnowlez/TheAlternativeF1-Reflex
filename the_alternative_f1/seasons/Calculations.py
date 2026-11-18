@@ -30,9 +30,11 @@ def load_calculations_cache() -> bool:
                 data = pickle.load(f)
                 if isinstance(data, dict):
                     _calculations_cache = data.get("cache", {})
-                    _calculations_mtime = data.get("mtime", {})
                     excel_path = Path(_EXCEL_PATH)
                     _last_excel_mtime = excel_path.stat().st_mtime if excel_path.exists() else 0
+                    # Anchor all precomputed cache timestamps to the current on-disk mtime
+                    # so container file extraction timestamps never invalidate the cache.
+                    _calculations_mtime = {k: _last_excel_mtime for k in _calculations_cache}
                     return True
         except Exception as e:
             print(f"Warning: Failed to load calculations cache: {e}")

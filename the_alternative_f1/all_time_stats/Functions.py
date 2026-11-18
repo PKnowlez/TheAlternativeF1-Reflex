@@ -3,6 +3,7 @@
 
 import os
 import json
+import pickle
 from pathlib import Path
 import pandas as pd
 import numpy as np
@@ -16,16 +17,44 @@ points_suffix = "Points"
 # Resolve file path dynamically to locate the Excel sheet in the parent folder
 current_dir = Path(__file__).parent
 file = str((current_dir.parent / "The_Alternative_F1.xlsx").resolve())
+_FUNCTIONS_CACHE_FILE = current_dir / "functions_cache.pickle"
 
 _excel_sheets_cache = {}
 _excel_mtime = 0
 _func_cache = {}
+
+def load_functions_cache() -> bool:
+    global _func_cache, _excel_mtime
+    if not _func_cache and _FUNCTIONS_CACHE_FILE.exists():
+        try:
+            with open(_FUNCTIONS_CACHE_FILE, "rb") as f:
+                data = pickle.load(f)
+                if isinstance(data, dict):
+                    _func_cache = data.get("func_cache", {})
+                    excel_path = Path(file)
+                    _excel_mtime = excel_path.stat().st_mtime if excel_path.exists() else 0
+                    return bool(_func_cache)
+        except Exception as e:
+            print(f"Warning: Failed to load functions cache: {e}")
+    return False
+
+def save_functions_cache() -> bool:
+    global _func_cache
+    try:
+        with open(_FUNCTIONS_CACHE_FILE, "wb") as f:
+            pickle.dump({"func_cache": _func_cache}, f)
+        return True
+    except Exception as e:
+        print(f"Warning: Failed to save functions cache: {e}")
+        return False
 
 def clear_excel_cache():
     global _excel_sheets_cache, _excel_mtime, _func_cache
     _excel_sheets_cache.clear()
     _func_cache.clear()
     _excel_mtime = 0
+
+load_functions_cache()
 
 def get_excel_sheet(sheet_name: str) -> pd.DataFrame:
     global _excel_sheets_cache, _excel_mtime, _func_cache

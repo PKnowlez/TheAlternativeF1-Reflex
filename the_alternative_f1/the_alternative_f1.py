@@ -290,8 +290,8 @@ def warm_up_caches():
 
 STATIC_TICKER_ITEMS = precompute_ticker_items()
 
-import threading
-threading.Thread(target=warm_up_caches, daemon=True).start()
+# Skip startup warm_up_caches thread when precomputed caches are already loaded
+# to avoid GIL contention and Supabase network calls during container readiness checks.
 
 _SVG_RAW_DATA_CACHE = {}
 

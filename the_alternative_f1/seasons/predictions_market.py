@@ -72,12 +72,21 @@ WIN_MARGIN_OPTIONS = [
 ]
 
 
+_ACTIVE_CONSTRUCTORS_CACHE: dict[int, list[str]] = {}
+_ACTIVE_DRIVERS_CACHE: dict[int, list[str]] = {}
+_DRIVER_CONSTRUCTOR_CACHE: dict[tuple[int, str], str] = {}
+
+
 def get_active_constructors(season_num: int = 5) -> list[str]:
     """Returns active constructors for the specified season."""
+    if season_num in _ACTIVE_CONSTRUCTORS_CACHE:
+        return _ACTIVE_CONSTRUCTORS_CACHE[season_num]
     try:
         df = get_excel_sheet(f"Season{season_num}")
         if not df.empty and "Team" in df.columns:
-            return sorted([str(t).strip() for t in df["Team"].dropna().unique() if str(t).strip()])
+            res = sorted([str(t).strip() for t in df["Team"].dropna().unique() if str(t).strip()])
+            _ACTIVE_CONSTRUCTORS_CACHE[season_num] = res
+            return res
     except Exception:
         pass
     return ["Audi", "Cadillac", "Ferrari", "Haas", "McLaren", "Mercedes", "Red Bull", "Williams"]
@@ -85,10 +94,14 @@ def get_active_constructors(season_num: int = 5) -> list[str]:
 
 def get_active_drivers(season_num: int = 5) -> list[str]:
     """Returns active drivers for the specified season."""
+    if season_num in _ACTIVE_DRIVERS_CACHE:
+        return _ACTIVE_DRIVERS_CACHE[season_num]
     try:
         df = get_excel_sheet(f"Season{season_num}")
         if not df.empty and "Driver" in df.columns:
-            return sorted([str(d).strip() for d in df["Driver"].dropna().unique() if str(d).strip()])
+            res = sorted([str(d).strip() for d in df["Driver"].dropna().unique() if str(d).strip()])
+            _ACTIVE_DRIVERS_CACHE[season_num] = res
+            return res
     except Exception:
         pass
     return ['Boz', 'Brently', 'Del', 'Eddie', 'Evelo', 'Grayson', 'Jaden', 'Jairo', 'Jelly', 'Josh C.', 'Joshua', 'Leo', 'Matthew', 'Nick', 'Patrick', 'Randy']
@@ -96,13 +109,19 @@ def get_active_drivers(season_num: int = 5) -> list[str]:
 
 def get_driver_constructor(driver_name: str, season_num: int = 5) -> str:
     """Returns the constructor a driver belongs to in the given season."""
+    cache_key = (season_num, driver_name)
+    if cache_key in _DRIVER_CONSTRUCTOR_CACHE:
+        return _DRIVER_CONSTRUCTOR_CACHE[cache_key]
     try:
         df = get_excel_sheet(f"Season{season_num}")
         match = df[df["Driver"].astype(str).str.strip().str.lower() == driver_name.strip().lower()]
         if not match.empty:
-            return str(match.iloc[0]["Team"]).strip()
+            res = str(match.iloc[0]["Team"]).strip()
+            _DRIVER_CONSTRUCTOR_CACHE[cache_key] = res
+            return res
     except Exception:
         pass
+    _DRIVER_CONSTRUCTOR_CACHE[cache_key] = ""
     return ""
 
 
@@ -845,7 +864,9 @@ def get_all_predictions(season_num: int = 5, force_fetch: bool = False) -> list[
     if not force_fetch and season_num in _PREDICTIONS_CACHE:
         return _PREDICTIONS_CACHE[season_num]
 
-    if season_num not in _SETTLED_SEASONS:
+    # Only run settlement when explicitly refreshing (force_fetch=True) so initial
+    # read-only hydration never fires background Supabase/Pandas threads at startup.
+    if force_fetch and season_num not in _SETTLED_SEASONS:
         _SETTLED_SEASONS.add(season_num)
         try:
             settle_completed_predictions(season_num, async_run=True)
@@ -900,7 +921,8 @@ def precompute_all_predictions(force: bool = False):
                 if res_pts.data:
                     local_data = _load_local_user_points()
                     for r in res_pts.data:
-                        u = normalize_username(str(r.get("display_name") or r.get("username", "")).strip())
+                        raw_uname = str(r.get("username", "")).strip()
+                        u = normalize_username(str(r.get("display_name") or raw_uname).strip())
                         if u and u != "Matthew Newman":
                             pts = int(r.get("points", 100))
                             local_data[u] = {
@@ -908,6 +930,15 @@ def precompute_all_predictions(force: bool = False):
                                 "all_time_points": pts,
                                 "season_points": {"5": pts},
                             }
+                            if force and (r.get("season_points") != {"5": pts} or int(r.get("all_time_points", 0) or 0) != pts):
+                                try:
+                                    sb.table("user_prediction_points").update({
+                                        "points": pts,
+                                        "all_time_points": pts,
+                                        "season_points": {"5": pts},
+                                    }).eq("username", raw_uname).execute()
+                                except Exception:
+                                    pass
                     _save_local_user_points(local_data)
                 break
             except Exception as e:

@@ -341,8 +341,8 @@ class LeaderboardState(rx.State):
 
         from the_alternative_f1.seasons.projections import compute_season_projections
         proj = compute_season_projections(5)
-        next_race_name = proj.get("next_main_race", proj.get("next_race", "Spa"))
-        current_race = next_race_name if next_race_name else "Spa"
+        next_race_name = proj.get("next_main_race", proj.get("next_race", "Suzuka"))
+        current_race = next_race_name if next_race_name else "Suzuka"
 
         all_preds = get_all_predictions(5)
         users = [r["user"] for r in rows]
@@ -373,9 +373,9 @@ class LeaderboardState(rx.State):
                 if f"{r}Points" in df_season.columns and (pd.to_numeric(df_season[f"{r}Points"], errors="coerce").fillna(0) > 0).any()
             ]
             if not completed_races:
-                completed_races = ["Australia", "Imola", "Miami", "Monza", "Spa", "Brazil"]
+                completed_races = ["Australia", "Imola", "Miami", "Monza", "Spa", "Brazil", "Silverstone"]
         except Exception:
-            completed_races = ["Australia", "Imola", "Miami", "Monza", "Spa", "Brazil"]
+            completed_races = ["Australia", "Imola", "Miami", "Monza", "Spa", "Brazil", "Silverstone"]
 
         for cr in completed_races:
             race_pt = {"race": cr}

@@ -35,8 +35,11 @@ from .Season5.Race_Recap.brazil_race_recap import article as Brazil_Race_Recap_A
 from .Season5.Race_Recap.brazil_joint import article as Brazil_Joint_Article
 from .Season5.Race_Recap.brazil_cadillac import article as Brazil_Cadillac_Article
 from .Season5.Race_Week.silverstone_race_week import article as Silverstone_Race_Week_Article
+from .Season5.Race_Recap.silverstone_race_recap import article as Silverstone_Race_Recap_Article
+from .Season5.Race_Week.suzuka_race_week import article as Suzuka_Race_Week_Article
 
-articles = [Silverstone_Race_Week_Article, Brazil_Cadillac_Article, 
+articles = [Suzuka_Race_Week_Article,
+Silverstone_Race_Recap_Article, Silverstone_Race_Week_Article, Brazil_Cadillac_Article, 
 Brazil_Joint_Article, Brazil_Race_Recap_Article, Brazil_Race_Week_Article, 
 Spa_Mercedes_Article, Spa_Race_Recap_Article, Spa_Race_Week_Article, 
 Monza_RedBull_Article, Monza_Race_Recap_Article, Monza_Race_Week_Article, 

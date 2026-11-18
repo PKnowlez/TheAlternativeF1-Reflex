@@ -282,7 +282,7 @@ _power_rankings_mtime = 0
 _power_rankings_json_mtime = 0
 
 def _sync_cache_from_json():
-    global _power_rankings_cache, _power_rankings_json_mtime
+    global _power_rankings_cache, _power_rankings_mtime, _power_rankings_json_mtime
     if not JSON_PATH.exists():
         return
     current_json_mtime = JSON_PATH.stat().st_mtime
@@ -291,6 +291,8 @@ def _sync_cache_from_json():
             with open(JSON_PATH, "r", encoding="utf-8") as f:
                 _power_rankings_cache = json.load(f)
             _power_rankings_json_mtime = current_json_mtime
+            if _power_rankings_mtime == 0 and _EXCEL_PATH.exists():
+                _power_rankings_mtime = _EXCEL_PATH.stat().st_mtime
         except Exception as e:
             print(f"Error reading power_rankings.json: {e}")
 

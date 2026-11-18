@@ -44,20 +44,23 @@ def main():
     calc_size = calc_path.stat().st_size // 1024 if calc_path.exists() else 0
     print(f"  -> Saved calculations_cache.pickle ({calc_size} KB) in {time.time() - t0:.2f}s")
 
-    # 2. Warm up all-time detailed statistics
+    # 2. Warm up all-time detailed statistics (including full UI payloads)
     print("\n[2/5] Calculating All-Time Detailed Driver & Constructor Metrics...")
     t0 = time.time()
     clear_detailed_cache()
     from the_alternative_f1.all_time_stats.DetailedAllTime import (
         get_entity_lists,
         compute_entity_detailed_metrics,
+        get_precomputed_entity_payload,
         save_detailed_cache,
     )
     drivers, teams = get_entity_lists(len(seasons))
     for d in drivers:
         compute_entity_detailed_metrics(len(seasons), "Driver", d)
+        get_precomputed_entity_payload(len(seasons), "Driver", d)
     for t in teams:
         compute_entity_detailed_metrics(len(seasons), "Constructor", t)
+        get_precomputed_entity_payload(len(seasons), "Constructor", t)
     save_detailed_cache()
     det_path = Path("the_alternative_f1/all_time_stats/detailed_cache.pickle")
     det_size = det_path.stat().st_size // 1024 if det_path.exists() else 0
@@ -79,21 +82,33 @@ def main():
     print(f"  -> JSON state datasets synced in {time.time() - t0:.2f}s")
 
     # 4. Map Data & Teammate Networks
-    print("\n[4/5] Precomputing Map & Teammate Network Visualizations...")
+    print("\n[4/5] Precomputing & Saving Map, Summary, Functions, and Network Caches...")
     t0 = time.time()
-    from the_alternative_f1.all_time_stats.MapAllTime import precompute_all_map_data
-    from the_alternative_f1.all_time_stats.SummaryAllTime import precompute_summary_data
-    from the_alternative_f1.all_time_stats.TeammateNetwork import build_teammate_network_data
-    from the_alternative_f1.all_time_stats.Functions import get_all_time_highest_positions, CalculateAllTime, PointTotals
-    precompute_all_map_data()
+    from the_alternative_f1.all_time_stats.MapAllTime import precompute_all_map_data, save_map_cache
+    from the_alternative_f1.all_time_stats.SummaryAllTime import precompute_summary_data, save_summary_cache
+    from the_alternative_f1.all_time_stats.TeammateNetwork import build_teammate_network_data, save_network_cache
+    from the_alternative_f1.all_time_stats.Functions import (
+        get_all_time_highest_positions,
+        CalculateAllTime,
+        RacesAllTime,
+        PointTotals,
+        save_functions_cache,
+    )
+    precompute_all_map_data(force=True)
+    save_map_cache()
     precompute_summary_data(num_seasons=len(seasons))
+    save_summary_cache()
     build_teammate_network_data()
+    save_network_cache()
     get_all_time_highest_positions(num_seasons=len(seasons))
     CalculateAllTime(len(seasons), "Driver")
     CalculateAllTime(len(seasons), "Team")
+    RacesAllTime(len(seasons), "Driver")
+    RacesAllTime(len(seasons), "Team")
     for s_idx in range(1, len(seasons) + 1):
         PointTotals(s_idx)
-    print(f"  -> Maps and historical matrices compiled in {time.time() - t0:.2f}s")
+    save_functions_cache()
+    print(f"  -> Maps, summary, functions, and network caches saved in {time.time() - t0:.2f}s")
 
     # 5. Grounded Intelligence Context
     print("\n[5/5] Re-compiling Alternative Intelligence Grounded Context...")

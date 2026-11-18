@@ -18,6 +18,7 @@ Implements SDDFEAT-12 and downstream SDD Requirements:
 """
 
 import json
+import pickle
 from pathlib import Path
 from collections import defaultdict
 import pandas as pd
@@ -531,8 +532,39 @@ def precompute_all_map_data(force: bool = False) -> dict:
     return _PRECOMPUTED_MAP_CACHE
 
 
+_MAP_CACHE_FILE = Path(__file__).parent / "map_cache.pickle"
+
+
+def load_map_cache() -> bool:
+    global _PRECOMPUTED_MAP_CACHE, _PRECOMPUTED_MTIME
+    if not _PRECOMPUTED_MAP_CACHE and _MAP_CACHE_FILE.exists():
+        try:
+            with open(_MAP_CACHE_FILE, "rb") as f:
+                data = pickle.load(f)
+                if isinstance(data, dict) and data:
+                    _PRECOMPUTED_MAP_CACHE = data
+                    excel_p = Path(excel_file_path)
+                    _PRECOMPUTED_MTIME = excel_p.stat().st_mtime if excel_p.exists() else 0.0
+                    return True
+        except Exception as e:
+            print(f"Warning: Failed to load map cache: {e}")
+    return False
+
+
+def save_map_cache() -> bool:
+    global _PRECOMPUTED_MAP_CACHE
+    try:
+        with open(_MAP_CACHE_FILE, "wb") as f:
+            pickle.dump(_PRECOMPUTED_MAP_CACHE, f)
+        return True
+    except Exception as e:
+        print(f"Warning: Failed to save map cache: {e}")
+        return False
+
+
 # Initial warm-up of precomputed dataset at module load time for zero latency
-precompute_all_map_data()
+if not load_map_cache():
+    precompute_all_map_data()
 
 
 # ── Reflex State for Stats Map ────────────────────────────────────────────────

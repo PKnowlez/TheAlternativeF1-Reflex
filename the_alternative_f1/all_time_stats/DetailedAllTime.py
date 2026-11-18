@@ -38,7 +38,9 @@ def load_detailed_cache() -> bool:
                 data = pickle.load(f)
                 if isinstance(data, dict):
                     _detailed_cache = data.get("cache", {})
-                    _detailed_mtime = data.get("mtime", 0)
+                    # Anchor to current on-disk mtime so container file extraction
+                    # timestamps never wipe out the precomputed cache.
+                    _detailed_mtime = _get_mtime()
                     return True
         except Exception as e:
             print(f"Warning: Failed to load detailed cache: {e}")
@@ -651,6 +653,272 @@ def compute_entity_track_ratings(df_races: pd.DataFrame) -> dict:
 
 
 
+def get_precomputed_entity_payload(num_seasons: int, entity_type: str, active_name: str) -> dict:
+    """Compute or retrieve the full DetailedStatsState payload for an entity, cached in _detailed_cache."""
+    global _detailed_cache, _detailed_mtime
+    curr_mtime = _get_mtime()
+    if _detailed_mtime and curr_mtime > _detailed_mtime:
+        _detailed_cache.clear()
+        _detailed_mtime = curr_mtime
+    elif not _detailed_mtime and curr_mtime:
+        _detailed_mtime = curr_mtime
+
+    cache_key = ("entity_payload", num_seasons, entity_type, active_name)
+    if cache_key in _detailed_cache:
+        return _detailed_cache[cache_key]
+
+    df_races, _ = compute_entity_detailed_metrics(num_seasons, entity_type, active_name)
+
+    if not df_races.empty:
+        tot_pts = float(df_races["pts"].sum())
+        wins = int(df_races["wins_cnt"].sum())
+        podiums = int(df_races["podiums_cnt"].sum())
+        fl_count = int(df_races["fl_cnt"].sum())
+        poles = int(df_races["poles_cnt"].sum())
+        dotd_count = int(df_races["dotd_cnt"].sum())
+        mot_count = int(df_races["mot_cnt"].sum())
+        cd_count = int(df_races["cd_cnt"].sum())
+
+        if entity_type == "Constructor" and "all_places" in df_races.columns:
+            all_p_flat = [p for places in df_races["all_places"] for p in places if p > 0]
+            all_q_flat = [q for quals in df_races["all_quals"] for q in quals if q > 0]
+            avg_p = float(np.mean(all_p_flat)) if all_p_flat else 0.0
+            avg_q = float(np.mean(all_q_flat)) if all_q_flat else 0.0
+        else:
+            valid_competed = df_races[df_races["competed"] == True] if "competed" in df_races.columns else df_races
+            valid_q = valid_competed[valid_competed["qual"] > 0]["qual"]
+            avg_q = float(valid_q.mean()) if not valid_q.empty else 0.0
+            valid_p = valid_competed[valid_competed["place"] > 0]["place"]
+            avg_p = float(valid_p.mean()) if not valid_p.empty else 0.0
+
+        avg_change = avg_q - avg_p
+
+        best_row = df_races.loc[df_races["pts"].idxmax()]
+        best_pts_str = f"{best_row['pts']:.0f} pts (S{best_row['season']} {best_row['race']})"
+    else:
+        tot_pts, wins, podiums, fl_count = 0.0, 0, 0, 0
+        avg_q, avg_p, avg_change, poles = 0.0, 0.0, 0.0, 0
+        dotd_count, mot_count, cd_count = 0, 0, 0
+        best_pts_str = "N/A"
+
+    # Requirement 75: Win Streak using CalculateAllTime method
+    win_streak = 0
+    try:
+        t_or_d = "Team" if entity_type == "Constructor" else entity_type
+        df_all_time = CalculateAllTime(num_seasons, t_or_d)
+        if not df_all_time.empty:
+            col_name = t_or_d
+            match_rows = df_all_time[df_all_time[col_name] == active_name]
+            if not match_rows.empty and "Win Streak" in match_rows.columns:
+                win_streak = int(match_rows["Win Streak"].iloc[0])
+    except Exception:
+        pass
+
+    # Requirement 75: Podium Streak (1st, 2nd, or 3rd place only, exclude preseason, sprints, and postseason races)
+    podium_streak = 0
+    curr_podium_streak = 0
+    for s in range(1, num_seasons + 1):
+        df_s = get_excel_sheet(f"Season{s}")
+        sched_s = get_excel_sheet(f"S{s}Schedule")
+        if df_s.empty or sched_s.empty:
+            continue
+        df_s_copy = df_s.copy()
+        df_s_copy["Driver"] = df_s_copy["Driver"].astype(str).str.strip()
+        df_s_copy["Team"] = df_s_copy["Team"].astype(str).str.strip()
+        col_k = "Driver" if entity_type == "Driver" else "Team"
+        e_rows = df_s_copy[df_s_copy[col_k] == active_name]
+
+        for r_name in sched_s["Race"]:
+            r_s = str(r_name).strip()
+            if r_s.lower().startswith(("pre", "post")) or "sprint" in r_s.lower():
+                continue
+            p_col = r_s + "Place"
+            pts_col = r_s + "Points"
+            v_pts = pd.to_numeric(df_s_copy[pts_col], errors='coerce').fillna(0) if pts_col in df_s_copy.columns else pd.Series()
+            v_plc = pd.to_numeric(df_s_copy[p_col], errors='coerce').fillna(0) if p_col in df_s_copy.columns else pd.Series()
+            if not ((not v_pts.empty and (v_pts > 0).any()) or (not v_plc.empty and (v_plc > 0).any())):
+                continue
+
+            if e_rows.empty:
+                curr_podium_streak = 0
+                continue
+
+            if entity_type == "Driver":
+                r_val = e_rows.iloc[0][p_col] if p_col in e_rows.columns else None
+                try:
+                    plc = float(r_val) if r_val is not None and not pd.isnull(r_val) else 0.0
+                except Exception:
+                    plc = 0.0
+                is_podium = (1.0 <= plc <= 3.0)
+            else:
+                v_p = []
+                if p_col in e_rows.columns:
+                    for p_item in e_rows[p_col].dropna():
+                        try:
+                            v_p.append(float(p_item))
+                        except Exception:
+                            pass
+                # Requirement 75 v4: for constructors please use either teammate for the streak to extend
+                is_podium = any(1.0 <= p <= 3.0 for p in v_p)
+
+            if is_podium:
+                curr_podium_streak += 1
+                podium_streak = max(podium_streak, curr_podium_streak)
+            else:
+                curr_podium_streak = 0
+
+    # Requirement 75 & 226: Simple Statistics Bubbles
+    highest_pos_dict = get_all_time_highest_positions(num_seasons)
+    pos_map = highest_pos_dict.get("constructors", {}) if entity_type in ("Constructor", "Team") else highest_pos_dict.get("drivers", {})
+    highest_pos_str = pos_map.get(active_name, "—")
+
+    badges = [
+        f"Total Points: {tot_pts:.1f}",
+        f"Wins: {wins}",
+        f"Win Streak: {win_streak}",
+        f"Podiums: {podiums}",
+        f"Podium Streak: {podium_streak}",
+        f"Fastest Laps: {fl_count}",
+        f"Avg Qualifying: {avg_q:.1f}",
+        f"Avg Place: {avg_p:.1f}",
+        f"Avg Position Change: {avg_change:+.1f}",
+        f"Pole Positions: {poles}",
+        f"DOTD Awards: {dotd_count}",
+        f"Most Overtakes: {mot_count}",
+        f"Cleanest Driver: {cd_count}",
+        f"Best: {best_pts_str}",
+        f"All-Time Highest Standing: {highest_pos_str}",
+    ]
+
+    all_pos_change_data = compute_all_time_avg_pos_change(num_seasons, entity_type, active_name)
+
+    pts_per_race_data = []
+    indiv_pos_change_data = []
+    season_start_races = []
+
+    if not df_races.empty:
+        seasons_present = df_races["season"].unique()
+        first_season = seasons_present[0] if len(seasons_present) > 0 else 1
+
+        for s in seasons_present:
+            if s > first_season:
+                s_races = df_races[df_races["season"] == s]
+                if not s_races.empty:
+                    first_r_label = f"S{s} {s_races.iloc[0]['race']}"
+                    season_start_races.append(first_r_label)
+
+        for idx, row in df_races.iterrows():
+            s_race_idx = int(row["season_race_idx"])
+            pts_fill = RACE_COLORS[s_race_idx % len(RACE_COLORS)]
+            pts_per_race_data.append({
+                "race": f"S{row['season']} {row['race']}",
+                "points": float(row["pts"]),
+                "fill": pts_fill,
+            })
+
+            if row.get("competed", True) and row.get("pos_change") is not None:
+                p_chg = float(row["pos_change"])
+                p_chg_fill = "#3cb44b" if p_chg > 0 else "#e6194b" if p_chg < 0 else "#888888"
+                indiv_pos_change_data.append({
+                    "race": f"S{row['season']} {row['race']}",
+                    "pos_change": p_chg,
+                    "fill": p_chg_fill,
+                })
+
+    placements_data = []
+    fixed_categories = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th+"]
+    place_counts = {cat: 0 for cat in fixed_categories}
+
+    # Requirement 73: Placements summary (For constructor graph, both drivers count towards the tally)
+    if not df_races.empty:
+        if entity_type == "Constructor" and "all_places" in df_races.columns:
+            for places_list in df_races["all_places"]:
+                if isinstance(places_list, (list, tuple, np.ndarray)):
+                    for p_val in places_list:
+                        try:
+                            p_int = int(p_val)
+                            if 1 <= p_int <= 9:
+                                suffix = "st" if p_int == 1 else "nd" if p_int == 2 else "rd" if p_int == 3 else "th"
+                                place_counts[f"{p_int}{suffix}"] += 1
+                            elif p_int >= 10:
+                                place_counts["10th+"] += 1
+                        except Exception:
+                            pass
+        else:
+            valid_competed = df_races[df_races["competed"] == True] if "competed" in df_races.columns else df_races
+            valid_finishes = valid_competed[valid_competed["place"] > 0]["place"]
+            for p_val in valid_finishes:
+                p_int = int(p_val)
+                if 1 <= p_int <= 9:
+                    suffix = "st" if p_int == 1 else "nd" if p_int == 2 else "rd" if p_int == 3 else "th"
+                    place_counts[f"{p_int}{suffix}"] += 1
+                elif p_int >= 10:
+                    place_counts["10th+"] += 1
+
+    for cat in fixed_categories:
+        placements_data.append({
+            "placement": cat,
+            "count": place_counts[cat],
+        })
+
+    track_total_pts_data = []
+    track_avg_pts_data = []
+    track_pos_change_data = []
+    track_score_data = []
+
+    if not df_races.empty:
+        track_ratings_dict = compute_entity_track_ratings(df_races)
+        alphabetical_tracks = sorted(list(track_ratings_dict.keys()))
+
+        for tr in alphabetical_tracks:
+            t_stats = track_ratings_dict[tr]
+            track_total_pts_data.append({"track": tr, "total_points": t_stats["total_points"]})
+            track_avg_pts_data.append({"track": tr, "avg_points": t_stats["avg_points"]})
+
+            t_pos_change = t_stats["avg_pos_change"]
+            t_chg_fill = "#3cb44b" if t_pos_change > 0 else "#e6194b" if t_pos_change < 0 else "#888888"
+            track_pos_change_data.append({
+                "track": tr,
+                "pos_change": t_pos_change,
+                "fill": t_chg_fill,
+            })
+
+            track_score_data.append({
+                "track": tr,
+                "score": t_stats["score"],
+            })
+
+        # Sort tracks best to worst (top of Y-axis to bottom)
+        track_score_data.sort(key=lambda x: x["score"], reverse=True)
+        for idx, item in enumerate(track_score_data):
+            if idx == 0:
+                item["fill"] = "#FFD700"  # Gold
+            elif idx == 1:
+                item["fill"] = "#C0C0C0"  # Silver
+            elif idx == 2:
+                item["fill"] = "#CD7F32"  # Bronze
+            else:
+                item["fill"] = "#00b4da"
+
+    donut_svg = build_detailed_donut_svg(df_races, active_name, num_seasons)
+
+    payload = {
+        "badges": badges,
+        "all_pos_change_data": all_pos_change_data,
+        "pts_per_race_data": pts_per_race_data,
+        "placements_data": placements_data,
+        "indiv_pos_change_data": indiv_pos_change_data,
+        "track_total_pts_data": track_total_pts_data,
+        "track_avg_pts_data": track_avg_pts_data,
+        "track_pos_change_data": track_pos_change_data,
+        "track_score_data": track_score_data,
+        "season_start_races": season_start_races,
+        "donut_svg_markup": donut_svg,
+    }
+    _detailed_cache[cache_key] = payload
+    return payload
+
+
 class DetailedStatsState(rx.State):
     """State management for Detailed All Time Statistics."""
     entity_type: str = "Driver"
@@ -691,258 +959,7 @@ class DetailedStatsState(rx.State):
 
     @rx.var(auto_deps=False, deps=["entity_type", "selected_driver", "selected_constructor"])
     def calculated_data(self) -> dict:
-        num_seasons = 5
-        entity_type = self.entity_type
-        active_name = self.active_name
-
-        df_races, _ = compute_entity_detailed_metrics(num_seasons, entity_type, active_name)
-
-        if not df_races.empty:
-            tot_pts = float(df_races["pts"].sum())
-            wins = int(df_races["wins_cnt"].sum())
-            podiums = int(df_races["podiums_cnt"].sum())
-            fl_count = int(df_races["fl_cnt"].sum())
-            poles = int(df_races["poles_cnt"].sum())
-            dotd_count = int(df_races["dotd_cnt"].sum())
-            mot_count = int(df_races["mot_cnt"].sum())
-            cd_count = int(df_races["cd_cnt"].sum())
-
-            if entity_type == "Constructor" and "all_places" in df_races.columns:
-                all_p_flat = [p for places in df_races["all_places"] for p in places if p > 0]
-                all_q_flat = [q for quals in df_races["all_quals"] for q in quals if q > 0]
-                avg_p = float(np.mean(all_p_flat)) if all_p_flat else 0.0
-                avg_q = float(np.mean(all_q_flat)) if all_q_flat else 0.0
-            else:
-                valid_competed = df_races[df_races["competed"] == True] if "competed" in df_races.columns else df_races
-                valid_q = valid_competed[valid_competed["qual"] > 0]["qual"]
-                avg_q = float(valid_q.mean()) if not valid_q.empty else 0.0
-                valid_p = valid_competed[valid_competed["place"] > 0]["place"]
-                avg_p = float(valid_p.mean()) if not valid_p.empty else 0.0
-
-            avg_change = avg_q - avg_p
-
-            best_row = df_races.loc[df_races["pts"].idxmax()]
-            best_pts_str = f"{best_row['pts']:.0f} pts (S{best_row['season']} {best_row['race']})"
-        else:
-            tot_pts, wins, podiums, fl_count = 0.0, 0, 0, 0
-            avg_q, avg_p, avg_change, poles = 0.0, 0.0, 0.0, 0
-            dotd_count, mot_count, cd_count = 0, 0, 0
-            best_pts_str = "N/A"
-
-        # Requirement 75: Win Streak using CalculateAllTime method
-        win_streak = 0
-        try:
-            t_or_d = "Team" if entity_type == "Constructor" else entity_type
-            df_all_time = CalculateAllTime(num_seasons, t_or_d)
-            if not df_all_time.empty:
-                col_name = t_or_d
-                match_rows = df_all_time[df_all_time[col_name] == active_name]
-                if not match_rows.empty and "Win Streak" in match_rows.columns:
-                    win_streak = int(match_rows["Win Streak"].iloc[0])
-        except Exception:
-            pass
-
-        # Requirement 75: Podium Streak (1st, 2nd, or 3rd place only, exclude preseason, sprints, and postseason races)
-        podium_streak = 0
-        curr_podium_streak = 0
-        for s in range(1, num_seasons + 1):
-            df_s = get_excel_sheet(f"Season{s}")
-            sched_s = get_excel_sheet(f"S{s}Schedule")
-            if df_s.empty or sched_s.empty:
-                continue
-            df_s_copy = df_s.copy()
-            df_s_copy["Driver"] = df_s_copy["Driver"].astype(str).str.strip()
-            df_s_copy["Team"] = df_s_copy["Team"].astype(str).str.strip()
-            col_k = "Driver" if entity_type == "Driver" else "Team"
-            e_rows = df_s_copy[df_s_copy[col_k] == active_name]
-
-            for r_name in sched_s["Race"]:
-                r_s = str(r_name).strip()
-                if r_s.lower().startswith(("pre", "post")) or "sprint" in r_s.lower():
-                    continue
-                p_col = r_s + "Place"
-                pts_col = r_s + "Points"
-                v_pts = pd.to_numeric(df_s_copy[pts_col], errors='coerce').fillna(0) if pts_col in df_s_copy.columns else pd.Series()
-                v_plc = pd.to_numeric(df_s_copy[p_col], errors='coerce').fillna(0) if p_col in df_s_copy.columns else pd.Series()
-                if not ((not v_pts.empty and (v_pts > 0).any()) or (not v_plc.empty and (v_plc > 0).any())):
-                    continue
-
-                if e_rows.empty:
-                    curr_podium_streak = 0
-                    continue
-
-                if entity_type == "Driver":
-                    r_val = e_rows.iloc[0][p_col] if p_col in e_rows.columns else None
-                    try:
-                        plc = float(r_val) if r_val is not None and not pd.isnull(r_val) else 0.0
-                    except Exception:
-                        plc = 0.0
-                    is_podium = (1.0 <= plc <= 3.0)
-                else:
-                    v_p = []
-                    if p_col in e_rows.columns:
-                        for p_item in e_rows[p_col].dropna():
-                            try:
-                                v_p.append(float(p_item))
-                            except Exception:
-                                pass
-                    # Requirement 75 v4: for constructors please use either teammate for the streak to extend
-                    is_podium = any(1.0 <= p <= 3.0 for p in v_p)
-
-                if is_podium:
-                    curr_podium_streak += 1
-                    podium_streak = max(podium_streak, curr_podium_streak)
-                else:
-                    curr_podium_streak = 0
-
-        # Requirement 75 & 226: Simple Statistics Bubbles
-        highest_pos_dict = get_all_time_highest_positions(num_seasons)
-        pos_map = highest_pos_dict.get("constructors", {}) if entity_type in ("Constructor", "Team") else highest_pos_dict.get("drivers", {})
-        highest_pos_str = pos_map.get(active_name, "—")
-
-        badges = [
-            f"Total Points: {tot_pts:.1f}",
-            f"Wins: {wins}",
-            f"Win Streak: {win_streak}",
-            f"Podiums: {podiums}",
-            f"Podium Streak: {podium_streak}",
-            f"Fastest Laps: {fl_count}",
-            f"Avg Qualifying: {avg_q:.1f}",
-            f"Avg Place: {avg_p:.1f}",
-            f"Avg Position Change: {avg_change:+.1f}",
-            f"Pole Positions: {poles}",
-            f"DOTD Awards: {dotd_count}",
-            f"Most Overtakes: {mot_count}",
-            f"Cleanest Driver: {cd_count}",
-            f"Best: {best_pts_str}",
-            f"All-Time Highest Standing: {highest_pos_str}",
-        ]
-
-        all_pos_change_data = compute_all_time_avg_pos_change(num_seasons, entity_type, active_name)
-
-        pts_per_race_data = []
-        indiv_pos_change_data = []
-        season_start_races = []
-
-        if not df_races.empty:
-            seasons_present = df_races["season"].unique()
-            first_season = seasons_present[0] if len(seasons_present) > 0 else 1
-
-            for s in seasons_present:
-                if s > first_season:
-                    s_races = df_races[df_races["season"] == s]
-                    if not s_races.empty:
-                        first_r_label = f"S{s} {s_races.iloc[0]['race']}"
-                        season_start_races.append(first_r_label)
-
-            for idx, row in df_races.iterrows():
-                s_race_idx = int(row["season_race_idx"])
-                pts_fill = RACE_COLORS[s_race_idx % len(RACE_COLORS)]
-                pts_per_race_data.append({
-                    "race": f"S{row['season']} {row['race']}",
-                    "points": float(row["pts"]),
-                    "fill": pts_fill,
-                })
-
-                if row.get("competed", True) and row.get("pos_change") is not None:
-                    p_chg = float(row["pos_change"])
-                    p_chg_fill = "#3cb44b" if p_chg > 0 else "#e6194b" if p_chg < 0 else "#888888"
-                    indiv_pos_change_data.append({
-                        "race": f"S{row['season']} {row['race']}",
-                        "pos_change": p_chg,
-                        "fill": p_chg_fill,
-                    })
-
-        placements_data = []
-        fixed_categories = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th+"]
-        place_counts = {cat: 0 for cat in fixed_categories}
-
-        # Requirement 73: Placements summary (For constructor graph, both drivers count towards the tally)
-        if not df_races.empty:
-            if entity_type == "Constructor" and "all_places" in df_races.columns:
-                for places_list in df_races["all_places"]:
-                    if isinstance(places_list, (list, tuple, np.ndarray)):
-                        for p_val in places_list:
-                            try:
-                                p_int = int(p_val)
-                                if 1 <= p_int <= 9:
-                                    suffix = "st" if p_int == 1 else "nd" if p_int == 2 else "rd" if p_int == 3 else "th"
-                                    place_counts[f"{p_int}{suffix}"] += 1
-                                elif p_int >= 10:
-                                    place_counts["10th+"] += 1
-                            except Exception:
-                                pass
-            else:
-                valid_competed = df_races[df_races["competed"] == True] if "competed" in df_races.columns else df_races
-                valid_finishes = valid_competed[valid_competed["place"] > 0]["place"]
-                for p_val in valid_finishes:
-                    p_int = int(p_val)
-                    if 1 <= p_int <= 9:
-                        suffix = "st" if p_int == 1 else "nd" if p_int == 2 else "rd" if p_int == 3 else "th"
-                        place_counts[f"{p_int}{suffix}"] += 1
-                    elif p_int >= 10:
-                        place_counts["10th+"] += 1
-
-        for cat in fixed_categories:
-            placements_data.append({
-                "placement": cat,
-                "count": place_counts[cat],
-            })
-
-        track_total_pts_data = []
-        track_avg_pts_data = []
-        track_pos_change_data = []
-        track_score_data = []
-
-        if not df_races.empty:
-            track_ratings_dict = compute_entity_track_ratings(df_races)
-            alphabetical_tracks = sorted(list(track_ratings_dict.keys()))
-
-            for tr in alphabetical_tracks:
-                t_stats = track_ratings_dict[tr]
-                track_total_pts_data.append({"track": tr, "total_points": t_stats["total_points"]})
-                track_avg_pts_data.append({"track": tr, "avg_points": t_stats["avg_points"]})
-
-                t_pos_change = t_stats["avg_pos_change"]
-                t_chg_fill = "#3cb44b" if t_pos_change > 0 else "#e6194b" if t_pos_change < 0 else "#888888"
-                track_pos_change_data.append({
-                    "track": tr,
-                    "pos_change": t_pos_change,
-                    "fill": t_chg_fill,
-                })
-
-                track_score_data.append({
-                    "track": tr,
-                    "score": t_stats["score"],
-                })
-
-            # Sort tracks best to worst (top of Y-axis to bottom)
-            track_score_data.sort(key=lambda x: x["score"], reverse=True)
-            for idx, item in enumerate(track_score_data):
-                if idx == 0:
-                    item["fill"] = "#FFD700"  # Gold
-                elif idx == 1:
-                    item["fill"] = "#C0C0C0"  # Silver
-                elif idx == 2:
-                    item["fill"] = "#CD7F32"  # Bronze
-                else:
-                    item["fill"] = "#00b4da"
-
-        donut_svg = build_detailed_donut_svg(df_races, active_name, num_seasons)
-
-        return {
-            "badges": badges,
-            "all_pos_change_data": all_pos_change_data,
-            "pts_per_race_data": pts_per_race_data,
-            "placements_data": placements_data,
-            "indiv_pos_change_data": indiv_pos_change_data,
-            "track_total_pts_data": track_total_pts_data,
-            "track_avg_pts_data": track_avg_pts_data,
-            "track_pos_change_data": track_pos_change_data,
-            "track_score_data": track_score_data,
-            "season_start_races": season_start_races,
-            "donut_svg_markup": donut_svg,
-        }
+        return get_precomputed_entity_payload(5, self.entity_type, self.active_name)
 
     @rx.var(auto_deps=False, deps=["entity_type", "selected_driver", "selected_constructor"])
     def badges(self) -> list[str]:

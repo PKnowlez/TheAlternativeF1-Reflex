@@ -11,6 +11,7 @@ Implements TAF1APP-SDDFEAT-5 downstream approved requirements:
 """
 
 import math
+import pickle
 from pathlib import Path
 from collections import defaultdict
 import pandas as pd
@@ -462,8 +463,39 @@ def precompute_summary_data(num_seasons: int = 5) -> dict:
     return _SUMMARY_CACHE
 
 
-# Initial warm-up of summary dataset
-precompute_summary_data()
+_SUMMARY_CACHE_FILE = Path(__file__).parent / "summary_cache.pickle"
+
+
+def load_summary_cache() -> bool:
+    global _SUMMARY_CACHE, _SUMMARY_MTIME
+    if not _SUMMARY_CACHE and _SUMMARY_CACHE_FILE.exists():
+        try:
+            with open(_SUMMARY_CACHE_FILE, "rb") as f:
+                data = pickle.load(f)
+                if isinstance(data, dict) and data:
+                    _SUMMARY_CACHE = data
+                    excel_p = Path(excel_file_path)
+                    _SUMMARY_MTIME = excel_p.stat().st_mtime if excel_p.exists() else 0.0
+                    return True
+        except Exception as e:
+            print(f"Warning: Failed to load summary cache: {e}")
+    return False
+
+
+def save_summary_cache() -> bool:
+    global _SUMMARY_CACHE
+    try:
+        with open(_SUMMARY_CACHE_FILE, "wb") as f:
+            pickle.dump(_SUMMARY_CACHE, f)
+        return True
+    except Exception as e:
+        print(f"Warning: Failed to save summary cache: {e}")
+        return False
+
+
+# Initial warm-up of summary dataset (load precomputed pickle first)
+if not load_summary_cache():
+    precompute_summary_data()
 
 
 # ── Reflex State for Summary Page ─────────────────────────────────────────────
