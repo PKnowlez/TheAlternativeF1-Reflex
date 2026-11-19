@@ -143,6 +143,30 @@
         "Red Bull": 18.5,
         "Williams": 1.5
       }
+    },
+    "Abu Dhabi": {
+      "season": 5,
+      "next_race": "Abu Dhabi",
+      "next_main_race": "Abu Dhabi",
+      "expected_winner": "Cadillac",
+      "expected_winner_prob": 46.8,
+      "expected_highest_score_team": "Cadillac",
+      "expected_highest_score_pts": 27,
+      "expected_podium": [
+        "Cadillac",
+        "McLaren",
+        "Red Bull"
+      ],
+      "expected_points_lines": {
+        "Audi": 1.5,
+        "Cadillac": 26.5,
+        "Ferrari": 15.5,
+        "Haas": 3.5,
+        "McLaren": 18.5,
+        "Mercedes": 18.5,
+        "Red Bull": 19.5,
+        "Williams": 1.5
+      }
     }
   },
   "4": {

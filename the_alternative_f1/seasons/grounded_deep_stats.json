@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "generated_at": "2026-11-18T02:45:43Z",
-    "excel_mtime": 1793933829.3249736,
+    "generated_at": "2026-11-19T04:04:21Z",
+    "excel_mtime": 1795060915.7611086,
     "num_seasons": 5,
     "latest_season": 5,
     "latest_completed_round": "Season 5 Spa",
@@ -100,6 +100,21 @@
         "rank": 4
       },
       {
+        "driver": "Jelly",
+        "wins": 4,
+        "maiden_win": "P1 at S5 Australia",
+        "seasons_breakdown": "S4: 0; S5: 4 (Australia, Imola, Monza, Suzuka)",
+        "chronological_wins": [
+          "S5 Australia",
+          "S5 Imola",
+          "S5 Monza",
+          "S5 Suzuka"
+        ],
+        "single_season_streak": 2,
+        "cross_season_streak": 2,
+        "rank": 5
+      },
+      {
         "driver": "Del",
         "wins": 3,
         "maiden_win": "P1 at S2 Silverstone",
@@ -111,20 +126,6 @@
         ],
         "single_season_streak": 1,
         "cross_season_streak": 1,
-        "rank": 5
-      },
-      {
-        "driver": "Jelly",
-        "wins": 3,
-        "maiden_win": "P1 at S5 Australia",
-        "seasons_breakdown": "S4: 0; S5: 3 (Australia, Imola, Monza)",
-        "chronological_wins": [
-          "S5 Australia",
-          "S5 Imola",
-          "S5 Monza"
-        ],
-        "single_season_streak": 2,
-        "cross_season_streak": 2,
         "rank": 6
       },
       {
@@ -256,15 +257,15 @@
     "podium_leaders": [
       {
         "driver": "Nick",
-        "podiums": 44,
-        "seasons_breakdown": "S1: 16; S2: 8; S3: 11; S4: 6; S5: 3",
+        "podiums": 45,
+        "seasons_breakdown": "S1: 16; S2: 8; S3: 11; S4: 6; S5: 4",
         "single_season_streak": 11,
         "cross_season_streak": 15
       },
       {
         "driver": "Joshua",
-        "podiums": 31,
-        "seasons_breakdown": "S2: 6; S3: 9; S4: 11; S5: 5",
+        "podiums": 32,
+        "seasons_breakdown": "S2: 6; S3: 9; S4: 11; S5: 6",
         "single_season_streak": 5,
         "cross_season_streak": 7
       },
@@ -284,9 +285,9 @@
       },
       {
         "driver": "Jelly",
-        "podiums": 10,
-        "seasons_breakdown": "S4: 5; S5: 5",
-        "single_season_streak": 2,
+        "podiums": 11,
+        "seasons_breakdown": "S4: 5; S5: 6",
+        "single_season_streak": 3,
         "cross_season_streak": 4
       },
       {
@@ -454,7 +455,8 @@
           "11 in a row (S3 Suzuka -> S3 Silverstone -> S3 Australia -> S3 Spa -> S3 Spain -> S3 China -> S3 Baku -> S3 Canada -> S3 Monza -> S3 Abu Dhabi -> S3 Austria)",
           "2 in a row (S4 Bahrain -> S4 Miami)",
           "2 in a row (S4 Spa -> S4 Brazil)",
-          "2 in a row (S5 Imola -> S5 Miami)"
+          "2 in a row (S5 Imola -> S5 Miami)",
+          "2 in a row (S5 Silverstone -> S5 Suzuka)"
         ],
         "cross_season_max": 15,
         "cross_season_details": [
@@ -465,7 +467,8 @@
           "15 in a row (S2 China -> S2 COTA -> S2 Spa -> S2 Austria -> S3 Suzuka -> S3 Silverstone -> S3 Australia -> S3 Spa -> S3 Spain -> S3 China -> S3 Baku -> S3 Canada -> S3 Monza -> S3 Abu Dhabi -> S3 Austria)",
           "2 in a row (S4 Bahrain -> S4 Miami)",
           "2 in a row (S4 Spa -> S4 Brazil)",
-          "2 in a row (S5 Imola -> S5 Miami)"
+          "2 in a row (S5 Imola -> S5 Miami)",
+          "2 in a row (S5 Silverstone -> S5 Suzuka)"
         ]
       },
       {
@@ -545,16 +548,16 @@
       },
       {
         "driver": "Jelly",
-        "single_season_max": 2,
+        "single_season_max": 3,
         "single_season_details": [
           "2 in a row (S4 Abu Dhabi -> S4 Monza)",
           "2 in a row (S5 Australia -> S5 Imola)",
-          "2 in a row (S5 Brazil -> S5 Silverstone)"
+          "3 in a row (S5 Brazil -> S5 Silverstone -> S5 Suzuka)"
         ],
         "cross_season_max": 4,
         "cross_season_details": [
           "4 in a row (S4 Abu Dhabi -> S4 Monza -> S5 Australia -> S5 Imola)",
-          "2 in a row (S5 Brazil -> S5 Silverstone)"
+          "3 in a row (S5 Brazil -> S5 Silverstone -> S5 Suzuka)"
         ]
       },
       {
@@ -672,7 +675,7 @@
       },
       {
         "driver": "Joshua",
-        "poles": 15,
+        "poles": 16,
         "poles_list": [
           "S2 Abu Dhabi",
           "S2 Monza",
@@ -688,9 +691,10 @@
           "S4 Zandvoort",
           "S4 Las Vegas",
           "S5 Australia",
-          "S5 Silverstone (S)"
+          "S5 Silverstone (S)",
+          "S5 Suzuka"
         ],
-        "avg_qual": 4.5
+        "avg_qual": 4.4
       },
       {
         "driver": "Jairo",
@@ -704,7 +708,7 @@
           "S4 Abu Dhabi",
           "S4 Monza"
         ],
-        "avg_qual": 5.9
+        "avg_qual": 6.1
       },
       {
         "driver": "Zane",
@@ -747,7 +751,7 @@
           "S5 Miami (S)",
           "S5 Monza"
         ],
-        "avg_qual": 5.8
+        "avg_qual": 5.7
       },
       {
         "driver": "Eddie",
@@ -781,7 +785,7 @@
         "poles_list": [
           "S5 Spa"
         ],
-        "avg_qual": 9.2
+        "avg_qual": 9.5
       },
       {
         "driver": "Jaden",
@@ -797,7 +801,7 @@
         "poles_list": [
           "S3 China (S)"
         ],
-        "avg_qual": 5.9
+        "avg_qual": 5.8
       }
     ]
   },
@@ -2602,7 +2606,7 @@
           {
             "driver": "Nick",
             "team": "McLaren",
-            "rating": 64.8,
+            "rating": 56.8,
             "rank": 1
           },
           {
@@ -2657,9 +2661,9 @@
         "constructor_ratings": [
           {
             "constructor": "McLaren",
-            "rating": 32.4,
+            "rating": 28.4,
             "drivers": {
-              "Nick": 64.8,
+              "Nick": 56.8,
               "Travis": 0.0
             },
             "rank": 1
@@ -4600,14 +4604,14 @@
             "rank": 7
           },
           {
-            "driver": "Eddie",
-            "team": "Alpine",
-            "rating": 12.0,
+            "driver": "David",
+            "team": "Ferrari",
+            "rating": 11.8,
             "rank": 8
           },
           {
-            "driver": "David",
-            "team": "Ferrari",
+            "driver": "Eddie",
+            "team": "Alpine",
             "rating": 11.8,
             "rank": 9
           },
@@ -4657,10 +4661,10 @@
           },
           {
             "constructor": "Alpine",
-            "rating": 20.0,
+            "rating": 19.9,
             "drivers": {
               "Joshua": 28.1,
-              "Eddie": 12.0
+              "Eddie": 11.8
             },
             "rank": 3
           },
@@ -5288,27 +5292,27 @@
       "Suzuka": {
         "driver_ratings": [
           {
-            "driver": "Nick",
-            "team": "McLaren",
-            "rating": 64.8,
+            "driver": "Joshua",
+            "team": "Alpine",
+            "rating": 57.2,
             "rank": 1
           },
           {
-            "driver": "Joshua",
-            "team": "Alpine",
-            "rating": 59.4,
+            "driver": "Nick",
+            "team": "McLaren",
+            "rating": 56.8,
             "rank": 2
-          },
-          {
-            "driver": "Del",
-            "team": "Mercedes",
-            "rating": 44.0,
-            "rank": 3
           },
           {
             "driver": "Erick",
             "team": "Ferrari",
             "rating": 34.6,
+            "rank": 3
+          },
+          {
+            "driver": "Del",
+            "team": "Mercedes",
+            "rating": 31.1,
             "rank": 4
           },
           {
@@ -5320,7 +5324,7 @@
           {
             "driver": "Eddie",
             "team": "Alpine",
-            "rating": 11.3,
+            "rating": 8.4,
             "rank": 6
           },
           {
@@ -5368,31 +5372,22 @@
         ],
         "constructor_ratings": [
           {
-            "constructor": "McLaren",
-            "rating": 35.7,
+            "constructor": "Alpine",
+            "rating": 32.8,
             "drivers": {
-              "Nick": 64.8,
-              "Gary": 6.6
+              "Joshua": 57.2,
+              "Eddie": 8.4
             },
             "rank": 1
           },
           {
-            "constructor": "Alpine",
-            "rating": 35.3,
+            "constructor": "McLaren",
+            "rating": 31.7,
             "drivers": {
-              "Joshua": 59.4,
-              "Eddie": 11.3
+              "Nick": 56.8,
+              "Gary": 6.6
             },
             "rank": 2
-          },
-          {
-            "constructor": "Mercedes",
-            "rating": 24.5,
-            "drivers": {
-              "Del": 44.0,
-              "Boz": 5.0
-            },
-            "rank": 3
           },
           {
             "constructor": "Ferrari",
@@ -5400,6 +5395,15 @@
             "drivers": {
               "Erick": 34.6,
               "David": 7.0
+            },
+            "rank": 3
+          },
+          {
+            "constructor": "Mercedes",
+            "rating": 18.1,
+            "drivers": {
+              "Del": 31.1,
+              "Boz": 5.0
             },
             "rank": 4
           },
@@ -6038,7 +6042,7 @@
           {
             "driver": "Joshua",
             "team": "Alpine",
-            "rating": 37.9,
+            "rating": 38.1,
             "rank": 4
           },
           {
@@ -6056,7 +6060,7 @@
           {
             "driver": "Del",
             "team": "Mercedes",
-            "rating": 25.2,
+            "rating": 24.7,
             "rank": 7
           },
           {
@@ -6080,7 +6084,7 @@
           {
             "driver": "Eddie",
             "team": "Alpine",
-            "rating": 12.0,
+            "rating": 11.8,
             "rank": 11
           },
           {
@@ -6126,19 +6130,19 @@
           },
           {
             "constructor": "Mercedes",
-            "rating": 29.1,
+            "rating": 28.8,
             "drivers": {
-              "Del": 25.2,
+              "Del": 24.7,
               "Boz": 33.0
             },
             "rank": 4
           },
           {
             "constructor": "Alpine",
-            "rating": 25.0,
+            "rating": 24.9,
             "drivers": {
-              "Joshua": 37.9,
-              "Eddie": 12.0
+              "Joshua": 38.1,
+              "Eddie": 11.8
             },
             "rank": 5
           },
@@ -6172,13 +6176,13 @@
           {
             "driver": "Joshua",
             "team": "Alpine",
-            "rating": 37.9,
+            "rating": 38.1,
             "rank": 2
           },
           {
             "driver": "Del",
             "team": "Mercedes",
-            "rating": 25.2,
+            "rating": 24.7,
             "rank": 3
           },
           {
@@ -6208,7 +6212,7 @@
           {
             "driver": "Eddie",
             "team": "Alpine",
-            "rating": 12.0,
+            "rating": 11.8,
             "rank": 8
           },
           {
@@ -6254,10 +6258,10 @@
           },
           {
             "constructor": "Alpine",
-            "rating": 25.0,
+            "rating": 24.9,
             "drivers": {
-              "Joshua": 37.9,
-              "Eddie": 12.0
+              "Joshua": 38.1,
+              "Eddie": 11.8
             },
             "rank": 2
           },
@@ -6280,9 +6284,9 @@
           },
           {
             "constructor": "Mercedes",
-            "rating": 12.6,
+            "rating": 12.4,
             "drivers": {
-              "Del": 25.2,
+              "Del": 24.7,
               "Boz": 0.0
             },
             "rank": 5
@@ -6798,7 +6802,7 @@
           {
             "driver": "Eddie",
             "team": "Alpine",
-            "rating": 12.0,
+            "rating": 11.8,
             "rank": 9
           },
           {
@@ -6838,10 +6842,10 @@
           },
           {
             "constructor": "Alpine",
-            "rating": 24.1,
+            "rating": 24.0,
             "drivers": {
               "Joshua": 36.2,
-              "Eddie": 12.0
+              "Eddie": 11.8
             },
             "rank": 2
           },
@@ -7194,7 +7198,7 @@
           {
             "driver": "Joshua",
             "team": "Alpine",
-            "rating": 37.9,
+            "rating": 38.1,
             "rank": 2
           },
           {
@@ -7212,7 +7216,7 @@
           {
             "driver": "Del",
             "team": "Mercedes",
-            "rating": 25.2,
+            "rating": 24.7,
             "rank": 5
           },
           {
@@ -7234,14 +7238,14 @@
             "rank": 8
           },
           {
-            "driver": "Eddie",
-            "team": "Alpine",
-            "rating": 12.0,
+            "driver": "David",
+            "team": "Ferrari",
+            "rating": 11.8,
             "rank": 9
           },
           {
-            "driver": "David",
-            "team": "Ferrari",
+            "driver": "Eddie",
+            "team": "Alpine",
             "rating": 11.8,
             "rank": 10
           },
@@ -7276,16 +7280,16 @@
           },
           {
             "constructor": "Alpine",
-            "rating": 25.0,
+            "rating": 24.9,
             "drivers": {
-              "Joshua": 37.9,
-              "Eddie": 12.0
+              "Joshua": 38.1,
+              "Eddie": 11.8
             },
             "rank": 2
           },
           {
             "constructor": "McLaren",
-            "rating": 23.8,
+            "rating": 23.7,
             "drivers": {
               "Nick": 40.3,
               "Gary": 7.2
@@ -7303,9 +7307,9 @@
           },
           {
             "constructor": "Mercedes",
-            "rating": 17.7,
+            "rating": 17.5,
             "drivers": {
-              "Del": 25.2,
+              "Del": 24.7,
               "Boz": 10.3
             },
             "rank": 5
@@ -7534,7 +7538,7 @@
           {
             "driver": "Eddie",
             "team": "Alpine",
-            "rating": 12.0,
+            "rating": 11.8,
             "rank": 10
           },
           {
@@ -7577,10 +7581,10 @@
           },
           {
             "constructor": "Alpine",
-            "rating": 19.6,
+            "rating": 19.5,
             "drivers": {
               "Joshua": 27.2,
-              "Eddie": 12.0
+              "Eddie": 11.8
             },
             "rank": 3
           },
@@ -7944,7 +7948,7 @@
           {
             "driver": "Eddie",
             "team": "Alpine",
-            "rating": 12.0,
+            "rating": 11.8,
             "rank": 9
           },
           {
@@ -7978,9 +7982,9 @@
           },
           {
             "constructor": "Alpine",
-            "rating": 20.0,
+            "rating": 19.9,
             "drivers": {
-              "Eddie": 12.0,
+              "Eddie": 11.8,
               "Joshua": 28.1
             },
             "rank": 2
@@ -8564,33 +8568,33 @@
       "Suzuka": {
         "driver_ratings": [
           {
-            "driver": "Nick",
-            "team": "McLaren",
-            "rating": 64.8,
+            "driver": "Joshua",
+            "team": "Alpine",
+            "rating": 57.2,
             "rank": 1
           },
           {
-            "driver": "Joshua",
-            "team": "Alpine",
-            "rating": 59.4,
+            "driver": "Nick",
+            "team": "McLaren",
+            "rating": 56.8,
             "rank": 2
-          },
-          {
-            "driver": "Del",
-            "team": "Aston Martin",
-            "rating": 44.0,
-            "rank": 3
           },
           {
             "driver": "Erick",
             "team": "Ferrari",
             "rating": 34.6,
+            "rank": 3
+          },
+          {
+            "driver": "Del",
+            "team": "Aston Martin",
+            "rating": 31.1,
             "rank": 4
           },
           {
             "driver": "Brently",
             "team": "VCARB",
-            "rating": 31.2,
+            "rating": 19.2,
             "rank": 5
           },
           {
@@ -8600,33 +8604,33 @@
             "rank": 6
           },
           {
+            "driver": "Patrick",
+            "team": "VCARB",
+            "rating": 10.1,
+            "rank": 7
+          },
+          {
             "driver": "Eddie",
             "team": "Alpine",
-            "rating": 11.3,
-            "rank": 7
+            "rating": 8.4,
+            "rank": 8
           },
           {
             "driver": "Yeti",
             "team": "Red Bull",
             "rating": 7.6,
-            "rank": 8
+            "rank": 9
           },
           {
             "driver": "Gary",
             "team": "Aston Martin",
             "rating": 6.6,
-            "rank": 9
+            "rank": 10
           },
           {
             "driver": "Boz",
             "team": "Red Bull",
             "rating": 5.0,
-            "rank": 10
-          },
-          {
-            "driver": "Patrick",
-            "team": "VCARB",
-            "rating": 0.6,
             "rank": 11
           },
           {
@@ -8639,48 +8643,48 @@
         "constructor_ratings": [
           {
             "constructor": "Alpine",
-            "rating": 35.3,
+            "rating": 32.8,
             "drivers": {
-              "Eddie": 11.3,
-              "Joshua": 59.4
+              "Eddie": 8.4,
+              "Joshua": 57.2
             },
             "rank": 1
           },
           {
             "constructor": "McLaren",
-            "rating": 32.4,
+            "rating": 28.4,
             "drivers": {
-              "Nick": 64.8,
+              "Nick": 56.8,
               "Travis": 0.0
             },
             "rank": 2
           },
           {
             "constructor": "Ferrari",
-            "rating": 31.4,
+            "rating": 27.1,
             "drivers": {
               "Erick": 34.6,
               "Zane": 15.5,
-              "Del": 44.0
+              "Del": 31.1
             },
             "rank": 3
           },
           {
             "constructor": "Aston Martin",
-            "rating": 22.0,
+            "rating": 17.7,
             "drivers": {
               "Gary": 6.6,
               "Zane": 15.5,
-              "Del": 44.0
+              "Del": 31.1
             },
             "rank": 4
           },
           {
             "constructor": "VCARB",
-            "rating": 15.9,
+            "rating": 14.7,
             "drivers": {
-              "Patrick": 0.6,
-              "Brently": 31.2
+              "Patrick": 10.1,
+              "Brently": 19.2
             },
             "rank": 5
           },
@@ -9254,7 +9258,7 @@
           {
             "driver": "Joshua",
             "team": "Alpine",
-            "rating": 37.9,
+            "rating": 38.1,
             "rank": 4
           },
           {
@@ -9266,13 +9270,13 @@
           {
             "driver": "Del",
             "team": "Aston Martin",
-            "rating": 25.2,
+            "rating": 24.7,
             "rank": 6
           },
           {
             "driver": "Patrick",
             "team": "VCARB",
-            "rating": 23.5,
+            "rating": 23.3,
             "rank": 7
           },
           {
@@ -9290,13 +9294,13 @@
           {
             "driver": "Eddie",
             "team": "Alpine",
-            "rating": 12.0,
+            "rating": 11.8,
             "rank": 10
           },
           {
             "driver": "Brently",
             "team": "VCARB",
-            "rating": 11.7,
+            "rating": 11.6,
             "rank": 11
           },
           {
@@ -9309,11 +9313,11 @@
         "constructor_ratings": [
           {
             "constructor": "Ferrari",
-            "rating": 44.9,
+            "rating": 44.7,
             "drivers": {
               "Erick": 51.5,
               "Zane": 58.0,
-              "Del": 25.2
+              "Del": 24.7
             },
             "rank": 1
           },
@@ -9328,20 +9332,20 @@
           },
           {
             "constructor": "Aston Martin",
-            "rating": 30.1,
+            "rating": 30.0,
             "drivers": {
               "Gary": 7.2,
               "Zane": 58.0,
-              "Del": 25.2
+              "Del": 24.7
             },
             "rank": 3
           },
           {
             "constructor": "Alpine",
-            "rating": 25.0,
+            "rating": 24.9,
             "drivers": {
-              "Eddie": 12.0,
-              "Joshua": 37.9
+              "Eddie": 11.8,
+              "Joshua": 38.1
             },
             "rank": 4
           },
@@ -9356,10 +9360,10 @@
           },
           {
             "constructor": "VCARB",
-            "rating": 17.6,
+            "rating": 17.5,
             "drivers": {
-              "Patrick": 23.5,
-              "Brently": 11.7
+              "Patrick": 23.3,
+              "Brently": 11.6
             },
             "rank": 6
           }
@@ -9376,19 +9380,19 @@
           {
             "driver": "Joshua",
             "team": "Alpine",
-            "rating": 37.9,
+            "rating": 38.1,
             "rank": 2
           },
           {
             "driver": "Del",
             "team": "Aston Martin",
-            "rating": 25.2,
+            "rating": 24.7,
             "rank": 3
           },
           {
             "driver": "Patrick",
             "team": "VCARB",
-            "rating": 23.5,
+            "rating": 23.3,
             "rank": 4
           },
           {
@@ -9418,13 +9422,13 @@
           {
             "driver": "Eddie",
             "team": "Alpine",
-            "rating": 12.0,
+            "rating": 11.8,
             "rank": 9
           },
           {
             "driver": "Brently",
             "team": "VCARB",
-            "rating": 11.7,
+            "rating": 11.6,
             "rank": 10
           },
           {
@@ -9443,39 +9447,39 @@
         "constructor_ratings": [
           {
             "constructor": "Ferrari",
-            "rating": 37.1,
+            "rating": 37.0,
             "drivers": {
               "Erick": 63.7,
               "Zane": 22.5,
-              "Del": 25.2
+              "Del": 24.7
             },
             "rank": 1
           },
           {
             "constructor": "Alpine",
-            "rating": 25.0,
+            "rating": 24.9,
             "drivers": {
-              "Eddie": 12.0,
-              "Joshua": 37.9
+              "Eddie": 11.8,
+              "Joshua": 38.1
             },
             "rank": 2
           },
           {
             "constructor": "Aston Martin",
-            "rating": 18.3,
+            "rating": 18.1,
             "drivers": {
               "Gary": 7.2,
               "Zane": 22.5,
-              "Del": 25.2
+              "Del": 24.7
             },
             "rank": 3
           },
           {
             "constructor": "VCARB",
-            "rating": 17.6,
+            "rating": 17.5,
             "drivers": {
-              "Patrick": 23.5,
-              "Brently": 11.7
+              "Patrick": 23.3,
+              "Brently": 11.6
             },
             "rank": 4
           },
@@ -9954,13 +9958,13 @@
           {
             "driver": "Eddie",
             "team": "Alpine",
-            "rating": 12.0,
+            "rating": 11.8,
             "rank": 9
           },
           {
             "driver": "Brently",
             "team": "VCARB",
-            "rating": 11.7,
+            "rating": 11.6,
             "rank": 10
           },
           {
@@ -9991,15 +9995,15 @@
             "rating": 29.2,
             "drivers": {
               "Patrick": 46.8,
-              "Brently": 11.7
+              "Brently": 11.6
             },
             "rank": 2
           },
           {
             "constructor": "Alpine",
-            "rating": 24.1,
+            "rating": 24.0,
             "drivers": {
-              "Eddie": 12.0,
+              "Eddie": 11.8,
               "Joshua": 36.2
             },
             "rank": 3
@@ -10082,7 +10086,7 @@
           {
             "driver": "Brently",
             "team": "VCARB",
-            "rating": 11.7,
+            "rating": 11.6,
             "rank": 8
           },
           {
@@ -10131,10 +10135,10 @@
           },
           {
             "constructor": "VCARB",
-            "rating": 28.2,
+            "rating": 28.1,
             "drivers": {
               "Patrick": 44.7,
-              "Brently": 11.7
+              "Brently": 11.6
             },
             "rank": 3
           },
@@ -10314,7 +10318,7 @@
           {
             "driver": "Joshua",
             "team": "Alpine",
-            "rating": 37.9,
+            "rating": 38.1,
             "rank": 2
           },
           {
@@ -10332,13 +10336,13 @@
           {
             "driver": "Del",
             "team": "Aston Martin",
-            "rating": 25.2,
+            "rating": 24.7,
             "rank": 5
           },
           {
             "driver": "Patrick",
             "team": "VCARB",
-            "rating": 23.5,
+            "rating": 23.3,
             "rank": 6
           },
           {
@@ -10356,13 +10360,13 @@
           {
             "driver": "Eddie",
             "team": "Alpine",
-            "rating": 12.0,
+            "rating": 11.8,
             "rank": 9
           },
           {
             "driver": "Brently",
             "team": "VCARB",
-            "rating": 11.7,
+            "rating": 11.6,
             "rank": 10
           },
           {
@@ -10381,11 +10385,11 @@
         "constructor_ratings": [
           {
             "constructor": "Ferrari",
-            "rating": 27.5,
+            "rating": 27.4,
             "drivers": {
               "Erick": 31.3,
               "Zane": 26.2,
-              "Del": 25.2
+              "Del": 24.7
             },
             "rank": 1
           },
@@ -10400,29 +10404,29 @@
           },
           {
             "constructor": "Alpine",
-            "rating": 25.0,
+            "rating": 24.9,
             "drivers": {
-              "Eddie": 12.0,
-              "Joshua": 37.9
+              "Eddie": 11.8,
+              "Joshua": 38.1
             },
             "rank": 3
           },
           {
             "constructor": "Aston Martin",
-            "rating": 19.5,
+            "rating": 19.4,
             "drivers": {
               "Gary": 7.2,
               "Zane": 26.2,
-              "Del": 25.2
+              "Del": 24.7
             },
             "rank": 4
           },
           {
             "constructor": "VCARB",
-            "rating": 17.6,
+            "rating": 17.5,
             "drivers": {
-              "Patrick": 23.5,
-              "Brently": 11.7
+              "Patrick": 23.3,
+              "Brently": 11.6
             },
             "rank": 5
           },
@@ -10448,7 +10452,7 @@
           {
             "driver": "Patrick",
             "team": "VCARB",
-            "rating": 23.5,
+            "rating": 23.3,
             "rank": 2
           },
           {
@@ -10484,7 +10488,7 @@
           {
             "driver": "Brently",
             "team": "VCARB",
-            "rating": 11.7,
+            "rating": 11.6,
             "rank": 8
           },
           {
@@ -10534,10 +10538,10 @@
           },
           {
             "constructor": "VCARB",
-            "rating": 17.6,
+            "rating": 17.5,
             "drivers": {
-              "Patrick": 23.5,
-              "Brently": 11.7
+              "Patrick": 23.3,
+              "Brently": 11.6
             },
             "rank": 3
           },
@@ -10636,7 +10640,7 @@
           {
             "driver": "Eddie",
             "team": "Alpine",
-            "rating": 12.0,
+            "rating": 11.8,
             "rank": 11
           },
           {
@@ -10687,9 +10691,9 @@
           },
           {
             "constructor": "Alpine",
-            "rating": 19.6,
+            "rating": 19.5,
             "drivers": {
-              "Eddie": 12.0,
+              "Eddie": 11.8,
               "Joshua": 27.2
             },
             "rank": 5
@@ -11066,7 +11070,7 @@
           {
             "driver": "Eddie",
             "team": "Alpine",
-            "rating": 12.0,
+            "rating": 11.8,
             "rank": 9
           },
           {
@@ -11121,10 +11125,10 @@
           },
           {
             "constructor": "Alpine",
-            "rating": 20.0,
+            "rating": 19.9,
             "drivers": {
               "Joshua": 28.1,
-              "Eddie": 12.0
+              "Eddie": 11.8
             },
             "rank": 3
           },
@@ -11781,21 +11785,21 @@
       "Suzuka": {
         "driver_ratings": [
           {
-            "driver": "Nick",
-            "team": "McLaren",
-            "rating": 64.8,
+            "driver": "Jelly",
+            "team": "VCARB",
+            "rating": 60.8,
             "rank": 1
           },
           {
             "driver": "Joshua",
             "team": "Alpine",
-            "rating": 59.4,
+            "rating": 57.2,
             "rank": 2
           },
           {
-            "driver": "Del",
-            "team": "Aston Martin",
-            "rating": 44.0,
+            "driver": "Nick",
+            "team": "McLaren",
+            "rating": 56.8,
             "rank": 3
           },
           {
@@ -11805,57 +11809,57 @@
             "rank": 4
           },
           {
-            "driver": "Brently",
-            "team": "Red Bull",
-            "rating": 31.2,
+            "driver": "Del",
+            "team": "Aston Martin",
+            "rating": 31.1,
             "rank": 5
-          },
-          {
-            "driver": "Jairo",
-            "team": "Mercedes",
-            "rating": 28.8,
-            "rank": 6
           },
           {
             "driver": "Jaden",
             "team": "Mercedes",
-            "rating": 26.8,
+            "rating": 28.9,
+            "rank": 6
+          },
+          {
+            "driver": "Jairo",
+            "team": "Mercedes",
+            "rating": 28.5,
             "rank": 7
           },
           {
-            "driver": "Jelly",
-            "team": "VCARB",
-            "rating": 24.1,
+            "driver": "Brently",
+            "team": "Red Bull",
+            "rating": 19.2,
             "rank": 8
+          },
+          {
+            "driver": "Matthew",
+            "team": "Red Bull",
+            "rating": 14.8,
+            "rank": 9
           },
           {
             "driver": "Leo",
             "team": "Ferrari",
             "rating": 11.5,
-            "rank": 9
+            "rank": 10
+          },
+          {
+            "driver": "Patrick",
+            "team": "VCARB",
+            "rating": 10.1,
+            "rank": 11
           },
           {
             "driver": "Eddie",
             "team": "Alpine",
-            "rating": 11.3,
-            "rank": 10
-          },
-          {
-            "driver": "Matthew",
-            "team": "Red Bull",
             "rating": 8.4,
-            "rank": 11
+            "rank": 12
           },
           {
             "driver": "Boz",
             "team": "Aston Martin",
             "rating": 5.0,
-            "rank": 12
-          },
-          {
-            "driver": "Patrick",
-            "team": "VCARB",
-            "rating": 0.6,
             "rank": 13
           },
           {
@@ -11867,44 +11871,44 @@
         ],
         "constructor_ratings": [
           {
-            "constructor": "Alpine",
-            "rating": 35.3,
+            "constructor": "VCARB",
+            "rating": 35.5,
             "drivers": {
-              "Joshua": 59.4,
-              "Eddie": 11.3
+              "Patrick": 10.1,
+              "Jelly": 60.8
             },
             "rank": 1
           },
           {
-            "constructor": "McLaren",
-            "rating": 32.4,
+            "constructor": "Alpine",
+            "rating": 32.8,
             "drivers": {
-              "Nick": 64.8,
-              "Travis": 0.0
+              "Joshua": 57.2,
+              "Eddie": 8.4
             },
             "rank": 2
           },
           {
             "constructor": "Mercedes",
-            "rating": 27.8,
+            "rating": 28.7,
             "drivers": {
-              "Jaden": 26.8,
-              "Jairo": 28.8
+              "Jaden": 28.9,
+              "Jairo": 28.5
             },
             "rank": 3
           },
           {
-            "constructor": "Aston Martin",
-            "rating": 24.5,
+            "constructor": "McLaren",
+            "rating": 28.4,
             "drivers": {
-              "Del": 44.0,
-              "Boz": 5.0
+              "Nick": 56.8,
+              "Travis": 0.0
             },
             "rank": 4
           },
           {
             "constructor": "Ferrari",
-            "rating": 23.1,
+            "rating": 23.0,
             "drivers": {
               "Erick": 34.6,
               "Leo": 11.5
@@ -11912,20 +11916,20 @@
             "rank": 5
           },
           {
-            "constructor": "Red Bull",
-            "rating": 19.8,
+            "constructor": "Aston Martin",
+            "rating": 18.1,
             "drivers": {
-              "Brently": 31.2,
-              "Matthew": 8.4
+              "Del": 31.1,
+              "Boz": 5.0
             },
             "rank": 6
           },
           {
-            "constructor": "VCARB",
-            "rating": 12.3,
+            "constructor": "Red Bull",
+            "rating": 17.0,
             "drivers": {
-              "Patrick": 0.6,
-              "Jelly": 24.1
+              "Brently": 19.2,
+              "Matthew": 14.8
             },
             "rank": 7
           }
@@ -12272,7 +12276,7 @@
           {
             "driver": "Jaden",
             "team": "Mercedes",
-            "rating": 26.8,
+            "rating": 26.9,
             "rank": 6
           },
           {
@@ -12284,7 +12288,7 @@
           {
             "driver": "Jelly",
             "team": "VCARB",
-            "rating": 24.1,
+            "rating": 25.3,
             "rank": 8
           },
           {
@@ -12314,7 +12318,7 @@
           {
             "driver": "Matthew",
             "team": "Red Bull",
-            "rating": 8.4,
+            "rating": 8.6,
             "rank": 13
           },
           {
@@ -12347,7 +12351,7 @@
             "constructor": "Mercedes",
             "rating": 27.8,
             "drivers": {
-              "Jaden": 26.8,
+              "Jaden": 26.9,
               "Jairo": 28.8
             },
             "rank": 3
@@ -12372,19 +12376,19 @@
           },
           {
             "constructor": "VCARB",
-            "rating": 22.8,
+            "rating": 23.4,
             "drivers": {
               "Patrick": 21.5,
-              "Jelly": 24.1
+              "Jelly": 25.3
             },
             "rank": 6
           },
           {
             "constructor": "Red Bull",
-            "rating": 4.5,
+            "rating": 4.7,
             "drivers": {
               "Brently": 0.7,
-              "Matthew": 8.4
+              "Matthew": 8.6
             },
             "rank": 7
           }
@@ -12560,7 +12564,7 @@
           {
             "driver": "Joshua",
             "team": "Alpine",
-            "rating": 37.9,
+            "rating": 38.1,
             "rank": 3
           },
           {
@@ -12578,25 +12582,25 @@
           {
             "driver": "Jaden",
             "team": "Mercedes",
-            "rating": 26.8,
+            "rating": 26.9,
             "rank": 6
-          },
-          {
-            "driver": "Del",
-            "team": "Aston Martin",
-            "rating": 25.2,
-            "rank": 7
           },
           {
             "driver": "Jelly",
             "team": "VCARB",
-            "rating": 24.1,
+            "rating": 25.3,
+            "rank": 7
+          },
+          {
+            "driver": "Del",
+            "team": "Aston Martin",
+            "rating": 24.7,
             "rank": 8
           },
           {
             "driver": "Patrick",
             "team": "VCARB",
-            "rating": 23.5,
+            "rating": 23.3,
             "rank": 9
           },
           {
@@ -12608,13 +12612,13 @@
           {
             "driver": "Eddie",
             "team": "Alpine",
-            "rating": 12.0,
+            "rating": 11.8,
             "rank": 11
           },
           {
             "driver": "Brently",
             "team": "Red Bull",
-            "rating": 11.7,
+            "rating": 11.6,
             "rank": 12
           },
           {
@@ -12626,7 +12630,7 @@
           {
             "driver": "Matthew",
             "team": "Red Bull",
-            "rating": 8.4,
+            "rating": 8.6,
             "rank": 14
           }
         ],
@@ -12651,9 +12655,9 @@
           },
           {
             "constructor": "Aston Martin",
-            "rating": 29.1,
+            "rating": 28.8,
             "drivers": {
-              "Del": 25.2,
+              "Del": 24.7,
               "Boz": 33.0
             },
             "rank": 3
@@ -12662,35 +12666,35 @@
             "constructor": "Mercedes",
             "rating": 27.8,
             "drivers": {
-              "Jaden": 26.8,
+              "Jaden": 26.9,
               "Jairo": 28.8
             },
             "rank": 4
           },
           {
             "constructor": "Alpine",
-            "rating": 25.0,
+            "rating": 24.9,
             "drivers": {
-              "Joshua": 37.9,
-              "Eddie": 12.0
+              "Joshua": 38.1,
+              "Eddie": 11.8
             },
             "rank": 5
           },
           {
             "constructor": "VCARB",
-            "rating": 23.8,
+            "rating": 24.3,
             "drivers": {
-              "Patrick": 23.5,
-              "Jelly": 24.1
+              "Patrick": 23.3,
+              "Jelly": 25.3
             },
             "rank": 6
           },
           {
             "constructor": "Red Bull",
-            "rating": 10.0,
+            "rating": 10.1,
             "drivers": {
-              "Brently": 11.7,
-              "Matthew": 8.4
+              "Brently": 11.6,
+              "Matthew": 8.6
             },
             "rank": 7
           }
@@ -12707,7 +12711,7 @@
           {
             "driver": "Joshua",
             "team": "Alpine",
-            "rating": 37.9,
+            "rating": 38.1,
             "rank": 2
           },
           {
@@ -12719,25 +12723,25 @@
           {
             "driver": "Jaden",
             "team": "Mercedes",
-            "rating": 26.8,
+            "rating": 26.9,
             "rank": 4
-          },
-          {
-            "driver": "Del",
-            "team": "Aston Martin",
-            "rating": 25.2,
-            "rank": 5
           },
           {
             "driver": "Jelly",
             "team": "VCARB",
-            "rating": 24.1,
+            "rating": 25.3,
+            "rank": 5
+          },
+          {
+            "driver": "Del",
+            "team": "Aston Martin",
+            "rating": 24.7,
             "rank": 6
           },
           {
             "driver": "Patrick",
             "team": "VCARB",
-            "rating": 23.5,
+            "rating": 23.3,
             "rank": 7
           },
           {
@@ -12755,13 +12759,13 @@
           {
             "driver": "Eddie",
             "team": "Alpine",
-            "rating": 12.0,
+            "rating": 11.8,
             "rank": 10
           },
           {
             "driver": "Brently",
             "team": "Red Bull",
-            "rating": 11.7,
+            "rating": 11.6,
             "rank": 11
           },
           {
@@ -12773,7 +12777,7 @@
           {
             "driver": "Matthew",
             "team": "Red Bull",
-            "rating": 8.4,
+            "rating": 8.6,
             "rank": 13
           },
           {
@@ -12797,26 +12801,26 @@
             "constructor": "Mercedes",
             "rating": 27.8,
             "drivers": {
-              "Jaden": 26.8,
+              "Jaden": 26.9,
               "Jairo": 28.8
             },
             "rank": 2
           },
           {
             "constructor": "Alpine",
-            "rating": 25.0,
+            "rating": 24.9,
             "drivers": {
-              "Joshua": 37.9,
-              "Eddie": 12.0
+              "Joshua": 38.1,
+              "Eddie": 11.8
             },
             "rank": 3
           },
           {
             "constructor": "VCARB",
-            "rating": 23.8,
+            "rating": 24.3,
             "drivers": {
-              "Patrick": 23.5,
-              "Jelly": 24.1
+              "Patrick": 23.3,
+              "Jelly": 25.3
             },
             "rank": 4
           },
@@ -12831,19 +12835,19 @@
           },
           {
             "constructor": "Aston Martin",
-            "rating": 12.6,
+            "rating": 12.4,
             "drivers": {
-              "Del": 25.2,
+              "Del": 24.7,
               "Boz": 0.0
             },
             "rank": 6
           },
           {
             "constructor": "Red Bull",
-            "rating": 10.0,
+            "rating": 10.1,
             "drivers": {
-              "Brently": 11.7,
-              "Matthew": 8.4
+              "Brently": 11.6,
+              "Matthew": 8.6
             },
             "rank": 7
           }
@@ -13178,19 +13182,19 @@
           {
             "driver": "Jaden",
             "team": "Mercedes",
-            "rating": 26.8,
+            "rating": 26.9,
             "rank": 4
+          },
+          {
+            "driver": "Jelly",
+            "team": "VCARB",
+            "rating": 25.3,
+            "rank": 5
           },
           {
             "driver": "Nick",
             "team": "McLaren",
             "rating": 24.4,
-            "rank": 5
-          },
-          {
-            "driver": "Jelly",
-            "team": "VCARB",
-            "rating": 24.1,
             "rank": 6
           },
           {
@@ -13232,7 +13236,7 @@
           {
             "driver": "Matthew",
             "team": "Red Bull",
-            "rating": 8.4,
+            "rating": 8.6,
             "rank": 13
           },
           {
@@ -13265,17 +13269,17 @@
             "constructor": "Mercedes",
             "rating": 27.8,
             "drivers": {
-              "Jaden": 26.8,
+              "Jaden": 26.9,
               "Jairo": 28.8
             },
             "rank": 3
           },
           {
             "constructor": "VCARB",
-            "rating": 24.0,
+            "rating": 24.6,
             "drivers": {
               "Patrick": 24.0,
-              "Jelly": 24.1
+              "Jelly": 25.3
             },
             "rank": 4
           },
@@ -13290,7 +13294,7 @@
           },
           {
             "constructor": "Ferrari",
-            "rating": 16.5,
+            "rating": 16.4,
             "drivers": {
               "Erick": 21.4,
               "Leo": 11.5
@@ -13299,10 +13303,10 @@
           },
           {
             "constructor": "Red Bull",
-            "rating": 9.2,
+            "rating": 9.3,
             "drivers": {
               "Brently": 9.9,
-              "Matthew": 8.4
+              "Matthew": 8.6
             },
             "rank": 7
           }
@@ -13355,7 +13359,7 @@
           {
             "driver": "Jaden",
             "team": "Mercedes",
-            "rating": 26.8,
+            "rating": 26.9,
             "rank": 8
           },
           {
@@ -13373,13 +13377,13 @@
           {
             "driver": "Eddie",
             "team": "Alpine",
-            "rating": 12.0,
+            "rating": 11.8,
             "rank": 11
           },
           {
             "driver": "Brently",
             "team": "Red Bull",
-            "rating": 11.7,
+            "rating": 11.6,
             "rank": 12
           },
           {
@@ -13398,9 +13402,9 @@
         "constructor_ratings": [
           {
             "constructor": "Mercedes",
-            "rating": 44.8,
+            "rating": 44.9,
             "drivers": {
-              "Jaden": 26.8,
+              "Jaden": 26.9,
               "Jairo": 62.8
             },
             "rank": 1
@@ -13425,10 +13429,10 @@
           },
           {
             "constructor": "Alpine",
-            "rating": 24.1,
+            "rating": 24.0,
             "drivers": {
               "Joshua": 36.2,
-              "Eddie": 12.0
+              "Eddie": 11.8
             },
             "rank": 4
           },
@@ -13454,7 +13458,7 @@
             "constructor": "Red Bull",
             "rating": 6.6,
             "drivers": {
-              "Brently": 11.7,
+              "Brently": 11.6,
               "Matthew": 1.6
             },
             "rank": 7
@@ -13496,7 +13500,7 @@
           {
             "driver": "Jaden",
             "team": "Mercedes",
-            "rating": 26.8,
+            "rating": 26.9,
             "rank": 6
           },
           {
@@ -13526,7 +13530,7 @@
           {
             "driver": "Brently",
             "team": "Red Bull",
-            "rating": 11.7,
+            "rating": 11.6,
             "rank": 11
           },
           {
@@ -13589,16 +13593,16 @@
             "constructor": "Mercedes",
             "rating": 22.7,
             "drivers": {
-              "Jaden": 26.8,
+              "Jaden": 26.9,
               "Jairo": 18.5
             },
             "rank": 5
           },
           {
             "constructor": "Red Bull",
-            "rating": 6.2,
+            "rating": 6.1,
             "drivers": {
-              "Brently": 11.7,
+              "Brently": 11.6,
               "Matthew": 0.6
             },
             "rank": 6
@@ -13643,7 +13647,7 @@
           {
             "driver": "Jaden",
             "team": "Mercedes",
-            "rating": 26.8,
+            "rating": 26.9,
             "rank": 5
           },
           {
@@ -13653,15 +13657,15 @@
             "rank": 6
           },
           {
-            "driver": "Joshua",
-            "team": "Alpine",
-            "rating": 24.4,
+            "driver": "Jelly",
+            "team": "VCARB",
+            "rating": 25.3,
             "rank": 7
           },
           {
-            "driver": "Jelly",
-            "team": "VCARB",
-            "rating": 24.1,
+            "driver": "Joshua",
+            "team": "Alpine",
+            "rating": 24.4,
             "rank": 8
           },
           {
@@ -13697,7 +13701,7 @@
           {
             "driver": "Matthew",
             "team": "Red Bull",
-            "rating": 8.4,
+            "rating": 8.6,
             "rank": 14
           }
         ],
@@ -13724,17 +13728,17 @@
             "constructor": "Mercedes",
             "rating": 27.8,
             "drivers": {
-              "Jaden": 26.8,
+              "Jaden": 26.9,
               "Jairo": 28.8
             },
             "rank": 3
           },
           {
             "constructor": "VCARB",
-            "rating": 26.3,
+            "rating": 26.9,
             "drivers": {
               "Patrick": 28.6,
-              "Jelly": 24.1
+              "Jelly": 25.3
             },
             "rank": 4
           },
@@ -13758,10 +13762,10 @@
           },
           {
             "constructor": "Red Bull",
-            "rating": 13.6,
+            "rating": 13.8,
             "drivers": {
               "Brently": 18.9,
-              "Matthew": 8.4
+              "Matthew": 8.6
             },
             "rank": 7
           }
@@ -13778,7 +13782,7 @@
           {
             "driver": "Joshua",
             "team": "Alpine",
-            "rating": 37.9,
+            "rating": 38.1,
             "rank": 2
           },
           {
@@ -13796,25 +13800,25 @@
           {
             "driver": "Jaden",
             "team": "Mercedes",
-            "rating": 26.8,
+            "rating": 26.9,
             "rank": 5
-          },
-          {
-            "driver": "Del",
-            "team": "Aston Martin",
-            "rating": 25.2,
-            "rank": 6
           },
           {
             "driver": "Jelly",
             "team": "VCARB",
-            "rating": 24.1,
+            "rating": 25.3,
+            "rank": 6
+          },
+          {
+            "driver": "Del",
+            "team": "Aston Martin",
+            "rating": 24.7,
             "rank": 7
           },
           {
             "driver": "Patrick",
             "team": "VCARB",
-            "rating": 23.5,
+            "rating": 23.3,
             "rank": 8
           },
           {
@@ -13826,13 +13830,13 @@
           {
             "driver": "Eddie",
             "team": "Alpine",
-            "rating": 12.0,
+            "rating": 11.8,
             "rank": 10
           },
           {
             "driver": "Brently",
             "team": "Red Bull",
-            "rating": 11.7,
+            "rating": 11.6,
             "rank": 11
           },
           {
@@ -13850,7 +13854,7 @@
           {
             "driver": "Matthew",
             "team": "Red Bull",
-            "rating": 8.4,
+            "rating": 8.6,
             "rank": 14
           }
         ],
@@ -13859,7 +13863,7 @@
             "constructor": "Mercedes",
             "rating": 27.8,
             "drivers": {
-              "Jaden": 26.8,
+              "Jaden": 26.9,
               "Jairo": 28.8
             },
             "rank": 1
@@ -13875,19 +13879,19 @@
           },
           {
             "constructor": "Alpine",
-            "rating": 25.0,
+            "rating": 24.9,
             "drivers": {
-              "Joshua": 37.9,
-              "Eddie": 12.0
+              "Joshua": 38.1,
+              "Eddie": 11.8
             },
             "rank": 3
           },
           {
             "constructor": "VCARB",
-            "rating": 23.8,
+            "rating": 24.3,
             "drivers": {
-              "Patrick": 23.5,
-              "Jelly": 24.1
+              "Patrick": 23.3,
+              "Jelly": 25.3
             },
             "rank": 4
           },
@@ -13902,19 +13906,19 @@
           },
           {
             "constructor": "Aston Martin",
-            "rating": 17.7,
+            "rating": 17.5,
             "drivers": {
-              "Del": 25.2,
+              "Del": 24.7,
               "Boz": 10.3
             },
             "rank": 6
           },
           {
             "constructor": "Red Bull",
-            "rating": 10.0,
+            "rating": 10.1,
             "drivers": {
-              "Brently": 11.7,
-              "Matthew": 8.4
+              "Brently": 11.6,
+              "Matthew": 8.6
             },
             "rank": 7
           }
@@ -13937,19 +13941,19 @@
           {
             "driver": "Jaden",
             "team": "Mercedes",
-            "rating": 26.8,
+            "rating": 26.9,
             "rank": 3
           },
           {
             "driver": "Jelly",
             "team": "VCARB",
-            "rating": 24.1,
+            "rating": 25.3,
             "rank": 4
           },
           {
             "driver": "Patrick",
             "team": "VCARB",
-            "rating": 23.5,
+            "rating": 23.3,
             "rank": 5
           },
           {
@@ -13979,7 +13983,7 @@
           {
             "driver": "Brently",
             "team": "Red Bull",
-            "rating": 11.7,
+            "rating": 11.6,
             "rank": 10
           },
           {
@@ -13991,7 +13995,7 @@
           {
             "driver": "Matthew",
             "team": "Red Bull",
-            "rating": 8.4,
+            "rating": 8.6,
             "rank": 12
           },
           {
@@ -14012,17 +14016,17 @@
             "constructor": "Mercedes",
             "rating": 27.8,
             "drivers": {
-              "Jaden": 26.8,
+              "Jaden": 26.9,
               "Jairo": 28.8
             },
             "rank": 1
           },
           {
             "constructor": "VCARB",
-            "rating": 23.8,
+            "rating": 24.3,
             "drivers": {
-              "Patrick": 23.5,
-              "Jelly": 24.1
+              "Patrick": 23.3,
+              "Jelly": 25.3
             },
             "rank": 2
           },
@@ -14055,10 +14059,10 @@
           },
           {
             "constructor": "Red Bull",
-            "rating": 10.0,
+            "rating": 10.1,
             "drivers": {
-              "Brently": 11.7,
-              "Matthew": 8.4
+              "Brently": 11.6,
+              "Matthew": 8.6
             },
             "rank": 6
           },
@@ -14144,7 +14148,7 @@
           {
             "driver": "Eddie",
             "team": "Alpine",
-            "rating": 12.0,
+            "rating": 11.8,
             "rank": 12
           },
           {
@@ -14190,10 +14194,10 @@
           },
           {
             "constructor": "Alpine",
-            "rating": 19.6,
+            "rating": 19.5,
             "drivers": {
               "Joshua": 27.2,
-              "Eddie": 12.0
+              "Eddie": 11.8
             },
             "rank": 4
           },
@@ -14617,7 +14621,7 @@
           {
             "driver": "Eddie",
             "team": "Red Bull",
-            "rating": 12.0,
+            "rating": 11.8,
             "rank": 7
           },
           {
@@ -14687,10 +14691,10 @@
           },
           {
             "constructor": "Red Bull",
-            "rating": 20.0,
+            "rating": 19.9,
             "drivers": {
               "Joshua": 28.1,
-              "Eddie": 12.0
+              "Eddie": 11.8
             },
             "rank": 2
           },
@@ -15449,163 +15453,163 @@
       "Suzuka": {
         "driver_ratings": [
           {
-            "driver": "Nick",
-            "team": "McLaren",
-            "rating": 64.8,
+            "driver": "Jelly",
+            "team": "Cadillac",
+            "rating": 60.8,
             "rank": 1
           },
           {
             "driver": "Joshua",
             "team": "Red Bull",
-            "rating": 59.4,
+            "rating": 57.2,
             "rank": 2
+          },
+          {
+            "driver": "Nick",
+            "team": "McLaren",
+            "rating": 56.8,
+            "rank": 3
           },
           {
             "driver": "Del",
             "team": "McLaren",
-            "rating": 44.0,
-            "rank": 3
-          },
-          {
-            "driver": "Brently",
-            "team": "Haas",
-            "rating": 31.2,
+            "rating": 31.1,
             "rank": 4
-          },
-          {
-            "driver": "Jairo",
-            "team": "Mercedes",
-            "rating": 28.8,
-            "rank": 5
           },
           {
             "driver": "Jaden",
             "team": "Ferrari",
-            "rating": 26.8,
+            "rating": 28.9,
+            "rank": 5
+          },
+          {
+            "driver": "Jairo",
+            "team": "Mercedes",
+            "rating": 28.5,
             "rank": 6
           },
           {
-            "driver": "Jelly",
-            "team": "Cadillac",
-            "rating": 24.1,
+            "driver": "Brently",
+            "team": "Haas",
+            "rating": 19.2,
             "rank": 7
+          },
+          {
+            "driver": "Matthew",
+            "team": "Haas",
+            "rating": 14.8,
+            "rank": 8
           },
           {
             "driver": "Leo",
             "team": "Ferrari",
             "rating": 11.5,
-            "rank": 8
+            "rank": 9
+          },
+          {
+            "driver": "Patrick",
+            "team": "Cadillac",
+            "rating": 10.1,
+            "rank": 10
           },
           {
             "driver": "Eddie",
             "team": "Red Bull",
-            "rating": 11.3,
-            "rank": 9
-          },
-          {
-            "driver": "Matthew",
-            "team": "Haas",
             "rating": 8.4,
-            "rank": 10
+            "rank": 11
           },
           {
             "driver": "Randy",
             "team": "Mercedes",
             "rating": 5.9,
-            "rank": 11
+            "rank": 12
           },
           {
             "driver": "Boz",
             "team": "Audi",
             "rating": 5.0,
-            "rank": 12
-          },
-          {
-            "driver": "Josh C.",
-            "team": "Williams",
-            "rating": 3.0,
             "rank": 13
           },
           {
             "driver": "Evelo",
             "team": "Audi",
-            "rating": 1.8,
+            "rating": 4.6,
             "rank": 14
+          },
+          {
+            "driver": "Josh C.",
+            "team": "Williams",
+            "rating": 3.0,
+            "rank": 15
           },
           {
             "driver": "Grayson",
             "team": "Williams",
             "rating": 1.7,
-            "rank": 15
-          },
-          {
-            "driver": "Patrick",
-            "team": "Cadillac",
-            "rating": 0.6,
             "rank": 16
           }
         ],
         "constructor_ratings": [
           {
             "constructor": "McLaren",
-            "rating": 54.4,
+            "rating": 43.9,
             "drivers": {
-              "Nick": 64.8,
-              "Del": 44.0
+              "Nick": 56.8,
+              "Del": 31.1
             },
             "rank": 1
           },
           {
-            "constructor": "Red Bull",
-            "rating": 35.3,
+            "constructor": "Cadillac",
+            "rating": 35.5,
             "drivers": {
-              "Joshua": 59.4,
-              "Eddie": 11.3
+              "Patrick": 10.1,
+              "Jelly": 60.8
             },
             "rank": 2
           },
           {
-            "constructor": "Haas",
-            "rating": 19.8,
+            "constructor": "Red Bull",
+            "rating": 32.8,
             "drivers": {
-              "Brently": 31.2,
-              "Matthew": 8.4
+              "Joshua": 57.2,
+              "Eddie": 8.4
             },
             "rank": 3
           },
           {
             "constructor": "Ferrari",
-            "rating": 19.2,
+            "rating": 20.2,
             "drivers": {
-              "Jaden": 26.8,
+              "Jaden": 28.9,
               "Leo": 11.5
             },
             "rank": 4
           },
           {
             "constructor": "Mercedes",
-            "rating": 17.4,
+            "rating": 17.2,
             "drivers": {
-              "Jairo": 28.8,
+              "Jairo": 28.5,
               "Randy": 5.9
             },
             "rank": 5
           },
           {
-            "constructor": "Cadillac",
-            "rating": 12.3,
+            "constructor": "Haas",
+            "rating": 17.0,
             "drivers": {
-              "Patrick": 0.6,
-              "Jelly": 24.1
+              "Brently": 19.2,
+              "Matthew": 14.8
             },
             "rank": 6
           },
           {
             "constructor": "Audi",
-            "rating": 3.4,
+            "rating": 4.8,
             "drivers": {
               "Boz": 5.0,
-              "Evelo": 1.8
+              "Evelo": 4.6
             },
             "rank": 7
           },
@@ -15703,7 +15707,7 @@
           {
             "driver": "Evelo",
             "team": "Audi",
-            "rating": 1.8,
+            "rating": 2.0,
             "rank": 14
           },
           {
@@ -15776,10 +15780,10 @@
           },
           {
             "constructor": "Audi",
-            "rating": 6.7,
+            "rating": 6.8,
             "drivers": {
               "Boz": 11.6,
-              "Evelo": 1.8
+              "Evelo": 2.0
             },
             "rank": 7
           },
@@ -15871,7 +15875,7 @@
           {
             "driver": "Evelo",
             "team": "Audi",
-            "rating": 1.8,
+            "rating": 2.0,
             "rank": 13
           },
           {
@@ -15941,10 +15945,10 @@
           },
           {
             "constructor": "Audi",
-            "rating": 5.7,
+            "rating": 5.9,
             "drivers": {
               "Boz": 9.7,
-              "Evelo": 1.8
+              "Evelo": 2.0
             },
             "rank": 6
           },
@@ -15997,7 +16001,7 @@
           {
             "driver": "Jaden",
             "team": "Ferrari",
-            "rating": 26.8,
+            "rating": 26.9,
             "rank": 5
           },
           {
@@ -16009,7 +16013,7 @@
           {
             "driver": "Jelly",
             "team": "Cadillac",
-            "rating": 24.1,
+            "rating": 25.3,
             "rank": 7
           },
           {
@@ -16033,7 +16037,7 @@
           {
             "driver": "Matthew",
             "team": "Haas",
-            "rating": 8.4,
+            "rating": 8.6,
             "rank": 11
           },
           {
@@ -16051,7 +16055,7 @@
           {
             "driver": "Evelo",
             "team": "Audi",
-            "rating": 1.8,
+            "rating": 2.0,
             "rank": 14
           },
           {
@@ -16088,10 +16092,10 @@
           },
           {
             "constructor": "Cadillac",
-            "rating": 22.8,
+            "rating": 23.4,
             "drivers": {
               "Patrick": 21.5,
-              "Jelly": 24.1
+              "Jelly": 25.3
             },
             "rank": 3
           },
@@ -16099,14 +16103,14 @@
             "constructor": "Ferrari",
             "rating": 19.2,
             "drivers": {
-              "Jaden": 26.8,
+              "Jaden": 26.9,
               "Leo": 11.5
             },
             "rank": 4
           },
           {
             "constructor": "Mercedes",
-            "rating": 17.4,
+            "rating": 17.3,
             "drivers": {
               "Jairo": 28.8,
               "Randy": 5.9
@@ -16115,19 +16119,19 @@
           },
           {
             "constructor": "Audi",
-            "rating": 8.0,
+            "rating": 8.1,
             "drivers": {
               "Boz": 14.2,
-              "Evelo": 1.8
+              "Evelo": 2.0
             },
             "rank": 6
           },
           {
             "constructor": "Haas",
-            "rating": 4.5,
+            "rating": 4.7,
             "drivers": {
               "Brently": 0.7,
-              "Matthew": 8.4
+              "Matthew": 8.6
             },
             "rank": 7
           },
@@ -16231,7 +16235,7 @@
           {
             "driver": "Evelo",
             "team": "Audi",
-            "rating": 1.8,
+            "rating": 2.0,
             "rank": 15
           },
           {
@@ -16289,10 +16293,10 @@
           },
           {
             "constructor": "Audi",
-            "rating": 4.9,
+            "rating": 5.0,
             "drivers": {
               "Boz": 8.0,
-              "Evelo": 1.8
+              "Evelo": 2.0
             },
             "rank": 6
           },
@@ -16327,7 +16331,7 @@
           {
             "driver": "Joshua",
             "team": "Red Bull",
-            "rating": 37.9,
+            "rating": 38.1,
             "rank": 2
           },
           {
@@ -16345,37 +16349,37 @@
           {
             "driver": "Jaden",
             "team": "Ferrari",
-            "rating": 26.8,
+            "rating": 26.9,
             "rank": 5
-          },
-          {
-            "driver": "Del",
-            "team": "McLaren",
-            "rating": 25.2,
-            "rank": 6
           },
           {
             "driver": "Jelly",
             "team": "Cadillac",
-            "rating": 24.1,
+            "rating": 25.3,
+            "rank": 6
+          },
+          {
+            "driver": "Del",
+            "team": "McLaren",
+            "rating": 24.7,
             "rank": 7
           },
           {
             "driver": "Patrick",
             "team": "Cadillac",
-            "rating": 23.5,
+            "rating": 23.3,
             "rank": 8
           },
           {
             "driver": "Eddie",
             "team": "Red Bull",
-            "rating": 12.0,
+            "rating": 11.8,
             "rank": 9
           },
           {
             "driver": "Brently",
             "team": "Haas",
-            "rating": 11.7,
+            "rating": 11.6,
             "rank": 10
           },
           {
@@ -16387,7 +16391,7 @@
           {
             "driver": "Matthew",
             "team": "Haas",
-            "rating": 8.4,
+            "rating": 8.6,
             "rank": 12
           },
           {
@@ -16405,7 +16409,7 @@
           {
             "driver": "Evelo",
             "team": "Audi",
-            "rating": 1.8,
+            "rating": 2.0,
             "rank": 15
           },
           {
@@ -16418,28 +16422,28 @@
         "constructor_ratings": [
           {
             "constructor": "McLaren",
-            "rating": 47.0,
+            "rating": 46.8,
             "drivers": {
               "Nick": 68.8,
-              "Del": 25.2
+              "Del": 24.7
             },
             "rank": 1
           },
           {
             "constructor": "Red Bull",
-            "rating": 25.0,
+            "rating": 24.9,
             "drivers": {
-              "Joshua": 37.9,
-              "Eddie": 12.0
+              "Joshua": 38.1,
+              "Eddie": 11.8
             },
             "rank": 2
           },
           {
             "constructor": "Cadillac",
-            "rating": 23.8,
+            "rating": 24.3,
             "drivers": {
-              "Patrick": 23.5,
-              "Jelly": 24.1
+              "Patrick": 23.3,
+              "Jelly": 25.3
             },
             "rank": 3
           },
@@ -16447,23 +16451,23 @@
             "constructor": "Ferrari",
             "rating": 19.2,
             "drivers": {
-              "Jaden": 26.8,
+              "Jaden": 26.9,
               "Leo": 11.5
             },
             "rank": 4
           },
           {
             "constructor": "Audi",
-            "rating": 17.4,
+            "rating": 17.5,
             "drivers": {
               "Boz": 33.0,
-              "Evelo": 1.8
+              "Evelo": 2.0
             },
             "rank": 5
           },
           {
             "constructor": "Mercedes",
-            "rating": 17.4,
+            "rating": 17.3,
             "drivers": {
               "Jairo": 28.8,
               "Randy": 5.9
@@ -16472,10 +16476,10 @@
           },
           {
             "constructor": "Haas",
-            "rating": 10.0,
+            "rating": 10.1,
             "drivers": {
-              "Brently": 11.7,
-              "Matthew": 8.4
+              "Brently": 11.6,
+              "Matthew": 8.6
             },
             "rank": 7
           },
@@ -16495,7 +16499,7 @@
           {
             "driver": "Joshua",
             "team": "Red Bull",
-            "rating": 37.9,
+            "rating": 38.1,
             "rank": 1
           },
           {
@@ -16507,25 +16511,25 @@
           {
             "driver": "Jaden",
             "team": "Ferrari",
-            "rating": 26.8,
+            "rating": 26.9,
             "rank": 3
-          },
-          {
-            "driver": "Del",
-            "team": "McLaren",
-            "rating": 25.2,
-            "rank": 4
           },
           {
             "driver": "Jelly",
             "team": "Cadillac",
-            "rating": 24.1,
+            "rating": 25.3,
+            "rank": 4
+          },
+          {
+            "driver": "Del",
+            "team": "McLaren",
+            "rating": 24.7,
             "rank": 5
           },
           {
             "driver": "Patrick",
             "team": "Cadillac",
-            "rating": 23.5,
+            "rating": 23.3,
             "rank": 6
           },
           {
@@ -16537,13 +16541,13 @@
           {
             "driver": "Eddie",
             "team": "Red Bull",
-            "rating": 12.0,
+            "rating": 11.8,
             "rank": 8
           },
           {
             "driver": "Brently",
             "team": "Haas",
-            "rating": 11.7,
+            "rating": 11.6,
             "rank": 9
           },
           {
@@ -16555,7 +16559,7 @@
           {
             "driver": "Matthew",
             "team": "Haas",
-            "rating": 8.4,
+            "rating": 8.6,
             "rank": 11
           },
           {
@@ -16573,7 +16577,7 @@
           {
             "driver": "Evelo",
             "team": "Audi",
-            "rating": 1.8,
+            "rating": 2.0,
             "rank": 14
           },
           {
@@ -16592,28 +16596,28 @@
         "constructor_ratings": [
           {
             "constructor": "Red Bull",
-            "rating": 25.0,
+            "rating": 24.9,
             "drivers": {
-              "Joshua": 37.9,
-              "Eddie": 12.0
+              "Joshua": 38.1,
+              "Eddie": 11.8
             },
             "rank": 1
           },
           {
             "constructor": "Cadillac",
-            "rating": 23.8,
+            "rating": 24.3,
             "drivers": {
-              "Patrick": 23.5,
-              "Jelly": 24.1
+              "Patrick": 23.3,
+              "Jelly": 25.3
             },
             "rank": 2
           },
           {
             "constructor": "McLaren",
-            "rating": 19.8,
+            "rating": 19.6,
             "drivers": {
               "Nick": 14.4,
-              "Del": 25.2
+              "Del": 24.7
             },
             "rank": 3
           },
@@ -16621,14 +16625,14 @@
             "constructor": "Ferrari",
             "rating": 19.2,
             "drivers": {
-              "Jaden": 26.8,
+              "Jaden": 26.9,
               "Leo": 11.5
             },
             "rank": 4
           },
           {
             "constructor": "Mercedes",
-            "rating": 17.4,
+            "rating": 17.3,
             "drivers": {
               "Jairo": 28.8,
               "Randy": 5.9
@@ -16637,10 +16641,10 @@
           },
           {
             "constructor": "Haas",
-            "rating": 10.0,
+            "rating": 10.1,
             "drivers": {
-              "Brently": 11.7,
-              "Matthew": 8.4
+              "Brently": 11.6,
+              "Matthew": 8.6
             },
             "rank": 6
           },
@@ -16655,10 +16659,10 @@
           },
           {
             "constructor": "Audi",
-            "rating": 0.9,
+            "rating": 1.0,
             "drivers": {
               "Boz": 0.0,
-              "Evelo": 1.8
+              "Evelo": 2.0
             },
             "rank": 8
           }
@@ -16753,7 +16757,7 @@
           {
             "driver": "Evelo",
             "team": "Audi",
-            "rating": 1.8,
+            "rating": 2.0,
             "rank": 15
           },
           {
@@ -16820,10 +16824,10 @@
           },
           {
             "constructor": "Audi",
-            "rating": 6.3,
+            "rating": 6.4,
             "drivers": {
               "Boz": 10.8,
-              "Evelo": 1.8
+              "Evelo": 2.0
             },
             "rank": 7
           },
@@ -16915,7 +16919,7 @@
           {
             "driver": "Evelo",
             "team": "Audi",
-            "rating": 1.8,
+            "rating": 2.0,
             "rank": 13
           },
           {
@@ -17003,10 +17007,10 @@
           },
           {
             "constructor": "Audi",
-            "rating": 1.0,
+            "rating": 1.1,
             "drivers": {
               "Boz": 0.1,
-              "Evelo": 1.8
+              "Evelo": 2.0
             },
             "rank": 8
           }
@@ -17035,19 +17039,19 @@
           {
             "driver": "Jaden",
             "team": "Ferrari",
-            "rating": 26.8,
+            "rating": 26.9,
             "rank": 4
+          },
+          {
+            "driver": "Jelly",
+            "team": "Cadillac",
+            "rating": 25.3,
+            "rank": 5
           },
           {
             "driver": "Nick",
             "team": "McLaren",
             "rating": 24.4,
-            "rank": 5
-          },
-          {
-            "driver": "Jelly",
-            "team": "Cadillac",
-            "rating": 24.1,
             "rank": 6
           },
           {
@@ -17077,7 +17081,7 @@
           {
             "driver": "Matthew",
             "team": "Haas",
-            "rating": 8.4,
+            "rating": 8.6,
             "rank": 11
           },
           {
@@ -17095,7 +17099,7 @@
           {
             "driver": "Evelo",
             "team": "Audi",
-            "rating": 1.8,
+            "rating": 2.0,
             "rank": 14
           },
           {
@@ -17132,10 +17136,10 @@
           },
           {
             "constructor": "Cadillac",
-            "rating": 24.0,
+            "rating": 24.6,
             "drivers": {
               "Patrick": 24.0,
-              "Jelly": 24.1
+              "Jelly": 25.3
             },
             "rank": 3
           },
@@ -17143,14 +17147,14 @@
             "constructor": "Ferrari",
             "rating": 19.2,
             "drivers": {
-              "Jaden": 26.8,
+              "Jaden": 26.9,
               "Leo": 11.5
             },
             "rank": 4
           },
           {
             "constructor": "Mercedes",
-            "rating": 17.4,
+            "rating": 17.3,
             "drivers": {
               "Jairo": 28.8,
               "Randy": 5.9
@@ -17159,10 +17163,10 @@
           },
           {
             "constructor": "Haas",
-            "rating": 9.2,
+            "rating": 9.3,
             "drivers": {
               "Brently": 9.9,
-              "Matthew": 8.4
+              "Matthew": 8.6
             },
             "rank": 6
           },
@@ -17177,10 +17181,10 @@
           },
           {
             "constructor": "Audi",
-            "rating": 1.5,
+            "rating": 1.6,
             "drivers": {
               "Boz": 1.2,
-              "Evelo": 1.8
+              "Evelo": 2.0
             },
             "rank": 8
           }
@@ -17227,7 +17231,7 @@
           {
             "driver": "Jaden",
             "team": "Ferrari",
-            "rating": 26.8,
+            "rating": 26.9,
             "rank": 7
           },
           {
@@ -17239,13 +17243,13 @@
           {
             "driver": "Eddie",
             "team": "Red Bull",
-            "rating": 12.0,
+            "rating": 11.8,
             "rank": 9
           },
           {
             "driver": "Brently",
             "team": "Haas",
-            "rating": 11.7,
+            "rating": 11.6,
             "rank": 10
           },
           {
@@ -17263,7 +17267,7 @@
           {
             "driver": "Evelo",
             "team": "Audi",
-            "rating": 1.8,
+            "rating": 2.0,
             "rank": 13
           },
           {
@@ -17308,17 +17312,17 @@
             "constructor": "Ferrari",
             "rating": 29.8,
             "drivers": {
-              "Jaden": 26.8,
+              "Jaden": 26.9,
               "Leo": 32.8
             },
             "rank": 3
           },
           {
             "constructor": "Red Bull",
-            "rating": 24.1,
+            "rating": 24.0,
             "drivers": {
               "Joshua": 36.2,
-              "Eddie": 12.0
+              "Eddie": 11.8
             },
             "rank": 4
           },
@@ -17333,10 +17337,10 @@
           },
           {
             "constructor": "Audi",
-            "rating": 17.4,
+            "rating": 17.5,
             "drivers": {
               "Boz": 33.0,
-              "Evelo": 1.8
+              "Evelo": 2.0
             },
             "rank": 6
           },
@@ -17344,7 +17348,7 @@
             "constructor": "Haas",
             "rating": 6.6,
             "drivers": {
-              "Brently": 11.7,
+              "Brently": 11.6,
               "Matthew": 1.6
             },
             "rank": 7
@@ -17389,7 +17393,7 @@
           {
             "driver": "Jaden",
             "team": "Ferrari",
-            "rating": 26.8,
+            "rating": 26.9,
             "rank": 5
           },
           {
@@ -17413,7 +17417,7 @@
           {
             "driver": "Brently",
             "team": "Haas",
-            "rating": 11.7,
+            "rating": 11.6,
             "rank": 9
           },
           {
@@ -17437,7 +17441,7 @@
           {
             "driver": "Evelo",
             "team": "Audi",
-            "rating": 1.8,
+            "rating": 2.0,
             "rank": 13
           },
           {
@@ -17489,9 +17493,9 @@
           },
           {
             "constructor": "Ferrari",
-            "rating": 22.9,
+            "rating": 23.0,
             "drivers": {
-              "Jaden": 26.8,
+              "Jaden": 26.9,
               "Leo": 19.1
             },
             "rank": 4
@@ -17506,20 +17510,20 @@
             "rank": 5
           },
           {
-            "constructor": "Haas",
-            "rating": 6.2,
+            "constructor": "Audi",
+            "rating": 6.1,
             "drivers": {
-              "Brently": 11.7,
-              "Matthew": 0.6
+              "Boz": 10.3,
+              "Evelo": 2.0
             },
             "rank": 6
           },
           {
-            "constructor": "Audi",
-            "rating": 6.0,
+            "constructor": "Haas",
+            "rating": 6.1,
             "drivers": {
-              "Boz": 10.3,
-              "Evelo": 1.8
+              "Brently": 11.6,
+              "Matthew": 0.6
             },
             "rank": 7
           },
@@ -17563,19 +17567,19 @@
           {
             "driver": "Jaden",
             "team": "Ferrari",
-            "rating": 26.8,
+            "rating": 26.9,
             "rank": 5
+          },
+          {
+            "driver": "Jelly",
+            "team": "Cadillac",
+            "rating": 25.3,
+            "rank": 6
           },
           {
             "driver": "Joshua",
             "team": "Red Bull",
             "rating": 24.4,
-            "rank": 6
-          },
-          {
-            "driver": "Jelly",
-            "team": "Cadillac",
-            "rating": 24.1,
             "rank": 7
           },
           {
@@ -17605,7 +17609,7 @@
           {
             "driver": "Matthew",
             "team": "Haas",
-            "rating": 8.4,
+            "rating": 8.6,
             "rank": 12
           },
           {
@@ -17623,7 +17627,7 @@
           {
             "driver": "Evelo",
             "team": "Audi",
-            "rating": 1.8,
+            "rating": 2.0,
             "rank": 15
           },
           {
@@ -17645,10 +17649,10 @@
           },
           {
             "constructor": "Cadillac",
-            "rating": 26.3,
+            "rating": 26.9,
             "drivers": {
               "Patrick": 28.6,
-              "Jelly": 24.1
+              "Jelly": 25.3
             },
             "rank": 2
           },
@@ -17665,14 +17669,14 @@
             "constructor": "Ferrari",
             "rating": 19.2,
             "drivers": {
-              "Jaden": 26.8,
+              "Jaden": 26.9,
               "Leo": 11.5
             },
             "rank": 4
           },
           {
             "constructor": "Mercedes",
-            "rating": 17.4,
+            "rating": 17.3,
             "drivers": {
               "Jairo": 28.8,
               "Randy": 5.9
@@ -17681,19 +17685,19 @@
           },
           {
             "constructor": "Haas",
-            "rating": 13.6,
+            "rating": 13.8,
             "drivers": {
               "Brently": 18.9,
-              "Matthew": 8.4
+              "Matthew": 8.6
             },
             "rank": 6
           },
           {
             "constructor": "Audi",
-            "rating": 10.2,
+            "rating": 10.3,
             "drivers": {
               "Boz": 18.6,
-              "Evelo": 1.8
+              "Evelo": 2.0
             },
             "rank": 7
           },
@@ -17719,7 +17723,7 @@
           {
             "driver": "Joshua",
             "team": "Red Bull",
-            "rating": 37.9,
+            "rating": 38.1,
             "rank": 2
           },
           {
@@ -17731,37 +17735,37 @@
           {
             "driver": "Jaden",
             "team": "Ferrari",
-            "rating": 26.8,
+            "rating": 26.9,
             "rank": 4
-          },
-          {
-            "driver": "Del",
-            "team": "McLaren",
-            "rating": 25.2,
-            "rank": 5
           },
           {
             "driver": "Jelly",
             "team": "Cadillac",
-            "rating": 24.1,
+            "rating": 25.3,
+            "rank": 5
+          },
+          {
+            "driver": "Del",
+            "team": "McLaren",
+            "rating": 24.7,
             "rank": 6
           },
           {
             "driver": "Patrick",
             "team": "Cadillac",
-            "rating": 23.5,
+            "rating": 23.3,
             "rank": 7
           },
           {
             "driver": "Eddie",
             "team": "Red Bull",
-            "rating": 12.0,
+            "rating": 11.8,
             "rank": 8
           },
           {
             "driver": "Brently",
             "team": "Haas",
-            "rating": 11.7,
+            "rating": 11.6,
             "rank": 9
           },
           {
@@ -17779,7 +17783,7 @@
           {
             "driver": "Matthew",
             "team": "Haas",
-            "rating": 8.4,
+            "rating": 8.6,
             "rank": 12
           },
           {
@@ -17797,7 +17801,7 @@
           {
             "driver": "Evelo",
             "team": "Audi",
-            "rating": 1.8,
+            "rating": 2.0,
             "rank": 15
           },
           {
@@ -17810,28 +17814,28 @@
         "constructor_ratings": [
           {
             "constructor": "McLaren",
-            "rating": 32.8,
+            "rating": 32.5,
             "drivers": {
               "Nick": 40.3,
-              "Del": 25.2
+              "Del": 24.7
             },
             "rank": 1
           },
           {
             "constructor": "Red Bull",
-            "rating": 25.0,
+            "rating": 24.9,
             "drivers": {
-              "Joshua": 37.9,
-              "Eddie": 12.0
+              "Joshua": 38.1,
+              "Eddie": 11.8
             },
             "rank": 2
           },
           {
             "constructor": "Cadillac",
-            "rating": 23.8,
+            "rating": 24.3,
             "drivers": {
-              "Patrick": 23.5,
-              "Jelly": 24.1
+              "Patrick": 23.3,
+              "Jelly": 25.3
             },
             "rank": 3
           },
@@ -17839,14 +17843,14 @@
             "constructor": "Ferrari",
             "rating": 19.2,
             "drivers": {
-              "Jaden": 26.8,
+              "Jaden": 26.9,
               "Leo": 11.5
             },
             "rank": 4
           },
           {
             "constructor": "Mercedes",
-            "rating": 17.4,
+            "rating": 17.3,
             "drivers": {
               "Jairo": 28.8,
               "Randy": 5.9
@@ -17855,19 +17859,19 @@
           },
           {
             "constructor": "Haas",
-            "rating": 10.0,
+            "rating": 10.1,
             "drivers": {
-              "Brently": 11.7,
-              "Matthew": 8.4
+              "Brently": 11.6,
+              "Matthew": 8.6
             },
             "rank": 6
           },
           {
             "constructor": "Audi",
-            "rating": 6.0,
+            "rating": 6.1,
             "drivers": {
               "Boz": 10.3,
-              "Evelo": 1.8
+              "Evelo": 2.0
             },
             "rank": 7
           },
@@ -17893,19 +17897,19 @@
           {
             "driver": "Jaden",
             "team": "Ferrari",
-            "rating": 26.8,
+            "rating": 26.9,
             "rank": 2
           },
           {
             "driver": "Jelly",
             "team": "Cadillac",
-            "rating": 24.1,
+            "rating": 25.3,
             "rank": 3
           },
           {
             "driver": "Patrick",
             "team": "Cadillac",
-            "rating": 23.5,
+            "rating": 23.3,
             "rank": 4
           },
           {
@@ -17929,7 +17933,7 @@
           {
             "driver": "Brently",
             "team": "Haas",
-            "rating": 11.7,
+            "rating": 11.6,
             "rank": 8
           },
           {
@@ -17941,7 +17945,7 @@
           {
             "driver": "Matthew",
             "team": "Haas",
-            "rating": 8.4,
+            "rating": 8.6,
             "rank": 10
           },
           {
@@ -17971,7 +17975,7 @@
           {
             "driver": "Evelo",
             "team": "Audi",
-            "rating": 1.8,
+            "rating": 2.0,
             "rank": 15
           },
           {
@@ -17984,10 +17988,10 @@
         "constructor_ratings": [
           {
             "constructor": "Cadillac",
-            "rating": 23.8,
+            "rating": 24.3,
             "drivers": {
-              "Patrick": 23.5,
-              "Jelly": 24.1
+              "Patrick": 23.3,
+              "Jelly": 25.3
             },
             "rank": 1
           },
@@ -18004,14 +18008,14 @@
             "constructor": "Ferrari",
             "rating": 19.2,
             "drivers": {
-              "Jaden": 26.8,
+              "Jaden": 26.9,
               "Leo": 11.5
             },
             "rank": 3
           },
           {
             "constructor": "Mercedes",
-            "rating": 17.4,
+            "rating": 17.3,
             "drivers": {
               "Jairo": 28.8,
               "Randy": 5.9
@@ -18020,10 +18024,10 @@
           },
           {
             "constructor": "Haas",
-            "rating": 10.0,
+            "rating": 10.1,
             "drivers": {
-              "Brently": 11.7,
-              "Matthew": 8.4
+              "Brently": 11.6,
+              "Matthew": 8.6
             },
             "rank": 5
           },
@@ -18038,10 +18042,10 @@
           },
           {
             "constructor": "Audi",
-            "rating": 4.6,
+            "rating": 4.7,
             "drivers": {
               "Boz": 7.4,
-              "Evelo": 1.8
+              "Evelo": 2.0
             },
             "rank": 7
           },
@@ -18115,7 +18119,7 @@
           {
             "driver": "Eddie",
             "team": "Red Bull",
-            "rating": 12.0,
+            "rating": 11.8,
             "rank": 10
           },
           {
@@ -18145,7 +18149,7 @@
           {
             "driver": "Evelo",
             "team": "Audi",
-            "rating": 1.8,
+            "rating": 2.0,
             "rank": 15
           },
           {
@@ -18194,19 +18198,19 @@
           },
           {
             "constructor": "Red Bull",
-            "rating": 19.6,
+            "rating": 19.5,
             "drivers": {
               "Joshua": 27.2,
-              "Eddie": 12.0
+              "Eddie": 11.8
             },
             "rank": 5
           },
           {
             "constructor": "Audi",
-            "rating": 12.1,
+            "rating": 12.2,
             "drivers": {
               "Boz": 22.4,
-              "Evelo": 1.8
+              "Evelo": 2.0
             },
             "rank": 6
           },
@@ -18756,7 +18760,7 @@
         {
           "driver": "Eddie",
           "team": "Red Bull",
-          "rating": 12.0,
+          "rating": 11.8,
           "rank": 7
         },
         {
@@ -18826,10 +18830,10 @@
         },
         {
           "constructor": "Red Bull",
-          "rating": 20.0,
+          "rating": 19.9,
           "drivers": {
             "Joshua": 28.1,
-            "Eddie": 12.0
+            "Eddie": 11.8
           },
           "rank": 2
         },
@@ -19923,163 +19927,163 @@
     "Suzuka": {
       "driver_ratings": [
         {
-          "driver": "Nick",
-          "team": "McLaren",
-          "rating": 64.8,
+          "driver": "Jelly",
+          "team": "Cadillac",
+          "rating": 60.8,
           "rank": 1
         },
         {
           "driver": "Joshua",
           "team": "Red Bull",
-          "rating": 59.4,
+          "rating": 57.2,
           "rank": 2
+        },
+        {
+          "driver": "Nick",
+          "team": "McLaren",
+          "rating": 56.8,
+          "rank": 3
         },
         {
           "driver": "Del",
           "team": "McLaren",
-          "rating": 44.0,
-          "rank": 3
-        },
-        {
-          "driver": "Brently",
-          "team": "Haas",
-          "rating": 31.2,
+          "rating": 31.1,
           "rank": 4
-        },
-        {
-          "driver": "Jairo",
-          "team": "Mercedes",
-          "rating": 28.8,
-          "rank": 5
         },
         {
           "driver": "Jaden",
           "team": "Ferrari",
-          "rating": 26.8,
+          "rating": 28.9,
+          "rank": 5
+        },
+        {
+          "driver": "Jairo",
+          "team": "Mercedes",
+          "rating": 28.5,
           "rank": 6
         },
         {
-          "driver": "Jelly",
-          "team": "Cadillac",
-          "rating": 24.1,
+          "driver": "Brently",
+          "team": "Haas",
+          "rating": 19.2,
           "rank": 7
+        },
+        {
+          "driver": "Matthew",
+          "team": "Haas",
+          "rating": 14.8,
+          "rank": 8
         },
         {
           "driver": "Leo",
           "team": "Ferrari",
           "rating": 11.5,
-          "rank": 8
+          "rank": 9
+        },
+        {
+          "driver": "Patrick",
+          "team": "Cadillac",
+          "rating": 10.1,
+          "rank": 10
         },
         {
           "driver": "Eddie",
           "team": "Red Bull",
-          "rating": 11.3,
-          "rank": 9
-        },
-        {
-          "driver": "Matthew",
-          "team": "Haas",
           "rating": 8.4,
-          "rank": 10
+          "rank": 11
         },
         {
           "driver": "Randy",
           "team": "Mercedes",
           "rating": 5.9,
-          "rank": 11
+          "rank": 12
         },
         {
           "driver": "Boz",
           "team": "Audi",
           "rating": 5.0,
-          "rank": 12
-        },
-        {
-          "driver": "Josh C.",
-          "team": "Williams",
-          "rating": 3.0,
           "rank": 13
         },
         {
           "driver": "Evelo",
           "team": "Audi",
-          "rating": 1.8,
+          "rating": 4.6,
           "rank": 14
+        },
+        {
+          "driver": "Josh C.",
+          "team": "Williams",
+          "rating": 3.0,
+          "rank": 15
         },
         {
           "driver": "Grayson",
           "team": "Williams",
           "rating": 1.7,
-          "rank": 15
-        },
-        {
-          "driver": "Patrick",
-          "team": "Cadillac",
-          "rating": 0.6,
           "rank": 16
         }
       ],
       "constructor_ratings": [
         {
           "constructor": "McLaren",
-          "rating": 54.4,
+          "rating": 43.9,
           "drivers": {
-            "Nick": 64.8,
-            "Del": 44.0
+            "Nick": 56.8,
+            "Del": 31.1
           },
           "rank": 1
         },
         {
-          "constructor": "Red Bull",
-          "rating": 35.3,
+          "constructor": "Cadillac",
+          "rating": 35.5,
           "drivers": {
-            "Joshua": 59.4,
-            "Eddie": 11.3
+            "Patrick": 10.1,
+            "Jelly": 60.8
           },
           "rank": 2
         },
         {
-          "constructor": "Haas",
-          "rating": 19.8,
+          "constructor": "Red Bull",
+          "rating": 32.8,
           "drivers": {
-            "Brently": 31.2,
-            "Matthew": 8.4
+            "Joshua": 57.2,
+            "Eddie": 8.4
           },
           "rank": 3
         },
         {
           "constructor": "Ferrari",
-          "rating": 19.2,
+          "rating": 20.2,
           "drivers": {
-            "Jaden": 26.8,
+            "Jaden": 28.9,
             "Leo": 11.5
           },
           "rank": 4
         },
         {
           "constructor": "Mercedes",
-          "rating": 17.4,
+          "rating": 17.2,
           "drivers": {
-            "Jairo": 28.8,
+            "Jairo": 28.5,
             "Randy": 5.9
           },
           "rank": 5
         },
         {
-          "constructor": "Cadillac",
-          "rating": 12.3,
+          "constructor": "Haas",
+          "rating": 17.0,
           "drivers": {
-            "Patrick": 0.6,
-            "Jelly": 24.1
+            "Brently": 19.2,
+            "Matthew": 14.8
           },
           "rank": 6
         },
         {
           "constructor": "Audi",
-          "rating": 3.4,
+          "rating": 4.8,
           "drivers": {
             "Boz": 5.0,
-            "Evelo": 1.8
+            "Evelo": 4.6
           },
           "rank": 7
         },
@@ -20095,62 +20099,62 @@
       ],
       "constructor_historical_ratings": [
         {
-          "constructor": "Alpine",
-          "rating": 59.0,
+          "constructor": "Cadillac",
+          "rating": 73.0,
           "rank": 1
         },
         {
-          "constructor": "McLaren",
-          "rating": 57.1,
+          "constructor": "Alpine",
+          "rating": 59.0,
           "rank": 2
         },
         {
-          "constructor": "Mercedes",
-          "rating": 55.8,
+          "constructor": "McLaren",
+          "rating": 52.6,
           "rank": 3
         },
         {
-          "constructor": "Ferrari",
-          "rating": 29.6,
+          "constructor": "Mercedes",
+          "rating": 45.9,
           "rank": 4
+        },
+        {
+          "constructor": "Ferrari",
+          "rating": 31.3,
+          "rank": 5
         },
         {
           "constructor": "VCARB",
           "rating": 25.8,
-          "rank": 5
+          "rank": 6
         },
         {
           "constructor": "Aston Martin",
           "rating": 25.0,
-          "rank": 6
-        },
-        {
-          "constructor": "Red Bull",
-          "rating": 4.7,
           "rank": 7
         },
         {
-          "constructor": "Alfa Romeo",
-          "rating": 3.0,
+          "constructor": "Haas",
+          "rating": 20.2,
           "rank": 8
         },
         {
-          "constructor": "AlphaTauri",
-          "rating": 0.0,
+          "constructor": "Red Bull",
+          "rating": 14.1,
           "rank": 9
         },
         {
           "constructor": "Audi",
-          "rating": 0.0,
+          "rating": 4.6,
           "rank": 10
         },
         {
-          "constructor": "Cadillac",
-          "rating": 0.0,
+          "constructor": "Alfa Romeo",
+          "rating": 3.0,
           "rank": 11
         },
         {
-          "constructor": "Haas",
+          "constructor": "AlphaTauri",
           "rating": 0.0,
           "rank": 12
         },
@@ -20244,7 +20248,7 @@
         {
           "driver": "Evelo",
           "team": "Audi",
-          "rating": 1.8,
+          "rating": 2.0,
           "rank": 14
         },
         {
@@ -20317,10 +20321,10 @@
         },
         {
           "constructor": "Audi",
-          "rating": 6.7,
+          "rating": 6.8,
           "drivers": {
             "Boz": 11.6,
-            "Evelo": 1.8
+            "Evelo": 2.0
           },
           "rank": 7
         },
@@ -20479,7 +20483,7 @@
         {
           "driver": "Evelo",
           "team": "Audi",
-          "rating": 1.8,
+          "rating": 2.0,
           "rank": 13
         },
         {
@@ -20549,10 +20553,10 @@
         },
         {
           "constructor": "Audi",
-          "rating": 5.7,
+          "rating": 5.9,
           "drivers": {
             "Boz": 9.7,
-            "Evelo": 1.8
+            "Evelo": 2.0
           },
           "rank": 6
         },
@@ -20672,7 +20676,7 @@
         {
           "driver": "Jaden",
           "team": "Ferrari",
-          "rating": 26.8,
+          "rating": 26.9,
           "rank": 5
         },
         {
@@ -20684,7 +20688,7 @@
         {
           "driver": "Jelly",
           "team": "Cadillac",
-          "rating": 24.1,
+          "rating": 25.3,
           "rank": 7
         },
         {
@@ -20708,7 +20712,7 @@
         {
           "driver": "Matthew",
           "team": "Haas",
-          "rating": 8.4,
+          "rating": 8.6,
           "rank": 11
         },
         {
@@ -20726,7 +20730,7 @@
         {
           "driver": "Evelo",
           "team": "Audi",
-          "rating": 1.8,
+          "rating": 2.0,
           "rank": 14
         },
         {
@@ -20763,10 +20767,10 @@
         },
         {
           "constructor": "Cadillac",
-          "rating": 22.8,
+          "rating": 23.4,
           "drivers": {
             "Patrick": 21.5,
-            "Jelly": 24.1
+            "Jelly": 25.3
           },
           "rank": 3
         },
@@ -20774,14 +20778,14 @@
           "constructor": "Ferrari",
           "rating": 19.2,
           "drivers": {
-            "Jaden": 26.8,
+            "Jaden": 26.9,
             "Leo": 11.5
           },
           "rank": 4
         },
         {
           "constructor": "Mercedes",
-          "rating": 17.4,
+          "rating": 17.3,
           "drivers": {
             "Jairo": 28.8,
             "Randy": 5.9
@@ -20790,19 +20794,19 @@
         },
         {
           "constructor": "Audi",
-          "rating": 8.0,
+          "rating": 8.1,
           "drivers": {
             "Boz": 14.2,
-            "Evelo": 1.8
+            "Evelo": 2.0
           },
           "rank": 6
         },
         {
           "constructor": "Haas",
-          "rating": 4.5,
+          "rating": 4.7,
           "drivers": {
             "Brently": 0.7,
-            "Matthew": 8.4
+            "Matthew": 8.6
           },
           "rank": 7
         },
@@ -20973,7 +20977,7 @@
         {
           "driver": "Evelo",
           "team": "Audi",
-          "rating": 1.8,
+          "rating": 2.0,
           "rank": 15
         },
         {
@@ -21031,10 +21035,10 @@
         },
         {
           "constructor": "Audi",
-          "rating": 4.9,
+          "rating": 5.0,
           "drivers": {
             "Boz": 8.0,
-            "Evelo": 1.8
+            "Evelo": 2.0
           },
           "rank": 6
         },
@@ -21136,7 +21140,7 @@
         {
           "driver": "Joshua",
           "team": "Red Bull",
-          "rating": 37.9,
+          "rating": 38.1,
           "rank": 2
         },
         {
@@ -21154,37 +21158,37 @@
         {
           "driver": "Jaden",
           "team": "Ferrari",
-          "rating": 26.8,
+          "rating": 26.9,
           "rank": 5
-        },
-        {
-          "driver": "Del",
-          "team": "McLaren",
-          "rating": 25.2,
-          "rank": 6
         },
         {
           "driver": "Jelly",
           "team": "Cadillac",
-          "rating": 24.1,
+          "rating": 25.3,
+          "rank": 6
+        },
+        {
+          "driver": "Del",
+          "team": "McLaren",
+          "rating": 24.7,
           "rank": 7
         },
         {
           "driver": "Patrick",
           "team": "Cadillac",
-          "rating": 23.5,
+          "rating": 23.3,
           "rank": 8
         },
         {
           "driver": "Eddie",
           "team": "Red Bull",
-          "rating": 12.0,
+          "rating": 11.8,
           "rank": 9
         },
         {
           "driver": "Brently",
           "team": "Haas",
-          "rating": 11.7,
+          "rating": 11.6,
           "rank": 10
         },
         {
@@ -21196,7 +21200,7 @@
         {
           "driver": "Matthew",
           "team": "Haas",
-          "rating": 8.4,
+          "rating": 8.6,
           "rank": 12
         },
         {
@@ -21214,7 +21218,7 @@
         {
           "driver": "Evelo",
           "team": "Audi",
-          "rating": 1.8,
+          "rating": 2.0,
           "rank": 15
         },
         {
@@ -21227,28 +21231,28 @@
       "constructor_ratings": [
         {
           "constructor": "McLaren",
-          "rating": 47.0,
+          "rating": 46.8,
           "drivers": {
             "Nick": 68.8,
-            "Del": 25.2
+            "Del": 24.7
           },
           "rank": 1
         },
         {
           "constructor": "Red Bull",
-          "rating": 25.0,
+          "rating": 24.9,
           "drivers": {
-            "Joshua": 37.9,
-            "Eddie": 12.0
+            "Joshua": 38.1,
+            "Eddie": 11.8
           },
           "rank": 2
         },
         {
           "constructor": "Cadillac",
-          "rating": 23.8,
+          "rating": 24.3,
           "drivers": {
-            "Patrick": 23.5,
-            "Jelly": 24.1
+            "Patrick": 23.3,
+            "Jelly": 25.3
           },
           "rank": 3
         },
@@ -21256,23 +21260,23 @@
           "constructor": "Ferrari",
           "rating": 19.2,
           "drivers": {
-            "Jaden": 26.8,
+            "Jaden": 26.9,
             "Leo": 11.5
           },
           "rank": 4
         },
         {
           "constructor": "Audi",
-          "rating": 17.4,
+          "rating": 17.5,
           "drivers": {
             "Boz": 33.0,
-            "Evelo": 1.8
+            "Evelo": 2.0
           },
           "rank": 5
         },
         {
           "constructor": "Mercedes",
-          "rating": 17.4,
+          "rating": 17.3,
           "drivers": {
             "Jairo": 28.8,
             "Randy": 5.9
@@ -21281,10 +21285,10 @@
         },
         {
           "constructor": "Haas",
-          "rating": 10.0,
+          "rating": 10.1,
           "drivers": {
-            "Brently": 11.7,
-            "Matthew": 8.4
+            "Brently": 11.6,
+            "Matthew": 8.6
           },
           "rank": 7
         },
@@ -21371,7 +21375,7 @@
         {
           "driver": "Joshua",
           "team": "Red Bull",
-          "rating": 37.9,
+          "rating": 38.1,
           "rank": 1
         },
         {
@@ -21383,25 +21387,25 @@
         {
           "driver": "Jaden",
           "team": "Ferrari",
-          "rating": 26.8,
+          "rating": 26.9,
           "rank": 3
-        },
-        {
-          "driver": "Del",
-          "team": "McLaren",
-          "rating": 25.2,
-          "rank": 4
         },
         {
           "driver": "Jelly",
           "team": "Cadillac",
-          "rating": 24.1,
+          "rating": 25.3,
+          "rank": 4
+        },
+        {
+          "driver": "Del",
+          "team": "McLaren",
+          "rating": 24.7,
           "rank": 5
         },
         {
           "driver": "Patrick",
           "team": "Cadillac",
-          "rating": 23.5,
+          "rating": 23.3,
           "rank": 6
         },
         {
@@ -21413,13 +21417,13 @@
         {
           "driver": "Eddie",
           "team": "Red Bull",
-          "rating": 12.0,
+          "rating": 11.8,
           "rank": 8
         },
         {
           "driver": "Brently",
           "team": "Haas",
-          "rating": 11.7,
+          "rating": 11.6,
           "rank": 9
         },
         {
@@ -21431,7 +21435,7 @@
         {
           "driver": "Matthew",
           "team": "Haas",
-          "rating": 8.4,
+          "rating": 8.6,
           "rank": 11
         },
         {
@@ -21449,7 +21453,7 @@
         {
           "driver": "Evelo",
           "team": "Audi",
-          "rating": 1.8,
+          "rating": 2.0,
           "rank": 14
         },
         {
@@ -21468,28 +21472,28 @@
       "constructor_ratings": [
         {
           "constructor": "Red Bull",
-          "rating": 25.0,
+          "rating": 24.9,
           "drivers": {
-            "Joshua": 37.9,
-            "Eddie": 12.0
+            "Joshua": 38.1,
+            "Eddie": 11.8
           },
           "rank": 1
         },
         {
           "constructor": "Cadillac",
-          "rating": 23.8,
+          "rating": 24.3,
           "drivers": {
-            "Patrick": 23.5,
-            "Jelly": 24.1
+            "Patrick": 23.3,
+            "Jelly": 25.3
           },
           "rank": 2
         },
         {
           "constructor": "McLaren",
-          "rating": 19.8,
+          "rating": 19.6,
           "drivers": {
             "Nick": 14.4,
-            "Del": 25.2
+            "Del": 24.7
           },
           "rank": 3
         },
@@ -21497,14 +21501,14 @@
           "constructor": "Ferrari",
           "rating": 19.2,
           "drivers": {
-            "Jaden": 26.8,
+            "Jaden": 26.9,
             "Leo": 11.5
           },
           "rank": 4
         },
         {
           "constructor": "Mercedes",
-          "rating": 17.4,
+          "rating": 17.3,
           "drivers": {
             "Jairo": 28.8,
             "Randy": 5.9
@@ -21513,10 +21517,10 @@
         },
         {
           "constructor": "Haas",
-          "rating": 10.0,
+          "rating": 10.1,
           "drivers": {
-            "Brently": 11.7,
-            "Matthew": 8.4
+            "Brently": 11.6,
+            "Matthew": 8.6
           },
           "rank": 6
         },
@@ -21531,10 +21535,10 @@
         },
         {
           "constructor": "Audi",
-          "rating": 0.9,
+          "rating": 1.0,
           "drivers": {
             "Boz": 0.0,
-            "Evelo": 1.8
+            "Evelo": 2.0
           },
           "rank": 8
         }
@@ -21696,7 +21700,7 @@
         {
           "driver": "Evelo",
           "team": "Audi",
-          "rating": 1.8,
+          "rating": 2.0,
           "rank": 15
         },
         {
@@ -21763,10 +21767,10 @@
         },
         {
           "constructor": "Audi",
-          "rating": 6.3,
+          "rating": 6.4,
           "drivers": {
             "Boz": 10.8,
-            "Evelo": 1.8
+            "Evelo": 2.0
           },
           "rank": 7
         },
@@ -21925,7 +21929,7 @@
         {
           "driver": "Evelo",
           "team": "Audi",
-          "rating": 1.8,
+          "rating": 2.0,
           "rank": 13
         },
         {
@@ -22013,10 +22017,10 @@
         },
         {
           "constructor": "Audi",
-          "rating": 1.0,
+          "rating": 1.1,
           "drivers": {
             "Boz": 0.1,
-            "Evelo": 1.8
+            "Evelo": 2.0
           },
           "rank": 8
         }
@@ -22112,19 +22116,19 @@
         {
           "driver": "Jaden",
           "team": "Ferrari",
-          "rating": 26.8,
+          "rating": 26.9,
           "rank": 4
+        },
+        {
+          "driver": "Jelly",
+          "team": "Cadillac",
+          "rating": 25.3,
+          "rank": 5
         },
         {
           "driver": "Nick",
           "team": "McLaren",
           "rating": 24.4,
-          "rank": 5
-        },
-        {
-          "driver": "Jelly",
-          "team": "Cadillac",
-          "rating": 24.1,
           "rank": 6
         },
         {
@@ -22154,7 +22158,7 @@
         {
           "driver": "Matthew",
           "team": "Haas",
-          "rating": 8.4,
+          "rating": 8.6,
           "rank": 11
         },
         {
@@ -22172,7 +22176,7 @@
         {
           "driver": "Evelo",
           "team": "Audi",
-          "rating": 1.8,
+          "rating": 2.0,
           "rank": 14
         },
         {
@@ -22209,10 +22213,10 @@
         },
         {
           "constructor": "Cadillac",
-          "rating": 24.0,
+          "rating": 24.6,
           "drivers": {
             "Patrick": 24.0,
-            "Jelly": 24.1
+            "Jelly": 25.3
           },
           "rank": 3
         },
@@ -22220,14 +22224,14 @@
           "constructor": "Ferrari",
           "rating": 19.2,
           "drivers": {
-            "Jaden": 26.8,
+            "Jaden": 26.9,
             "Leo": 11.5
           },
           "rank": 4
         },
         {
           "constructor": "Mercedes",
-          "rating": 17.4,
+          "rating": 17.3,
           "drivers": {
             "Jairo": 28.8,
             "Randy": 5.9
@@ -22236,10 +22240,10 @@
         },
         {
           "constructor": "Haas",
-          "rating": 9.2,
+          "rating": 9.3,
           "drivers": {
             "Brently": 9.9,
-            "Matthew": 8.4
+            "Matthew": 8.6
           },
           "rank": 6
         },
@@ -22254,10 +22258,10 @@
         },
         {
           "constructor": "Audi",
-          "rating": 1.5,
+          "rating": 1.6,
           "drivers": {
             "Boz": 1.2,
-            "Evelo": 1.8
+            "Evelo": 2.0
           },
           "rank": 8
         }
@@ -22371,7 +22375,7 @@
         {
           "driver": "Jaden",
           "team": "Ferrari",
-          "rating": 26.8,
+          "rating": 26.9,
           "rank": 7
         },
         {
@@ -22383,13 +22387,13 @@
         {
           "driver": "Eddie",
           "team": "Red Bull",
-          "rating": 12.0,
+          "rating": 11.8,
           "rank": 9
         },
         {
           "driver": "Brently",
           "team": "Haas",
-          "rating": 11.7,
+          "rating": 11.6,
           "rank": 10
         },
         {
@@ -22407,7 +22411,7 @@
         {
           "driver": "Evelo",
           "team": "Audi",
-          "rating": 1.8,
+          "rating": 2.0,
           "rank": 13
         },
         {
@@ -22452,17 +22456,17 @@
           "constructor": "Ferrari",
           "rating": 29.8,
           "drivers": {
-            "Jaden": 26.8,
+            "Jaden": 26.9,
             "Leo": 32.8
           },
           "rank": 3
         },
         {
           "constructor": "Red Bull",
-          "rating": 24.1,
+          "rating": 24.0,
           "drivers": {
             "Joshua": 36.2,
-            "Eddie": 12.0
+            "Eddie": 11.8
           },
           "rank": 4
         },
@@ -22477,10 +22481,10 @@
         },
         {
           "constructor": "Audi",
-          "rating": 17.4,
+          "rating": 17.5,
           "drivers": {
             "Boz": 33.0,
-            "Evelo": 1.8
+            "Evelo": 2.0
           },
           "rank": 6
         },
@@ -22488,7 +22492,7 @@
           "constructor": "Haas",
           "rating": 6.6,
           "drivers": {
-            "Brently": 11.7,
+            "Brently": 11.6,
             "Matthew": 1.6
           },
           "rank": 7
@@ -22600,7 +22604,7 @@
         {
           "driver": "Jaden",
           "team": "Ferrari",
-          "rating": 26.8,
+          "rating": 26.9,
           "rank": 5
         },
         {
@@ -22624,7 +22628,7 @@
         {
           "driver": "Brently",
           "team": "Haas",
-          "rating": 11.7,
+          "rating": 11.6,
           "rank": 9
         },
         {
@@ -22648,7 +22652,7 @@
         {
           "driver": "Evelo",
           "team": "Audi",
-          "rating": 1.8,
+          "rating": 2.0,
           "rank": 13
         },
         {
@@ -22700,9 +22704,9 @@
         },
         {
           "constructor": "Ferrari",
-          "rating": 22.9,
+          "rating": 23.0,
           "drivers": {
-            "Jaden": 26.8,
+            "Jaden": 26.9,
             "Leo": 19.1
           },
           "rank": 4
@@ -22717,20 +22721,20 @@
           "rank": 5
         },
         {
-          "constructor": "Haas",
-          "rating": 6.2,
+          "constructor": "Audi",
+          "rating": 6.1,
           "drivers": {
-            "Brently": 11.7,
-            "Matthew": 0.6
+            "Boz": 10.3,
+            "Evelo": 2.0
           },
           "rank": 6
         },
         {
-          "constructor": "Audi",
-          "rating": 6.0,
+          "constructor": "Haas",
+          "rating": 6.1,
           "drivers": {
-            "Boz": 10.3,
-            "Evelo": 1.8
+            "Brently": 11.6,
+            "Matthew": 0.6
           },
           "rank": 7
         },
@@ -22841,19 +22845,19 @@
         {
           "driver": "Jaden",
           "team": "Ferrari",
-          "rating": 26.8,
+          "rating": 26.9,
           "rank": 5
+        },
+        {
+          "driver": "Jelly",
+          "team": "Cadillac",
+          "rating": 25.3,
+          "rank": 6
         },
         {
           "driver": "Joshua",
           "team": "Red Bull",
           "rating": 24.4,
-          "rank": 6
-        },
-        {
-          "driver": "Jelly",
-          "team": "Cadillac",
-          "rating": 24.1,
           "rank": 7
         },
         {
@@ -22883,7 +22887,7 @@
         {
           "driver": "Matthew",
           "team": "Haas",
-          "rating": 8.4,
+          "rating": 8.6,
           "rank": 12
         },
         {
@@ -22901,7 +22905,7 @@
         {
           "driver": "Evelo",
           "team": "Audi",
-          "rating": 1.8,
+          "rating": 2.0,
           "rank": 15
         },
         {
@@ -22923,10 +22927,10 @@
         },
         {
           "constructor": "Cadillac",
-          "rating": 26.3,
+          "rating": 26.9,
           "drivers": {
             "Patrick": 28.6,
-            "Jelly": 24.1
+            "Jelly": 25.3
           },
           "rank": 2
         },
@@ -22943,14 +22947,14 @@
           "constructor": "Ferrari",
           "rating": 19.2,
           "drivers": {
-            "Jaden": 26.8,
+            "Jaden": 26.9,
             "Leo": 11.5
           },
           "rank": 4
         },
         {
           "constructor": "Mercedes",
-          "rating": 17.4,
+          "rating": 17.3,
           "drivers": {
             "Jairo": 28.8,
             "Randy": 5.9
@@ -22959,19 +22963,19 @@
         },
         {
           "constructor": "Haas",
-          "rating": 13.6,
+          "rating": 13.8,
           "drivers": {
             "Brently": 18.9,
-            "Matthew": 8.4
+            "Matthew": 8.6
           },
           "rank": 6
         },
         {
           "constructor": "Audi",
-          "rating": 10.2,
+          "rating": 10.3,
           "drivers": {
             "Boz": 18.6,
-            "Evelo": 1.8
+            "Evelo": 2.0
           },
           "rank": 7
         },
@@ -23064,7 +23068,7 @@
         {
           "driver": "Joshua",
           "team": "Red Bull",
-          "rating": 37.9,
+          "rating": 38.1,
           "rank": 2
         },
         {
@@ -23076,37 +23080,37 @@
         {
           "driver": "Jaden",
           "team": "Ferrari",
-          "rating": 26.8,
+          "rating": 26.9,
           "rank": 4
-        },
-        {
-          "driver": "Del",
-          "team": "McLaren",
-          "rating": 25.2,
-          "rank": 5
         },
         {
           "driver": "Jelly",
           "team": "Cadillac",
-          "rating": 24.1,
+          "rating": 25.3,
+          "rank": 5
+        },
+        {
+          "driver": "Del",
+          "team": "McLaren",
+          "rating": 24.7,
           "rank": 6
         },
         {
           "driver": "Patrick",
           "team": "Cadillac",
-          "rating": 23.5,
+          "rating": 23.3,
           "rank": 7
         },
         {
           "driver": "Eddie",
           "team": "Red Bull",
-          "rating": 12.0,
+          "rating": 11.8,
           "rank": 8
         },
         {
           "driver": "Brently",
           "team": "Haas",
-          "rating": 11.7,
+          "rating": 11.6,
           "rank": 9
         },
         {
@@ -23124,7 +23128,7 @@
         {
           "driver": "Matthew",
           "team": "Haas",
-          "rating": 8.4,
+          "rating": 8.6,
           "rank": 12
         },
         {
@@ -23142,7 +23146,7 @@
         {
           "driver": "Evelo",
           "team": "Audi",
-          "rating": 1.8,
+          "rating": 2.0,
           "rank": 15
         },
         {
@@ -23155,28 +23159,28 @@
       "constructor_ratings": [
         {
           "constructor": "McLaren",
-          "rating": 32.8,
+          "rating": 32.5,
           "drivers": {
             "Nick": 40.3,
-            "Del": 25.2
+            "Del": 24.7
           },
           "rank": 1
         },
         {
           "constructor": "Red Bull",
-          "rating": 25.0,
+          "rating": 24.9,
           "drivers": {
-            "Joshua": 37.9,
-            "Eddie": 12.0
+            "Joshua": 38.1,
+            "Eddie": 11.8
           },
           "rank": 2
         },
         {
           "constructor": "Cadillac",
-          "rating": 23.8,
+          "rating": 24.3,
           "drivers": {
-            "Patrick": 23.5,
-            "Jelly": 24.1
+            "Patrick": 23.3,
+            "Jelly": 25.3
           },
           "rank": 3
         },
@@ -23184,14 +23188,14 @@
           "constructor": "Ferrari",
           "rating": 19.2,
           "drivers": {
-            "Jaden": 26.8,
+            "Jaden": 26.9,
             "Leo": 11.5
           },
           "rank": 4
         },
         {
           "constructor": "Mercedes",
-          "rating": 17.4,
+          "rating": 17.3,
           "drivers": {
             "Jairo": 28.8,
             "Randy": 5.9
@@ -23200,19 +23204,19 @@
         },
         {
           "constructor": "Haas",
-          "rating": 10.0,
+          "rating": 10.1,
           "drivers": {
-            "Brently": 11.7,
-            "Matthew": 8.4
+            "Brently": 11.6,
+            "Matthew": 8.6
           },
           "rank": 6
         },
         {
           "constructor": "Audi",
-          "rating": 6.0,
+          "rating": 6.1,
           "drivers": {
             "Boz": 10.3,
-            "Evelo": 1.8
+            "Evelo": 2.0
           },
           "rank": 7
         },
@@ -23305,19 +23309,19 @@
         {
           "driver": "Jaden",
           "team": "Ferrari",
-          "rating": 26.8,
+          "rating": 26.9,
           "rank": 2
         },
         {
           "driver": "Jelly",
           "team": "Cadillac",
-          "rating": 24.1,
+          "rating": 25.3,
           "rank": 3
         },
         {
           "driver": "Patrick",
           "team": "Cadillac",
-          "rating": 23.5,
+          "rating": 23.3,
           "rank": 4
         },
         {
@@ -23341,7 +23345,7 @@
         {
           "driver": "Brently",
           "team": "Haas",
-          "rating": 11.7,
+          "rating": 11.6,
           "rank": 8
         },
         {
@@ -23353,7 +23357,7 @@
         {
           "driver": "Matthew",
           "team": "Haas",
-          "rating": 8.4,
+          "rating": 8.6,
           "rank": 10
         },
         {
@@ -23383,7 +23387,7 @@
         {
           "driver": "Evelo",
           "team": "Audi",
-          "rating": 1.8,
+          "rating": 2.0,
           "rank": 15
         },
         {
@@ -23396,10 +23400,10 @@
       "constructor_ratings": [
         {
           "constructor": "Cadillac",
-          "rating": 23.8,
+          "rating": 24.3,
           "drivers": {
-            "Patrick": 23.5,
-            "Jelly": 24.1
+            "Patrick": 23.3,
+            "Jelly": 25.3
           },
           "rank": 1
         },
@@ -23416,14 +23420,14 @@
           "constructor": "Ferrari",
           "rating": 19.2,
           "drivers": {
-            "Jaden": 26.8,
+            "Jaden": 26.9,
             "Leo": 11.5
           },
           "rank": 3
         },
         {
           "constructor": "Mercedes",
-          "rating": 17.4,
+          "rating": 17.3,
           "drivers": {
             "Jairo": 28.8,
             "Randy": 5.9
@@ -23432,10 +23436,10 @@
         },
         {
           "constructor": "Haas",
-          "rating": 10.0,
+          "rating": 10.1,
           "drivers": {
-            "Brently": 11.7,
-            "Matthew": 8.4
+            "Brently": 11.6,
+            "Matthew": 8.6
           },
           "rank": 5
         },
@@ -23450,10 +23454,10 @@
         },
         {
           "constructor": "Audi",
-          "rating": 4.6,
+          "rating": 4.7,
           "drivers": {
             "Boz": 7.4,
-            "Evelo": 1.8
+            "Evelo": 2.0
           },
           "rank": 7
         },
@@ -23594,7 +23598,7 @@
         {
           "driver": "Eddie",
           "team": "Red Bull",
-          "rating": 12.0,
+          "rating": 11.8,
           "rank": 10
         },
         {
@@ -23624,7 +23628,7 @@
         {
           "driver": "Evelo",
           "team": "Audi",
-          "rating": 1.8,
+          "rating": 2.0,
           "rank": 15
         },
         {
@@ -23673,19 +23677,19 @@
         },
         {
           "constructor": "Red Bull",
-          "rating": 19.6,
+          "rating": 19.5,
           "drivers": {
             "Joshua": 27.2,
-            "Eddie": 12.0
+            "Eddie": 11.8
           },
           "rank": 5
         },
         {
           "constructor": "Audi",
-          "rating": 12.1,
+          "rating": 12.2,
           "drivers": {
             "Boz": 22.4,
-            "Evelo": 1.8
+            "Evelo": 2.0
           },
           "rank": 6
         },
@@ -23981,11 +23985,11 @@
     },
     "Brently": {
       "driver": "Brently",
-      "total_points": 188.0,
+      "total_points": 191.0,
       "points_by_season": [
         "S3: 111pts",
         "S4: 57.5pts",
-        "S5: 19.5pts"
+        "S5: 22.5pts"
       ],
       "feature_wins": 0,
       "sprint_wins": 0,
@@ -24152,10 +24156,10 @@
           "avg_pos_change": 2.5
         },
         "Suzuka": {
-          "score": 31.2,
-          "total_points": 10.0,
-          "avg_points": 10.0,
-          "avg_pos_change": 11.0
+          "score": 19.2,
+          "total_points": 13.0,
+          "avg_points": 6.5,
+          "avg_pos_change": 5.0
         },
         "Zandvoort": {
           "score": 7.3,
@@ -24347,12 +24351,12 @@
     },
     "Del": {
       "driver": "Del",
-      "total_points": 454.0,
+      "total_points": 456.0,
       "points_by_season": [
         "S2: 191pts",
         "S3: 132pts (Ferrari: 53pts + Aston Martin: 79pts - Mid-Season Team Swap)",
         "S4: 86pts",
-        "S5: 45pts"
+        "S5: 47pts"
       ],
       "feature_wins": 3,
       "sprint_wins": 1,
@@ -24417,9 +24421,9 @@
         "S4 Pre-Season: Silverstone - P3 (Pre-Season)"
       ],
       "post_season_podiums": [],
-      "avg_place": 5.4,
+      "avg_place": 5.5,
       "avg_qual": 7.5,
-      "avg_pos_change": 2.1,
+      "avg_pos_change": 2.0,
       "best_race_all_time": "P1 at S2 Silverstone (30pts)",
       "best_race_by_season": [
         "S2: P1 at Silverstone (30pts)",
@@ -24562,10 +24566,10 @@
           "avg_pos_change": 1.5
         },
         "Suzuka": {
-          "score": 44.0,
-          "total_points": 36.0,
-          "avg_points": 18.0,
-          "avg_pos_change": 6.5
+          "score": 31.1,
+          "total_points": 38.0,
+          "avg_points": 12.7,
+          "avg_pos_change": 4.0
         },
         "Zandvoort": {
           "score": 22.1,
@@ -24577,12 +24581,12 @@
     },
     "Eddie": {
       "driver": "Eddie",
-      "total_points": 206.5,
+      "total_points": 207.5,
       "points_by_season": [
         "S2: 56pts",
         "S3: 85pts",
         "S4: 50pts",
-        "S5: 15.5pts"
+        "S5: 16.5pts"
       ],
       "feature_wins": 0,
       "sprint_wins": 0,
@@ -24743,10 +24747,10 @@
           "avg_pos_change": -9.0
         },
         "Suzuka": {
-          "score": 11.3,
-          "total_points": 5.0,
-          "avg_points": 2.5,
-          "avg_pos_change": 5.5
+          "score": 8.4,
+          "total_points": 6.0,
+          "avg_points": 2.0,
+          "avg_pos_change": 3.3
         },
         "Zandvoort": {
           "score": 10.0,
@@ -25014,9 +25018,9 @@
     },
     "Evelo": {
       "driver": "Evelo",
-      "total_points": 8.5,
+      "total_points": 9.5,
       "points_by_season": [
-        "S5: 8.5pts"
+        "S5: 9.5pts"
       ],
       "feature_wins": 0,
       "sprint_wins": 0,
@@ -25045,8 +25049,8 @@
       "pre_season_podiums": [],
       "post_season_podiums": [],
       "avg_place": 11.5,
-      "avg_qual": 9.2,
-      "avg_pos_change": -2.3,
+      "avg_qual": 9.5,
+      "avg_pos_change": -2.0,
       "best_race_all_time": "P9 at S5 Spa (S) (0pts)",
       "best_race_by_season": [
         "S5: P9 at Spa (S) (0pts)"
@@ -25107,6 +25111,12 @@
           "total_points": 2.0,
           "avg_points": 1.2,
           "avg_pos_change": -5.5
+        },
+        "Suzuka": {
+          "score": 4.6,
+          "total_points": 1.0,
+          "avg_points": 1.0,
+          "avg_pos_change": 1.0
         }
       }
     },
@@ -25299,10 +25309,10 @@
     },
     "Jaden": {
       "driver": "Jaden",
-      "total_points": 273.0,
+      "total_points": 285.0,
       "points_by_season": [
         "S4: 153pts",
-        "S5: 120pts"
+        "S5: 132pts"
       ],
       "feature_wins": 1,
       "sprint_wins": 2,
@@ -25468,6 +25478,12 @@
           "avg_points": 3.0,
           "avg_pos_change": -4.0
         },
+        "Suzuka": {
+          "score": 28.9,
+          "total_points": 12.0,
+          "avg_points": 12.0,
+          "avg_pos_change": 1.0
+        },
         "Zandvoort": {
           "score": 40.3,
           "total_points": 16.0,
@@ -25478,10 +25494,10 @@
     },
     "Jairo": {
       "driver": "Jairo",
-      "total_points": 331.0,
+      "total_points": 342.0,
       "points_by_season": [
         "S4: 241pts",
-        "S5: 90pts"
+        "S5: 101pts"
       ],
       "feature_wins": 8,
       "sprint_wins": 1,
@@ -25553,8 +25569,8 @@
       ],
       "post_season_podiums": [],
       "avg_place": 4.9,
-      "avg_qual": 5.9,
-      "avg_pos_change": 1.0,
+      "avg_qual": 6.1,
+      "avg_pos_change": 1.2,
       "best_race_all_time": "P1 at S4 Abu Dhabi (27pts)",
       "best_race_by_season": [
         "S4: P1 at Abu Dhabi (27pts)",
@@ -25571,7 +25587,7 @@
         "S4 Monza"
       ],
       "fastest_laps": 7,
-      "driver_of_the_day": 6,
+      "driver_of_the_day": 7,
       "most_overtakes": 1,
       "cleanest_driver": 1,
       "driver_championships": [],
@@ -25674,6 +25690,12 @@
           "avg_points": 25.0,
           "avg_pos_change": 0.0
         },
+        "Suzuka": {
+          "score": 28.5,
+          "total_points": 11.0,
+          "avg_points": 11.0,
+          "avg_pos_change": 5.0
+        },
         "Zandvoort": {
           "score": 2.6,
           "total_points": 2.0,
@@ -25684,21 +25706,22 @@
     },
     "Jelly": {
       "driver": "Jelly",
-      "total_points": 273.0,
+      "total_points": 298.0,
       "points_by_season": [
         "S4: 141pts",
-        "S5: 132pts"
+        "S5: 157pts"
       ],
-      "feature_wins": 3,
+      "feature_wins": 4,
       "sprint_wins": 0,
-      "feature_podiums": 10,
+      "feature_podiums": 11,
       "sprint_podiums": 2,
       "maiden_win": "P1 at S5 Australia",
       "maiden_podium": "S4 Mexico (P3)",
       "chronological_feature_wins": [
         "S5 Australia",
         "S5 Imola",
-        "S5 Monza"
+        "S5 Monza",
+        "S5 Suzuka"
       ],
       "chronological_sprint_wins": [],
       "chronological_feature_podiums": [
@@ -25711,7 +25734,8 @@
         "S5 Imola (P1)",
         "S5 Monza (P1)",
         "S5 Brazil (P3)",
-        "S5 Silverstone (P3)"
+        "S5 Silverstone (P3)",
+        "S5 Suzuka (P1)"
       ],
       "chronological_sprint_podiums": [
         "S5 Miami (S) (P3)",
@@ -25719,7 +25743,7 @@
       ],
       "feature_wins_by_season": [
         "S4: 0",
-        "S5: 3 (Australia, Imola, Monza)"
+        "S5: 4 (Australia, Imola, Monza, Suzuka)"
       ],
       "sprint_wins_by_season": [],
       "single_season_win_streak": 2,
@@ -25730,16 +25754,16 @@
       "cross_season_win_streak_list": [
         "2 in a row (S5 Australia -> S5 Imola)"
       ],
-      "single_season_podium_streak": 2,
+      "single_season_podium_streak": 3,
       "cross_season_podium_streak": 4,
       "single_season_podium_streak_list": [
         "2 in a row (S4 Abu Dhabi -> S4 Monza)",
         "2 in a row (S5 Australia -> S5 Imola)",
-        "2 in a row (S5 Brazil -> S5 Silverstone)"
+        "3 in a row (S5 Brazil -> S5 Silverstone -> S5 Suzuka)"
       ],
       "cross_season_podium_streak_list": [
         "4 in a row (S4 Abu Dhabi -> S4 Monza -> S5 Australia -> S5 Imola)",
-        "2 in a row (S5 Brazil -> S5 Silverstone)"
+        "3 in a row (S5 Brazil -> S5 Silverstone -> S5 Suzuka)"
       ],
       "pre_season_wins": [],
       "post_season_wins": [
@@ -25751,8 +25775,8 @@
       "post_season_podiums": [
         "S4 Post-Season: Monaco - P1 (Post-Season)"
       ],
-      "avg_place": 5.3,
-      "avg_qual": 5.8,
+      "avg_place": 5.1,
+      "avg_qual": 5.7,
       "avg_pos_change": 0.5,
       "best_race_all_time": "P1 at S5 Monza (26pts)",
       "best_race_by_season": [
@@ -25866,6 +25890,12 @@
           "total_points": 10.0,
           "avg_points": 10.0,
           "avg_pos_change": -2.0
+        },
+        "Suzuka": {
+          "score": 60.8,
+          "total_points": 25.0,
+          "avg_points": 25.0,
+          "avg_pos_change": 1.0
         },
         "Zandvoort": {
           "score": 25.2,
@@ -26019,16 +26049,16 @@
     },
     "Joshua": {
       "driver": "Joshua",
-      "total_points": 786.0,
+      "total_points": 805.0,
       "points_by_season": [
         "S2: 170pts",
         "S3: 227pts",
         "S4: 256pts",
-        "S5: 133pts"
+        "S5: 152pts"
       ],
       "feature_wins": 8,
       "sprint_wins": 3,
-      "feature_podiums": 31,
+      "feature_podiums": 32,
       "sprint_podiums": 5,
       "maiden_win": "P1 at S3 Suzuka",
       "maiden_podium": "S2 Suzuka (P2)",
@@ -26078,7 +26108,8 @@
         "S5 Miami (P2)",
         "S5 Monza (P3)",
         "S5 Spa (P2)",
-        "S5 Brazil (P1)"
+        "S5 Brazil (P1)",
+        "S5 Suzuka (P2)"
       ],
       "chronological_sprint_podiums": [
         "S3 COTA (S) (P2)",
@@ -26147,8 +26178,8 @@
       ],
       "post_season_podiums": [],
       "avg_place": 2.9,
-      "avg_qual": 4.5,
-      "avg_pos_change": 1.6,
+      "avg_qual": 4.4,
+      "avg_pos_change": 1.5,
       "best_race_all_time": "P1 at S3 Suzuka (26pts)",
       "best_race_by_season": [
         "S2: P2 at Abu Dhabi (24pts)",
@@ -26156,7 +26187,7 @@
         "S4: P1 at Zandvoort (26pts)",
         "S5: P1 at Brazil (25pts)"
       ],
-      "poles_count": 15,
+      "poles_count": 16,
       "poles_list": [
         "S2 Abu Dhabi",
         "S2 Monza",
@@ -26172,9 +26203,10 @@
         "S4 Zandvoort",
         "S4 Las Vegas",
         "S5 Australia",
-        "S5 Silverstone (S)"
+        "S5 Silverstone (S)",
+        "S5 Suzuka"
       ],
-      "fastest_laps": 18,
+      "fastest_laps": 19,
       "driver_of_the_day": 4,
       "most_overtakes": 3,
       "cleanest_driver": 0,
@@ -26307,10 +26339,10 @@
           "avg_pos_change": 1.0
         },
         "Suzuka": {
-          "score": 59.4,
-          "total_points": 49.0,
-          "avg_points": 24.5,
-          "avg_pos_change": 0.5
+          "score": 57.2,
+          "total_points": 68.0,
+          "avg_points": 22.7,
+          "avg_pos_change": 0.0
         },
         "Zandvoort": {
           "score": 58.7,
@@ -26322,10 +26354,10 @@
     },
     "Leo": {
       "driver": "Leo",
-      "total_points": 126.0,
+      "total_points": 131.0,
       "points_by_season": [
         "S4: 60pts",
-        "S5: 66pts"
+        "S5: 71pts"
       ],
       "feature_wins": 1,
       "sprint_wins": 0,
@@ -26370,7 +26402,7 @@
       "poles_list": [],
       "fastest_laps": 0,
       "driver_of_the_day": 1,
-      "most_overtakes": 1,
+      "most_overtakes": 2,
       "cleanest_driver": 1,
       "driver_championships": [],
       "constructor_championships_on_team": [],
@@ -26468,6 +26500,12 @@
           "score": 2.2,
           "total_points": 1.0,
           "avg_points": 1.0,
+          "avg_pos_change": -2.0
+        },
+        "Suzuka": {
+          "score": 11.5,
+          "total_points": 5.0,
+          "avg_points": 5.0,
           "avg_pos_change": -2.0
         },
         "Zandvoort": {
@@ -26665,10 +26703,10 @@
     },
     "Matthew": {
       "driver": "Matthew",
-      "total_points": 97.5,
+      "total_points": 103.5,
       "points_by_season": [
         "S4: 60.5pts",
-        "S5: 37pts"
+        "S5: 43pts"
       ],
       "feature_wins": 0,
       "sprint_wins": 0,
@@ -26703,7 +26741,7 @@
       "post_season_podiums": [
         "S4 Post-Season: Monaco - P2 (Post-Season)"
       ],
-      "avg_place": 9.0,
+      "avg_place": 8.9,
       "avg_qual": 7.2,
       "avg_pos_change": -1.7,
       "best_race_all_time": "P3 at S5 Spa (15pts)",
@@ -26815,6 +26853,12 @@
           "avg_points": 12.0,
           "avg_pos_change": 0.0
         },
+        "Suzuka": {
+          "score": 14.8,
+          "total_points": 6.0,
+          "avg_points": 6.0,
+          "avg_pos_change": 0.0
+        },
         "Zandvoort": {
           "score": 22.3,
           "total_points": 8.0,
@@ -26825,17 +26869,17 @@
     },
     "Nick": {
       "driver": "Nick",
-      "total_points": 1234.0,
+      "total_points": 1250.0,
       "points_by_season": [
         "S1: 434pts",
         "S2: 248pts",
         "S3: 262pts",
         "S4: 178pts",
-        "S5: 112pts"
+        "S5: 128pts"
       ],
       "feature_wins": 24,
       "sprint_wins": 2,
-      "feature_podiums": 44,
+      "feature_podiums": 45,
       "sprint_podiums": 5,
       "maiden_win": "P1 at S1 Bahrain",
       "maiden_podium": "S1 Bahrain (P1)",
@@ -26913,7 +26957,8 @@
         "S4 Las Vegas (P3)",
         "S5 Imola (P2)",
         "S5 Miami (P3)",
-        "S5 Silverstone (P1)"
+        "S5 Silverstone (P1)",
+        "S5 Suzuka (P3)"
       ],
       "chronological_sprint_podiums": [
         "S3 China (S) (P1)",
@@ -26962,7 +27007,8 @@
         "11 in a row (S3 Suzuka -> S3 Silverstone -> S3 Australia -> S3 Spa -> S3 Spain -> S3 China -> S3 Baku -> S3 Canada -> S3 Monza -> S3 Abu Dhabi -> S3 Austria)",
         "2 in a row (S4 Bahrain -> S4 Miami)",
         "2 in a row (S4 Spa -> S4 Brazil)",
-        "2 in a row (S5 Imola -> S5 Miami)"
+        "2 in a row (S5 Imola -> S5 Miami)",
+        "2 in a row (S5 Silverstone -> S5 Suzuka)"
       ],
       "cross_season_podium_streak_list": [
         "5 in a row (S1 Bahrain -> S1 Jeddah -> S1 Australia -> S1 Miami -> S1 Spain)",
@@ -26972,7 +27018,8 @@
         "15 in a row (S2 China -> S2 COTA -> S2 Spa -> S2 Austria -> S3 Suzuka -> S3 Silverstone -> S3 Australia -> S3 Spa -> S3 Spain -> S3 China -> S3 Baku -> S3 Canada -> S3 Monza -> S3 Abu Dhabi -> S3 Austria)",
         "2 in a row (S4 Bahrain -> S4 Miami)",
         "2 in a row (S4 Spa -> S4 Brazil)",
-        "2 in a row (S5 Imola -> S5 Miami)"
+        "2 in a row (S5 Imola -> S5 Miami)",
+        "2 in a row (S5 Silverstone -> S5 Suzuka)"
       ],
       "pre_season_wins": [
         "S1 Pre-Season Test Barcelona (Pre-Season)"
@@ -27022,7 +27069,7 @@
       "fastest_laps": 12,
       "driver_of_the_day": 1,
       "most_overtakes": 3,
-      "cleanest_driver": 3,
+      "cleanest_driver": 4,
       "driver_championships": [
         3
       ],
@@ -27165,10 +27212,10 @@
           "avg_pos_change": 1.3
         },
         "Suzuka": {
-          "score": 64.8,
-          "total_points": 79.0,
-          "avg_points": 26.3,
-          "avg_pos_change": 0.3
+          "score": 56.8,
+          "total_points": 95.0,
+          "avg_points": 23.8,
+          "avg_pos_change": 0.5
         },
         "Zandvoort": {
           "score": 51.8,
@@ -27180,11 +27227,11 @@
     },
     "Patrick": {
       "driver": "Patrick",
-      "total_points": 407.5,
+      "total_points": 415.5,
       "points_by_season": [
         "S3: 117.5pts",
         "S4: 215pts",
-        "S5: 75pts"
+        "S5: 83pts"
       ],
       "feature_wins": 3,
       "sprint_wins": 0,
@@ -27243,8 +27290,8 @@
       ],
       "post_season_podiums": [],
       "avg_place": 5.6,
-      "avg_qual": 5.9,
-      "avg_pos_change": 0.2,
+      "avg_qual": 5.8,
+      "avg_pos_change": 0.1,
       "best_race_all_time": "P1 at S4 Austria (26pts)",
       "best_race_by_season": [
         "S3: P1 at China (25pts)",
@@ -27377,10 +27424,10 @@
           "avg_pos_change": 1.5
         },
         "Suzuka": {
-          "score": 0.6,
-          "total_points": 1.0,
-          "avg_points": 1.0,
-          "avg_pos_change": -7.0
+          "score": 10.1,
+          "total_points": 9.0,
+          "avg_points": 4.5,
+          "avg_pos_change": -5.0
         },
         "Zandvoort": {
           "score": 43.5,
@@ -28585,7 +28632,7 @@
     },
     "Audi": {
       "constructor": "Audi",
-      "total_points": 8.5,
+      "total_points": 9.5,
       "feature_wins": 0,
       "sprint_wins": 0,
       "feature_podiums": 0,
@@ -28602,8 +28649,8 @@
       "single_season_podium_streak": 0,
       "cross_season_podium_streak": 0,
       "avg_place": 11.5,
-      "avg_qual": 9.2,
-      "avg_pos_change": -2.3,
+      "avg_qual": 9.5,
+      "avg_pos_change": -2.0,
       "constructor_championships": [],
       "all_time_standings_peak": "11th - S5 Miami",
       "track_ratings": {
@@ -28662,34 +28709,43 @@
           "avg_pos_change": -5.5,
           "avg_qual": 4.0,
           "avg_place": 9.5
+        },
+        "Suzuka": {
+          "score": 4.559,
+          "total_points": 1.0,
+          "avg_points": 1.0,
+          "avg_pos_change": 1.0,
+          "avg_qual": 12.0,
+          "avg_place": 11.0
         }
       }
     },
     "Cadillac": {
       "constructor": "Cadillac",
-      "total_points": 207.0,
-      "feature_wins": 3,
+      "total_points": 240.0,
+      "feature_wins": 4,
       "sprint_wins": 0,
-      "feature_podiums": 5,
+      "feature_podiums": 6,
       "sprint_podiums": 2,
       "maiden_win": "P1 at S5 Australia",
       "maiden_podium": "S5 Australia",
       "chronological_feature_wins": [
         "S5 Australia",
         "S5 Imola",
-        "S5 Monza"
+        "S5 Monza",
+        "S5 Suzuka"
       ],
       "chronological_sprint_wins": [],
       "feature_wins_by_season": [
-        "S5: 3 (Australia, Imola, Monza)"
+        "S5: 4 (Australia, Imola, Monza, Suzuka)"
       ],
       "single_season_win_streak": 2,
       "cross_season_win_streak": 2,
-      "single_season_podium_streak": 2,
-      "cross_season_podium_streak": 2,
-      "avg_place": 4.9,
-      "avg_qual": 5.0,
-      "avg_pos_change": 0.1,
+      "single_season_podium_streak": 3,
+      "cross_season_podium_streak": 3,
+      "avg_place": 4.8,
+      "avg_qual": 4.8,
+      "avg_pos_change": 0.0,
       "constructor_championships": [],
       "all_time_standings_peak": "8th - S5 Imola",
       "track_ratings": {
@@ -28748,12 +28804,20 @@
           "avg_pos_change": -1.5,
           "avg_qual": 5.75,
           "avg_place": 7.25
+        },
+        "Suzuka": {
+          "score": 73.011,
+          "total_points": 33.0,
+          "avg_points": 33.0,
+          "avg_pos_change": -1.0,
+          "avg_qual": 2.5,
+          "avg_place": 3.5
         }
       }
     },
     "Ferrari": {
       "constructor": "Ferrari",
-      "total_points": 780.0,
+      "total_points": 797.0,
       "feature_wins": 3,
       "sprint_wins": 2,
       "feature_podiums": 21,
@@ -28782,7 +28846,7 @@
       "cross_season_podium_streak": 6,
       "avg_place": 6.7,
       "avg_qual": 8.3,
-      "avg_pos_change": 1.7,
+      "avg_pos_change": 1.6,
       "constructor_championships": [],
       "all_time_standings_peak": "4th - S3 China",
       "track_ratings": {
@@ -28955,12 +29019,12 @@
           "avg_place": 7.5
         },
         "Suzuka": {
-          "score": 29.583,
-          "total_points": 38.0,
-          "avg_points": 12.67,
-          "avg_pos_change": 1.83,
-          "avg_qual": 7.67,
-          "avg_place": 5.83
+          "score": 31.311,
+          "total_points": 55.0,
+          "avg_points": 13.75,
+          "avg_pos_change": 1.06,
+          "avg_qual": 6.94,
+          "avg_place": 5.89
         },
         "Zandvoort": {
           "score": 35.705,
@@ -28974,7 +29038,7 @@
     },
     "Haas": {
       "constructor": "Haas",
-      "total_points": 56.5,
+      "total_points": 65.5,
       "feature_wins": 0,
       "sprint_wins": 0,
       "feature_podiums": 1,
@@ -28991,8 +29055,8 @@
       "single_season_podium_streak": 1,
       "cross_season_podium_streak": 1,
       "avg_place": 8.8,
-      "avg_qual": 6.3,
-      "avg_pos_change": -2.5,
+      "avg_qual": 6.5,
+      "avg_pos_change": -2.3,
       "constructor_championships": [],
       "all_time_standings_peak": "10th - S5 Australia",
       "track_ratings": {
@@ -29051,15 +29115,23 @@
           "avg_pos_change": -1.25,
           "avg_qual": 5.5,
           "avg_place": 6.75
+        },
+        "Suzuka": {
+          "score": 20.185,
+          "total_points": 9.0,
+          "avg_points": 9.0,
+          "avg_pos_change": -0.5,
+          "avg_qual": 7.5,
+          "avg_place": 8.0
         }
       }
     },
     "McLaren": {
       "constructor": "McLaren",
-      "total_points": 1440.5,
+      "total_points": 1458.5,
       "feature_wins": 24,
       "sprint_wins": 2,
-      "feature_podiums": 46,
+      "feature_podiums": 47,
       "sprint_podiums": 5,
       "maiden_win": "P1 at S1 Bahrain",
       "maiden_podium": "S1 Bahrain",
@@ -29104,7 +29176,7 @@
       "cross_season_win_streak": 3,
       "single_season_podium_streak": 11,
       "cross_season_podium_streak": 15,
-      "avg_place": 5.0,
+      "avg_place": 5.1,
       "avg_qual": 5.7,
       "avg_pos_change": 0.7,
       "constructor_championships": [
@@ -29281,12 +29353,12 @@
           "avg_place": 7.5
         },
         "Suzuka": {
-          "score": 57.107,
-          "total_points": 82.0,
-          "avg_points": 27.33,
-          "avg_pos_change": -0.67,
+          "score": 52.592,
+          "total_points": 100.0,
+          "avg_points": 25.0,
+          "avg_pos_change": -0.5,
           "avg_qual": 6.5,
-          "avg_place": 7.17
+          "avg_place": 7.0
         },
         "Zandvoort": {
           "score": 48.869,
@@ -29300,7 +29372,7 @@
     },
     "Mercedes": {
       "constructor": "Mercedes",
-      "total_points": 1300.0,
+      "total_points": 1311.0,
       "feature_wins": 18,
       "sprint_wins": 2,
       "feature_podiums": 42,
@@ -29343,7 +29415,7 @@
       "cross_season_podium_streak": 13,
       "avg_place": 5.3,
       "avg_qual": 5.8,
-      "avg_pos_change": 0.4,
+      "avg_pos_change": 0.5,
       "constructor_championships": [
         1,
         4
@@ -29519,12 +29591,12 @@
           "avg_place": 4.0
         },
         "Suzuka": {
-          "score": 55.78,
-          "total_points": 53.0,
-          "avg_points": 26.5,
-          "avg_pos_change": -2.75,
-          "avg_qual": 3.75,
-          "avg_place": 6.5
+          "score": 45.909,
+          "total_points": 64.0,
+          "avg_points": 21.33,
+          "avg_pos_change": -0.17,
+          "avg_qual": 5.83,
+          "avg_place": 6.0
         },
         "Zandvoort": {
           "score": 44.296,
@@ -29538,10 +29610,10 @@
     },
     "Red Bull": {
       "constructor": "Red Bull",
-      "total_points": 602.0,
+      "total_points": 622.0,
       "feature_wins": 1,
       "sprint_wins": 2,
-      "feature_podiums": 10,
+      "feature_podiums": 11,
       "sprint_podiums": 3,
       "maiden_win": "P1 at S5 Brazil",
       "maiden_podium": "S1 COTA",
@@ -29564,8 +29636,8 @@
       "single_season_podium_streak": 5,
       "cross_season_podium_streak": 5,
       "avg_place": 8.3,
-      "avg_qual": 7.8,
-      "avg_pos_change": -0.5,
+      "avg_qual": 7.7,
+      "avg_pos_change": -0.6,
       "constructor_championships": [],
       "all_time_standings_peak": "4th - S1 Bahrain",
       "track_ratings": {
@@ -29738,12 +29810,12 @@
           "avg_place": 6.67
         },
         "Suzuka": {
-          "score": 4.736,
-          "total_points": 10.0,
-          "avg_points": 3.33,
-          "avg_pos_change": -4.5,
-          "avg_qual": 9.17,
-          "avg_place": 13.67
+          "score": 14.069,
+          "total_points": 30.0,
+          "avg_points": 7.5,
+          "avg_pos_change": -3.62,
+          "avg_qual": 8.38,
+          "avg_place": 12.0
         },
         "Zandvoort": {
           "score": 28.237,
@@ -30011,6 +30083,14 @@
           "avg_place": 9.5
         },
         "Spa": {
+          "score": 0.0,
+          "total_points": 0.0,
+          "avg_points": 0.0,
+          "avg_pos_change": 0.0,
+          "avg_qual": 0.0,
+          "avg_place": 0.0
+        },
+        "Suzuka": {
           "score": 0.0,
           "total_points": 0.0,
           "avg_points": 0.0,
@@ -30553,6 +30633,21 @@
             "P1: Joshua (Alpine)",
             "P2: Nick (McLaren)",
             "P3: Del (Aston Martin)"
+          ]
+        },
+        "S5 Suzuka": {
+          "season": 5,
+          "race_name": "Suzuka",
+          "is_sprint": false,
+          "winner": "Jelly (Cadillac)",
+          "winner_driver": "Jelly",
+          "winner_team": "Cadillac",
+          "pole": "Joshua",
+          "fastest_lap": "None",
+          "podium": [
+            "P1: Jelly (Cadillac)",
+            "P2: Joshua (Red Bull)",
+            "P3: Nick (McLaren)"
           ]
         }
       }

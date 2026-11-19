@@ -630,7 +630,8 @@
       "Spa",
       "Brazil",
       "Silverstone Sprint",
-      "Silverstone"
+      "Silverstone",
+      "Suzuka"
     ],
     "rankings": {
       "Preseason": [
@@ -749,6 +750,16 @@
         "Haas",
         "McLaren",
         "Red Bull",
+        "Mercedes",
+        "Audi",
+        "Williams"
+      ],
+      "Suzuka": [
+        "Cadillac",
+        "Ferrari",
+        "McLaren",
+        "Red Bull",
+        "Haas",
         "Mercedes",
         "Audi",
         "Williams"
