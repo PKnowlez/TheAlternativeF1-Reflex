@@ -11,6 +11,7 @@ from the_alternative_f1.articles.components import (
     DownloadState,
     interactive_line_chart_key,
     chart_card,
+    sorted_graphing_tooltip,
 )
 from the_alternative_f1.constructor_colors import get_constructor_color
 from the_alternative_f1.all_time_stats.SummaryAllTime import _build_arc_path, _get_driver_shade
@@ -205,7 +206,7 @@ def Tab1(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
                 tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
             ),
             rx.recharts.cartesian_grid(vertical=False, stroke="rgba(255, 255, 255, 0.2)"),
-            rx.recharts.graphing_tooltip(),
+            sorted_graphing_tooltip(),
             data=team_line_data,
             margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
             width="100%",
@@ -250,7 +251,7 @@ def Tab1(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
                 tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
             ),
             rx.recharts.cartesian_grid(vertical=False, stroke="rgba(255, 255, 255, 0.2)"),
-            rx.recharts.graphing_tooltip(),
+            sorted_graphing_tooltip(),
             data=driver_line_data,
             margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
             width="100%",

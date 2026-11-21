@@ -28,9 +28,11 @@ def main():
     from the_alternative_f1.all_time_stats.Functions import clear_excel_cache
     from the_alternative_f1.seasons.Calculations import clear_calculations_cache, Calculations, save_calculations_cache
     from the_alternative_f1.all_time_stats.DetailedAllTime import clear_detailed_cache
+    from the_alternative_f1.all_time_stats.SummaryAllTime import clear_summary_cache
     clear_excel_cache()
     clear_calculations_cache()
     clear_detailed_cache()
+    clear_summary_cache()
 
     # 1. Warm up season calculations
     print("\n[1/5] Calculating Season Results (Seasons 1-5)...")
@@ -96,11 +98,11 @@ def main():
     )
     precompute_all_map_data(force=True)
     save_map_cache()
-    precompute_summary_data(num_seasons=len(seasons))
+    precompute_summary_data(num_seasons=len(seasons), force=True)
     save_summary_cache()
     build_teammate_network_data()
     save_network_cache()
-    get_all_time_highest_positions(num_seasons=len(seasons))
+    get_all_time_highest_positions(num_seasons=len(seasons), force_refresh=True)
     CalculateAllTime(len(seasons), "Driver")
     CalculateAllTime(len(seasons), "Team")
     RacesAllTime(len(seasons), "Driver")

@@ -320,6 +320,7 @@ def Tab4(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
 
         # ── Placement summary chart (based on actual finishing place) ───
         placements = [0] * 10
+        feature_wins = 0
         places_list = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th+"]
         for j in range(index_a):
             raw_p = raw_places[j] if j < len(raw_places) else None
@@ -328,6 +329,14 @@ def Tab4(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
             if status_p in ("EMPTY", "DNS") or (p_val is None and raw_p is None) or (pd.isnull(p_val) and pd.isnull(raw_p)):
                 continue
 
+            race_label = str(races_points_only[j] if j < len(races_points_only) else "")
+            place_col_name = (
+                str(new_df_Place.columns[j + 1])
+                if (new_df_Place is not None and j + 1 < len(new_df_Place.columns))
+                else ""
+            )
+            is_sprint_race = ("sprint" in place_col_name.lower()) or ("sprint" in race_label.lower())
+
             if status_p == "FINISH":
                 try:
                     p_num = int(float(raw_p if raw_p is not None and not pd.isnull(raw_p) else p_val))
@@ -335,6 +344,8 @@ def Tab4(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
                     p_num = int(float(p_val)) if p_val is not None and not pd.isnull(p_val) else 10
                 if 1 <= p_num <= 9:
                     placements[p_num - 1] += 1
+                    if p_num == 1 and not is_sprint_race:
+                        feature_wins += 1
                 elif p_num >= 10:
                     placements[9] += 1
             elif status_p in ("DNF", "DSQ"):
@@ -369,8 +380,8 @@ def Tab4(data: dict, season_data: dict, sprint_only_var=None, toggle_sprint_only
             download_position=pos_plc,
         )
 
-        # ── Wins & Podiums (derived directly from actual finishing places) ──
-        wins = placements[0]
+        # ── Wins & Podiums (exclude Sprint wins from total wins) ──
+        wins = feature_wins
         podiums = sum(placements[:3])
 
         # ── Total points ─────────────────────────────────────────────────

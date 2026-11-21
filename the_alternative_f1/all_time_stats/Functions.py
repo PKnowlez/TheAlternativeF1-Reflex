@@ -49,9 +49,10 @@ def save_functions_cache() -> bool:
         return False
 
 def clear_excel_cache():
-    global _excel_sheets_cache, _excel_mtime, _func_cache
+    global _excel_sheets_cache, _excel_mtime, _func_cache, _HIGHEST_POSITIONS_CACHE
     _excel_sheets_cache.clear()
     _func_cache.clear()
+    _HIGHEST_POSITIONS_CACHE = {}
     _excel_mtime = 0
 
 load_functions_cache()
@@ -222,11 +223,13 @@ def get_all_time_highest_positions(num_seasons: int = 5, force_refresh: bool = F
     global _HIGHEST_POSITIONS_CACHE, _excel_mtime
     excel_path = Path(file)
     current_mtime = excel_path.stat().st_mtime if excel_path.exists() else 0
-    if _excel_mtime != current_mtime:
-        _HIGHEST_POSITIONS_CACHE = None
-        force_refresh = True
 
-    if _HIGHEST_POSITIONS_CACHE and not force_refresh:
+    if (
+        not force_refresh
+        and _HIGHEST_POSITIONS_CACHE
+        and _HIGHEST_POSITIONS_CACHE.get("_excel_mtime") == current_mtime
+        and _HIGHEST_POSITIONS_CACHE.get("_num_seasons") == num_seasons
+    ):
         return _HIGHEST_POSITIONS_CACHE
 
     json_file = Path(__file__).parent / "all_time_highest_positions.json"
@@ -234,6 +237,11 @@ def get_all_time_highest_positions(num_seasons: int = 5, force_refresh: bool = F
         try:
             with open(json_file, "r", encoding="utf-8") as f:
                 data = json.load(f)
+            if (
+                isinstance(data, dict)
+                and data.get("_excel_mtime") == current_mtime
+                and data.get("_num_seasons") == num_seasons
+            ):
                 _HIGHEST_POSITIONS_CACHE = data
                 return data
         except Exception:
@@ -281,16 +289,31 @@ def get_all_time_highest_positions(num_seasons: int = 5, force_refresh: bool = F
         df_s = season_dfs.get(s)
         p_col = f"{r_str}Points"
         pl_col = f"{r_str}Place"
+        q_col = f"{r_str}Qualifying"
         if df_s is not None and not df_s.empty:
             for _, row in df_s.iterrows():
                 drv = str(row.get("Driver", "")).strip()
                 tm = str(row.get("Team", "")).strip()
-                if drv and drv.lower() not in ("nan", "none", "—", ""):
-                    if (p_col in df_s.columns or pl_col in df_s.columns) and drv not in driver_debut:
-                        driver_debut[drv] = race_idx
-                if tm and tm.lower() not in ("nan", "none", "—", ""):
-                    if (p_col in df_s.columns or pl_col in df_s.columns) and tm not in constructor_debut:
-                        constructor_debut[tm] = race_idx
+                pts_raw = row.get(p_col) if p_col in df_s.columns else None
+                pl_raw = row.get(pl_col) if pl_col in df_s.columns else None
+                q_raw = row.get(q_col) if q_col in df_s.columns else None
+                try:
+                    has_pts = pts_raw is not None and not pd.isna(pts_raw) and float(pts_raw) > 0
+                except Exception:
+                    has_pts = False
+                pl_str = str(pl_raw).strip().lower() if pl_raw is not None and not pd.isna(pl_raw) else ""
+                q_str = str(q_raw).strip().lower() if q_raw is not None and not pd.isna(q_raw) else ""
+                competed_in_race = (
+                    has_pts
+                    or pl_str not in ("", "nan", "none", "—", "-", "dns", "0")
+                    or q_str not in ("", "nan", "none", "—", "-", "dns", "0")
+                )
+                if not competed_in_race:
+                    continue
+                if drv and drv.lower() not in ("nan", "none", "—", "") and drv not in driver_debut:
+                    driver_debut[drv] = race_idx
+                if tm and tm.lower() not in ("nan", "none", "—", "") and tm not in constructor_debut:
+                    constructor_debut[tm] = race_idx
 
     def format_pos(rank, race_label):
         if rank == 1:
@@ -344,7 +367,9 @@ def get_all_time_highest_positions(num_seasons: int = 5, force_refresh: bool = F
 
     data = {
         "constructors": constructors_dict,
-        "drivers": drivers_dict
+        "drivers": drivers_dict,
+        "_excel_mtime": current_mtime,
+        "_num_seasons": num_seasons,
     }
 
     try:
@@ -399,8 +424,12 @@ def CalculateAllTime(NumSeason, tORd):
 
         x = tORd
 
-        # Keep place columns and remove the rest
-        cols_to_keep = [col for col in df_season.columns if col.endswith("Place") or col == x]
+        # Keep feature race place columns (exclude Sprint, Pre-Season, and Post-Season)
+        cols_to_keep = [
+            col for col in df_season.columns
+            if (col.endswith("Place") and "sprint" not in col.lower() and not col.lower().startswith(("pre", "post")))
+            or col == x
+        ]
         df_season = df_season[cols_to_keep]
         place_cols = [col for col in df_season.columns if col != x]
         melted_df = df_season.melt(id_vars=x, value_vars=place_cols, value_name='Place')

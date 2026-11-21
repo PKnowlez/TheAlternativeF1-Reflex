@@ -324,7 +324,8 @@ def precompute_all_map_data(force: bool = False) -> dict:
                     try:
                         place = float(row[pl_col])
                         if place == 1.0:
-                            s_stats[drv]["wins"] += 1
+                            if "sprint" not in r.lower():
+                                s_stats[drv]["wins"] += 1
                             s_stats[drv]["podiums"] += 1
                         elif place in (2.0, 3.0):
                             s_stats[drv]["podiums"] += 1

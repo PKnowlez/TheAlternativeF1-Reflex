@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generated_at": "2026-11-19T04:04:21Z",
+    "generated_at": "2026-11-21T05:15:37Z",
     "excel_mtime": 1795060915.7611086,
     "num_seasons": 5,
     "latest_season": 5,
@@ -208,52 +208,7 @@
       "Travis",
       "Yeti"
     ],
-    "sprint_race_winners": [
-      {
-        "driver": "Joshua",
-        "wins": 3,
-        "chronological_wins": [
-          "S4 Brazil (S)",
-          "S5 Spa (S)",
-          "S5 Silverstone (S)"
-        ],
-        "seasons_breakdown": "S4: 1 (Brazil (S)); S5: 2 (Spa (S), Silverstone (S))"
-      },
-      {
-        "driver": "Jaden",
-        "wins": 2,
-        "chronological_wins": [
-          "S4 Spa (S)",
-          "S5 Miami (S)"
-        ],
-        "seasons_breakdown": "S4: 1 (Spa (S)); S5: 1 (Miami (S))"
-      },
-      {
-        "driver": "Nick",
-        "wins": 2,
-        "chronological_wins": [
-          "S3 China (S)",
-          "S3 COTA (S)"
-        ],
-        "seasons_breakdown": "S3: 2 (China (S), COTA (S))"
-      },
-      {
-        "driver": "Del",
-        "wins": 1,
-        "chronological_wins": [
-          "S3 Austria (S)"
-        ],
-        "seasons_breakdown": "S3: 1 (Austria (S))"
-      },
-      {
-        "driver": "Jairo",
-        "wins": 1,
-        "chronological_wins": [
-          "S4 Miami (S)"
-        ],
-        "seasons_breakdown": "S4: 1 (Miami (S))"
-      }
-    ],
+    "sprint_race_winners": [],
     "podium_leaders": [
       {
         "driver": "Nick",
@@ -24359,7 +24314,7 @@
         "S5: 47pts"
       ],
       "feature_wins": 3,
-      "sprint_wins": 1,
+      "sprint_wins": 0,
       "feature_podiums": 13,
       "sprint_podiums": 1,
       "maiden_win": "P1 at S2 Silverstone",
@@ -24369,9 +24324,7 @@
         "S2 Austria",
         "S3 Canada"
       ],
-      "chronological_sprint_wins": [
-        "S3 Austria (S)"
-      ],
+      "chronological_sprint_wins": [],
       "chronological_feature_podiums": [
         "S2 Suzuka (P3)",
         "S2 Monza (P3)",
@@ -24396,9 +24349,7 @@
         "S4: 0",
         "S5: 0"
       ],
-      "sprint_wins_by_season": [
-        "S3: 1 (Austria (S))"
-      ],
+      "sprint_wins_by_season": [],
       "single_season_win_streak": 1,
       "cross_season_win_streak": 1,
       "single_season_win_streak_list": [],
@@ -25315,7 +25266,7 @@
         "S5: 132pts"
       ],
       "feature_wins": 1,
-      "sprint_wins": 2,
+      "sprint_wins": 0,
       "feature_podiums": 8,
       "sprint_podiums": 4,
       "maiden_win": "P1 at S4 Brazil",
@@ -25323,10 +25274,7 @@
       "chronological_feature_wins": [
         "S4 Brazil"
       ],
-      "chronological_sprint_wins": [
-        "S4 Spa (S)",
-        "S5 Miami (S)"
-      ],
+      "chronological_sprint_wins": [],
       "chronological_feature_podiums": [
         "S4 Mexico (P2)",
         "S4 Brazil (P1)",
@@ -25347,10 +25295,7 @@
         "S4: 1 (Brazil)",
         "S5: 0"
       ],
-      "sprint_wins_by_season": [
-        "S4: 1 (Spa (S))",
-        "S5: 1 (Miami (S))"
-      ],
+      "sprint_wins_by_season": [],
       "single_season_win_streak": 1,
       "cross_season_win_streak": 1,
       "single_season_win_streak_list": [],
@@ -25500,7 +25445,7 @@
         "S5: 101pts"
       ],
       "feature_wins": 8,
-      "sprint_wins": 1,
+      "sprint_wins": 0,
       "feature_podiums": 9,
       "sprint_podiums": 4,
       "maiden_win": "P1 at S4 Spain",
@@ -25515,9 +25460,7 @@
         "S4 Monza",
         "S5 Miami"
       ],
-      "chronological_sprint_wins": [
-        "S4 Miami (S)"
-      ],
+      "chronological_sprint_wins": [],
       "chronological_feature_podiums": [
         "S4 Spain (P1)",
         "S4 Mexico (P1)",
@@ -25539,9 +25482,7 @@
         "S4: 7 (Spain, Mexico, Baku, Austria (R), Las Vegas, Abu Dhabi, Monza)",
         "S5: 1 (Miami)"
       ],
-      "sprint_wins_by_season": [
-        "S4: 1 (Miami (S))"
-      ],
+      "sprint_wins_by_season": [],
       "single_season_win_streak": 4,
       "cross_season_win_streak": 4,
       "single_season_win_streak_list": [
@@ -25955,7 +25896,7 @@
       "seasonal_standings_finishes": [
         "S5: P10"
       ],
-      "all_time_standings_peak": "23rd - S5 Australia",
+      "all_time_standings_peak": "22nd - S5 Silverstone",
       "track_ratings": {
         "Australia": {
           "score": 2.0,
@@ -26057,7 +25998,7 @@
         "S5: 152pts"
       ],
       "feature_wins": 8,
-      "sprint_wins": 3,
+      "sprint_wins": 0,
       "feature_podiums": 32,
       "sprint_podiums": 5,
       "maiden_win": "P1 at S3 Suzuka",
@@ -26072,11 +26013,7 @@
         "S4 Jeddah",
         "S5 Brazil"
       ],
-      "chronological_sprint_wins": [
-        "S4 Brazil (S)",
-        "S5 Spa (S)",
-        "S5 Silverstone (S)"
-      ],
+      "chronological_sprint_wins": [],
       "chronological_feature_podiums": [
         "S2 Suzuka (P2)",
         "S2 Abu Dhabi (P2)",
@@ -26124,10 +26061,7 @@
         "S4: 2 (Zandvoort, Jeddah)",
         "S5: 1 (Brazil)"
       ],
-      "sprint_wins_by_season": [
-        "S4: 1 (Brazil (S))",
-        "S5: 2 (Spa (S), Silverstone (S))"
-      ],
+      "sprint_wins_by_season": [],
       "single_season_win_streak": 2,
       "cross_season_win_streak": 2,
       "single_season_win_streak_list": [
@@ -26222,7 +26156,7 @@
         "S4: P1",
         "S5: P1"
       ],
-      "all_time_standings_peak": "🥉 S3 COTA (S)",
+      "all_time_standings_peak": "🥈 S5 Silverstone (S)",
       "track_ratings": {
         "Abu Dhabi": {
           "score": 44.8,
@@ -26878,7 +26812,7 @@
         "S5: 128pts"
       ],
       "feature_wins": 24,
-      "sprint_wins": 2,
+      "sprint_wins": 0,
       "feature_podiums": 45,
       "sprint_podiums": 5,
       "maiden_win": "P1 at S1 Bahrain",
@@ -26909,10 +26843,7 @@
         "S4 Spa",
         "S5 Silverstone"
       ],
-      "chronological_sprint_wins": [
-        "S3 China (S)",
-        "S3 COTA (S)"
-      ],
+      "chronological_sprint_wins": [],
       "chronological_feature_podiums": [
         "S1 Bahrain (P1)",
         "S1 Jeddah (P1)",
@@ -26974,9 +26905,7 @@
         "S4: 2 (Miami, Spa)",
         "S5: 1 (Silverstone)"
       ],
-      "sprint_wins_by_season": [
-        "S3: 2 (China (S), COTA (S))"
-      ],
+      "sprint_wins_by_season": [],
       "single_season_win_streak": 3,
       "cross_season_win_streak": 3,
       "single_season_win_streak_list": [
@@ -28232,7 +28161,7 @@
       "constructor": "Alpine",
       "total_points": 844.0,
       "feature_wins": 7,
-      "sprint_wins": 1,
+      "sprint_wins": 0,
       "feature_podiums": 26,
       "sprint_podiums": 3,
       "maiden_win": "P1 at S3 Suzuka",
@@ -28246,9 +28175,7 @@
         "S4 Zandvoort",
         "S4 Jeddah"
       ],
-      "chronological_sprint_wins": [
-        "S4 Brazil (S)"
-      ],
+      "chronological_sprint_wins": [],
       "feature_wins_by_season": [
         "S2: 0",
         "S3: 5 (Suzuka, Silverstone, Spain, Austria, COTA)",
@@ -28432,7 +28359,7 @@
       "constructor": "Aston Martin",
       "total_points": 496.5,
       "feature_wins": 3,
-      "sprint_wins": 1,
+      "sprint_wins": 0,
       "feature_podiums": 12,
       "sprint_podiums": 1,
       "maiden_win": "P1 at S1 COTA",
@@ -28442,9 +28369,7 @@
         "S1 Mexico",
         "S3 Canada"
       ],
-      "chronological_sprint_wins": [
-        "S3 Austria (S)"
-      ],
+      "chronological_sprint_wins": [],
       "feature_wins_by_season": [
         "S1: 2 (COTA, Mexico)",
         "S3: 1 (Canada)",
@@ -28819,7 +28744,7 @@
       "constructor": "Ferrari",
       "total_points": 797.0,
       "feature_wins": 3,
-      "sprint_wins": 2,
+      "sprint_wins": 0,
       "feature_podiums": 21,
       "sprint_podiums": 5,
       "maiden_win": "P1 at S2 COTA",
@@ -28829,10 +28754,7 @@
         "S3 Canada",
         "S5 Spa"
       ],
-      "chronological_sprint_wins": [
-        "S3 Austria (S)",
-        "S5 Miami (S)"
-      ],
+      "chronological_sprint_wins": [],
       "feature_wins_by_season": [
         "S1: 0",
         "S2: 1 (COTA)",
@@ -29130,7 +29052,7 @@
       "constructor": "McLaren",
       "total_points": 1458.5,
       "feature_wins": 24,
-      "sprint_wins": 2,
+      "sprint_wins": 0,
       "feature_podiums": 47,
       "sprint_podiums": 5,
       "maiden_win": "P1 at S1 Bahrain",
@@ -29161,10 +29083,7 @@
         "S4 Spa",
         "S5 Silverstone"
       ],
-      "chronological_sprint_wins": [
-        "S3 China (S)",
-        "S3 COTA (S)"
-      ],
+      "chronological_sprint_wins": [],
       "feature_wins_by_season": [
         "S1: 10 (Bahrain, Jeddah, Miami, Spain, Austria, Spa, Suzuka, Qatar, Brazil, Abu Dhabi)",
         "S2: 6 (Suzuka, Abu Dhabi, Monza, Zandvoort, China, Spa)",
@@ -29374,7 +29293,7 @@
       "constructor": "Mercedes",
       "total_points": 1311.0,
       "feature_wins": 18,
-      "sprint_wins": 2,
+      "sprint_wins": 0,
       "feature_podiums": 42,
       "sprint_podiums": 6,
       "maiden_win": "P1 at S1 Australia",
@@ -29399,10 +29318,7 @@
         "S4 Monza",
         "S5 Miami"
       ],
-      "chronological_sprint_wins": [
-        "S4 Miami (S)",
-        "S4 Spa (S)"
-      ],
+      "chronological_sprint_wins": [],
       "feature_wins_by_season": [
         "S1: 7 (Australia, Canada, Silverstone, Zandvoort, Monza, Singapore, Las Vegas)",
         "S2: 2 (Silverstone, Austria)",
@@ -29612,7 +29528,7 @@
       "constructor": "Red Bull",
       "total_points": 622.0,
       "feature_wins": 1,
-      "sprint_wins": 2,
+      "sprint_wins": 0,
       "feature_podiums": 11,
       "sprint_podiums": 3,
       "maiden_win": "P1 at S5 Brazil",
@@ -29620,10 +29536,7 @@
       "chronological_feature_wins": [
         "S5 Brazil"
       ],
-      "chronological_sprint_wins": [
-        "S5 Spa (S)",
-        "S5 Silverstone (S)"
-      ],
+      "chronological_sprint_wins": [],
       "feature_wins_by_season": [
         "S1: 0",
         "S2: 0",

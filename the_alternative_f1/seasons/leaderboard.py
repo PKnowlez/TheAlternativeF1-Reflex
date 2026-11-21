@@ -15,6 +15,7 @@ from the_alternative_f1.articles.components import (
     interactive_line_chart_key,
     chart_card,
     zoomable_chart,
+    sorted_graphing_tooltip,
 )
 from the_alternative_f1.seasons.predictions_market import (
     get_user_total_points,
@@ -839,7 +840,7 @@ def alternative_points_leaderboard_view() -> rx.Component:
                 rx.recharts.y_axis(stroke="#888888", font_size=10, domain=[0, "auto"]),
                 rx.recharts.reference_line(y=100, stroke="rgba(255, 255, 255, 0.25)", stroke_dasharray="3 3", label="100 Base Pts"),
                 rx.recharts.cartesian_grid(vertical=False, stroke="rgba(255, 255, 255, 0.1)"),
-                rx.recharts.graphing_tooltip(),
+                sorted_graphing_tooltip(),
                 rx.foreach(
                     LeaderboardState.predictor_series,
                     lambda s: rx.recharts.line(

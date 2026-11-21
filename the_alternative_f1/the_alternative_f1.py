@@ -2070,15 +2070,6 @@ def comment_card(comment: CommentData) -> rx.Component:
                     rx.fragment()
                 ),
                 rx.hstack(
-                    rx.spacer(),
-                    rx.button(
-                        "Cancel",
-                        size="1",
-                        variant="ghost",
-                        color="white",
-                        on_click=lambda: State.set_active_reply_comment_id(""),
-                        cursor="pointer",
-                    ),
                     rx.button(
                         rx.cond(
                             State.is_submitting_reply,
@@ -2092,7 +2083,16 @@ def comment_card(comment: CommentData) -> rx.Component:
                         cursor="pointer",
                         disabled=State.is_submitting_reply,
                     ),
+                    rx.button(
+                        "Cancel",
+                        size="1",
+                        variant="ghost",
+                        color="white",
+                        on_click=lambda: State.set_active_reply_comment_id(""),
+                        cursor="pointer",
+                    ),
                     spacing="2",
+                    justify="start",
                     width="100%",
                 ),
                 width="100%",
@@ -2105,7 +2105,7 @@ def comment_card(comment: CommentData) -> rx.Component:
 
         # Replies Container (with collapse/expand logic)
         rx.cond(
-            comment.replies.length() > 1,
+            comment.replies.length() > 2,
             rx.cond(
                 State.expanded_comment_ids.contains(comment.id),
                 rx.vstack(
@@ -2138,7 +2138,7 @@ def comment_card(comment: CommentData) -> rx.Component:
                 ),
             ),
             rx.cond(
-                comment.replies.length() == 1,
+                comment.replies.length() > 0,
                 rx.foreach(
                     comment.replies,
                     render_reply_item
@@ -2351,7 +2351,7 @@ def comments_popout_panel() -> rx.Component:
                                 bg="#00b4da",
                                 color="white",
                                 on_click=State.add_comment,
-                                align_self="end",
+                                align_self="start",
                                 _hover={"bg": "#009bbd"},
                                 cursor="pointer",
                                 disabled=State.is_submitting,
@@ -2389,6 +2389,7 @@ def comments_popout_panel() -> rx.Component:
                     width="100%",
                     overflow_y="auto",
                     flex="1",
+                    padding_bottom="60px",
                 ),
                 
                 # Main panel styling

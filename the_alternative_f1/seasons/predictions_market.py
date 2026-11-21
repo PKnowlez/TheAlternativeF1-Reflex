@@ -35,6 +35,7 @@ import math
 import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone, timedelta
+from zoneinfo import ZoneInfo
 from pathlib import Path
 import pandas as pd
 import reflex as rx
@@ -310,7 +311,7 @@ def is_race_locked(season_num: int, race_name: str) -> tuple[bool, str]:
         if not dt_race:
             return (False, "Open")
 
-        mountain_tz = timezone(timedelta(hours=-6))
+        mountain_tz = ZoneInfo("America/Denver")
         race_start_time = datetime(
             year=dt_race.year, month=dt_race.month, day=dt_race.day,
             hour=18, minute=45, second=0, tzinfo=mountain_tz
@@ -319,7 +320,7 @@ def is_race_locked(season_num: int, race_name: str) -> tuple[bool, str]:
         now_mountain = datetime.now(mountain_tz)
 
         if now_mountain >= lockout_time:
-            return (True, f"Locked (Closed at {lockout_time.strftime('%I:%M %p MDT')})")
+            return (True, f"Locked (Closed at {lockout_time.strftime('%I:%M %p %Z')})")
         else:
             time_left = lockout_time - now_mountain
             total_secs = max(0, int(time_left.total_seconds()))

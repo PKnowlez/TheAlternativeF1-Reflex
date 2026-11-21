@@ -25,6 +25,7 @@ from the_alternative_f1.articles.components import (
     interactive_line_chart_key,
     chart_card,
     get_download_position,
+    sorted_graphing_tooltip,
 )
 
 # Comprehensive Driver Colors across all 24 drivers
@@ -112,13 +113,13 @@ def _format_race_name(race_str: str) -> str:
     return res
 
 
-def precompute_summary_data(num_seasons: int = 5) -> dict:
+def precompute_summary_data(num_seasons: int = 5, force: bool = False) -> dict:
     """Precompute all-time cumulative points with debut trimming and aligned donut slices."""
     global _SUMMARY_CACHE, _SUMMARY_MTIME
     excel_p = Path(excel_file_path)
     current_mtime = excel_p.stat().st_mtime if excel_p.exists() else 0.0
 
-    if _SUMMARY_CACHE and _SUMMARY_MTIME == current_mtime:
+    if not force and _SUMMARY_CACHE and _SUMMARY_MTIME == current_mtime:
         return _SUMMARY_CACHE
 
     all_races = []  # list of tuples: (season, raw_race_name, full_label)
@@ -491,6 +492,13 @@ def save_summary_cache() -> bool:
     except Exception as e:
         print(f"Warning: Failed to save summary cache: {e}")
         return False
+
+
+def clear_summary_cache() -> None:
+    """Reset the in-memory summary cache so the next computation reads fresh data."""
+    global _SUMMARY_CACHE, _SUMMARY_MTIME
+    _SUMMARY_CACHE = {}
+    _SUMMARY_MTIME = 0.0
 
 
 # Initial warm-up of summary dataset (load precomputed pickle first)
@@ -870,7 +878,7 @@ def summary_all_time_view(num_seasons: int = 5) -> rx.Component:
                 width=38,
                 tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
             ),
-            rx.recharts.graphing_tooltip(),
+            sorted_graphing_tooltip(),
             data=team_line_data,
             margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
             width="100%",
@@ -952,7 +960,7 @@ def summary_all_time_view(num_seasons: int = 5) -> rx.Component:
                 width=38,
                 tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
             ),
-            rx.recharts.graphing_tooltip(),
+            sorted_graphing_tooltip(),
             data=driver_stint_line_data,
             margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
             width="100%",

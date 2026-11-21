@@ -511,12 +511,13 @@ def compute_entity_detailed_metrics(num_seasons: int, entity_type: str, entity_n
                 except Exception:
                     pts_val = 0.0
 
+                is_sprint = "sprint" in race_str.lower()
                 is_fl = is_truthy(fl)
                 is_dotd = is_truthy(dotd)
                 is_mot = is_truthy(mot)
                 is_cd = is_truthy(cd)
                 is_pole = (qual_val == 1.0)
-                is_win = (place_val == 1.0)
+                is_win = (place_val == 1.0) and not is_sprint
                 is_podium = (1.0 <= place_val <= 3.0)
 
                 races_detail.append({
@@ -577,8 +578,9 @@ def compute_entity_detailed_metrics(num_seasons: int, entity_type: str, entity_n
                 dotd_cnt = int((entity_rows[dotd_col].apply(is_truthy)).sum()) if dotd_col in entity_rows.columns else 0
                 mot_cnt = int((entity_rows[mot_col].apply(is_truthy)).sum()) if mot_col in entity_rows.columns else 0
                 cd_cnt = int((entity_rows[cd_col].apply(is_truthy)).sum()) if cd_col in entity_rows.columns else 0
+                is_sprint = "sprint" in race_str.lower()
                 poles_cnt = int(sum(1 for q in valid_quals if q == 1.0))
-                wins_cnt = int(sum(1 for p in valid_places if p == 1.0))
+                wins_cnt = 0 if is_sprint else int(sum(1 for p in valid_places if p == 1.0))
                 podiums_cnt = int(sum(1 for p in valid_places if 1.0 <= p <= 3.0))
 
                 races_detail.append({

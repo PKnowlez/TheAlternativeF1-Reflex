@@ -1302,6 +1302,13 @@ def image_carousel(
     )
 
 
+def sorted_graphing_tooltip() -> rx.Component:
+    """Return a Recharts tooltip that sorts entries by value descending (highest to lowest)."""
+    return rx.recharts.graphing_tooltip(
+        custom_attrs={"itemSorter": rx.Var("((item) => -Number(item?.value ?? 0))")}
+    )
+
+
 def fia_badge(
     font_size: str = "15px",
     padding_x: str = "14px",

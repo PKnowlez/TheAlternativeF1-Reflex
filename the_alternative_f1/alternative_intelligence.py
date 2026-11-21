@@ -19,6 +19,7 @@ from pydantic import BaseModel
 import reflex as rx
 import pandas as pd
 from collections import defaultdict
+from the_alternative_f1.articles.components import sorted_graphing_tooltip
 from the_alternative_f1.constructor_colors import get_constructor_color
 from the_alternative_f1.seasons.grounded_context_builder import load_grounded_deep_stats, sync_grounded_deep_stats
 
@@ -3948,6 +3949,7 @@ CALENDAR ROUNDS vs. SPRINTS STRUCTURE (SPRINTS ARE PART OF THE FEATURE RACE ROUN
     - SPRINT SCORING (Regulation 12): 1st: 8 pts, 2nd: 7 pts, 3rd: 6 pts, 4th: 5 pts, 5th: 4 pts, 6th: 3 pts, 7th: 2 pts, 8th: 1 pt, 9th-20th: 0.5 pts. Maximum Sprint win = 8 pts (NEVER 25 pts).
     - GRAND PRIX SCORING (Regulation 2): 1st: 25 pts, 2nd: 18 pts, 3rd: 15 pts, 4th: 12 pts, 5th: 10 pts, 6th: 8 pts, 7th: 6 pts, 8th: 4 pts, 9th: 3 pts, 10th: 2 pts, 11th-20th: 1 pt. Maximum Grand Prix win = 25 pts (plus up to 4 accolade bonus points = 29 pts max).
     - Sprints do NOT count as full Grand Prix race starts, nor do they count as full Grand Prix race wins or full Grand Prix race podiums.
+    - TOTAL WINS QUERIES: Whenever a user asks for the total number of wins a driver has, you MUST return BOTH their Feature Race wins and their Sprint Race wins, and clearly differentiate between the two (e.g., "X Feature Wins and Y Sprint Wins").
     - LEAGUE CALENDAR ROUND TRUTH:
       * Season 1: 19 Rounds
       * Season 2: 10 Rounds
@@ -7806,7 +7808,7 @@ def native_per_season_tracker_card(msg: ChatMessage) -> rx.Component:
                         domain=[1, msg.pst_max_place],
                     ),
                     rx.recharts.cartesian_grid(vertical=False, stroke="rgba(255, 255, 255, 0.08)"),
-                    rx.recharts.graphing_tooltip(),
+                    sorted_graphing_tooltip(),
                     # Entity 1 Lines
                     rx.recharts.line(
                         data_key="points_1",

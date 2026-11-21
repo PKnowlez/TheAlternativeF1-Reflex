@@ -24,7 +24,7 @@ from the_alternative_f1.all_time_stats.Functions import get_excel_sheet
 from the_alternative_f1.all_time_stats.DetailedAllTime import compute_entity_detailed_metrics, _extract_track_name
 from the_alternative_f1.seasons.power_rankings import load_power_rankings
 from the_alternative_f1.constructor_colors import CONSTRUCTOR_COLORS, get_constructor_color
-from the_alternative_f1.articles.components import zoomable_chart, interactive_line_chart_key, DownloadState, chart_card
+from the_alternative_f1.articles.components import zoomable_chart, interactive_line_chart_key, DownloadState, chart_card, sorted_graphing_tooltip
 
 PROJECTIONS_JSON = Path(__file__).parent / "projections_lines.json"
 PROJECTIONS_DATA_JSON = Path(__file__).parent / "projections_data.json"
@@ -954,7 +954,7 @@ def projections_tab_view(season_num: int = 5) -> rx.Component:
                 tick={"textAnchor": "start", "dx": -25, "fill": "white", "fontSize": 10, "fontFamily": "Outfit"},
             ),
             rx.recharts.cartesian_grid(vertical=False, stroke="rgba(255, 255, 255, 0.15)"),
-            rx.recharts.graphing_tooltip(),
+            sorted_graphing_tooltip(),
             data=chart_data,
             margin={"top": 10, "right": 20, "left": 35, "bottom": 30},
             width="100%",
