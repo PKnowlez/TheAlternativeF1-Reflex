@@ -1,42 +1,43 @@
 from the_alternative_f1.constructor_colors import CONSTRUCTOR_COLORS
-from the_alternative_f1.articles.Season5.Grid_Announcements.Haas import article as Haas_Article
-from the_alternative_f1.articles.Season5.Grid_Announcements.Erick import article as Erick_Article
-from the_alternative_f1.articles.Season5.Grid_Announcements.RedBull import article as RedBull_Article
-from the_alternative_f1.articles.Season5.Grid_Announcements.Cadillac import article as Cadillac_Article
-from the_alternative_f1.articles.Season5.Grid_Announcements.Ferrari import article as Ferrari_Article
-from the_alternative_f1.articles.Season5.Grid_Announcements.McLaren import article as McLaren_Article
-from the_alternative_f1.articles.Season5.Grid_Announcements.Williams import article as Williams_Article
-from the_alternative_f1.articles.Season5.Tracks.Rankings import article as Rankings_Article
-from the_alternative_f1.articles.Season5.Tracks.Schedule import article as Schedule_Article
-from the_alternative_f1.articles.Season5.Grid_Announcements.Audi import article as Audi_Article
-from the_alternative_f1.articles.Season5.Grid_Announcements.Mercedes import article as Mercedes_Article
-from the_alternative_f1.articles.Season5.Grid_Announcements.TheGrid import article as TheGrid_Article
-from the_alternative_f1.articles.Season5.Preseason.PreseasonArticle import article as Preseason_Article
-from the_alternative_f1.articles.Season5.Preseason.MexicoRecap import article as Mexico_Recap_Article
-from the_alternative_f1.articles.Season5.Preseason.VegasRecap import article as Vegas_Recap_Article
-from the_alternative_f1.articles.Season5.TrophyReveal.TrophyTeaser import article as TrophyTeaser_Article
-from the_alternative_f1.articles.Season5.Preseason.HungaryRecap import article as Hungary_Recap_Article
-from the_alternative_f1.articles.Season5.TrophyReveal.TrophyReveal import article as TrophyReveal_Article
-from the_alternative_f1.articles.Season5.Race_Week.australia_race_week import article as Australia_Race_Week_Article
-from the_alternative_f1.articles.Season5.Race_Recap.australia_race_recap import article as Australia_Race_Recap_Article
-from the_alternative_f1.articles.Season5.Race_Week.imola_race_week import article as Imola_Race_Week_Article
-from the_alternative_f1.articles.Season5.Race_Recap.imola_race_recap import article as Imola_Race_Recap_Article
-from the_alternative_f1.articles.Season5.Bye_Week.bye_week1 import article as Bye_Week_Article1
-from the_alternative_f1.articles.Season5.Race_Week.miami_race_week import article as Miami_Race_Week_Article
-from the_alternative_f1.articles.Season5.Race_Recap.miami_race_recap import article as Miami_Race_Recap_Article
-from the_alternative_f1.articles.Season5.Race_Week.monza_race_week import article as Monza_Race_Week_Article
-from the_alternative_f1.articles.Season5.Race_Recap.monza_race_recap import article as Monza_Race_Recap_Article
-from the_alternative_f1.articles.Season5.Race_Recap.monza_red_bull import article as Monza_RedBull_Article
-from the_alternative_f1.articles.Season5.Race_Week.spa_race_week import article as Spa_Race_Week_Article
-from the_alternative_f1.articles.Season5.Race_Recap.spa_race_recap import article as Spa_Race_Recap_Article
-from the_alternative_f1.articles.Season5.Race_Recap.spa_mercedes import article as Spa_Mercedes_Article
-from the_alternative_f1.articles.Season5.Race_Week.brazil_race_week import article as Brazil_Race_Week_Article
-from the_alternative_f1.articles.Season5.Race_Recap.brazil_race_recap import article as Brazil_Race_Recap_Article
-from the_alternative_f1.articles.Season5.Race_Recap.brazil_joint import article as Brazil_Joint_Article
-from the_alternative_f1.articles.Season5.Race_Recap.brazil_cadillac import article as Brazil_Cadillac_Article
-from the_alternative_f1.articles.Season5.Race_Week.silverstone_race_week import article as Silverstone_Race_Week_Article
-from the_alternative_f1.articles.Season5.Race_Recap.silverstone_race_recap import article as Silverstone_Race_Recap_Article
+from the_alternative_f1.articles.Season5.Race_Recap.suzuka_recap import article as Suzuka_Recap_Article
 from the_alternative_f1.articles.Season5.Race_Week.suzuka_race_week import article as Suzuka_Race_Week_Article
+from the_alternative_f1.articles.Season5.Race_Recap.silverstone_race_recap import article as Silverstone_Race_Recap_Article
+from the_alternative_f1.articles.Season5.Race_Week.silverstone_race_week import article as Silverstone_Race_Week_Article
+from the_alternative_f1.articles.Season5.Race_Recap.brazil_cadillac import article as Brazil_Cadillac_Article
+from the_alternative_f1.articles.Season5.Race_Recap.brazil_joint import article as Brazil_Joint_Article
+from the_alternative_f1.articles.Season5.Race_Recap.brazil_race_recap import article as Brazil_Race_Recap_Article
+from the_alternative_f1.articles.Season5.Race_Week.brazil_race_week import article as Brazil_Race_Week_Article
+from the_alternative_f1.articles.Season5.Race_Recap.spa_mercedes import article as Spa_Mercedes_Article
+from the_alternative_f1.articles.Season5.Race_Recap.spa_race_recap import article as Spa_Race_Recap_Article
+from the_alternative_f1.articles.Season5.Race_Week.spa_race_week import article as Spa_Race_Week_Article
+from the_alternative_f1.articles.Season5.Race_Recap.monza_red_bull import article as Monza_RedBull_Article
+from the_alternative_f1.articles.Season5.Race_Recap.monza_race_recap import article as Monza_Race_Recap_Article
+from the_alternative_f1.articles.Season5.Race_Week.monza_race_week import article as Monza_Race_Week_Article
+from the_alternative_f1.articles.Season5.Race_Recap.miami_race_recap import article as Miami_Race_Recap_Article
+from the_alternative_f1.articles.Season5.Race_Week.miami_race_week import article as Miami_Race_Week_Article
+from the_alternative_f1.articles.Season5.Bye_Week.bye_week1 import article as Bye_Week_Article1
+from the_alternative_f1.articles.Season5.Race_Recap.imola_race_recap import article as Imola_Race_Recap_Article
+from the_alternative_f1.articles.Season5.Race_Week.imola_race_week import article as Imola_Race_Week_Article
+from the_alternative_f1.articles.Season5.Race_Recap.australia_race_recap import article as Australia_Race_Recap_Article
+from the_alternative_f1.articles.Season5.Race_Week.australia_race_week import article as Australia_Race_Week_Article
+from the_alternative_f1.articles.Season5.TrophyReveal.TrophyReveal import article as TrophyReveal_Article
+from the_alternative_f1.articles.Season5.Preseason.HungaryRecap import article as Hungary_Recap_Article
+from the_alternative_f1.articles.Season5.TrophyReveal.TrophyTeaser import article as TrophyTeaser_Article
+from the_alternative_f1.articles.Season5.Preseason.VegasRecap import article as Vegas_Recap_Article
+from the_alternative_f1.articles.Season5.Preseason.MexicoRecap import article as Mexico_Recap_Article
+from the_alternative_f1.articles.Season5.Preseason.PreseasonArticle import article as Preseason_Article
+from the_alternative_f1.articles.Season5.Grid_Announcements.TheGrid import article as TheGrid_Article
+from the_alternative_f1.articles.Season5.Grid_Announcements.Mercedes import article as Mercedes_Article
+from the_alternative_f1.articles.Season5.Grid_Announcements.Audi import article as Audi_Article
+from the_alternative_f1.articles.Season5.Tracks.Schedule import article as Schedule_Article
+from the_alternative_f1.articles.Season5.Tracks.Rankings import article as Rankings_Article
+from the_alternative_f1.articles.Season5.Grid_Announcements.Williams import article as Williams_Article
+from the_alternative_f1.articles.Season5.Grid_Announcements.McLaren import article as McLaren_Article
+from the_alternative_f1.articles.Season5.Grid_Announcements.Ferrari import article as Ferrari_Article
+from the_alternative_f1.articles.Season5.Grid_Announcements.Cadillac import article as Cadillac_Article
+from the_alternative_f1.articles.Season5.Grid_Announcements.RedBull import article as RedBull_Article
+from the_alternative_f1.articles.Season5.Grid_Announcements.Erick import article as Erick_Article
+from the_alternative_f1.articles.Season5.Grid_Announcements.Haas import article as Haas_Article
 
 season = {
     "season_number": 5,
@@ -46,19 +47,47 @@ season = {
     # Rookies: drivers not present in Season 4
     "rookies": {"Grayson", "Josh C.", "Randy", "Evelo"},
 
-    "articles": [Suzuka_Race_Week_Article, Silverstone_Race_Recap_Article,
-    Silverstone_Race_Week_Article, Brazil_Cadillac_Article, Brazil_Joint_Article, 
-    Brazil_Race_Recap_Article, Brazil_Race_Week_Article, Spa_Mercedes_Article,
-    Spa_Race_Recap_Article, Spa_Race_Week_Article, Monza_RedBull_Article, 
-    Monza_Race_Recap_Article, Monza_Race_Week_Article, Miami_Race_Recap_Article, 
-    Miami_Race_Week_Article, Bye_Week_Article1, Imola_Race_Recap_Article, 
-    Imola_Race_Week_Article, Australia_Race_Recap_Article, Australia_Race_Week_Article, 
-    TrophyReveal_Article, Hungary_Recap_Article, TrophyTeaser_Article, 
-    Vegas_Recap_Article, Mexico_Recap_Article, Preseason_Article, 
-    TheGrid_Article, Mercedes_Article, Audi_Article,
-    Schedule_Article, Rankings_Article, Williams_Article, 
-    McLaren_Article, Ferrari_Article, Cadillac_Article, 
-    RedBull_Article, Erick_Article, Haas_Article],
+    "articles": [
+        Suzuka_Recap_Article,
+        Suzuka_Race_Week_Article,
+        Silverstone_Race_Recap_Article,
+        Silverstone_Race_Week_Article,
+        Brazil_Cadillac_Article,
+        Brazil_Joint_Article,
+        Brazil_Race_Recap_Article,
+        Brazil_Race_Week_Article,
+        Spa_Mercedes_Article,
+        Spa_Race_Recap_Article,
+        Spa_Race_Week_Article,
+        Monza_RedBull_Article,
+        Monza_Race_Recap_Article,
+        Monza_Race_Week_Article,
+        Miami_Race_Recap_Article,
+        Miami_Race_Week_Article,
+        Bye_Week_Article1,
+        Imola_Race_Recap_Article,
+        Imola_Race_Week_Article,
+        Australia_Race_Recap_Article,
+        Australia_Race_Week_Article,
+        TrophyReveal_Article,
+        Hungary_Recap_Article,
+        TrophyTeaser_Article,
+        Vegas_Recap_Article,
+        Mexico_Recap_Article,
+        Preseason_Article,
+        TheGrid_Article,
+        Mercedes_Article,
+        Audi_Article,
+        Schedule_Article,
+        Rankings_Article,
+        Williams_Article,
+        McLaren_Article,
+        Ferrari_Article,
+        Cadillac_Article,
+        RedBull_Article,
+        Erick_Article,
+        Haas_Article,
+    ],
 
     "team_colors": {
         "Ferrari": CONSTRUCTOR_COLORS["Ferrari"],
