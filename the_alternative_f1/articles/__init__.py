@@ -114,6 +114,7 @@ from .Season4.ZandvoortWeek import article as ZandvoortWeek_Article
 from .Season5.Race_Recap.suzuka_recap import article as Suzuka_Recap_Article
 
 articles = [
+    Suzuka_Recap_Article,
     Suzuka_Race_Week_Article,
     Silverstone_Race_Recap_Article,
     Silverstone_Race_Week_Article,
