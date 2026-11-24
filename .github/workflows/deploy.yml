@@ -37,7 +37,7 @@ jobs:
 
       - name: Deploy to Reflex Cloud
         env:
-          REFLEX_API_KEY: ${{ secrets.REFLEX_API_KEY }}
+          REFLEX_ACCESS_TOKEN: ${{ secrets.REFLEX_API_KEY }}
           REFLEX_SSR: "false"
         run: |
-          reflex deploy --no-interactive --exclude-from-backend assets
+          reflex deploy --no-interactive --loglevel info --exclude-from-backend assets
