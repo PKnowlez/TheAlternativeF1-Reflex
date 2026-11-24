@@ -1,4 +1,3 @@
-from .Season5.Race_Recap.suzuka_recap import article as Suzuka_Recap_Article
 from .Season5.Race_Week.suzuka_race_week import article as Suzuka_Race_Week_Article
 from .Season5.Race_Recap.silverstone_race_recap import article as Silverstone_Race_Recap_Article
 from .Season5.Race_Week.silverstone_race_week import article as Silverstone_Race_Week_Article
@@ -112,9 +111,9 @@ from .Season4.TrackTierList import article as TrackTierList_Article
 from .Season4.Trophies import article as Trophies_Article
 from .Season4.ZandvoortRecap import article as ZandvoortRecap_Article
 from .Season4.ZandvoortWeek import article as ZandvoortWeek_Article
+from .Season5.Race_Recap.suzuka_recap import article as Suzuka_Recap_Article
 
 articles = [
-    Suzuka_Recap_Article,
     Suzuka_Race_Week_Article,
     Silverstone_Race_Recap_Article,
     Silverstone_Race_Week_Article,
@@ -227,5 +226,6 @@ articles = [
     TrackTierList_Article,
     Trophies_Article,
     ZandvoortRecap_Article,
-    ZandvoortWeek_Article
+    ZandvoortWeek_Article,
+    Suzuka_Recap_Article
 ]
