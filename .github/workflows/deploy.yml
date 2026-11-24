@@ -1,0 +1,43 @@
+name: Deploy to Reflex Cloud
+
+on:
+  workflow_dispatch:
+    inputs:
+      article_title:
+        description: "Article title that triggered the deploy"
+        required: false
+        default: ""
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Precompute static caches
+        env:
+          REFLEX_SSR: "false"
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python precompute_cache.py
+
+      - name: Deploy to Reflex Cloud
+        env:
+          REFLEX_API_KEY: ${{ secrets.REFLEX_API_KEY }}
+          REFLEX_SSR: "false"
+        run: |
+          reflex deploy --no-interactive --exclude-from-backend assets --exclude-from-backend .photoshop_sources --exclude-from-backend .scratch

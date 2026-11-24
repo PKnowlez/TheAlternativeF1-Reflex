@@ -85,7 +85,7 @@ def main():
     print(f"Scanning directory: {SOURCE_DIR}")
     
     # Exclude credentials, instructions, and the script itself if it exists in the source folder
-    exclude_files = {"r2_credentials.env", "cloudflare_r2_instructions.md", "upload_to_r2.py"}
+    exclude_files = {"r2_credentials.env", "cloudflare_r2_instructions.md", "upload_to_r2.py", "download_from_r2.py"}
     exclude_dirs = {".git", ".vscode", "__pycache__"}
 
     files_to_upload = []
