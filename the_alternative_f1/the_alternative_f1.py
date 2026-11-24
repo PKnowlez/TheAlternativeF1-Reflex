@@ -68,7 +68,7 @@ KNOWN_CAR_ICONS = {
 
 from the_alternative_f1.constructor_colors import CONSTRUCTOR_COLORS, get_constructor_color
 from the_alternative_f1.articles import articles
-from the_alternative_f1.articles.components import DownloadState, fia_badge
+from the_alternative_f1.articles.components import DownloadState, fia_badge, carousel_lightbox_modal
 from the_alternative_f1.regulations_settings.Regulations import Regulations as regulations_content
 from the_alternative_f1.regulations_settings.Settings import Settings as settings_content
 from the_alternative_f1.all_time_stats.ConstructorAllTime import constructor_stats_view
@@ -3532,6 +3532,7 @@ def index() -> rx.Component:
         comment_fab(),
         comments_popout_panel(),
         alternative_intelligence_drawer(),
+        carousel_lightbox_modal(),
         rx.button(
             id="complete-discord-login-btn",
             on_click=State.complete_discord_login,
@@ -3582,7 +3583,7 @@ app = rx.App(
         rx.el.link(rel="icon", href="/Icons/IconLogoApp.png"),
         rx.el.link(rel="apple-touch-icon", href="/Icons/IconLogoApp.png"),
         rx.el.script(src="/pwa-register.js"),
-        rx.el.script(src="/carousel.js"),
+        rx.el.script(src="/carousel.js?v=20261123_01"),
         rx.el.script(src="/power_rankings_chart.js?v=20260911_01"),
         rx.el.script(src="/stats_map.js"),
         rx.el.script(src="/donut_chart.js?v=20260912_06"),

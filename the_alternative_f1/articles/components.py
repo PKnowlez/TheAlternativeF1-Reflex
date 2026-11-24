@@ -1283,7 +1283,7 @@ def image_carousel(
     margin_y = kwargs.pop("margin_y", "4")
 
     return rx.fragment(
-        rx.script(src="/carousel.js"),
+        rx.script(src="/carousel.js?v=20261123_01"),
         rx.box(
             rx.html(
                 carousel_html,
@@ -1298,6 +1298,106 @@ def image_carousel(
             overflow="hidden",
             margin_y=margin_y,
             **kwargs,
+        ),
+    )
+
+
+class CarouselLightboxState(rx.State):
+    """State for the global article carousel pop-out image modal."""
+
+    is_open: bool = False
+    src: str = ""
+    caption: str = ""
+
+    def set_is_open(self, open_val: bool):
+        self.is_open = open_val
+
+    def open_image(self, payload: str):
+        if not payload:
+            return
+        src = ""
+        caption = ""
+        try:
+            data = json.loads(payload)
+            if isinstance(data, dict):
+                src = data.get("src", "")
+                caption = data.get("caption", "")
+            elif isinstance(data, str):
+                src = data
+        except Exception:
+            src = payload
+
+        if not src:
+            return
+        self.src = rewrite_r2_url(src)
+        self.caption = caption or ""
+        self.is_open = True
+
+
+def carousel_lightbox_modal() -> rx.Component:
+    """Global pop-out modal and hidden JS bridge for image_carousel clicks."""
+    return rx.fragment(
+        rx.input(
+            id="taf1_carousel_lightbox_input",
+            value="",
+            on_change=CarouselLightboxState.open_image,
+            style={"display": "none"},
+        ),
+        rx.dialog.root(
+            rx.dialog.content(
+                rx.dialog.close(
+                    rx.button(
+                        rx.icon("x", size=16),
+                        variant="ghost",
+                        color="white",
+                        position="absolute",
+                        top="12px",
+                        right="12px",
+                        _hover={"bg": "#00b4da"},
+                        cursor="pointer",
+                    ),
+                ),
+                rx.vstack(
+                    rx.image(
+                        src=CarouselLightboxState.src,
+                        width="100%",
+                        max_height="75vh",
+                        object_fit="contain",
+                        border_radius="md",
+                    ),
+                    rx.cond(
+                        CarouselLightboxState.caption != "",
+                        rx.text(
+                            CarouselLightboxState.caption,
+                            color="#e2e8f0",
+                            font_size="sm",
+                            text_align="center",
+                        ),
+                    ),
+                    rx.button(
+                        rx.hstack(
+                            rx.icon("download", size=16),
+                            rx.text("Download Image"),
+                            spacing="2",
+                        ),
+                        on_click=lambda: DownloadState.download_image(CarouselLightboxState.src),
+                        bg="#00b4da",
+                        color="white",
+                        _hover={"bg": "#009bbd"},
+                        cursor="pointer",
+                        margin_top="4",
+                    ),
+                    align="center",
+                    width="100%",
+                    spacing="4",
+                ),
+                bg="#111111",
+                border="1px solid #2C2C32",
+                max_width="90vw",
+                width="auto",
+            ),
+            open=CarouselLightboxState.is_open,
+            on_open_change=CarouselLightboxState.set_is_open,
         ),
     )
 

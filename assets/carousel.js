@@ -28,6 +28,7 @@
       this.touchDeltaX = 0;
       this.isDragging = false;
       this.swipeThreshold = 40;
+      this._lastLightboxOpenAt = 0;
     }
 
     static get observedAttributes() {
@@ -128,6 +129,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            cursor: zoom-in;
           }
 
           .slides-track {
@@ -465,14 +467,24 @@
         this.progressStartTime = performance.now() - (this.pausedProgress || 0) * this.autoProgressMs;
       });
 
-      // Touch events for swiping
+      // Touch events for swiping and tap-to-expand
+      let touchMoved = false;
+      let touchStartedInControl = false;
+
       container.addEventListener(
         'touchstart',
         (e) => {
           if (e.touches.length === 1) {
+            touchStartedInControl = Boolean(
+              e.target.closest('.click-zone') ||
+              e.target.closest('.nav-btn') ||
+              e.target.closest('.dots-container') ||
+              e.target.closest('.dot')
+            );
             this.touchStartX = e.touches[0].clientX;
             this.touchStartY = e.touches[0].clientY;
             this.touchDeltaX = 0;
+            touchMoved = false;
             this.isDragging = true;
             this.isPaused = true;
             track.style.transition = 'none';
@@ -489,6 +501,10 @@
           const currentY = e.touches[0].clientY;
           const deltaX = currentX - this.touchStartX;
           const deltaY = currentY - this.touchStartY;
+
+          if (Math.abs(deltaX) > 8 || Math.abs(deltaY) > 8) {
+            touchMoved = true;
+          }
 
           // If horizontal gesture is dominant, prevent page scrolling
           if (Math.abs(deltaX) > Math.abs(deltaY)) {
@@ -515,12 +531,15 @@
         } else {
           // Snap back
           this.updateSlide(this.currentIndex);
+          if (!touchMoved && !touchStartedInControl) {
+            this.openCurrentImageLightbox();
+          }
         }
         this.touchDeltaX = 0;
         this.restartTimer();
       });
 
-      // Mouse drag gestures (for desktop swiping)
+      // Mouse drag gestures (for desktop swiping) and click-to-expand
       let mouseStartX = 0;
       let mouseDeltaX = 0;
       let isMouseDown = false;
@@ -528,8 +547,15 @@
       container.addEventListener('mousedown', (e) => {
         // Only trigger on primary button
         if (e.button !== 0) return;
-        // Don't drag if clicking buttons directly
-        if (e.target.closest('.nav-btn') || e.target.closest('.dot')) return;
+        // Don't drag or open lightbox if clicking navigation controls
+        if (
+          e.target.closest('.click-zone') ||
+          e.target.closest('.nav-btn') ||
+          e.target.closest('.dots-container') ||
+          e.target.closest('.dot')
+        ) {
+          return;
+        }
 
         isMouseDown = true;
         mouseStartX = e.clientX;
@@ -540,11 +566,13 @@
       window.addEventListener('mousemove', (e) => {
         if (!isMouseDown) return;
         mouseDeltaX = e.clientX - mouseStartX;
-        const offset = -this.currentIndex * 100 + (mouseDeltaX / container.offsetWidth) * 100;
-        track.style.transform = `translateX(${offset}%)`;
+        if (Math.abs(mouseDeltaX) > 4) {
+          const offset = -this.currentIndex * 100 + (mouseDeltaX / container.offsetWidth) * 100;
+          track.style.transform = `translateX(${offset}%)`;
+        }
       });
 
-      window.addEventListener('mouseup', (e) => {
+      window.addEventListener('mouseup', () => {
         if (!isMouseDown) return;
         isMouseDown = false;
         track.style.transition = 'transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)';
@@ -557,6 +585,9 @@
           this.restartTimer();
         } else {
           this.updateSlide(this.currentIndex);
+          if (Math.abs(mouseDeltaX) < 6) {
+            this.openCurrentImageLightbox();
+          }
         }
         mouseDeltaX = 0;
       });
@@ -627,6 +658,32 @@
 
     goTo(index) {
       this.updateSlide(index);
+    }
+
+    openCurrentImageLightbox() {
+      const now = Date.now();
+      if (now - this._lastLightboxOpenAt < 400) return;
+      this._lastLightboxOpenAt = now;
+
+      const currentItem = this.items[this.currentIndex];
+      if (!currentItem || !currentItem.src) return;
+
+      const inp = document.getElementById('taf1_carousel_lightbox_input');
+      if (!inp) return;
+
+      const payload = JSON.stringify({
+        src: currentItem.src,
+        caption: currentItem.caption || '',
+        ts: now,
+      });
+
+      const last = inp.value;
+      inp.value = payload;
+      const tracker = inp._valueTracker;
+      if (tracker) {
+        tracker.setValue(last);
+      }
+      inp.dispatchEvent(new Event('input', { bubbles: true }));
     }
 
     startTimer() {
