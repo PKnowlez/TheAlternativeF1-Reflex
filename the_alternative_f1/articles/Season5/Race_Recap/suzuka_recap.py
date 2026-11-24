@@ -8,7 +8,7 @@ article = {
         "Alright, so I, the illustrious intern, have been busy. Sue me. Maybe pay a guy if you want instant article gratification sheesh. Now, I have been hearing some of you want to see memes. And lots of em. So, today, as a lazy, unpaid, intern, I will satisfy that need and only that need. Well, I guess the Rumor Mill Round Up.",
 
         rx.box(
-            image_carousel([]),
+            image_carousel(["/thealternativef1-cloudflare/Season5/Race_Recap/Suzuka/s1.png", "/thealternativef1-cloudflare/Season5/Race_Recap/Suzuka/s2.png", "/thealternativef1-cloudflare/Season5/Race_Recap/Suzuka/s3.png", "/thealternativef1-cloudflare/Season5/Race_Recap/Suzuka/s4.gif", "/thealternativef1-cloudflare/Season5/Race_Recap/Suzuka/s5.gif", "/thealternativef1-cloudflare/Season5/Race_Recap/Suzuka/s7.png", "/thealternativef1-cloudflare/Season5/Race_Recap/Suzuka/s11.png", "/thealternativef1-cloudflare/Season5/Race_Recap/Suzuka/s12.png", "/thealternativef1-cloudflare/Season5/Race_Recap/Suzuka/s10.png", "/thealternativef1-cloudflare/Season5/Race_Recap/Suzuka/s6.gif", "/thealternativef1-cloudflare/Season5/Race_Recap/Suzuka/s8.png", "/thealternativef1-cloudflare/Season5/Race_Recap/Suzuka/s9.png"]),
             width="100%",
             margin_y="4",
         ),
