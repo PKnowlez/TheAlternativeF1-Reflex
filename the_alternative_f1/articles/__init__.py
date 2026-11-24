@@ -1,3 +1,4 @@
+from .Season5.Race_Recap.suzuka_recap import article as Suzuka_Recap_Article
 from .Season5.Race_Week.suzuka_race_week import article as Suzuka_Race_Week_Article
 from .Season5.Race_Recap.silverstone_race_recap import article as Silverstone_Race_Recap_Article
 from .Season5.Race_Week.silverstone_race_week import article as Silverstone_Race_Week_Article
@@ -37,7 +38,6 @@ from .Season5.Grid_Announcements.RedBull import article as RedBull_Article
 from .Season5.Grid_Announcements.Erick import article as Erick_Article
 from .Season5.Grid_Announcements.Haas import article as Haas_Article
 from .app_intro import article as App_Intro_Article
-from .Season5.Race_Recap.suzuka_recap import article as Suzuka_Recap_Article
 from .Season4.AbuDhabiRecap import article as AbuDhabiRecap_Article
 from .Season3.AlpineStatement import article as AlpineStatement_Article
 from .Season3.AustraliaRecap import article as AustraliaRecap_Article
@@ -114,6 +114,7 @@ from .Season4.ZandvoortRecap import article as ZandvoortRecap_Article
 from .Season4.ZandvoortWeek import article as ZandvoortWeek_Article
 
 articles = [
+    Suzuka_Recap_Article,
     Suzuka_Race_Week_Article,
     Silverstone_Race_Recap_Article,
     Silverstone_Race_Week_Article,
@@ -153,7 +154,6 @@ articles = [
     Erick_Article,
     Haas_Article,
     App_Intro_Article,
-    Suzuka_Recap_Article,
     AbuDhabiRecap_Article,
     AlpineStatement_Article,
     AustraliaRecap_Article,

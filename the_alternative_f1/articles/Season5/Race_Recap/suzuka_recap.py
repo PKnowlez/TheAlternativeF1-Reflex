@@ -12,6 +12,17 @@ article = {
             width="100%",
             margin_y="4",
         ),
+
+        rx.heading(
+            "Rumor Mill Round Up",
+            size="4",
+            color="#00b4da",
+            margin_top="6",
+            margin_bottom="3",
+            font_family="Outfit",
+        ),
+
+        "Alright, alright, alright, it is all quiet on the Erick Tavera front this week. Maybe that bum will get off his ass and race again. However, there are lots of rumors about Brently and his seat at Haas. We've heard the crew at FOM have reached out for exclusive broadcasting of league races. But that would mean dropping the wheel...which his teammate Newman is hotly against.\n\nRumor also has it that this whole F2 car thing is really coming to reality. the maFIA has been in discussions about running F2 cars in the final remaining sprints for 'purer racing,' whatever that means.\n\nOh, and finally, yes, I am still unpaid if you didn't catch that earlier. ",
     ],
     "image": "/thealternativef1-cloudflare/Season5/Race_Recap/Suzuka/suzuka_title.jpeg",
     "author": "The Intern",
