@@ -40,4 +40,4 @@ jobs:
           REFLEX_API_KEY: ${{ secrets.REFLEX_API_KEY }}
           REFLEX_SSR: "false"
         run: |
-          reflex deploy --no-interactive --exclude-from-backend assets --exclude-from-backend .photoshop_sources --exclude-from-backend .scratch
+          reflex deploy --no-interactive --exclude-from-backend assets
