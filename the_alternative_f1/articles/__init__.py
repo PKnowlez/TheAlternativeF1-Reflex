@@ -79,5 +79,5 @@ articles = [
     RedBull_Article,
     Erick_Article,
     Haas_Article,
-    App_Intro_Article,
+    App_Intro_Article
 ]
